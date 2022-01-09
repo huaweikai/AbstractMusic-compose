@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">抽象音乐</string>
+    <string name="hello_text">欢迎使用抽象音乐APP,您可以使用本应用进行更为舒适的音乐体验,
+        本应用将会提供在线音乐,本地音乐,收藏分享的音乐,更为您提供了账号系统。
+        为了您在本次应用使用愉悦,我们将申请以下权限来使软件正常工作,感谢您的配合:</string>
+    <string name="hello_permission_net_title">连接到互联网</string>
+    <string name="hello_permission_net_subtitle">用于登录和播放在线音乐</string>
+    <string name="hello_permission_read_title">读取设备本地音乐</string>
+    <string name="hello_permission_read_subtitle">用于读取和播放本地音乐</string>
+    <string name="hello_permission_service_title">应用前台服务</string>
+    <string name="hello_permission_service_subtitle">用于对音乐服务进行保活</string>
+    <string name="hello_permission_title">用户须知</string>
+    <string name="hello_permission_request_bt">申请权限</string>
+    <string name="notification_channel_name">音乐通知栏</string>
+    <string name="notification_channel_description">用于控制当前播放的音乐</string>
+</resources>

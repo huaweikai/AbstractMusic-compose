@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AbstractMusic</string>
+    <string name="hello_text">Welcome to use abstract music APP,you can use this application more comfortable experience of music,This application will provide online music,local music collection to share music,the more you provide the account system.In order to use pleasure you in this application,we will apply for permission to make software to work properly,thank you for your cooperation:</string>
+    <string name="hello_permission_net_title">connect to the Internet</string>
+    <string name="hello_permission_net_subtitle">To login and play music online</string>
+    <string name="hello_permission_read_title">Read the local music equipment</string>
+    <string name="hello_permission_read_subtitle">For reading and playing the local music</string>
+    <string name="hello_permission_service_title">Application at the front desk service</string>
+    <string name="hello_permission_service_subtitle">Used to keep alive music services</string>
+    <string name="hello_permission_title">User Agreement</string>
+    <string name="hello_permission_request_bt">To apply for permission</string>
+    <string name="notification_channel_name">Music Notification</string>
+    <string name="notification_channel_description">Used to control the playback of music</string>
+</resources>

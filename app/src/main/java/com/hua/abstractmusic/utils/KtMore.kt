@@ -1,0 +1,87 @@
+package com.hua.abstractmusic.utils
+
+import android.net.Uri
+import androidx.media2.common.MediaItem
+import androidx.media2.common.MediaMetadata
+import com.hua.abstractmusic.bean.net.NetAlbum
+import com.hua.abstractmusic.bean.net.NetArtist
+import com.hua.abstractmusic.bean.net.NetMusic
+import com.hua.abstractmusic.other.Constant
+import java.text.SimpleDateFormat
+import java.util.*
+
+/**
+ * @author : huaweikai
+ * @Date   : 2021/11/28
+ * @Desc   : more
+ */
+fun Long.toTime(): String {
+    val simpleDateFormat = SimpleDateFormat("mm:ss", Locale.CHINESE)
+    val date = Date(this)
+    return simpleDateFormat.format(date)
+}
+
+fun String.toTime(): Long {
+    val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.CHINESE)
+    return try {
+        simpleDateFormat.parse(this)!!.time
+    } catch (e: Throwable) {
+        0
+    }
+}
+
+fun NetAlbum.Data.toMediaItem(): MediaItem {
+    return MediaItem.Builder()
+        .setMetadata(
+            MediaMetadata.Builder().apply {
+                id = "${Constant.NETWORK_ALBUM_ID}/${this@toMediaItem.id}"
+                title = this@toMediaItem.name
+                year = this@toMediaItem.time.toTime()
+                artist = this@toMediaItem.artistName
+                displayTitle = this@toMediaItem.name
+                displaySubtitle = this@toMediaItem.artistName
+                albumArtUri = this@toMediaItem.imgUrl
+                displayIconUri = this@toMediaItem.imgUrl
+                isPlayable = false
+                browserType = MediaMetadata.BROWSABLE_TYPE_ALBUMS
+            }.build()
+        ).build()
+}
+
+fun NetArtist.Data.toMediaItem(): MediaItem {
+    return MediaItem.Builder()
+        .setMetadata(
+            MediaMetadata.Builder().apply {
+                id = "${Constant.NETWORK_ARTIST_ID}/${this@toMediaItem.id}"
+                title = this@toMediaItem.name
+                artist = this@toMediaItem.name
+                displayTitle = this@toMediaItem.name
+                albumArtUri = this@toMediaItem.imgUrl
+                displayIconUri = this@toMediaItem.imgUrl
+                displaySubtitle = this@toMediaItem.artistDesc
+                isPlayable = false
+                browserType = MediaMetadata.BROWSABLE_TYPE_ARTISTS
+            }.build()
+        ).build()
+}
+
+fun NetMusic.Data.toMediaItem(parentId:Uri):MediaItem{
+    return MediaItem.Builder()
+        .setMetadata(
+            MediaMetadata.Builder().apply {
+                id = parentId.buildUpon().appendPath(this@toMediaItem.id.toString()).toString()
+                mediaUri = this@toMediaItem.musicUrl
+                displayIconUri = this@toMediaItem.imgUrl
+                artUri = this@toMediaItem.imgUrl
+                albumArtUri = this@toMediaItem.imgUrl
+                artist = this@toMediaItem.artist
+                album = this@toMediaItem.albumName
+                title = this@toMediaItem.name
+                displayTitle = this@toMediaItem.name
+                displaySubtitle = this@toMediaItem.artist
+                isPlayable = true
+                browserType = MediaMetadata.BROWSABLE_TYPE_NONE
+            }.build()
+        )
+        .build()
+}
