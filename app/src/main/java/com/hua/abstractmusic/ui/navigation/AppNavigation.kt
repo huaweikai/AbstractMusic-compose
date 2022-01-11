@@ -14,9 +14,11 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.pager.ExperimentalPagerApi
 import com.hua.abstractmusic.ui.hello.HelloScreen
 import com.hua.abstractmusic.ui.hello.PermissionGet
 import com.hua.abstractmusic.ui.home.HomeScreen
+import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.route.Screen
 
 /**
@@ -25,8 +27,13 @@ import com.hua.abstractmusic.ui.route.Screen
  * @Desc   : 整个界面的navigation
  */
 
+
 @Composable
-fun HomeNavigation(activity: ComponentActivity, navController: NavHostController) {
+fun HomeNavigation(
+    activity: ComponentActivity,
+    navController: NavHostController,
+    viewModel: HomeViewModel
+) {
     var isGet by remember {
         mutableStateOf(true)
     }
@@ -84,7 +91,7 @@ Snackbar(
             }
         }
         composable(route = Screen.HomeScreen.route) {
-            HomeScreen(navController = navController)
+            HomeScreen(navController = navController,viewModel)
         }
     }
 }

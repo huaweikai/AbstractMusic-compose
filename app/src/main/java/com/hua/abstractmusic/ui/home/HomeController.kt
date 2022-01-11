@@ -18,6 +18,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
+import androidx.media2.common.MediaItem
 import androidx.media2.common.SessionPlayer
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -42,76 +45,80 @@ import com.hua.abstractmusic.utils.title
 @Composable
 fun HomeController(
     navController: NavHostController,
-    viewModel: HomeViewModel
+    viewModel: HomeViewModel,
+    modifier: Modifier,
+    playListClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(androidx.compose.material3.MaterialTheme.colorScheme.background)
-            .height(130.dp),
+        modifier = modifier,
     ) {
-        Controller(viewModel)
+        Controller(viewModel, playListClick)
         HomeNavigation(navController = navController)
     }
 }
 
 @Composable
 fun Controller(
-    viewModel: HomeViewModel
+    viewModel: HomeViewModel,
+    playListClick: () -> Unit
 ) {
     val data = viewModel.currentItem.value.metadata
-    Row(
+    ConstraintLayout(
         modifier = Modifier
             .height(60.dp)
     ) {
+        val (album, title, artist, controller) = createRefs()
+        val percent = createGuidelineFromStart(0.7f)
         Image(
-            painter = rememberImagePainter(data = data?.albumArtUri ){
-                   this.error(R.drawable.music)
+            painter = rememberImagePainter(data = data?.albumArtUri) {
+                this.error(R.drawable.music)
             },
             contentDescription = "专辑图",
             modifier = Modifier
-                .padding(
-                    start = 10.dp
-                )
+                .constrainAs(album) {
+                    start.linkTo(parent.start, 10.dp)
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                }
                 .size(50.dp)
-                .align(Alignment.CenterVertically)
         )
-        Column(
+
+        Text(
             modifier = Modifier
-                .fillMaxHeight()
-                .padding(start = 8.dp)
-                .align(Alignment.CenterVertically)
-        ) {
-            Text(
-                modifier = Modifier
-                    .padding(top = 5.dp)
-                    .fillMaxHeight()
-                    .weight(1f),
-                text = "${data?.title}",
-                textAlign = TextAlign.Left,
-                maxLines = 1
-            )
-            Spacer(modifier = Modifier.padding(top = 10.dp))
-            Text(
-                modifier = Modifier
-                    .padding(bottom = 5.dp)
-                    .fillMaxHeight()
-                    .weight(1f),
-                text = "${data?.artist}",
-                textAlign = TextAlign.Left,
-                maxLines = 1
-            )
-        }
+                .constrainAs(title) {
+                    start.linkTo(album.end, 8.dp)
+                    top.linkTo(album.top, 3.dp)
+                    end.linkTo(percent, 8.dp)
+                    width = Dimension.fillToConstraints
+                },
+            text = "${data?.title}",
+            textAlign = TextAlign.Left,
+            maxLines = 1
+        )
+        Text(
+            modifier = Modifier
+                .constrainAs(artist) {
+                    start.linkTo(title.start)
+                    end.linkTo(title.end)
+                    bottom.linkTo(album.bottom, 3.dp)
+                    width = Dimension.fillToConstraints
+                },
+            text = "${data?.artist}",
+            textAlign = TextAlign.Left,
+            maxLines = 1
+        )
         Row(
-            horizontalArrangement = Arrangement.End,
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.CenterVertically)
+            modifier = Modifier.constrainAs(controller) {
+                top.linkTo(parent.top, 2.dp)
+                bottom.linkTo(parent.bottom, 2.dp)
+                start.linkTo(percent, 2.dp)
+                end.linkTo(parent.end, 8.dp)
+            }
         ) {
             val stateIcon =
-                if(viewModel.playerState.value == SessionPlayer.PLAYER_STATE_PLAYING){
+                if (viewModel.playerState.value == SessionPlayer.PLAYER_STATE_PLAYING) {
                     R.drawable.ic_pause
-                }else{
+                } else {
                     R.drawable.ic_play
                 }
             val list = listOf(
@@ -135,11 +142,14 @@ fun Controller(
                         1 -> {
                             viewModel.skipIem()
                         }
-                        2 -> {}
+                        2 -> {
+                            playListClick()
+                        }
                     }
                 }
             }
         }
+
     }
 }
 
@@ -151,7 +161,7 @@ fun ControllerButton(
     onclick: () -> Unit
 ) {
     IconButton(
-        modifier =  modifier,
+        modifier = modifier,
         onClick = {
             onclick()
         },
@@ -184,13 +194,15 @@ fun HomeNavigation(navController: NavHostController) {
             NavigationBarItem(
                 selected = selected,
                 onClick = {
-                    navController.navigate(item.route)
+                    navController.navigate(item.route) {
+                        launchSingleTop = true
+                    }
                 },
                 icon = {
-                        Icon(
-                            painter = painterResource(id = item.resId),
-                            contentDescription = item.name
-                        )
+                    Icon(
+                        painter = painterResource(id = item.resId),
+                        contentDescription = item.name
+                    )
                 },
                 label = {
                     Text(

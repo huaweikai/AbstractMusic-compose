@@ -8,6 +8,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media2.session.MediaBrowser
 import androidx.media2.session.SessionToken
+import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.common.util.concurrent.MoreExecutors
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant.LASTMEDIA
@@ -34,6 +35,7 @@ abstract class BaseBrowserViewModel (
 
 
     abstract fun initializeController()
+
 
 
     fun connectBrowserService(browserCallback: MediaBrowser.BrowserCallback){

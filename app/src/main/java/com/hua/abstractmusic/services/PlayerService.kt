@@ -7,10 +7,14 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import android.content.*
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.media2.common.MediaItem
+import androidx.media2.common.MediaMetadata
 import androidx.media2.common.SessionPlayer
 import androidx.media2.session.MediaLibraryService
 import androidx.media2.session.MediaSession
+import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.media2.SessionPlayerConnector
 import com.google.common.util.concurrent.MoreExecutors
 import com.hua.abstractmusic.ui.MainActivity
@@ -19,6 +23,10 @@ import com.hua.abstractmusic.other.Constant.LASTMEDIA
 import com.hua.abstractmusic.other.Constant.LASTMEDIAINDEX
 import com.hua.abstractmusic.services.extensions.MediaSessionCallback
 import com.hua.abstractmusic.use_case.UseCase
+import com.hua.abstractmusic.utils.artist
+import com.hua.abstractmusic.utils.browserType
+import com.hua.abstractmusic.utils.isPlayable
+import com.hua.abstractmusic.utils.title
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -58,10 +66,12 @@ class PlayerService : MediaLibraryService() {
     }
 
 
+
     override fun onCreate() {
         super.onCreate()
         initSessionAndPlayer()
     }
+
 
 
     private fun initSessionAndPlayer() {
@@ -95,17 +105,6 @@ class PlayerService : MediaLibraryService() {
             )
             .setSessionActivity(pendingIntent)
             .build()
-
-        //生成自定义的通知管理
-        notificationManager = MusicNotificationManager(
-            this,
-            mediaLibrarySession.sessionCompatToken,
-            PlayerNotificationListener(this)
-        )
-
-        //为 notification设置exoplayer
-        notificationManager.showNotification(exoplayer)
-
         serviceScope.launch(Dispatchers.IO) {
             val sp = applicationContext.getSharedPreferences(LASTMEDIA, Context.MODE_PRIVATE)
             val index = sp.getInt(LASTMEDIAINDEX, 0)
@@ -114,8 +113,27 @@ class PlayerService : MediaLibraryService() {
                 player.setPlaylist(list, null).addListener({
                     player.skipToPlaylistItem(index)
                 }, MoreExecutors.directExecutor())
+            }else{
+                (player as SessionPlayerConnector).addPlaylistItem(
+                    0, MediaItem.Builder().setMetadata(
+                        MediaMetadata.Builder()
+                            .apply {
+                                title = "欢迎进入音乐的世界"
+                                artist = "暂无选中歌单"
+                            }.build()
+                    ).build()
+                )
             }
         }
+
+        //生成自定义的通知管理
+        notificationManager = MusicNotificationManager(
+            this,
+            mediaLibrarySession.sessionCompatToken,
+            PlayerNotificationListener(this)
+        )
+
+        notificationManager.showNotification(exoplayer)
     }
 
     override fun onUpdateNotification(session: MediaSession): MediaNotification? {

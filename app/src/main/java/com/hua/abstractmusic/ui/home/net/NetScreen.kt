@@ -1,5 +1,7 @@
 package com.hua.abstractmusic.ui.home.net
 
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,8 +12,11 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.media2.common.MediaMetadata
@@ -23,6 +28,7 @@ import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ARTIST_ID
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
 import com.hua.abstractmusic.utils.*
+import kotlinx.coroutines.launch
 
 
 /**
@@ -35,6 +41,8 @@ fun NetScreen(
     navHostController: NavHostController,
     viewModel: HomeViewModel
 ) {
+
+    val scope = rememberCoroutineScope()
     Column(
         Modifier.fillMaxSize()
     ) {
@@ -50,6 +58,9 @@ fun NetScreen(
                     .weight(1f)
                     .size(30.dp)
                     .clickable {
+//                        scope.launch {
+//                            viewModel.navigationState.value.animateTo(130.dp)
+//                        }
                         viewModel.init(NETWORK_ALBUM_ID)
                     }
             )
@@ -61,6 +72,9 @@ fun NetScreen(
                     .weight(1f)
                     .size(30.dp)
                     .clickable {
+//                        scope.launch {
+//                            viewModel.navigationState.value.animateTo(60.dp)
+//                        }
                         viewModel.init(NETWORK_ARTIST_ID)
                     }
             )
@@ -101,7 +115,8 @@ fun NetScreen(
                         text = "${item.mediaItem.metadata?.title}",
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
-                            .padding(start = 8.dp)
+                            .padding(start = 8.dp),
+                        color = if(item.isPlaying) Color(0xff77D3D0) else Color.Black
                     )
                 }
             }

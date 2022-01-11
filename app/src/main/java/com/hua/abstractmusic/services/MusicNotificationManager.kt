@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.services
 
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Bitmap
@@ -30,11 +31,13 @@ class MusicNotificationManager(
     sessionToken: MediaSessionCompat.Token,
     notificationListener: PlayerNotificationManager.NotificationListener
 ){
-    private val notificationManager:PlayerNotificationManager
-    val imageLoader = ImageLoader(context)
+    private val
+            notificationManager:PlayerNotificationManager
+    private val imageLoader = ImageLoader(context)
 
     init {
-        val mediaControllerCompat = MediaController.Builder(context)
+        val mediaControllerCompat =
+            MediaController.Builder(context)
             .setSessionCompatToken(sessionToken)
             .build()
         notificationManager = PlayerNotificationManager.Builder(
@@ -42,9 +45,14 @@ class MusicNotificationManager(
             NOTIFICATION_ID,
             NOTIFICATION_CHANNEL_ID
         ).apply {
+            setChannelNameResourceId(R.string.notification_channel_name)
+            setChannelDescriptionResourceId(R.string.notification_channel_description)
             setMediaDescriptionAdapter(DescriptionAdapter(mediaControllerCompat))
             setNotificationListener(notificationListener)
-        }.build()
+            setSmallIconResourceId(R.drawable.music)
+        }.build().apply {
+            setMediaSessionToken(sessionToken)
+        }
     }
 
     fun showNotification(player: Player){

@@ -10,6 +10,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.ui.home.local.LocalScreen
 import com.hua.abstractmusic.ui.home.mine.MineScreen
 import com.hua.abstractmusic.ui.home.net.NetScreen
@@ -21,12 +23,15 @@ import com.hua.abstractmusic.ui.route.Screen
  * @Date   : 2022/01/08
  * @Desc   : 主页的小navigation，用于跳转在线音乐，本地音乐和我的界面
  */
+
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun HomeNavigationNav(
     homeNavController:NavHostController,
     modifier: Modifier,
     viewModel: HomeViewModel
 ) {
+    val pagerState = rememberPagerState(initialPage = 0)
     NavHost(
         navController = homeNavController,
         startDestination = Screen.NetScreen.route,
@@ -38,7 +43,7 @@ fun HomeNavigationNav(
         }
         composable(route = Screen.LocalScreen.route) {
             it.destination.label = "本地音乐"
-            LocalScreen(homeNavController)
+            LocalScreen(homeNavController,viewModel)
         }
         composable(route = Screen.MineScreen.route) {
             it.destination.label = "我的"

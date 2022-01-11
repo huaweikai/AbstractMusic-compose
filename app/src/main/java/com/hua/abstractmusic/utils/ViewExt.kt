@@ -60,14 +60,14 @@ fun View.getDrawable(@DrawableRes id: Int): Drawable? = ResourcesCompat.getDrawa
 /**
  * 将dp转为对应px的像素
  */
-val Int.dp: Int
-    get() {
-        return TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            this.toFloat(),
-            Resources.getSystem().displayMetrics
-        ).toInt()
-    }
+//val Int.dp: Int
+//    get() {
+//        return TypedValue.applyDimension(
+//            TypedValue.COMPLEX_UNIT_DIP,
+//            this.toFloat(),
+//            Resources.getSystem().displayMetrics
+//        ).toInt()
+//    }
 
 /**
  * 设置点击事件防抖

@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.utils
 
+import android.content.Context
 import android.net.Uri
 import androidx.media2.common.MediaItem
 import androidx.media2.common.MediaMetadata
@@ -85,3 +86,4 @@ fun NetMusic.Data.toMediaItem(parentId:Uri):MediaItem{
         )
         .build()
 }
+

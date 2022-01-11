@@ -41,5 +41,5 @@ object Constant {
     const val BASE_URL = "http://192.168.123.199:8080"
 
     const val NOTIFICATION_CHANNEL_ID = "music_notification"
-    const val NOTIFICATION_ID = 2
+    const val NOTIFICATION_ID = 1
 }
