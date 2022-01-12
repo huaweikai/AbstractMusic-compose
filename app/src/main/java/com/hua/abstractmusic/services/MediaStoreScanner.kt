@@ -22,9 +22,9 @@ import java.util.concurrent.TimeUnit
  * @Date   : 2021/11/27
  * @Desc   : 扫描音乐和从数据库提取音乐
  */
-class MediaStoreScanner (
+class MediaStoreScanner(
     private val useCase: UseCase,
-){
+) {
 
     //获取音乐
     private val mediaProjection = arrayOf(
@@ -57,8 +57,9 @@ class MediaStoreScanner (
     private val mediaSelectionArgs = arrayOf(
         TimeUnit.MILLISECONDS.convert(5, TimeUnit.MILLISECONDS).toString()
     )
+
     //从mediaStore媒体库扫描音乐
-    fun scanAllFromMediaStore(context: Context, parentId : Uri):List<MediaItem>{
+    fun scanAllFromMediaStore(context: Context, parentId: Uri): List<MediaItem> {
         val cursor = context.contentResolver.query(
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             mediaProjection,
@@ -66,10 +67,10 @@ class MediaStoreScanner (
             mediaSelectionArgs,
             MediaStore.Audio.Media.DEFAULT_SORT_ORDER
         )
-        return handleMediaMusicCursor(cursor,parentId)
+        return handleMediaMusicCursor(cursor, parentId)
     }
     //从MediaStore媒体库中扫描专辑
-    fun scanAlbumFromMediaStore(context: Context, parentId: Uri):List<MediaItem>{
+    fun scanAlbumFromMediaStore(context: Context, parentId: Uri): List<MediaItem> {
         val cursor = context.contentResolver.query(
             MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
             albumProjection,
@@ -77,12 +78,14 @@ class MediaStoreScanner (
             null,
             MediaStore.Audio.Albums.DEFAULT_SORT_ORDER
         )
-        return handleAlbumCursor(cursor,parentId)
+        return handleAlbumCursor(cursor, parentId)
     }
 
     //从MediaStore中获取专辑中的音乐
-    private val albumMediaSelection = "${MediaStore.Audio.Media.IS_MUSIC} != 0 AND $DURATION > ? AND ${MediaStore.Audio.Media.ALBUM_ID} = ? "
-    fun scanAlbumMusic(context: Context, parentId: Uri):List<MediaItem>{
+    private val albumMediaSelection =
+        "${MediaStore.Audio.Media.IS_MUSIC} != 0 AND $DURATION > ? AND ${MediaStore.Audio.Media.ALBUM_ID} = ? "
+
+    fun scanAlbumMusic(context: Context, parentId: Uri): List<MediaItem> {
         val albumMediaSelectionArgs = arrayOf(
             TimeUnit.MILLISECONDS.convert(5, TimeUnit.MILLISECONDS).toString(),
             parentId.lastPathSegment
@@ -94,10 +97,10 @@ class MediaStoreScanner (
             albumMediaSelectionArgs,
             "${MediaStore.Audio.Media.TRACK} ASC"
         )
-        return handleMediaMusicCursor(cursor,parentId)
+        return handleMediaMusicCursor(cursor, parentId)
     }
 
-    private fun handleMediaMusicCursor(cursor: Cursor?, parentId: Uri):List<MediaItem>{
+    private fun handleMediaMusicCursor(cursor: Cursor?, parentId: Uri): List<MediaItem> {
         val localMusicList = mutableListOf<MediaItem>()
         cursor?.use {
             val colId = it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
@@ -110,7 +113,7 @@ class MediaStoreScanner (
             val colDuration = it.getColumnIndexOrThrow(DURATION)
             val colTrack = it.getColumnIndexOrThrow(MediaStore.Audio.Media.TRACK)
 
-            while (it.moveToNext()){
+            while (it.moveToNext()) {
                 val id = it.getLong(colId)
                 val title = it.getString(colTitle)
                 val album = it.getString(colAlbum)
@@ -120,7 +123,8 @@ class MediaStoreScanner (
                 val albumId = it.getLong(colAlbumId)
                 val artistId = it.getLong(colArtistId)
 
-                val musicUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,id)
+                val musicUri =
+                    ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id)
 
                 val metaDataBuilder = MediaMetadata.Builder().apply {
                     this.id = parentId.buildUpon().appendPath(id.toString()).toString()
@@ -149,16 +153,18 @@ class MediaStoreScanner (
         }
         return localMusicList
     }
+
     private fun handleAlbumCursor(cursor: Cursor?, parentId: Uri): List<MediaItem> {
         val albumList = mutableListOf<MediaItem>()
 
         cursor?.use {
-            val albumIdColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums. _ID)
+            val albumIdColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID)
             val albumTitleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM)
             val artistColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST)
-            val trackNumColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.NUMBER_OF_SONGS)
+            val trackNumColumn =
+                cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.NUMBER_OF_SONGS)
             val yearColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.FIRST_YEAR)
-            while (it.moveToNext()){
+            while (it.moveToNext()) {
                 val albumId = it.getLong(albumIdColumn)
                 val albumTitle = it.getString(albumTitleColumn)
                 val artist = it.getString(artistColumn)
@@ -197,7 +203,7 @@ class MediaStoreScanner (
     /**
      * 从MediaStore媒体库中扫描歌手
      * */
-    fun scanArtistFromMediaStore(context: Context,parentId: Uri):List<MediaItem>{
+    fun scanArtistFromMediaStore(context: Context, parentId: Uri): List<MediaItem> {
         val cursor = context.contentResolver.query(
             MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI,
             artistProjection,
@@ -205,14 +211,15 @@ class MediaStoreScanner (
             null,
             MediaStore.Audio.Artists.DEFAULT_SORT_ORDER
         )
-        return handleArtistCursor(cursor,parentId)
+        return handleArtistCursor(cursor, parentId)
     }
+
     private fun handleArtistCursor(cursor: Cursor?, parentId: Uri): List<MediaItem> {
         val localArtists = mutableListOf<MediaItem>()
         cursor?.use {
             val artistIdColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID)
             val artistTitleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST)
-            while (it.moveToNext()){
+            while (it.moveToNext()) {
                 val artistId = it.getLong(artistIdColumn)
                 val artistName = it.getString(artistTitleColumn)
                 val metadataBuilder = MediaMetadata.Builder().apply {
@@ -221,68 +228,65 @@ class MediaStoreScanner (
                     this.isPlayable = false
                     this.browserType = MediaMetadata.BROWSABLE_TYPE_MIXED
                 }
-                localArtists.add(MediaItem.Builder()
-                    .setMetadata(metadataBuilder.build())
-                    .build())
+                localArtists.add(
+                    MediaItem.Builder()
+                        .setMetadata(metadataBuilder.build())
+                        .build()
+                )
             }
         }
         return localArtists
     }
-    fun scanArtistMusic(context: Context,parentId: Uri):List<MediaItem>{
+
+    fun scanArtistMusic(context: Context, parentId: Uri): List<MediaItem> {
         val cursor = context.contentResolver.query(
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             mediaProjection,
             "${MediaStore.Audio.Media.IS_MUSIC} != 0 AND $DURATION > ? AND ${MediaStore.Audio.Media.ARTIST_ID} = ?",
             arrayOf(
-                TimeUnit.MILLISECONDS.convert(5,TimeUnit.MILLISECONDS).toString(),parentId.lastPathSegment
+                TimeUnit.MILLISECONDS.convert(5, TimeUnit.MILLISECONDS).toString(),
+                parentId.lastPathSegment
             ),
             "${MediaStore.Audio.Media.TRACK} ASC"
         )
-        return handleMediaMusicCursor(cursor,parentId)
+        return handleMediaMusicCursor(cursor, parentId)
     }
 
 
     //处理逻辑都放在了usecase
-    fun scanSheetListFromRoom(parentId: Uri):List<MediaItem>{
+    fun scanSheetListFromRoom(parentId: Uri): List<MediaItem> {
         return useCase.getSheetNameCase(parentId)
     }
-    fun scanSheetDecs(parentId: Uri):List<MediaItem>?{
-        if(parentId.lastPathSegment.isNullOrEmpty()) return null
-        return useCase.getSheetMusicListCase(parentId.lastPathSegment!!,parentId)
+
+    fun scanSheetDecs(parentId: Uri): List<MediaItem>? {
+        if (parentId.lastPathSegment.isNullOrEmpty()) return null
+        return useCase.getSheetMusicListCase(parentId.lastPathSegment!!, parentId)
     }
 
-    suspend fun getCurrentPlayList():List<MediaItem>{
+    suspend fun getCurrentPlayList(): List<MediaItem> {
         return useCase.getCurrentListCase()
     }
 
-    private fun getAlbumUri(albumId: String): String{
+    private fun getAlbumUri(albumId: String): String {
         val artworkUri = Uri.parse(ALBUM_ART_URI)
-        return Uri.withAppendedPath(artworkUri,albumId).toString()
+        return Uri.withAppendedPath(artworkUri, albumId).toString()
     }
 
     var executor: ExecutorService = Executors.newFixedThreadPool(5)
 
-    fun selectAlbumList():List<MediaItem>{
-       return runBlocking {
-            useCase.selectNetAlbumCase()
-        }
+    suspend fun selectAlbumList(): List<MediaItem> {
+        return useCase.selectNetAlbumCase()
     }
 
-    fun selectMusicByAlbum(parentId: Uri):List<MediaItem>{
-        return runBlocking {
-            useCase.selectNetAlbumCase(parentId)
-        }
+    suspend fun selectMusicByAlbum(parentId: Uri): List<MediaItem> {
+        return useCase.selectNetAlbumCase(parentId)
     }
 
-    fun selectArtistList():List<MediaItem>{
-        return runBlocking {
-            useCase.selectNetArtistCase()
-        }
+    suspend fun selectArtistList(): List<MediaItem> {
+        return useCase.selectNetArtistCase()
     }
 
-    fun selectMusicByArtist(parentId: Uri):List<MediaItem>{
-        return runBlocking {
-            useCase.selectNetArtistCase(parentId)
-        }
+    suspend fun selectMusicByArtist(parentId: Uri): List<MediaItem> {
+        return useCase.selectNetArtistCase(parentId)
     }
 }

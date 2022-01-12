@@ -132,14 +132,10 @@ class MediaItemTree(
     fun getRootItem(): MediaItem {
         return treeNodes[ROOT_SCHEME]!!.item
     }
-    fun getChildren(parentId:String):List<MediaItem>?{
-//        if(parentId.startsWith(SHEET_ID)){
-//            treeNodes[parentId] = null
-//        }
-        val children = treeNodes[parentId]?.getChildren()
-        if(!children.isNullOrEmpty()){
-            return children
-        }
+
+    suspend fun getChildren(parentId:String):List<MediaItem>?{
+        //把之前的逻辑删了，并且把addchild换成setChild，
+        // 目的是请求一次都是新的数据,网络请求也可以刷新获取新的，不然只会把第一次请求的返回去
         val parentIdUri = Uri.parse(parentId)
         return when(parentIdUri.authority){
             TYPE_ROOT->{
@@ -158,7 +154,7 @@ class MediaItemTree(
                         MediaItem.Builder().build()
                     )
                 }
-                treeNodes[parentId]!!.addChild(result)
+                treeNodes[parentId]!!.setChild(result)
                 result
             }
             TYPE_ARTIST->{
@@ -172,17 +168,16 @@ class MediaItemTree(
                         MediaItem.Builder().build()
                     )
                 }
-                // 将数据加入到其中
-                treeNodes[parentId]!!.addChild(result)
+                treeNodes[parentId]!!.setChild(result)
                 result
             }
             TYPE_SHEET->{
+                //TODO(自定义歌单逻辑，先不动)
                 return if(parentIdUri.lastPathSegment.isNullOrEmpty()){
                     scanner.scanSheetListFromRoom(parentIdUri)
                 }else{
                     scanner.scanSheetDecs(parentIdUri)
                 }
-                //TODO(先不存下来，因为这个时时刻刻在变化)
             }
             TYPE_NETWORK_ALBUM->{
                 val result =  if(parentIdUri.lastPathSegment.isNullOrEmpty()){
@@ -195,7 +190,7 @@ class MediaItemTree(
                         MediaItem.Builder().build()
                     )
                 }
-                treeNodes[parentId]!!.addChild(result)
+                treeNodes[parentId]!!.setChild(result)
                 result
             }
             TYPE_NETWORK_ARTIST->{
@@ -209,11 +204,18 @@ class MediaItemTree(
                         MediaItem.Builder().build()
                     )
                 }
-                treeNodes[parentId]!!.addChild(result)
+                treeNodes[parentId]!!.setChild(result)
                 result
             }
             else->null
         }
+    }
+
+    fun getChildItem(
+        parentId: String
+    ):List<MediaItem>{
+        //想的是既然是回调回来拿数据的，那么数据肯定是存在的，直接返回。
+        return treeNodes[parentId]?.getChildren()?: emptyList()
     }
 
     fun getItem(mediaId: String):MediaItem?{

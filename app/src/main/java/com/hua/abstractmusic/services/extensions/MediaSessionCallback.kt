@@ -3,8 +3,13 @@ package com.hua.abstractmusic.services.extensions
 import androidx.media2.common.MediaItem
 import androidx.media2.session.LibraryResult
 import androidx.media2.session.MediaLibraryService
+import androidx.media2.session.MediaLibraryService.MediaLibrarySession.MediaLibrarySessionCallback
 import androidx.media2.session.MediaSession
+import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
+import com.hua.abstractmusic.other.Constant.NETWORK_ARTIST_ID
 import com.hua.abstractmusic.services.MediaItemTree
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -14,8 +19,9 @@ import java.util.concurrent.Executors
  * @Desc   : MediaSessionCallback
  */
 class MediaSessionCallback(
-    private val mediaItemTree :MediaItemTree
-): MediaLibraryService.MediaLibrarySession.MediaLibrarySessionCallback() {
+    private val mediaItemTree :MediaItemTree,
+    private val scope:CoroutineScope
+): MediaLibrarySessionCallback() {
 
     override fun onGetLibraryRoot(
         session: MediaLibraryService.MediaLibrarySession,
@@ -41,12 +47,12 @@ class MediaSessionCallback(
         pageSize: Int,
         params: MediaLibraryService.LibraryParams?
     ): LibraryResult {
-        val children = mediaItemTree.getChildren(parentId)
-        return if(children != null){
-            LibraryResult(LibraryResult.RESULT_SUCCESS,children,null)
-        }else{
-            LibraryResult(LibraryResult.RESULT_ERROR_NOT_SUPPORTED)
+        scope.launch {
+            mediaItemTree.getChildren(parentId)
+//            session.notifyChildrenChanged(controller,parentId, Int.MAX_VALUE,null)
+            session.notifyChildrenChanged(parentId,0,null)
         }
+        return LibraryResult(LibraryResult.RESULT_ERROR_NOT_SUPPORTED)
     }
     override fun onSubscribe(
         session: MediaLibraryService.MediaLibrarySession,
@@ -54,7 +60,7 @@ class MediaSessionCallback(
         parentId: String,
         params: MediaLibraryService.LibraryParams?
     ): Int {
-        return LibraryResult.RESULT_ERROR_NOT_SUPPORTED
+        return LibraryResult.RESULT_SUCCESS
     }
 
     override fun onUnsubscribe(

@@ -101,10 +101,19 @@ class PlayerService : MediaLibraryService() {
                 this,
                 player,
                 Executors.newSingleThreadExecutor(),
-                MediaSessionCallback(itemTree)
+                MediaSessionCallback(itemTree,serviceScope)
             )
             .setSessionActivity(pendingIntent)
             .build()
+
+        //生成自定义的通知管理
+        notificationManager = MusicNotificationManager(
+            this,
+            mediaLibrarySession.sessionCompatToken,
+            PlayerNotificationListener(this)
+        )
+
+        notificationManager.showNotification(exoplayer)
         serviceScope.launch(Dispatchers.IO) {
             val sp = applicationContext.getSharedPreferences(LASTMEDIA, Context.MODE_PRIVATE)
             val index = sp.getInt(LASTMEDIAINDEX, 0)
@@ -125,15 +134,6 @@ class PlayerService : MediaLibraryService() {
                 )
             }
         }
-
-        //生成自定义的通知管理
-        notificationManager = MusicNotificationManager(
-            this,
-            mediaLibrarySession.sessionCompatToken,
-            PlayerNotificationListener(this)
-        )
-
-        notificationManager.showNotification(exoplayer)
     }
 
     override fun onUpdateNotification(session: MediaSession): MediaNotification? {

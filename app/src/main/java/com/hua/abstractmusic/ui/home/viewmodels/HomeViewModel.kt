@@ -22,6 +22,7 @@ import androidx.media2.common.MediaMetadata
 import androidx.media2.common.SessionPlayer
 import androidx.media2.session.MediaBrowser
 import androidx.media2.session.MediaController
+import androidx.media2.session.MediaLibraryService
 import androidx.media2.session.SessionCommandGroup
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
@@ -29,11 +30,19 @@ import com.google.android.exoplayer2.Player
 import com.google.common.util.concurrent.MoreExecutors
 import com.hua.abstractmusic.base.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.MediaData
+import com.hua.abstractmusic.other.Constant.ALBUM_ID
+import com.hua.abstractmusic.other.Constant.ALL_ID
+import com.hua.abstractmusic.other.Constant.ARTIST_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
+import com.hua.abstractmusic.other.Constant.NETWORK_ARTIST_ID
+import com.hua.abstractmusic.other.Constant.ROOT_SCHEME
+import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.use_case.UseCase
 import com.hua.abstractmusic.utils.artist
 import com.hua.abstractmusic.utils.title
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -42,18 +51,21 @@ import javax.inject.Inject
  * @Desc   : viewmodel
  */
 @HiltViewModel
-@OptIn(ExperimentalPagerApi::class,ExperimentalMaterialApi::class)
+@OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
 class HomeViewModel @Inject constructor(
     application: Application,
-    useCase: UseCase
-):BaseBrowserViewModel(application, useCase) {
+    useCase: UseCase,
+    private val mediaItemTree: MediaItemTree
+) : BaseBrowserViewModel(application, useCase) {
 
-    private val browserCallback = object :MediaBrowser.BrowserCallback(){
+    private val browserCallback = object : MediaBrowser.BrowserCallback() {
         override fun onConnected(
             controller: MediaController,
             allowedCommands: SessionCommandGroup
         ) {
             init(NETWORK_ALBUM_ID)
+            init(ALL_ID)
+            init(ALBUM_ID)
             updateItem(browser?.currentMediaItem)
         }
 
@@ -62,26 +74,41 @@ class HomeViewModel @Inject constructor(
             list: MutableList<MediaItem>?,
             metadata: MediaMetadata?
         ) {
-//            updatePlayList(list)
+            updatePlayList(list)
         }
 
         override fun onCurrentMediaItemChanged(controller: MediaController, item: MediaItem?) {
-            updateItem(item)
+            viewModelScope.launch {
+                //延迟更新，不然会跳到第一个
+                delay(100L)
+                updateItem(browser?.currentMediaItem)
+            }
         }
 
         override fun onPlayerStateChanged(controller: MediaController, state: Int) {
             updatePlayState(state)
+        }
+
+        override fun onChildrenChanged(
+            browser: MediaBrowser,
+            parentId: String,
+            itemCount: Int,
+            params: MediaLibraryService.LibraryParams?
+        ) {
+            //抓取数据完毕，直接去拿数据去更新
+            childrenInit(parentId)
         }
     }
 
     //初始化，连接service
     override fun initializeController() {
         connectBrowserService(browserCallback)
+//        browser!!.subscribe(ROOT_SCHEME,null)
     }
 
     //当前播放列表
     private val _currentPlayList = mutableStateOf<List<MediaData>>(emptyList())
-    val currentPlayList :State<List<MediaData>> get() = _currentPlayList
+    val currentPlayList: State<List<MediaData>> get() = _currentPlayList
 
     //用于在启动时，state需要一个起始的value
     private val nullMediaData = MediaItem.Builder()
@@ -96,13 +123,21 @@ class HomeViewModel @Inject constructor(
         .build()
 
     //网络请求的数据，到时候会清理掉，仅仅只是测试使用
-    private val _netAlbum =  mutableStateOf<List<MediaData>>(emptyList())
-    val netAlbum : State<List<MediaData>> get() = _netAlbum
+    private val _netAlbum = mutableStateOf<List<MediaData>>(emptyList())
+    val netAlbum: State<List<MediaData>> get() = _netAlbum
+
+    private val _localMusicList = mutableStateOf(emptyList<MediaData>())
+    val localMusicList: State<List<MediaData>> get() = _localMusicList
+
+    private val _localAlbumList = mutableStateOf(emptyList<MediaData>())
+    val localAlbumList: State<List<MediaData>> get() = _localAlbumList
+
+    private val _localArtistList = mutableStateOf(emptyList<MediaData>())
+    val localArtistList: State<List<MediaData>> get() = _localArtistList
 
     //当前播放的item，用户更新控制栏
     private val _currentItem = mutableStateOf(nullMediaData)
-    val currentItem :State<MediaItem> get() = _currentItem
-
+    val currentItem: State<MediaItem> get() = _currentItem
 
 
     //播放状态
@@ -114,75 +149,90 @@ class HomeViewModel @Inject constructor(
     }
 
     //加载音乐列表，根据父ID来进行加载
-    fun init(parentId:String){
-        val browser = browser?:return
-        val childrenFeature = browser.getChildren(
-            parentId,0,Int.MAX_VALUE,null
-        )
-        childrenFeature.addListener({
-            childrenFeature.get().mediaItems?.map {
-                MediaData(
-                    it,
-                    it.metadata?.mediaId == browser.currentMediaItem?.metadata?.mediaId
-                )
-            }.apply {
-                _netAlbum.value = this?: emptyList()
+    fun init(parentId: String) {
+        val browser = browser ?: return
+        //订阅
+        browser.subscribe(parentId, null)
+        //去获取数据
+        browser.getChildren(parentId, 0, Int.MAX_VALUE, null)
+    }
+
+    //根据parentId去拿数据
+    fun childrenInit(parentId: String) {
+        mediaItemTree.getChildItem(parentId).map {
+            MediaData(
+                it,
+                it.metadata?.mediaId == browser?.currentMediaItem?.metadata?.mediaId
+            )
+        }.apply {
+            when (parentId) {
+                ALL_ID -> _localMusicList.value = this
+                ALBUM_ID -> _localAlbumList.value = this
+                ARTIST_ID -> _localArtistList.value = this
+                else -> _netAlbum.value = this
             }
-        },MoreExecutors.directExecutor())
+        }
     }
 
     //更新item的方法，当回调到item改变就调用这个方法
-    private fun updateItem(item:MediaItem?){
-        item?:return
-        browser?:return
+    private fun updateItem(item: MediaItem?) {
+        item ?: return
+        browser ?: return
         _netAlbum.value = _netAlbum.value.toMutableList().map {
-            val isPlaying =it.mediaId == browser!!.currentMediaItem?.metadata?.mediaId
+            val isPlaying = it.mediaId == item.metadata?.mediaId
             it.copy(isPlaying = isPlaying)
         }
         _currentItem.value = item
 
         _currentPlayList.value = browser!!.playlist?.map {
-            val isPlaying =it.metadata?.mediaId == browser!!.currentMediaItem?.metadata?.mediaId
-            MediaData(it,isPlaying)
-        }?: emptyList()
+            val isPlaying = it.metadata?.mediaId == browser!!.currentMediaItem?.metadata?.mediaId
+            MediaData(it, isPlaying)
+        } ?: emptyList()
+
+        _localMusicList.value = _localMusicList.value.toMutableList().map {
+            val isPlaying = it.mediaId == item.metadata?.mediaId
+            it.copy(isPlaying = isPlaying)
+        }
+
     }
 
     //下一首
-    fun skipIem(){
-        val browser = browser?:return
+    fun skipIem() {
+        val browser = browser ?: return
         browser.skipToNextPlaylistItem()
     }
 
     //播放还是暂停？
-    fun playOrPause(){
-        val browser = browser?:return
-        if(browser.playerState == SessionPlayer.PLAYER_STATE_PLAYING){
+    fun playOrPause() {
+        val browser = browser ?: return
+        if (browser.playerState == SessionPlayer.PLAYER_STATE_PLAYING) {
             browser.pause()
-        }else{
+        } else {
             browser.play()
         }
     }
 
-/*    //更新播放列表的方法
-    fun updatePlayList(mediaItems:List<MediaItem>?){
-        mediaItems?:return
-        val browser = browser?:return
+    //更新播放列表的方法
+    fun updatePlayList(mediaItems: List<MediaItem>?) {
+        mediaItems ?: return
+        val browser = browser ?: return
         _currentPlayList.value = mediaItems.map {
             val isPlaying = it.metadata?.mediaId == browser.currentMediaItem?.metadata?.mediaId
-            MediaData(it,isPlaying)
+            MediaData(it, isPlaying)
         }
-    }*/
-    fun removePlayItem(position:Int){
-        val browser = browser?:return
+    }
+
+    fun removePlayItem(position: Int) {
+        val browser = browser ?: return
         browser.removePlaylistItem(position)
     }
 
-    fun skipTo(position: Int){
-        val browser = browser?:return
+    fun skipTo(position: Int) {
+        val browser = browser ?: return
         browser.skipToPlaylistItem(position)
     }
 
-    fun clearPlayList(){
+    fun clearPlayList() {
         browser?.removePlaylistItem(0)
     }
 
@@ -195,6 +245,6 @@ class HomeViewModel @Inject constructor(
 
     //记录主页控制中心，的navigationview是否要隐藏
     val navigationState = mutableStateOf(
-        Animatable(130.dp,Dp.VectorConverter)
+        Animatable(130.dp, Dp.VectorConverter)
     )
 }

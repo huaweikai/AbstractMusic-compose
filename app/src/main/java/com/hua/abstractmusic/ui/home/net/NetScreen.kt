@@ -26,6 +26,7 @@ import coil.compose.rememberImagePainter
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ARTIST_ID
+import com.hua.abstractmusic.ui.home.MusicItem
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
 import com.hua.abstractmusic.utils.*
 import kotlinx.coroutines.launch
@@ -84,40 +85,16 @@ fun NetScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             itemsIndexed(viewModel.netAlbum.value) { index, item ->
-                val data = item.mediaItem.metadata
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(80.dp)
-                        .padding(bottom = 10.dp)
-                        .clickable {
-                            if (data?.isPlayable == true &&
-                                data.browserType == MediaMetadata.BROWSABLE_TYPE_NONE
-                            ) {
-                                viewModel.setPlaylist(index, viewModel.netAlbum.value)
-                            } else {
-                                viewModel.init(item.mediaId)
-                            }
-                        }
-                ) {
-                    Image(
-                        painter = rememberImagePainter(
-                            data = item.mediaItem.metadata?.albumArtUri
-                        ) {
-                            this.error(R.drawable.music)
-                        },
-                        contentDescription = "专辑图",
-                        modifier = Modifier
-                            .height(60.dp)
-                            .width(60.dp)
-                    )
-                    Text(
-                        text = "${item.mediaItem.metadata?.title}",
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .padding(start = 8.dp),
-                        color = if(item.isPlaying) Color(0xff77D3D0) else Color.Black
-                    )
+                MusicItem(
+                    data = item
+                ){
+                    if (item.mediaItem.metadata?.isPlayable == true &&
+                        item.mediaItem.metadata?.browserType == MediaMetadata.BROWSABLE_TYPE_NONE
+                    ) {
+                        viewModel.setPlaylist(index, viewModel.netAlbum.value)
+                    } else {
+                        viewModel.init(item.mediaId)
+                    }
                 }
             }
         }

@@ -66,7 +66,6 @@ fun HomePlayList(
                 modifier = Modifier
                     .heightIn(max = 500.dp)
                     .padding(10.dp)
-//                    .height(300.dp)
                     .fillMaxWidth()
             ) {
                 itemsIndexed(viewModel.currentPlayList.value) { index: Int, item: MediaData ->
