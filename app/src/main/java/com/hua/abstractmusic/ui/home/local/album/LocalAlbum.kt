@@ -44,7 +44,6 @@ fun LocalAlbum(
     viewModel: HomeViewModel,
     homeNavController: NavHostController
 ){
-    val scope = rememberCoroutineScope()
     LazyVerticalGrid(
         cells = GridCells.Fixed(2),
         contentPadding = PaddingValues(20.dp)
@@ -58,13 +57,6 @@ fun LocalAlbum(
                     .clickable {
                         homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumIndex=${index}")
                         viewModel.navigationState2.value = false
-                        viewModel.topBarState2.value = false
-//                        scope.launch {
-//                            viewModel.navigationState.value.animateTo(60.dp)
-//                        }
-//                        scope.launch {
-//                            viewModel.topBarState.value.animateTo(0.dp)
-//                        }
                     },
                 shape = MaterialTheme.shapes.medium.copy(CornerSize(20.dp)),
                 elevation = 10.dp

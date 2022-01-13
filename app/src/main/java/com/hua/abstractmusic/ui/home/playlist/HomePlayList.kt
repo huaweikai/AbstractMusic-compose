@@ -60,13 +60,15 @@ fun HomePlayList(
                     text = "播放列表",
                     fontSize = 20.sp,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .weight(1f)
                 )
                 Image(
                     painter = painterResource(id = R.drawable.ic_delete_all),
                     contentDescription = "清空",
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .weight(1f)
                         .clickable {
                             viewModel.clearPlayList()

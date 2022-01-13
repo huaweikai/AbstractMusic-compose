@@ -43,9 +43,6 @@ fun LocalAlbumDetail(
                     .clickable {
                     homeNavHostController.navigateUp()
                         viewModel.navigationState2.value = true
-                        viewModel.topBarState2.value = true
-//                    scope.launch { viewModel.topBarState.value.animateTo(42.dp) }
-//                    scope.launch { viewModel.navigationState.value.animateTo(130.dp) }
                 }
             )
         },
