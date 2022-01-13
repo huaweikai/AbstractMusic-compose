@@ -2,6 +2,7 @@ package com.hua.abstractmusic.ui.home.local.album.detail
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.TopAppBar
 import androidx.compose.material3.Icon
@@ -9,6 +10,7 @@ import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,26 +36,35 @@ fun LocalAlbumDetail(
     viewModel: HomeViewModel
 ){
     val scope = rememberCoroutineScope()
-    TopAppBar(
-        navigationIcon = {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_back),
-                contentDescription = "back",
-                modifier = Modifier
-                    .clickable {
-                    homeNavHostController.navigateUp()
+
+    Column {
+//        DisposableEffect(Unit){
+//            this.onDispose {
+//                viewModel.navigationState2.value = true
+//            }
+//        }
+        TopAppBar(
+            navigationIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_back),
+                    contentDescription = "back",
+                    modifier = Modifier
+                        .clickable {
+                            homeNavHostController.navigateUp()
                         viewModel.navigationState2.value = true
-                        viewModel.topBarState2.value = true
+//                        viewModel.topBarState2.value = true
 //                    scope.launch { viewModel.topBarState.value.animateTo(42.dp) }
 //                    scope.launch { viewModel.navigationState.value.animateTo(130.dp) }
-                }
-            )
-        },
-        title = {
-            Text(text = "${item.metadata?.title}")
-        },
-        backgroundColor = Color.White,
-        modifier = Modifier.padding(top=40.dp),
-        elevation = 0.dp
-    )
+                        }
+                )
+            },
+            title = {
+                Text(text = "${item.metadata?.title}")
+            },
+            backgroundColor = Color.White,
+            modifier = Modifier.padding(top=40.dp),
+            elevation = 0.dp
+        )
+        Text(text = "${item.metadata?.title}")
+    }
 }

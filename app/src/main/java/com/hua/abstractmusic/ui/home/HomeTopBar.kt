@@ -48,7 +48,7 @@ fun HomeTopBar(
     TopAppBar(
         modifier = modifier,
         title = {
-            Text(text = "${maps[back?.route]}")
+            Text(text = maps[back?.route]?:"")
         },
         actions = {
             IconButton(onClick = {

@@ -1,8 +1,7 @@
 package com.hua.abstractmusic.ui.home
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -59,30 +58,19 @@ fun HomeScreen(
     val playListState = viewModel.playListState.value
     val scope = rememberCoroutineScope()
     val homeNavController = rememberNavController()
-    val translationTop = remember{
-        Animatable(42f)
-    }
-    val translationBottom = remember{
-        Animatable(130f)
-    }
-    LaunchedEffect(viewModel.navigationState2.value){
-        if(viewModel.navigationState2.value){
-//            translationTop.animateTo(42f)
-            translationBottom.animateTo(130f)
-        }else{
-//            translationTop.animateTo(0f)
-            translationBottom.animateTo(60f)
-        }
-    }
-    LaunchedEffect(viewModel.topBarState2.value){
-        if(viewModel.navigationState2.value){
-            translationTop.animateTo(42f)
-//            translationBottom.animateTo(130f)
-        }else{
-            translationTop.animateTo(0f)
-//            translationBottom.animateTo(60f)
-        }
-    }
+    val translationTop by animateFloatAsState(
+            if(viewModel.navigationState2.value) 42f else 0f,
+            animationSpec = spring(1f, 100f)
+        )
+
+    val translationBottom by animateFloatAsState(
+        if(viewModel.navigationState2.value) 130f else 60f,
+        animationSpec = spring(1f,100f)
+    )
+
+//    val translationBottom = remember{
+//        Animatable(130f)
+//    }
     HomePlayList(viewModel = viewModel) {
         Scaffold(
             bottomBar = {
@@ -90,7 +78,7 @@ fun HomeScreen(
                     homeNavController, viewModel,
                     Modifier
                         .fillMaxWidth()
-                        .height(translationBottom.value.dp)
+                        .height(translationBottom.dp)
                 ) {
                     scope.launch { playListState.show() }
                 }
@@ -103,8 +91,8 @@ fun HomeScreen(
                         //todo(后续要自动计算每个手机的状态栏高度)
 //                        .padding(top = viewModel.topBarState.value.value)
 //                        .height(viewModel.topBarState.value.value)
-                        .padding(top = translationTop.value.dp)
-                        .height(translationTop.value.dp)
+                        .padding(top = translationTop.dp)
+                        .height(translationTop.dp)
                         .background(Color.White)
                 )
             }) {

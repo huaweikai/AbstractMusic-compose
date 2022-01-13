@@ -48,14 +48,14 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onBackPressed() {
-        if(navHostController.currentDestination?.route == Screen.HomeScreen.route){
-            finish()
-        }
-        else{
-            super.onBackPressed()
-        }
-    }
+//    override fun onBackPressed() {
+//        if(navHostController.currentDestination?.route == Screen.HomeScreen.route){
+//            finish()
+//        }
+//        else{
+//            super.onBackPressed()
+//        }
+//    }
 }
 
 

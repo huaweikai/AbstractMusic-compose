@@ -63,6 +63,7 @@ fun HomeNavigationNav(
                 }
             )
         ){
+            it.destination.label = ""
             val index =it.arguments?.getInt("albumIndex",-1)
             LocalAlbumDetail(
                 homeNavController,
