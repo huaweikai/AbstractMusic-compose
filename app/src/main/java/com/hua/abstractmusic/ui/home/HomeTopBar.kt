@@ -22,6 +22,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
 import com.hua.abstractmusic.R
+import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.utils.getStatusBarHeight
 
@@ -31,7 +32,11 @@ import com.hua.abstractmusic.utils.getStatusBarHeight
  * @Desc   : 主页的actionbar
  */
 @Composable
-fun HomeTopBar(navHostController: NavHostController) {
+fun HomeTopBar(
+    navHostController: NavHostController,
+    viewModel: HomeViewModel,
+    modifier: Modifier
+) {
     val back = navHostController.currentBackStackEntryAsState().value?.destination
     val maps = HashMap<String, String>()
     maps[Screen.NetScreen.route] = "在线音乐"
@@ -41,10 +46,7 @@ fun HomeTopBar(navHostController: NavHostController) {
         insets = LocalWindowInsets.current.statusBars, applyTop = true
     )
     TopAppBar(
-        modifier = Modifier
-                //todo(后续要自动计算每个手机的状态栏高度)
-            .padding(top = 39.dp)
-            .background(Color.White),
+        modifier = modifier,
         title = {
             Text(text = "${maps[back?.route]}")
         },
@@ -59,7 +61,8 @@ fun HomeTopBar(navHostController: NavHostController) {
                 )
             }
         },
-        backgroundColor = Color.White
+        backgroundColor = Color.White,
+        elevation = 0.dp
 
     )
 }

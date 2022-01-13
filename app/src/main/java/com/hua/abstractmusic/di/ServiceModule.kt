@@ -2,6 +2,8 @@ package com.hua.abstractmusic.di
 
 import android.content.Context
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.ForwardingPlayer
+import com.google.android.exoplayer2.LoadControl
 import com.google.android.exoplayer2.audio.AudioAttributes
 import dagger.Module
 import dagger.Provides
@@ -28,6 +30,17 @@ class ServiceModule {
         return ExoPlayer.Builder(context)
             .setAudioAttributes(AudioAttributes.DEFAULT,true)
             .setHandleAudioBecomingNoisy(true)
+            .setSeekBackIncrementMs(1L)
             .build()
+    }
+
+    @Provides
+    @ServiceScoped
+    fun provideForwardingPlayer(
+        player: ExoPlayer
+    ):ForwardingPlayer{
+        return ForwardingPlayer(player).apply {
+
+        }
     }
 }

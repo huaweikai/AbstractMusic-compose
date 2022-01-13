@@ -7,6 +7,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
+import androidx.core.app.NotificationCompat.VISIBILITY_PRIVATE
+import androidx.core.app.NotificationCompat.VISIBILITY_PUBLIC
 import androidx.core.graphics.drawable.toBitmap
 import androidx.media2.session.MediaController
 import coil.ImageLoader
@@ -31,8 +33,7 @@ class MusicNotificationManager(
     sessionToken: MediaSessionCompat.Token,
     notificationListener: PlayerNotificationManager.NotificationListener
 ){
-    private val
-            notificationManager:PlayerNotificationManager
+    private val notificationManager:PlayerNotificationManager
     private val imageLoader = ImageLoader(context)
 
     init {
@@ -55,12 +56,9 @@ class MusicNotificationManager(
         }
     }
 
+
     fun showNotification(player: Player){
         notificationManager.setPlayer(player)
-    }
-
-    fun hideNotification(){
-        notificationManager.setPlayer(null)
     }
 
 
@@ -104,5 +102,6 @@ class MusicNotificationManager(
             imageLoader.enqueue(request)
             return null
         }
+
     }
 }

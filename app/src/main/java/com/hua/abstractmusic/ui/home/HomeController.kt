@@ -133,7 +133,6 @@ fun Controller(
                     resId = button.resId,
                     resDesc = button.resDesc,
                     modifier = Modifier
-                        .padding(end = 5.dp)
                 ) {
                     when (i) {
                         0 -> {

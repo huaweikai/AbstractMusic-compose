@@ -140,7 +140,7 @@ class MediaItemTree(
         return when(parentIdUri.authority){
             TYPE_ROOT->{
                 val result = scanner.scanAllFromMediaStore(context,parentIdUri)
-                treeNodes[parentId]!!.addChild(result)
+                treeNodes[parentId]!!.setChild(result)
                 result
             }
             TYPE_ALBUM->{

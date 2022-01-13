@@ -87,3 +87,11 @@ fun NetMusic.Data.toMediaItem(parentId:Uri):MediaItem{
         .build()
 }
 
+/**
+ * 根据手机的分辨率从 px(像素) 的单位 转成为 dp
+ */
+fun Number.px2dip(context: Context, pxValue: Float): Int {
+    val scale: Float = context.resources.displayMetrics.density
+    return (pxValue / scale + 0.5f).toInt()
+}
+

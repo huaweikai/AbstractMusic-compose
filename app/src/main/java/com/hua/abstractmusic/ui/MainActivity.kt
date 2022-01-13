@@ -40,34 +40,21 @@ class MainActivity : ComponentActivity() {
             rememberSystemUiController().setStatusBarColor(
                 Color.Transparent,
                 darkIcons = MaterialTheme.colors.isLight)
-            Log.d("TAG", "onCreate: ${px2dip(this, getStatusBarHeight(this).toFloat())}")
             AbstractMusicTheme {
                 viewModel = viewModel()
-//                viewModel = hiltViewModel()
                 viewModel.initializeController()
-                HomeNavigation(activity = this@MainActivity,navHostController, viewModel)
+                HomeNavigation(activity = this@MainActivity,navHostController,viewModel)
             }
         }
     }
 
     override fun onBackPressed() {
-        if(currentRoute != null && currentRoute == Screen.HomeScreen.route){
-            viewModel.releaseBrowser()
+        if(navHostController.currentDestination?.route == Screen.HomeScreen.route){
             finish()
-        }else{
+        }
+        else{
             super.onBackPressed()
         }
-    }
-
-    override fun finish() {
-        moveTaskToBack(true)
-    }
-    /**
-     * 根据手机的分辨率从 px(像素) 的单位 转成为 dp
-     */
-    fun px2dip(context: Context, pxValue: Float): Int {
-        val scale: Float = context.resources.displayMetrics.density
-        return (pxValue / scale + 0.5f).toInt()
     }
 }
 

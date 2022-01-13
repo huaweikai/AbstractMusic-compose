@@ -46,11 +46,14 @@ abstract class BaseBrowserViewModel (
             .build()
     }
 
-    fun releaseBrowser(){
+    fun savePosition(){
         val sp = getApplication<Application>().getSharedPreferences(LASTMEDIA,Context.MODE_PRIVATE)
         browser?.currentMediaItemIndex?.let {
             sp.edit().putInt(LASTMEDIAINDEX, it).apply()
         }
+    }
+
+    fun releaseBrowser(){
         browser?.close()
     }
 
@@ -71,6 +74,15 @@ abstract class BaseBrowserViewModel (
             useCase.clearCurrentListCase()
             useCase.insertMusicToCurrentItemCase(items)
         }
+    }
+
+    //加载音乐列表，根据父ID来进行加载
+    fun init(parentId: String) {
+        val browser = browser ?: return
+        //订阅
+        browser.subscribe(parentId, null)
+        //去获取数据
+        browser.getChildren(parentId, 0, Int.MAX_VALUE, null)
     }
 
 }

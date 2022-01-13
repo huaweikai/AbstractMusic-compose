@@ -1,6 +1,8 @@
 package com.hua.abstractmusic.ui.home.viewmodels
 
 import android.app.Application
+import android.content.Intent
+import android.os.Bundle
 import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Animatable
@@ -20,10 +22,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.media2.common.MediaItem
 import androidx.media2.common.MediaMetadata
 import androidx.media2.common.SessionPlayer
-import androidx.media2.session.MediaBrowser
-import androidx.media2.session.MediaController
-import androidx.media2.session.MediaLibraryService
-import androidx.media2.session.SessionCommandGroup
+import androidx.media2.session.*
+import androidx.media2.session.SessionCommand.COMMAND_CODE_CUSTOM
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import com.google.android.exoplayer2.Player
@@ -33,10 +33,13 @@ import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant.ALBUM_ID
 import com.hua.abstractmusic.other.Constant.ALL_ID
 import com.hua.abstractmusic.other.Constant.ARTIST_ID
+import com.hua.abstractmusic.other.Constant.CLEAR_PLAY_LIST
 import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ARTIST_ID
+import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.other.Constant.ROOT_SCHEME
 import com.hua.abstractmusic.services.MediaItemTree
+import com.hua.abstractmusic.services.PlayerService
 import com.hua.abstractmusic.use_case.UseCase
 import com.hua.abstractmusic.utils.artist
 import com.hua.abstractmusic.utils.title
@@ -66,6 +69,7 @@ class HomeViewModel @Inject constructor(
             init(NETWORK_ALBUM_ID)
             init(ALL_ID)
             init(ALBUM_ID)
+            browser?.subscribe("null",null)
             updateItem(browser?.currentMediaItem)
         }
 
@@ -80,7 +84,7 @@ class HomeViewModel @Inject constructor(
         override fun onCurrentMediaItemChanged(controller: MediaController, item: MediaItem?) {
             viewModelScope.launch {
                 //延迟更新，不然会跳到第一个
-                delay(100L)
+                delay(200L)
                 updateItem(browser?.currentMediaItem)
             }
         }
@@ -96,7 +100,11 @@ class HomeViewModel @Inject constructor(
             params: MediaLibraryService.LibraryParams?
         ) {
             //抓取数据完毕，直接去拿数据去更新
-            childrenInit(parentId)
+            if (parentId == "null"){
+                updateItem(null)
+            }else{
+                childrenInit(parentId)
+            }
         }
     }
 
@@ -110,17 +118,6 @@ class HomeViewModel @Inject constructor(
     private val _currentPlayList = mutableStateOf<List<MediaData>>(emptyList())
     val currentPlayList: State<List<MediaData>> get() = _currentPlayList
 
-    //用于在启动时，state需要一个起始的value
-    private val nullMediaData = MediaItem.Builder()
-        .setMetadata(
-            MediaMetadata.Builder()
-                .apply {
-                    title = "欢迎来到音乐的世界"
-                    artist = ""
-                }
-                .build()
-        )
-        .build()
 
     //网络请求的数据，到时候会清理掉，仅仅只是测试使用
     private val _netAlbum = mutableStateOf<List<MediaData>>(emptyList())
@@ -136,7 +133,7 @@ class HomeViewModel @Inject constructor(
     val localArtistList: State<List<MediaData>> get() = _localArtistList
 
     //当前播放的item，用户更新控制栏
-    private val _currentItem = mutableStateOf(nullMediaData)
+    private val _currentItem = mutableStateOf(NULL_MEDIA_ITEM)
     val currentItem: State<MediaItem> get() = _currentItem
 
 
@@ -148,14 +145,7 @@ class HomeViewModel @Inject constructor(
         _playerState.value = playState
     }
 
-    //加载音乐列表，根据父ID来进行加载
-    fun init(parentId: String) {
-        val browser = browser ?: return
-        //订阅
-        browser.subscribe(parentId, null)
-        //去获取数据
-        browser.getChildren(parentId, 0, Int.MAX_VALUE, null)
-    }
+
 
     //根据parentId去拿数据
     fun childrenInit(parentId: String) {
@@ -176,23 +166,25 @@ class HomeViewModel @Inject constructor(
 
     //更新item的方法，当回调到item改变就调用这个方法
     private fun updateItem(item: MediaItem?) {
-        item ?: return
+//        item ?: return
         browser ?: return
         _netAlbum.value = _netAlbum.value.toMutableList().map {
-            val isPlaying = it.mediaId == item.metadata?.mediaId
+            val isPlaying = if(item == null) false else it.mediaId == item.metadata?.mediaId
             it.copy(isPlaying = isPlaying)
         }
-        _currentItem.value = item
+        _currentItem.value = item ?: NULL_MEDIA_ITEM
 
         _currentPlayList.value = browser!!.playlist?.map {
-            val isPlaying = it.metadata?.mediaId == browser!!.currentMediaItem?.metadata?.mediaId
+            val isPlaying = if(item == null) false else it.metadata?.mediaId == item.metadata?.mediaId
             MediaData(it, isPlaying)
         } ?: emptyList()
 
         _localMusicList.value = _localMusicList.value.toMutableList().map {
-            val isPlaying = it.mediaId == item.metadata?.mediaId
+            val isPlaying = if(item == null) false else it.mediaId == item.metadata?.mediaId
             it.copy(isPlaying = isPlaying)
         }
+
+        savePosition()
 
     }
 
@@ -233,7 +225,20 @@ class HomeViewModel @Inject constructor(
     }
 
     fun clearPlayList() {
-        browser?.removePlaylistItem(0)
+//        val result = browser?.sendCustomCommand(
+//            SessionCommand("clear",Bundle().apply { putString("c","clear") }),Bundle().apply { putString("c","clear")}
+//        )
+//        if (result?.get()?.resultCode == SessionResult.RESULT_SUCCESS){
+//            updateItem(null)
+//        }
+        getApplication<Application>()
+            .startService(Intent(getApplication(),PlayerService::class.java).apply {
+                action = CLEAR_PLAY_LIST
+            })
+        viewModelScope.launch {
+            useCase.clearCurrentListCase()
+            savePosition()
+        }
     }
 
 
@@ -246,5 +251,18 @@ class HomeViewModel @Inject constructor(
     //记录主页控制中心，的navigationview是否要隐藏
     val navigationState = mutableStateOf(
         Animatable(130.dp, Dp.VectorConverter)
+    )
+    //记录主页控制中心，的navigationview是否要隐藏
+    val topBarState = mutableStateOf(
+        Animatable(42.dp, Dp.VectorConverter)
+    )
+
+    //记录主页控制中心，的navigationview是否要隐藏
+    val navigationState2 = mutableStateOf(
+        true
+    )
+    //记录主页控制中心，的navigationview是否要隐藏
+    val topBarState2 = mutableStateOf(
+        true
     )
 }

@@ -19,8 +19,10 @@ import com.google.android.exoplayer2.ext.media2.SessionPlayerConnector
 import com.google.common.util.concurrent.MoreExecutors
 import com.hua.abstractmusic.ui.MainActivity
 import com.hua.abstractmusic.R
+import com.hua.abstractmusic.other.Constant.CLEAR_PLAY_LIST
 import com.hua.abstractmusic.other.Constant.LASTMEDIA
 import com.hua.abstractmusic.other.Constant.LASTMEDIAINDEX
+import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.services.extensions.MediaSessionCallback
 import com.hua.abstractmusic.use_case.UseCase
 import com.hua.abstractmusic.utils.artist
@@ -95,13 +97,12 @@ class PlayerService : MediaLibraryService() {
 
         }
         player = SessionPlayerConnector(exoplayer)
-
         mediaLibrarySession = MediaLibrarySession
             .Builder(
                 this,
                 player,
                 Executors.newSingleThreadExecutor(),
-                MediaSessionCallback(itemTree,serviceScope)
+                MediaSessionCallback(itemTree,serviceScope,this)
             )
             .setSessionActivity(pendingIntent)
             .build()
@@ -124,16 +125,19 @@ class PlayerService : MediaLibraryService() {
                 }, MoreExecutors.directExecutor())
             }else{
                 (player as SessionPlayerConnector).addPlaylistItem(
-                    0, MediaItem.Builder().setMetadata(
-                        MediaMetadata.Builder()
-                            .apply {
-                                title = "欢迎进入音乐的世界"
-                                artist = "暂无选中歌单"
-                            }.build()
-                    ).build()
-                )
+                    0, NULL_MEDIA_ITEM)
             }
         }
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        intent?.let {
+            when(it.action){
+                CLEAR_PLAY_LIST -> removeAllMusic()
+                else-> null
+            }
+        }
+        return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onUpdateNotification(session: MediaSession): MediaNotification? {
@@ -144,5 +148,11 @@ class PlayerService : MediaLibraryService() {
         super.onDestroy()
         player.close()
         mediaLibrarySession.close()
+    }
+
+    fun removeAllMusic(){
+        exoplayer.clearMediaItems()
+//        mediaLibrarySession.sendCustomCommand()
+        mediaLibrarySession.notifyChildrenChanged("null",0,null)
     }
 }

@@ -59,20 +59,54 @@ fun HomeScreen(
     val playListState = viewModel.playListState.value
     val scope = rememberCoroutineScope()
     val homeNavController = rememberNavController()
-    HomePlayList(viewModel = viewModel, state = playListState) {
+    val translationTop = remember{
+        Animatable(42f)
+    }
+    val translationBottom = remember{
+        Animatable(130f)
+    }
+    LaunchedEffect(viewModel.navigationState2.value){
+        if(viewModel.navigationState2.value){
+//            translationTop.animateTo(42f)
+            translationBottom.animateTo(130f)
+        }else{
+//            translationTop.animateTo(0f)
+            translationBottom.animateTo(60f)
+        }
+    }
+    LaunchedEffect(viewModel.topBarState2.value){
+        if(viewModel.navigationState2.value){
+            translationTop.animateTo(42f)
+//            translationBottom.animateTo(130f)
+        }else{
+            translationTop.animateTo(0f)
+//            translationBottom.animateTo(60f)
+        }
+    }
+    HomePlayList(viewModel = viewModel) {
         Scaffold(
             bottomBar = {
                 HomeController(
                     homeNavController, viewModel,
                     Modifier
                         .fillMaxWidth()
-                        .height(viewModel.navigationState.value.value)
+                        .height(translationBottom.value.dp)
                 ) {
                     scope.launch { playListState.show() }
                 }
             },
             topBar = {
-                HomeTopBar(navHostController = homeNavController)
+                HomeTopBar(
+                    navHostController = homeNavController,
+                    viewModel = viewModel,
+                    modifier = Modifier
+                        //todo(后续要自动计算每个手机的状态栏高度)
+//                        .padding(top = viewModel.topBarState.value.value)
+//                        .height(viewModel.topBarState.value.value)
+                        .padding(top = translationTop.value.dp)
+                        .height(translationTop.value.dp)
+                        .background(Color.White)
+                )
             }) {
             HomeNavigationNav(
                 modifier = Modifier

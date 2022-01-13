@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.ui.home.local.music
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,7 +25,22 @@ import com.hua.abstractmusic.utils.isPlayable
 fun LocalMusic(
     viewModel: HomeViewModel
 ) {
-
-
-
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        itemsIndexed(viewModel.localMusicList.value) { index, item ->
+            Log.d("TAG", "LocalMusic: ${viewModel.localMusicList.value}")
+            MusicItem(
+                data = item
+            ){
+                if (item.mediaItem.metadata?.isPlayable == true &&
+                    item.mediaItem.metadata?.browserType == MediaMetadata.BROWSABLE_TYPE_NONE
+                ) {
+                    viewModel.setPlaylist(index, viewModel.localMusicList.value)
+                } else {
+                    viewModel.init(item.mediaId)
+                }
+            }
+        }
+    }
 }

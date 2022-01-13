@@ -1,5 +1,11 @@
 package com.hua.abstractmusic.other
 
+import androidx.media2.common.MediaItem
+import androidx.media2.common.MediaMetadata
+import com.hua.abstractmusic.utils.albumArtUri
+import com.hua.abstractmusic.utils.artist
+import com.hua.abstractmusic.utils.title
+
 /**
  * @author : huaweikai
  * @Date   : 2021/11/26
@@ -42,4 +48,13 @@ object Constant {
 
     const val NOTIFICATION_CHANNEL_ID = "music_notification"
     const val NOTIFICATION_ID = 1
+
+    val NULL_MEDIA_ITEM = MediaItem.Builder().setMetadata(
+        MediaMetadata.Builder()
+            .apply {
+                title = "欢迎进入音乐的世界"
+                artist = "暂无选中歌单"
+                albumArtUri = ""
+            }.build()).build()
+    const val CLEAR_PLAY_LIST = "clear_list"
 }

@@ -20,25 +20,25 @@ class PlayerNotificationListener(
         notification: Notification,
         ongoing: Boolean
     ) {
-//        musicService.apply {
+        musicService.apply {
             //如果是持续存在的，且不在后台
             if(ongoing &&!musicService.isForegroundService){
                 ContextCompat.startForegroundService(
                     musicService,
                     Intent(musicService,PlayerService::class.java)
                 )
-                musicService.startForeground(notificationId,notification)
-                musicService.isForegroundService=true
+                startForeground(notificationId,notification)
+                isForegroundService = true
             }
-//        }
+        }
     }
 
     override fun onNotificationCancelled(notificationId: Int, dismissedByUser: Boolean) {
         //通知取消时，要做的动作
-//        musicService.apply {
-            musicService.stopForeground(true)
-            musicService.isForegroundService=false
-            musicService.stopSelf()
-//        }
+        musicService.apply {
+            stopForeground(true)
+            isForegroundService=false
+            stopSelf()
+        }
     }
 }

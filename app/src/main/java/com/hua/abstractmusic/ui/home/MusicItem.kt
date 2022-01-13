@@ -12,6 +12,8 @@ import androidx.compose.ui.unit.dp
 import androidx.media2.common.MediaItem
 import androidx.media2.common.MediaMetadata
 import coil.compose.rememberImagePainter
+import coil.transform.RoundedCornersTransformation
+import coil.transform.Transformation
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
@@ -44,12 +46,15 @@ fun MusicItem(
             painter = rememberImagePainter(
                 data = data.mediaItem.metadata?.albumArtUri
             ) {
+                this.transformations(
+                    RoundedCornersTransformation(5f)
+                )
                 this.error(R.drawable.music)
             },
             contentDescription = "专辑图",
             modifier = Modifier
-                .height(60.dp)
-                .width(60.dp)
+                .height(50.dp)
+                .width(50.dp)
         )
         Text(
             text = "${data.mediaItem.metadata?.title}",

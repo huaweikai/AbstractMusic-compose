@@ -83,24 +83,10 @@ fun LocalScreen(
         ) { page ->
             when (page) {
                 0 -> {
-                    LazyColumn {
-                        itemsIndexed(viewModel.localMusicList.value) { index, item ->
-                            MusicItem(
-                                data = item
-                            ) {
-                                if (item.mediaItem.metadata?.isPlayable == true &&
-                                    item.mediaItem.metadata?.browserType == MediaMetadata.BROWSABLE_TYPE_NONE
-                                ) {
-                                    viewModel.setPlaylist(index, viewModel.localMusicList.value)
-                                } else {
-                                    viewModel.init(item.mediaId)
-                                }
-                            }
-                        }
-                    }
+                    LocalMusic(viewModel = viewModel)
                 }
                 1->{
-                    LocalAlbum(viewModel = viewModel)
+                    LocalAlbum(viewModel = viewModel,navHostController)
                 }
                 2 -> {
                     Text(text = "${tabTitles[page]}")

@@ -12,4 +12,6 @@ sealed class Screen(val route:String){
     object NetScreen:Screen("home_net_screen")
     object LocalScreen:Screen("home_local_screen")
     object MineScreen:Screen("home_mine_screen")
+
+    object LocalAlbumDetail:Screen("local_album_screen")
 }

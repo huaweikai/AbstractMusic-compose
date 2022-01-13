@@ -40,9 +40,9 @@ import com.hua.abstractmusic.utils.title
 @Composable
 fun HomePlayList(
     viewModel: HomeViewModel,
-    state: ModalBottomSheetState,
     ScaffoldContent: @Composable () -> Unit
 ) {
+    val state = viewModel.playListState.value
     ModalBottomSheetLayout(
         sheetState = state,
         sheetContent = {
@@ -55,12 +55,24 @@ fun HomePlayList(
                 }
             }
             Spacer(modifier = Modifier.height(10.dp))
-            Text(
-                text = "播放列表",
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
+            Row(Modifier.fillMaxWidth()) {
+                Text(
+                    text = "播放列表",
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                        .weight(1f)
+                )
+                Image(
+                    painter = painterResource(id = R.drawable.ic_delete_all),
+                    contentDescription = "清空",
+                    modifier = Modifier.fillMaxWidth()
+                        .weight(1f)
+                        .clickable {
+                            viewModel.clearPlayList()
+                        }
+                )
+            }
             Spacer(modifier = Modifier.height(10.dp))
             LazyColumn(
                 modifier = Modifier
