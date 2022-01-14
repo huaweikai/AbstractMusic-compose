@@ -29,7 +29,6 @@ fun LocalMusic(
         modifier = Modifier.fillMaxWidth()
     ) {
         itemsIndexed(viewModel.localMusicList.value) { index, item ->
-            Log.d("TAG", "LocalMusic: ${viewModel.localMusicList.value}")
             MusicItem(
                 data = item
             ){

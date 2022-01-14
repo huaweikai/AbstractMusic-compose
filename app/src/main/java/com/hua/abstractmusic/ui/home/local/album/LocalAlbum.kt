@@ -57,8 +57,7 @@ fun LocalAlbum(
                     .padding(20.dp)
                     .clickable {
                         homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumIndex=${index}")
-                        viewModel.navigationState2.value = false
-                        viewModel.topBarState2.value = false
+                        viewModel.navigationState.value = false
 //                        scope.launch {
 //                            viewModel.navigationState.value.animateTo(60.dp)
 //                        }

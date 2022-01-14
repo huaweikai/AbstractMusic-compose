@@ -1,5 +1,7 @@
 package com.hua.abstractmusic.ui.navigation
 
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,10 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.ui.home.local.LocalScreen
@@ -27,7 +28,7 @@ import com.hua.abstractmusic.ui.route.Screen
  * @Desc   : 主页的小navigation，用于跳转在线音乐，本地音乐和我的界面
  */
 
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalPagerApi::class,ExperimentalAnimationApi::class)
 @Composable
 fun HomeNavigationNav(
     homeNavController:NavHostController,
@@ -35,7 +36,7 @@ fun HomeNavigationNav(
     viewModel: HomeViewModel
 ) {
     val pagerState = rememberPagerState(initialPage = 0)
-    NavHost(
+    AnimatedNavHost(
         navController = homeNavController,
         startDestination = Screen.NetScreen.route,
         modifier = modifier
@@ -61,7 +62,13 @@ fun HomeNavigationNav(
                     type = NavType.IntType
                     defaultValue = -1
                 }
-            )
+            ),
+//            enterTransition = {
+//                this.slideIntoContainer(AnimatedContentScope.SlideDirection.Up)
+//            },
+//            popExitTransition = {
+//                this.slideOutOfContainer(AnimatedContentScope.SlideDirection.Down)
+//            }
         ){
             it.destination.label = ""
             val index =it.arguments?.getInt("albumIndex",-1)

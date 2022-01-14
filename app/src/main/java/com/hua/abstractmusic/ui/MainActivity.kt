@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
@@ -15,6 +16,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
@@ -24,18 +26,21 @@ import com.hua.abstractmusic.ui.theme.AbstractMusicTheme
 import com.hua.abstractmusic.utils.getStatusBarHeight
 import dagger.hilt.android.AndroidEntryPoint
 
+@OptIn(ExperimentalAnimationApi::class)
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private lateinit var navHostController: NavHostController
     private var currentRoute :String? = null
     lateinit var viewModel: HomeViewModel
+    private lateinit var homeNavController:NavHostController
     override fun onCreate(savedInstanceState: Bundle?) {
         //不会在系统视图下面绘制
         WindowCompat.setDecorFitsSystemWindows(window,false)
         super.onCreate(savedInstanceState)
         setContent {
             navHostController = rememberNavController()
-            currentRoute = navHostController.currentBackStackEntryAsState().value?.destination?.route
+            homeNavController = rememberAnimatedNavController()
+//            currentRoute = navHostController.currentBackStackEntryAsState().value?.destination?.route
             //这个， 透明状态栏
             rememberSystemUiController().setStatusBarColor(
                 Color.Transparent,
@@ -43,19 +48,28 @@ class MainActivity : ComponentActivity() {
             AbstractMusicTheme {
                 viewModel = viewModel()
                 viewModel.initializeController()
-                HomeNavigation(activity = this@MainActivity,navHostController,viewModel)
+                HomeNavigation(activity = this@MainActivity,navHostController,viewModel,homeNavController)
             }
         }
     }
 
-//    override fun onBackPressed() {
-//        if(navHostController.currentDestination?.route == Screen.HomeScreen.route){
-//            finish()
-//        }
-//        else{
-//            super.onBackPressed()
-//        }
-//    }
+    override fun onBackPressed() {
+        val localScreen = listOf(Screen.LocalScreen.route,Screen.NetScreen.route,Screen.MineScreen.route)
+        val currentRoute = homeNavController.currentDestination?.route
+        when {
+            currentRoute in localScreen -> {
+                finish()
+            }
+            currentRoute?.startsWith(Screen.LocalAlbumDetail.route) == true -> {
+                viewModel.navigationState.value = true
+                homeNavController.navigateUp()
+
+            }
+            else -> {
+                super.onBackPressed()
+            }
+        }
+    }
 }
 
 

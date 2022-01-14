@@ -248,21 +248,9 @@ class HomeViewModel @Inject constructor(
     //记录主页播放列表的打开和关闭
     val playListState = mutableStateOf(ModalBottomSheetState(ModalBottomSheetValue.Hidden))
 
-    //记录主页控制中心，的navigationview是否要隐藏
-    val navigationState = mutableStateOf(
-        Animatable(130.dp, Dp.VectorConverter)
-    )
-    //记录主页控制中心，的navigationview是否要隐藏
-    val topBarState = mutableStateOf(
-        Animatable(42.dp, Dp.VectorConverter)
-    )
 
     //记录主页控制中心，的navigationview是否要隐藏
-    val navigationState2 = mutableStateOf(
-        true
-    )
-    //记录主页控制中心，的navigationview是否要隐藏
-    val topBarState2 = mutableStateOf(
+    val navigationState = mutableStateOf(
         true
     )
 }

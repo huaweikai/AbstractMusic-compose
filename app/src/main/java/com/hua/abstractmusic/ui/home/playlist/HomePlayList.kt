@@ -46,14 +46,6 @@ fun HomePlayList(
     ModalBottomSheetLayout(
         sheetState = state,
         sheetContent = {
-            LaunchedEffect(null) {
-                viewModel.initializeController()
-            }
-            DisposableEffect(null) {
-                this.onDispose {
-                    viewModel.releaseBrowser()
-                }
-            }
             Spacer(modifier = Modifier.height(10.dp))
             Row(Modifier.fillMaxWidth()) {
                 Text(

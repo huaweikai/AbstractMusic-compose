@@ -27,9 +27,11 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hua.abstractmusic.R
@@ -49,28 +51,25 @@ import kotlinx.coroutines.launch
  */
 
 
-@OptIn(ExperimentalMaterialApi::class)
+
+@OptIn(ExperimentalMaterialApi::class,ExperimentalAnimationApi::class)
 @Composable
 fun HomeScreen(
-    navController: NavController,
-    viewModel: HomeViewModel
+    appNaviController: NavHostController,
+    viewModel: HomeViewModel,
+    homeNavController: NavHostController
 ) {
     val playListState = viewModel.playListState.value
     val scope = rememberCoroutineScope()
-    val homeNavController = rememberNavController()
     val translationTop by animateFloatAsState(
-            if(viewModel.navigationState2.value) 42f else 0f,
-            animationSpec = spring(1f, 100f)
-        )
-
-    val translationBottom by animateFloatAsState(
-        if(viewModel.navigationState2.value) 130f else 60f,
-        animationSpec = spring(1f,100f)
+        if(viewModel.navigationState.value) 0f else -80f,
+        animationSpec = spring(1f, 100f)
     )
 
-//    val translationBottom = remember{
-//        Animatable(130f)
-//    }
+    val translationBottom by animateFloatAsState(
+        if(viewModel.navigationState.value) 0f else 70f,
+        animationSpec = spring(1f,100f)
+    )
     HomePlayList(viewModel = viewModel) {
         Scaffold(
             bottomBar = {
@@ -78,31 +77,45 @@ fun HomeScreen(
                     homeNavController, viewModel,
                     Modifier
                         .fillMaxWidth()
-                        .height(translationBottom.dp)
+                        .offset(0.dp, translationBottom.dp)
+                        .height(130.dp)
                 ) {
                     scope.launch { playListState.show() }
                 }
-            },
-            topBar = {
+            }
+        )
+        {
+            ConstraintLayout(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                val (topBar,navHost) = createRefs()
                 HomeTopBar(
                     navHostController = homeNavController,
                     viewModel = viewModel,
-                    modifier = Modifier
-                        //todo(后续要自动计算每个手机的状态栏高度)
-//                        .padding(top = viewModel.topBarState.value.value)
-//                        .height(viewModel.topBarState.value.value)
-                        .padding(top = translationTop.dp)
-                        .height(translationTop.dp)
-                        .background(Color.White)
+                    modifier = Modifier.constrainAs(topBar){
+                        top.linkTo(parent.top,40.dp)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        bottom.linkTo(navHost.top)
+                        width = Dimension.fillToConstraints
+                        height = Dimension.preferredValue(40.dp)
+                    }
                 )
-            }) {
-            HomeNavigationNav(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = viewModel.navigationState.value.value),
-                homeNavController = homeNavController,
-                viewModel = viewModel
-            )
+                HomeNavigationNav(
+                    modifier = Modifier
+                        .constrainAs(navHost){
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                            top.linkTo(topBar.bottom)
+                            bottom.linkTo(parent.bottom)
+                            width = Dimension.fillToConstraints
+                            height = Dimension.fillToConstraints
+                        }
+                        .padding(bottom = (if (viewModel.navigationState.value) 130 else 60).dp),
+                    homeNavController = homeNavController,
+                    viewModel = viewModel
+                )
+            }
         }
     }
 }

@@ -4,17 +4,11 @@ import android.Manifest
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material.Snackbar
-import androidx.compose.material.SnackbarData
-import androidx.compose.material.SnackbarDuration
 import androidx.compose.runtime.*
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.pager.ExperimentalPagerApi
 import com.hua.abstractmusic.ui.hello.HelloScreen
 import com.hua.abstractmusic.ui.hello.PermissionGet
 import com.hua.abstractmusic.ui.home.HomeScreen
@@ -31,8 +25,9 @@ import com.hua.abstractmusic.ui.route.Screen
 @Composable
 fun HomeNavigation(
     activity: ComponentActivity,
-    navController: NavHostController,
-    viewModel: HomeViewModel
+    appNavController: NavHostController,
+    viewModel: HomeViewModel,
+    homeController: NavHostController
 ) {
     var isGet by remember {
         mutableStateOf(true)
@@ -71,12 +66,12 @@ Snackbar(
             if (isGet) {
                 val navOptions =
                     NavOptions.Builder().setPopUpTo(Screen.HelloScreen.route, true).build()
-                navController.navigate(Screen.HomeScreen.route, navOptions)
+                appNavController.navigate(Screen.HomeScreen.route, navOptions)
             }
         }
     )
     NavHost(
-        navController = navController,
+        navController = appNavController,
         startDestination = startNavi
     ) {
         composable(route = Screen.HelloScreen.route) {
@@ -91,7 +86,7 @@ Snackbar(
             }
         }
         composable(route = Screen.HomeScreen.route) {
-            HomeScreen(navController = navController,viewModel)
+            HomeScreen(appNaviController = appNavController,viewModel,homeController)
         }
     }
 }

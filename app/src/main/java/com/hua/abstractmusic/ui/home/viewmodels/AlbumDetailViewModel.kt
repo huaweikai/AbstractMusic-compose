@@ -1,6 +1,7 @@
 package com.hua.abstractmusic.ui.home.viewmodels
 
 import android.app.Application
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.media2.common.MediaItem
@@ -31,6 +32,7 @@ class AlbumDetailViewModel @Inject constructor(
             controller: MediaController,
             allowedCommands: SessionCommandGroup
         ) {
+            Log.d("TAG", "onConnected: ")
 //            init()
         }
 
