@@ -14,6 +14,8 @@ import com.hua.abstractmusic.ui.hello.PermissionGet
 import com.hua.abstractmusic.ui.home.HomeScreen
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.route.Screen
+import com.hua.abstractmusic.ui.splash.SplashScreen
+import kotlinx.coroutines.launch
 
 /**
  * @author : huaweikai
@@ -24,7 +26,7 @@ import com.hua.abstractmusic.ui.route.Screen
 
 @Composable
 fun HomeNavigation(
-    activity: ComponentActivity,
+    nextRoute:String,
     appNavController: NavHostController,
     viewModel: HomeViewModel,
     homeController: NavHostController
@@ -32,6 +34,7 @@ fun HomeNavigation(
     var isGet by remember {
         mutableStateOf(true)
     }
+    val scpoe = rememberCoroutineScope()
 /*    todo(这个是我刚写的还不知道能不能生效)
 Snackbar(
         snackbarData = object : SnackbarData {
@@ -52,9 +55,6 @@ Snackbar(
         actionOnNewLine = !isGet
     )*/
 
-    //如果是第一次界面，就把路由设置为主界面，如果不是就设置路由为欢迎界面
-    val startNavi =
-        if (PermissionGet.checkReadPermission(activity)) Screen.HomeScreen.route else Screen.HelloScreen.route
     val s = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
         onResult = {
@@ -66,14 +66,19 @@ Snackbar(
             if (isGet) {
                 val navOptions =
                     NavOptions.Builder().setPopUpTo(Screen.HelloScreen.route, true).build()
-                appNavController.navigate(Screen.HomeScreen.route, navOptions)
+//                scpoe.launch {
+                    appNavController.navigate(Screen.HomeScreen.route, navOptions)
+//                }
             }
         }
     )
     NavHost(
         navController = appNavController,
-        startDestination = startNavi
+        startDestination = Screen.Splash.route
     ) {
+        composable(route = Screen.Splash.route){
+            SplashScreen(appNavHostController = appNavController, nextRoute = nextRoute)
+        }
         composable(route = Screen.HelloScreen.route) {
             HelloScreen {
                 //从欢迎界面传递过来的点击的lambda

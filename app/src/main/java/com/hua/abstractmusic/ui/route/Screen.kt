@@ -7,6 +7,7 @@ package com.hua.abstractmusic.ui.route
  */
 sealed class Screen(val route:String){
     object HelloScreen:Screen("hello_screen")
+    object Splash:Screen("splash_screen")
     object HomeScreen:Screen("home_screen")
 
     object NetScreen:Screen("home_net_screen")

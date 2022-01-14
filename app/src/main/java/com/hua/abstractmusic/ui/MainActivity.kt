@@ -16,9 +16,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.hua.abstractmusic.ui.hello.PermissionGet
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.navigation.HomeNavigation
 import com.hua.abstractmusic.ui.route.Screen
@@ -39,16 +39,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             navHostController = rememberNavController()
-            homeNavController = rememberAnimatedNavController()
+            homeNavController = rememberNavController()
 //            currentRoute = navHostController.currentBackStackEntryAsState().value?.destination?.route
             //这个， 透明状态栏
             rememberSystemUiController().setStatusBarColor(
                 Color.Transparent,
                 darkIcons = MaterialTheme.colors.isLight)
             AbstractMusicTheme {
+                val nextScreen = if (PermissionGet.checkReadPermission(this)) Screen.HomeScreen.route else Screen.HelloScreen.route
                 viewModel = viewModel()
                 viewModel.initializeController()
-                HomeNavigation(activity = this@MainActivity,navHostController,viewModel,homeNavController)
+                HomeNavigation(nextScreen,navHostController,viewModel,homeNavController)
             }
         }
     }

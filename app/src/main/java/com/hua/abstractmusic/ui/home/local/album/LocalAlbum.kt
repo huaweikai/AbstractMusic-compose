@@ -53,17 +53,11 @@ fun LocalAlbum(
             Card(
                 modifier = Modifier
                     .height(230.dp)
-                    .width(190.dp)
+                    .width(200.dp)
                     .padding(20.dp)
                     .clickable {
                         homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumIndex=${index}")
                         viewModel.navigationState.value = false
-//                        scope.launch {
-//                            viewModel.navigationState.value.animateTo(60.dp)
-//                        }
-//                        scope.launch {
-//                            viewModel.topBarState.value.animateTo(0.dp)
-//                        }
                     },
                 shape = MaterialTheme.shapes.medium.copy(CornerSize(20.dp)),
                 elevation = 10.dp

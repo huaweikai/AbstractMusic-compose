@@ -31,7 +31,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hua.abstractmusic.R
@@ -51,8 +50,7 @@ import kotlinx.coroutines.launch
  */
 
 
-
-@OptIn(ExperimentalMaterialApi::class,ExperimentalAnimationApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun HomeScreen(
     appNaviController: NavHostController,
@@ -62,16 +60,26 @@ fun HomeScreen(
     val playListState = viewModel.playListState.value
     val scope = rememberCoroutineScope()
     val translationTop by animateFloatAsState(
-        if(viewModel.navigationState.value) 0f else -80f,
+        if (viewModel.navigationState.value) 0f else -80f,
         animationSpec = spring(1f, 100f)
     )
 
     val translationBottom by animateFloatAsState(
-        if(viewModel.navigationState.value) 0f else 70f,
-        animationSpec = spring(1f,100f)
+        if (viewModel.navigationState.value) 0f else 70f,
+        animationSpec = spring(1f, 100f)
     )
     HomePlayList(viewModel = viewModel) {
         Scaffold(
+            topBar = {
+                HomeTopBar(
+                    navHostController = homeNavController,
+                    viewModel = viewModel,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 40.dp)
+                        .height(40.dp)
+                )
+            },
             bottomBar = {
                 HomeController(
                     homeNavController, viewModel,
@@ -85,37 +93,13 @@ fun HomeScreen(
             }
         )
         {
-            ConstraintLayout(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                val (topBar,navHost) = createRefs()
-                HomeTopBar(
-                    navHostController = homeNavController,
-                    viewModel = viewModel,
-                    modifier = Modifier.constrainAs(topBar){
-                        top.linkTo(parent.top,40.dp)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                        bottom.linkTo(navHost.top)
-                        width = Dimension.fillToConstraints
-                        height = Dimension.preferredValue(40.dp)
-                    }
-                )
-                HomeNavigationNav(
-                    modifier = Modifier
-                        .constrainAs(navHost){
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                            top.linkTo(topBar.bottom)
-                            bottom.linkTo(parent.bottom)
-                            width = Dimension.fillToConstraints
-                            height = Dimension.fillToConstraints
-                        }
-                        .padding(bottom = (if (viewModel.navigationState.value) 130 else 60).dp),
-                    homeNavController = homeNavController,
-                    viewModel = viewModel
-                )
-            }
+            HomeNavigationNav(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = (if (viewModel.navigationState.value) 130 else 60).dp),
+                homeNavController = homeNavController,
+                viewModel = viewModel
+            )
         }
     }
 }

@@ -10,9 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.ui.home.local.LocalScreen
@@ -28,7 +28,7 @@ import com.hua.abstractmusic.ui.route.Screen
  * @Desc   : 主页的小navigation，用于跳转在线音乐，本地音乐和我的界面
  */
 
-@OptIn(ExperimentalPagerApi::class,ExperimentalAnimationApi::class)
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun HomeNavigationNav(
     homeNavController:NavHostController,
@@ -36,7 +36,7 @@ fun HomeNavigationNav(
     viewModel: HomeViewModel
 ) {
     val pagerState = rememberPagerState(initialPage = 0)
-    AnimatedNavHost(
+    NavHost(
         navController = homeNavController,
         startDestination = Screen.NetScreen.route,
         modifier = modifier
@@ -64,10 +64,10 @@ fun HomeNavigationNav(
                 }
             ),
 //            enterTransition = {
-//                this.slideIntoContainer(AnimatedContentScope.SlideDirection.Up)
+//                this.slideIntoContainer(AnimatedContentScope.SlideDirection.End)
 //            },
 //            popExitTransition = {
-//                this.slideOutOfContainer(AnimatedContentScope.SlideDirection.Down)
+//                this.slideOutOfContainer(AnimatedContentScope.SlideDirection.Start)
 //            }
         ){
             it.destination.label = ""
