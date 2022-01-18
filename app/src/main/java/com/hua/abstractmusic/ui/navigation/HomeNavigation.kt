@@ -21,6 +21,7 @@ import com.hua.abstractmusic.ui.home.mine.MineScreen
 import com.hua.abstractmusic.ui.home.net.NetScreen
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.route.Screen
+import com.hua.abstractmusic.utils.title
 
 /**
  * @author : huaweikai
@@ -63,19 +64,11 @@ fun HomeNavigationNav(
                     defaultValue = -1
                 }
             ),
-//            enterTransition = {
-//                this.slideIntoContainer(AnimatedContentScope.SlideDirection.End)
-//            },
-//            popExitTransition = {
-//                this.slideOutOfContainer(AnimatedContentScope.SlideDirection.Start)
-//            }
         ){
-            it.destination.label = ""
             val index =it.arguments?.getInt("albumIndex",-1)
+            val item = viewModel.localAlbumList.value[index!!].mediaItem
             LocalAlbumDetail(
-                homeNavController,
-                item = viewModel.localAlbumList.value[index!!].mediaItem,
-                viewModel
+                item = item,
             )
         }
     }

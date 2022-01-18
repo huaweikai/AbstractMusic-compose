@@ -61,6 +61,10 @@ class MusicNotificationManager(
         notificationManager.setPlayer(player)
     }
 
+    fun hideNotification(){
+        notificationManager.setPlayer(null)
+    }
+
 
     //用来控制媒体的我们还需要将session给这个，我们可以用它控制当前音乐，并且在服务中也有这样
     //服务链接中有这样的媒体控制器

@@ -50,7 +50,7 @@ fun NetworkImage(
             Spacer(
                 modifier = Modifier
                     .matchParentSize()
-                    .background(placeholderColor)
+                    .background(MaterialTheme.colors.compositedOnSurface(0.2f))
             )
         }
     }

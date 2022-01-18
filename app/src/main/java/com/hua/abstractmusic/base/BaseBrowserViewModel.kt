@@ -77,7 +77,7 @@ abstract class BaseBrowserViewModel (
     }
 
     //加载音乐列表，根据父ID来进行加载
-    fun init(parentId: String) {
+    open fun init(parentId: String) {
         val browser = browser ?: return
         //订阅
         browser.subscribe(parentId, null)

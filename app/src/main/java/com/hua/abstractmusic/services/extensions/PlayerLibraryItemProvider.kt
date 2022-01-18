@@ -20,11 +20,11 @@ import java.util.concurrent.Executors
  * @Date   : 2021/11/26
  * @Desc   : MediaSessionCallback
  */
-class MediaSessionCallback(
+class PlayerLibraryItemProvider(
     private val mediaItemTree: MediaItemTree,
     private val scope: CoroutineScope,
     private val service: PlayerService
-) : MediaLibrarySessionCallback() {
+) : LibraryItemProvider {
 
     override fun onGetLibraryRoot(
         session: MediaLibraryService.MediaLibrarySession,
@@ -93,41 +93,4 @@ class MediaSessionCallback(
     ): LibraryResult {
         return LibraryResult(LibraryResult.RESULT_ERROR_NOT_SUPPORTED)
     }
-
-    override fun onCreateMediaItem(
-        session: MediaSession,
-        controller: MediaSession.ControllerInfo,
-        mediaId: String
-    ): MediaItem? {
-        return mediaItemTree.getItem(mediaId)
-    }
-
-//    override fun onCustomCommand(
-//        session: MediaSession,
-//        controller: MediaSession.ControllerInfo,
-//        customCommand: SessionCommand,
-//        args: Bundle?
-//    ): SessionResult {
-//        Log.d("TAG", "onCustomCommand: ")
-////        return super.onCustomCommand(session, controller, customCommand, args)
-//        return SessionResult(SessionResult.RESULT_SUCCESS,null)
-//
-////        return when (customCommand.customAction) {
-////            "null" -> {
-////                service.removeAllMusic()
-////                SessionResult(SessionResult.RESULT_SUCCESS, null)
-////            }
-////            else -> SessionResult(SessionResult.RESULT_ERROR_NOT_SUPPORTED, null)
-////        }
-//    }
-//
-//    override fun onCommandRequest(
-//        session: MediaSession,
-//        controller: MediaSession.ControllerInfo,
-//        command: SessionCommand
-//    ): Int {
-//        Log.d("TAG", "onCommandRequest: ")
-////        return super.onCommandRequest(session, controller, command)
-//        return SessionResult.RESULT_SUCCESS
-//    }
 }

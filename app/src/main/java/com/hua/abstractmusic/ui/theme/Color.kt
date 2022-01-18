@@ -16,3 +16,12 @@ val SkyBule = Color(0xff77D3D0)
 fun Colors.compositedOnSurface(alpha: Float): Color {
     return onSurface.copy(alpha = alpha).compositeOver(surface)
 }
+
+object LightColor{
+    val backgroundColor = Color.White
+    val playingTitleColor = Color(0xff77D3D0)
+}
+object NightColor{
+    val backgroundColor = Color.Black
+    val playingTitleColor = Color(0xff77D3D0)
+}

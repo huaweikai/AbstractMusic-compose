@@ -3,6 +3,7 @@ package com.hua.abstractmusic.ui.home.viewmodels
 import android.app.Application
 import android.content.Intent
 import android.os.Bundle
+import android.se.omapi.Session
 import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Animatable
@@ -67,8 +68,7 @@ class HomeViewModel @Inject constructor(
             allowedCommands: SessionCommandGroup
         ) {
             init(NETWORK_ALBUM_ID)
-            init(ALL_ID)
-            init(ALBUM_ID)
+            refresh()
             browser?.subscribe("null",null)
             updateItem(browser?.currentMediaItem)
         }
@@ -100,12 +100,19 @@ class HomeViewModel @Inject constructor(
             params: MediaLibraryService.LibraryParams?
         ) {
             //抓取数据完毕，直接去拿数据去更新
-            if (parentId == "null"){
-                updateItem(null)
-            }else{
+//            if (parentId == "null"){
+//                updateItem(null)
+//            }else{
                 childrenInit(parentId)
-            }
+//            }
         }
+
+    }
+
+    fun refresh(){
+        init(ALL_ID)
+        init(ALBUM_ID)
+        init(ARTIST_ID)
     }
 
     //初始化，连接service
@@ -131,7 +138,6 @@ class HomeViewModel @Inject constructor(
 
     private val _localArtistList = mutableStateOf(emptyList<MediaData>())
     val localArtistList: State<List<MediaData>> get() = _localArtistList
-
     //当前播放的item，用户更新控制栏
     private val _currentItem = mutableStateOf(NULL_MEDIA_ITEM)
     val currentItem: State<MediaItem> get() = _currentItem
@@ -222,23 +228,21 @@ class HomeViewModel @Inject constructor(
     fun skipTo(position: Int) {
         val browser = browser ?: return
         browser.skipToPlaylistItem(position)
+        browser.play()
     }
 
     fun clearPlayList() {
-//        val result = browser?.sendCustomCommand(
-//            SessionCommand("clear",Bundle().apply { putString("c","clear") }),Bundle().apply { putString("c","clear")}
-//        )
-//        if (result?.get()?.resultCode == SessionResult.RESULT_SUCCESS){
-//            updateItem(null)
-//        }
-        getApplication<Application>()
+        val result = browser?.sendCustomCommand(
+            SessionCommand(CLEAR_PLAY_LIST,null),null
+        )
+/*        getApplication<Application>()
             .startService(Intent(getApplication(),PlayerService::class.java).apply {
                 action = CLEAR_PLAY_LIST
             })
         viewModelScope.launch {
             useCase.clearCurrentListCase()
             savePosition()
-        }
+        }*/
     }
 
 

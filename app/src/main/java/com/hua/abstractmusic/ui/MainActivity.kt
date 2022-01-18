@@ -48,7 +48,9 @@ class MainActivity : ComponentActivity() {
             AbstractMusicTheme {
                 val nextScreen = if (PermissionGet.checkReadPermission(this)) Screen.HomeScreen.route else Screen.HelloScreen.route
                 viewModel = viewModel()
-                viewModel.initializeController()
+                if(nextScreen == Screen.HomeScreen.route){
+                    viewModel.initializeController()
+                }
                 HomeNavigation(nextScreen,navHostController,viewModel,homeNavController)
             }
         }
@@ -59,6 +61,7 @@ class MainActivity : ComponentActivity() {
         val currentRoute = homeNavController.currentDestination?.route
         when {
             currentRoute in localScreen -> {
+                viewModel.releaseBrowser()
                 finish()
             }
             currentRoute?.startsWith(Screen.LocalAlbumDetail.route) == true -> {

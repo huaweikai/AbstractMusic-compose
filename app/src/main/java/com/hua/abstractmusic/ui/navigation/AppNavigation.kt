@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun HomeNavigation(
-    nextRoute:String,
+    nextRoute: String,
     appNavController: NavHostController,
     viewModel: HomeViewModel,
     homeController: NavHostController
@@ -35,25 +35,6 @@ fun HomeNavigation(
         mutableStateOf(true)
     }
     val scpoe = rememberCoroutineScope()
-/*    todo(这个是我刚写的还不知道能不能生效)
-Snackbar(
-        snackbarData = object : SnackbarData {
-            override val actionLabel: String?
-                get() = null
-            override val duration: SnackbarDuration
-                get() = SnackbarDuration.Short
-            override val message: String
-                get() = "权限未获取完整"
-
-            override fun dismiss() {
-
-            }
-
-            override fun performAction() {
-            }
-        },
-        actionOnNewLine = !isGet
-    )*/
 
     val s = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -66,9 +47,8 @@ Snackbar(
             if (isGet) {
                 val navOptions =
                     NavOptions.Builder().setPopUpTo(Screen.HelloScreen.route, true).build()
-//                scpoe.launch {
-                    appNavController.navigate(Screen.HomeScreen.route, navOptions)
-//                }
+                viewModel.initializeController()
+                appNavController.navigate(Screen.HomeScreen.route, navOptions)
             }
         }
     )
@@ -76,7 +56,7 @@ Snackbar(
         navController = appNavController,
         startDestination = Screen.Splash.route
     ) {
-        composable(route = Screen.Splash.route){
+        composable(route = Screen.Splash.route) {
             SplashScreen(appNavHostController = appNavController, nextRoute = nextRoute)
         }
         composable(route = Screen.HelloScreen.route) {
@@ -91,7 +71,7 @@ Snackbar(
             }
         }
         composable(route = Screen.HomeScreen.route) {
-            HomeScreen(appNaviController = appNavController,viewModel,homeController)
+            HomeScreen(appNaviController = appNavController, viewModel, homeController)
         }
     }
 }

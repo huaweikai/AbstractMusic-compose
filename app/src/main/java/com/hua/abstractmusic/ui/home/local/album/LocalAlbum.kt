@@ -12,10 +12,12 @@ import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -24,6 +26,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil.compose.rememberImagePainter
 import coil.size.ViewSizeResolver
+import coil.transform.CircleCropTransformation
+import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.route.Screen
@@ -43,56 +47,49 @@ import kotlinx.coroutines.launch
 fun LocalAlbum(
     viewModel: HomeViewModel,
     homeNavController: NavHostController
-){
+) {
     val scope = rememberCoroutineScope()
     LazyVerticalGrid(
         cells = GridCells.Fixed(2),
-        contentPadding = PaddingValues(20.dp)
-    ){
-        itemsIndexed(viewModel.localAlbumList.value){ index, item ->
-            Card(
+        contentPadding = PaddingValues(16.dp)
+    ) {
+        itemsIndexed(viewModel.localAlbumList.value) { index, item ->
+            Column(
                 modifier = Modifier
-                    .height(230.dp)
-                    .width(200.dp)
-                    .padding(20.dp)
-                    .clickable {
-                        homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumIndex=${index}")
-                        viewModel.navigationState.value = false
-                    },
-                shape = MaterialTheme.shapes.medium.copy(CornerSize(20.dp)),
-                elevation = 10.dp
+                    .padding(10.dp),
             ) {
-                Column {
-                    Image(
-                        modifier = Modifier
-                            .height(150.dp)
-                            .fillMaxWidth(),
-                        painter = rememberImagePainter(
-                            data = item.mediaItem.metadata?.albumArtUri
-                        ){
-                            this.error(R.drawable.music)
+                Image(
+                    painter = rememberImagePainter(
+                        data = item.mediaItem.metadata?.albumArtUri
+                    ) {
+                        transformations(RoundedCornersTransformation(40f))
+                        error(R.drawable.music)
+                    },
+                    modifier = Modifier
+                        .size(190.dp)
+                        .clickable {
+                            viewModel.navigationState.value = false
+                            homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumIndex=${index}")
                         },
-                        alignment = Alignment.Center,
-                        contentDescription = "专辑图",
-                        contentScale = ContentScale.Crop
-                    )
-                    Text(
-                        text = "${item.mediaItem.metadata?.title}",
-                        Modifier
-                            .height(20.dp)
-                            .fillMaxWidth(),
-                        fontSize = 15.sp,
-                        textAlign = TextAlign.Center
-                    )
-                    Text(
-                        text = "${item.mediaItem.metadata?.artist}",
-                        Modifier
-                            .height(20.dp)
-                            .fillMaxWidth(),
-                        fontSize = 11.sp,
-                        textAlign = TextAlign.Center
-                    )
-                }
+                    contentDescription = "",
+                    contentScale = ContentScale.Crop,
+                )
+                Text(
+                    text = "${item.mediaItem.metadata?.title}",
+                    Modifier
+                        .height(20.dp)
+                        .fillMaxWidth(),
+                    fontSize = 15.sp,
+                    textAlign = TextAlign.Center,
+                )
+                Text(
+                    text = "${item.mediaItem.metadata?.artist}",
+                    Modifier
+                        .height(20.dp)
+                        .fillMaxWidth(),
+                    fontSize = 11.sp,
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }

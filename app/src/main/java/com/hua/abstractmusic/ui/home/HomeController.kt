@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +31,8 @@ import com.hua.abstractmusic.bean.ui.home.BottomBarBean
 import com.hua.abstractmusic.bean.ui.home.ControllerBean
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.route.Screen
+import com.hua.abstractmusic.ui.theme.LightColor
+import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.utils.albumArtUri
 import com.hua.abstractmusic.utils.artUri
 import com.hua.abstractmusic.utils.artist
@@ -67,7 +70,7 @@ fun Controller(
         modifier = Modifier
             .height(60.dp)
     ) {
-        val (album, title, artist, controller) = createRefs()
+        val (album, title, controller) = createRefs()
         val percent = createGuidelineFromStart(0.7f)
         Image(
             painter = rememberImagePainter(data = data?.albumArtUri) {
@@ -82,36 +85,26 @@ fun Controller(
                 }
                 .size(50.dp)
         )
-
-        Text(
+        Column(
             modifier = Modifier
                 .constrainAs(title) {
                     start.linkTo(album.end, 8.dp)
-                    top.linkTo(album.top, 3.dp)
-                    end.linkTo(percent, 8.dp)
+                    top.linkTo(album.top)
+                    end.linkTo(percent, 10.dp)
+                    bottom.linkTo(album.bottom)
                     width = Dimension.fillToConstraints
-                },
-            text = "${data?.title}",
-            textAlign = TextAlign.Left,
-            maxLines = 1
-        )
-        Text(
-            modifier = Modifier
-                .constrainAs(artist) {
-                    start.linkTo(title.start)
-                    end.linkTo(title.end)
-                    bottom.linkTo(album.bottom, 3.dp)
-                    width = Dimension.fillToConstraints
-                },
-            text = "${data?.artist}",
-            textAlign = TextAlign.Left,
-            maxLines = 1
-        )
+                }
+        ) {
+            TitleAndArtist(
+                title = "${data?.title}",
+                artist = "${data?.artist}"
+            )
+        }
         Row(
             modifier = Modifier.constrainAs(controller) {
                 top.linkTo(parent.top, 2.dp)
                 bottom.linkTo(parent.bottom, 2.dp)
-                start.linkTo(percent, 2.dp)
+                start.linkTo(percent, 5.dp)
                 end.linkTo(parent.end, 8.dp)
             }
         ) {
@@ -182,15 +175,16 @@ fun HomeNavigation(navController: NavHostController) {
         BottomBarBean("本地音乐", R.drawable.ic_music_icon, Screen.LocalScreen.route),
         BottomBarBean("我的", R.drawable.ic_person_icon, Screen.MineScreen.route)
     )
-    NavigationBar(
+    BottomNavigation(
         modifier = Modifier
             .fillMaxWidth()
-            .height(70.dp),
-        tonalElevation = 0.dp
+            .height(60.dp),
+        elevation = 0.dp
     ) {
         bars.forEachIndexed { index, item ->
             val selected = item.route == back.value?.destination?.route
-            NavigationBarItem(
+            val color = if (selected) LightColor.playingTitleColor else Color.Black
+            BottomNavigationItem(
                 selected = selected,
                 onClick = {
                     navController.navigate(item.route) {
@@ -200,23 +194,24 @@ fun HomeNavigation(navController: NavHostController) {
                 icon = {
                     Icon(
                         painter = painterResource(id = item.resId),
-                        contentDescription = item.name
+                        contentDescription = item.name,
+                        tint = color
                     )
                 },
                 label = {
                     Text(
                         text = item.name,
                         textAlign = TextAlign.Center,
-                        fontSize = 13.sp
+                        fontSize = 13.sp,
+                        color = color
                     )
                 },
                 alwaysShowLabel = false,
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color(0xff77D3D0),
-                    selectedTextColor = Color(0xff77D3D0),
-                    indicatorColor = Color.White
-                )
+                selectedContentColor = LightColor.playingTitleColor,
+                modifier = Modifier
+                    .background(LightColor.backgroundColor)
             )
         }
     }
+
 }

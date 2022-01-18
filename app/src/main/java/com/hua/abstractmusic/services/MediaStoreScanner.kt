@@ -78,7 +78,7 @@ class MediaStoreScanner(
             null,
             MediaStore.Audio.Albums.DEFAULT_SORT_ORDER
         )
-        return handleAlbumCursor(cursor, parentId)
+        return handleAlbumCursor(cursor, parentId,context)
     }
 
     //从MediaStore中获取专辑中的音乐
@@ -154,7 +154,7 @@ class MediaStoreScanner(
         return localMusicList
     }
 
-    private fun handleAlbumCursor(cursor: Cursor?, parentId: Uri): List<MediaItem> {
+    private fun handleAlbumCursor(cursor: Cursor?, parentId: Uri,context: Context): List<MediaItem> {
         val albumList = mutableListOf<MediaItem>()
 
         cursor?.use {
@@ -171,8 +171,14 @@ class MediaStoreScanner(
                 val trackNum = it.getLong(trackNumColumn)
                 val year = it.getLong(yearColumn)
 
+                val id = parentId.buildUpon().appendPath(albumId.toString()).toString()
+                //去除秒数小于8的专辑
+                if(scanAlbumMusic(context, Uri.parse(id)).isEmpty()){
+                    continue
+                }
+
                 val metadataBuilder = MediaMetadata.Builder().apply {
-                    this.id = parentId.buildUpon().appendPath(albumId.toString()).toString()
+                    this.id = id
                     this.title = albumTitle
                     this.displayTitle = albumTitle
                     this.displaySubtitle = artist
@@ -186,7 +192,6 @@ class MediaStoreScanner(
                 }
 
                 val albumUri = getAlbumUri(albumId.toString())
-                Log.d("TAG", "handleAlbumCursor: $albumUri")
                 metadataBuilder.albumArtUri = albumUri
                 metadataBuilder.displayIconUri = albumUri
 
@@ -211,20 +216,30 @@ class MediaStoreScanner(
             null,
             MediaStore.Audio.Artists.DEFAULT_SORT_ORDER
         )
-        return handleArtistCursor(cursor, parentId)
+        return handleArtistCursor(cursor, parentId,context)
     }
 
-    private fun handleArtistCursor(cursor: Cursor?, parentId: Uri): List<MediaItem> {
+    private fun handleArtistCursor(cursor: Cursor?, parentId: Uri,context: Context): List<MediaItem> {
         val localArtists = mutableListOf<MediaItem>()
         cursor?.use {
             val artistIdColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID)
             val artistTitleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST)
+            val albumNumColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists.NUMBER_OF_ALBUMS)
             while (it.moveToNext()) {
                 val artistId = it.getLong(artistIdColumn)
                 val artistName = it.getString(artistTitleColumn)
+                val albumNum = it.getLong(albumNumColumn)
+                val id = parentId.buildUpon().appendPath(artistId.toString()).toString()
+                val data = scanArtistMusic(context, Uri.parse(id))
+                val albumArtUri = data[0].metadata?.albumArtUri
+                val trackNum = data.size
                 val metadataBuilder = MediaMetadata.Builder().apply {
-                    this.id = parentId.buildUpon().appendPath(artistId.toString()).toString()
+                    this.id = id
                     this.title = artistName
+                    this.displaySubtitle = albumNum.toString()
+                    this.displayDescription = trackNum.toString()
+                    this.albumArtUri = albumArtUri.toString()
+                    this.trackNumber = albumNum
                     this.isPlayable = false
                     this.browserType = MediaMetadata.BROWSABLE_TYPE_MIXED
                 }

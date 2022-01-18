@@ -26,6 +26,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.pager.*
 import com.hua.abstractmusic.ui.home.MusicItem
 import com.hua.abstractmusic.ui.home.local.album.LocalAlbum
+import com.hua.abstractmusic.ui.home.local.artist.LocalArtist
 import com.hua.abstractmusic.ui.home.local.music.LocalMusic
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
 import com.hua.abstractmusic.utils.browserType
@@ -89,7 +90,7 @@ fun LocalScreen(
                     LocalAlbum(viewModel = viewModel,navHostController)
                 }
                 2 -> {
-                    Text(text = "${tabTitles[page]}")
+                    LocalArtist(homeViewModel = viewModel, homeNavHostController = navHostController)
                 }
 
             }

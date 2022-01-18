@@ -14,6 +14,7 @@ import com.hua.abstractmusic.ui.home.MusicItem
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
 import com.hua.abstractmusic.utils.browserType
 import com.hua.abstractmusic.utils.isPlayable
+import com.hua.abstractmusic.utils.title
 
 
 /**
@@ -28,7 +29,9 @@ fun LocalMusic(
     LazyColumn(
         modifier = Modifier.fillMaxWidth()
     ) {
-        itemsIndexed(viewModel.localMusicList.value) { index, item ->
+        itemsIndexed(viewModel.localMusicList.value, key = {index, item ->
+            item.mediaId
+        }) { index, item ->
             MusicItem(
                 data = item
             ){
