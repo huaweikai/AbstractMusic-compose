@@ -92,7 +92,6 @@ fun LocalScreen(
                 2 -> {
                     LocalArtist(homeViewModel = viewModel, homeNavHostController = navHostController)
                 }
-
             }
         }
     }

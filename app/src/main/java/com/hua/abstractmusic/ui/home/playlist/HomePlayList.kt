@@ -40,7 +40,6 @@ import com.hua.abstractmusic.utils.title
 @Composable
 fun HomePlayList(
     viewModel: HomeViewModel,
-    ScaffoldContent: @Composable () -> Unit
 ) {
     val state = viewModel.playListState.value
     ModalBottomSheetLayout(
@@ -126,6 +125,6 @@ fun HomePlayList(
             }
         }
     ) {
-        ScaffoldContent()
+//        ScaffoldContent()
     }
 }

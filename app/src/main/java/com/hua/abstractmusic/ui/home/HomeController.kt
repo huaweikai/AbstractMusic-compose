@@ -1,12 +1,15 @@
 package com.hua.abstractmusic.ui.home
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.TextView
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.*
 import androidx.compose.material3.*
 import androidx.compose.material3.Icon
@@ -31,6 +34,8 @@ import androidx.media2.common.SessionPlayer
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.rememberImagePainter
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.ui.home.BottomBarBean
 import com.hua.abstractmusic.bean.ui.home.ControllerBean
@@ -42,6 +47,7 @@ import com.hua.abstractmusic.utils.albumArtUri
 import com.hua.abstractmusic.utils.artUri
 import com.hua.abstractmusic.utils.artist
 import com.hua.abstractmusic.utils.title
+import kotlinx.coroutines.launch
 
 
 /**
@@ -61,19 +67,28 @@ fun HomeController(
         modifier = modifier,
     ) {
         Controller(viewModel, playListClick)
-        HomeNavigation(navController = navController,viewModel)
+        HomeNavigation(navController = navController, viewModel)
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
 @Composable
 fun Controller(
     viewModel: HomeViewModel,
     playListClick: () -> Unit
 ) {
+    val scope = rememberCoroutineScope()
     val data = viewModel.currentItem.value.metadata
+    val state = viewModel.playScreenState.value
     ConstraintLayout(
         modifier = Modifier
             .height(60.dp)
+            .clickable {
+                scope.launch {
+                    state.animateTo(ModalBottomSheetValue.Expanded)
+                    viewModel.playScreenBoolean.value = true
+                }
+            }
     ) {
         val (album, title, controller) = createRefs()
         val percent = createGuidelineFromStart(0.7f)
@@ -105,6 +120,30 @@ fun Controller(
                 artist = "${data?.artist}"
             )
         }
+/*
+    HorizontalPager(
+            state = viewModel.controllerTitleViewPageState.value,
+            count = viewModel.currentPlayList.value.size,
+            modifier = Modifier
+                .constrainAs(title) {
+                    start.linkTo(album.end, 8.dp)
+                    top.linkTo(album.top)
+                    end.linkTo(percent, 10.dp)
+                    bottom.linkTo(album.bottom)
+                    width = Dimension.fillToConstraints
+                }
+        ) { pager ->
+            val item = viewModel.currentPlayList.value[pager].mediaItem.metadata
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center
+            ) {
+                TitleAndArtist(
+                    title = "${item?.title}",
+                    artist = "${item?.artist}"
+                )
+            }
+        }*/
         Row(
             modifier = Modifier.constrainAs(controller) {
                 top.linkTo(parent.top, 2.dp)
@@ -173,8 +212,8 @@ fun ControllerButton(
 
 
 @Composable
-fun HomeNavigation(navController: NavHostController,viewModel: HomeViewModel) {
-//    val back = navController.currentBackStackEntryAsState()
+fun HomeNavigation(navController: NavHostController, viewModel: HomeViewModel) {
+    val back = navController.currentBackStackEntryAsState()
     val bars = listOf(
         BottomBarBean("网络音乐", R.drawable.ic_line, Screen.NetScreen.route),
         BottomBarBean("本地音乐", R.drawable.ic_music_icon, Screen.LocalScreen.route),
@@ -187,13 +226,14 @@ fun HomeNavigation(navController: NavHostController,viewModel: HomeViewModel) {
         elevation = 0.dp
     ) {
         bars.forEachIndexed { index, item ->
-            val selected = item.route == viewModel.homeNavigationState.value
+            val selected = item.route == back.value?.destination?.route
             val color = if (selected) LightColor.playingTitleColor else Color.Black
             BottomNavigationItem(
                 selected = selected,
                 onClick = {
-                    navController.navigate(item.route)
-                    viewModel.homeNavigationState.value = item.route
+                    navController.navigate(item.route) {
+                        this.launchSingleTop = true
+                    }
                 },
                 icon = {
                     Icon(

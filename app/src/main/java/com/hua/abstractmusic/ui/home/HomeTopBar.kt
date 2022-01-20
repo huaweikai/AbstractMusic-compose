@@ -38,7 +38,7 @@ fun HomeTopBar(
     modifier: Modifier
 ) {
     val back = navHostController.currentBackStackEntryAsState()
-    var icon = remember {
+    val icon = remember {
         mutableStateOf(TopBarIconButton(Icons.Default.Search, "搜索"))
     }
     ConstraintLayout(

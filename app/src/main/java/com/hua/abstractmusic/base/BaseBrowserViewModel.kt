@@ -4,6 +4,8 @@ import android.app.Application
 import android.content.ComponentName
 import android.content.Context
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media2.session.MediaBrowser
@@ -17,6 +19,7 @@ import com.hua.abstractmusic.services.PlayerService
 import com.hua.abstractmusic.use_case.UseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -36,7 +39,8 @@ abstract class BaseBrowserViewModel (
 
     abstract fun initializeController()
 
-
+    protected val _state = mutableStateOf(false)
+    val state: State<Boolean> get() = _state
 
     fun connectBrowserService(browserCallback: MediaBrowser.BrowserCallback){
         val context = getApplication<Application>().applicationContext
@@ -73,6 +77,14 @@ abstract class BaseBrowserViewModel (
         viewModelScope.launch (Dispatchers.IO){
             useCase.clearCurrentListCase()
             useCase.insertMusicToCurrentItemCase(items)
+        }
+    }
+
+    open fun detailInit(parentId: String){
+        viewModelScope.launch {
+            _state.value = false
+            delay(500L)
+            init(parentId)
         }
     }
 

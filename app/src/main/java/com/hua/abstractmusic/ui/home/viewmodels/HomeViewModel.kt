@@ -101,11 +101,7 @@ class HomeViewModel @Inject constructor(
             params: MediaLibraryService.LibraryParams?
         ) {
             //抓取数据完毕，直接去拿数据去更新
-//            if (parentId == "null"){
-//                updateItem(null)
-//            }else{
                 childrenInit(parentId)
-//            }
         }
 
     }
@@ -173,7 +169,6 @@ class HomeViewModel @Inject constructor(
 
     //更新item的方法，当回调到item改变就调用这个方法
     private fun updateItem(item: MediaItem?) {
-//        item ?: return
         browser ?: return
         _netAlbum.value = _netAlbum.value.toMutableList().map {
             val isPlaying = if(item == null) false else it.mediaId == item.metadata?.mediaId
@@ -221,6 +216,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+
     fun removePlayItem(position: Int) {
         val browser = browser ?: return
         browser.removePlaylistItem(position)
@@ -228,8 +224,10 @@ class HomeViewModel @Inject constructor(
 
     fun skipTo(position: Int) {
         val browser = browser ?: return
-        browser.skipToPlaylistItem(position)
-        browser.play()
+        if(browser.currentMediaItemIndex != position){
+            browser.skipToPlaylistItem(position)
+            browser.play()
+        }
     }
 
     fun clearPlayList() {
@@ -250,6 +248,12 @@ class HomeViewModel @Inject constructor(
     //记录本地音乐的viewpager停在哪
     var horViewPagerState = mutableStateOf(PagerState(0))
 
+    //记录控制栏标题
+    var controllerTitleViewPageState = mutableStateOf(PagerState(0))
+
+    //记录播放界面的进度
+    var playScreenViewPageState = mutableStateOf(PagerState(1))
+
     //记录主页播放列表的打开和关闭
     val playListState = mutableStateOf(ModalBottomSheetState(ModalBottomSheetValue.Hidden))
 
@@ -262,4 +266,12 @@ class HomeViewModel @Inject constructor(
     val homeNavigationState = mutableStateOf(
         Screen.NetScreen.route
     )
+    //记录主页播放列表的打开和关闭
+    val playScreenState = mutableStateOf(
+        ModalBottomSheetState(ModalBottomSheetValue.Hidden, isSkipHalfExpanded = true)
+    )
+
+    val playScreenBoolean = mutableStateOf(false)
+
+    val playListBoolean = mutableStateOf(false)
 }

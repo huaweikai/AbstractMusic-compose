@@ -21,6 +21,7 @@ import com.hua.abstractmusic.ui.home.local.artist.detail.LocalArtistDetail
 import com.hua.abstractmusic.ui.home.mine.MineScreen
 import com.hua.abstractmusic.ui.home.net.NetScreen
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.play.PlayScreen
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.utils.title
 
@@ -90,6 +91,12 @@ fun HomeNavigationNav(
                 homeNavController
             )
         }
+
+//        composable(
+//            route = Screen.PlayScreen.route
+//        ){
+//            PlayScreen()
+//        }
     }
 
 }

@@ -65,19 +65,19 @@ class AlbumDetailViewModel @Inject constructor(
         connectBrowserService(browserCallback)
     }
 
-    override fun init(parentId: String) {
-        viewModelScope.launch {
-            _state.value = false
-            delay(1000L)
-            super.init(parentId)
-        }
-    }
+//    override fun init(parentId: String) {
+//        viewModelScope.launch {
+//            _state.value = false
+//            delay(500L)
+//            super.init(parentId)
+//        }
+//    }
 
     private val _albumDetail = mutableStateOf<List<MediaData>>(emptyList())
     val albumDetail: State<List<MediaData>> get() = _albumDetail
 
-    private val _state = mutableStateOf(false)
-    val state:State<Boolean> get() = _state
+//    private val _state = mutableStateOf(false)
+//    val state:State<Boolean> get() = _state
 
     fun getItem(parentId: String) {
         itemTree.getChildItem(parentId).map {
@@ -86,7 +86,6 @@ class AlbumDetailViewModel @Inject constructor(
                 it.metadata?.mediaId == browser?.currentMediaItem?.metadata?.mediaId
             )
         }.apply {
-            Log.d("TAG", "getItem: $this")
             _albumDetail.value = this
         }
     }

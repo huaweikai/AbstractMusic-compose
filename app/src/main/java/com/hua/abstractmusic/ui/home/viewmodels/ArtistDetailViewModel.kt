@@ -5,6 +5,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.viewModelScope
 import androidx.media2.common.MediaItem
 import androidx.media2.session.MediaBrowser
 import androidx.media2.session.MediaController
@@ -16,6 +17,8 @@ import com.hua.abstractmusic.other.Constant.ARTIST_ID
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.use_case.UseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -49,7 +52,10 @@ class ArtistDetailViewModel @Inject constructor(
         }
 
         override fun onCurrentMediaItemChanged(controller: MediaController, item: MediaItem?) {
-
+            viewModelScope.launch {
+                delay(200L)
+                updateItem(browser?.currentMediaItem)
+            }
         }
 
         override fun onChildrenChanged(
@@ -59,6 +65,7 @@ class ArtistDetailViewModel @Inject constructor(
             params: MediaLibraryService.LibraryParams?
         ) {
             getItem(parentId)
+            _state.value = true
         }
     }
 
@@ -82,6 +89,13 @@ class ArtistDetailViewModel @Inject constructor(
                 artistId-> _artistDetail.value = this
                 artistAlbumId->_artistAlbumDetail.value = this
             }
+        }
+    }
+    fun updateItem(item: MediaItem?) {
+        _artistDetail.value = _artistDetail.value.toMutableList().map {
+            it.copy(
+                isPlaying = if (item == null) false else it.mediaId == item.metadata?.mediaId
+            )
         }
     }
 }

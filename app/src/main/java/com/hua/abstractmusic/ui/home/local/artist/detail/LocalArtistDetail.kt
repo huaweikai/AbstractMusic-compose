@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -74,7 +75,9 @@ fun LocalArtistDetail(
         }
     }
     LazyColumn(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 10.dp)
     ) {
         item {
             Spacer(modifier = Modifier.padding(top = 20.dp))
@@ -99,7 +102,25 @@ fun LocalArtistDetail(
             }
         }
         item {
-            Text(text = "歌曲")
+            Spacer(modifier = Modifier.padding(top = 10.dp))
+            Text(text = "歌曲",Modifier.padding(start = 10.dp))
+            Spacer(modifier = Modifier.padding(top = 10.dp))
+        }
+        item {
+            if(!viewModel.state.value){
+                Row(
+                    modifier = Modifier
+                        .height(70.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(
+                            Alignment.CenterVertically
+                        )
+                    )
+                }
+            }
         }
         itemsIndexed(viewModel.artistDetail.value){index, item ->
             MusicItem(data = item) {
@@ -107,12 +128,34 @@ fun LocalArtistDetail(
             }
         }
         item {
-            Text(text = "专辑")
+            Spacer(modifier = Modifier.padding(top = 10.dp))
+            Text(text = "专辑",Modifier.padding(start = 10.dp))
+            Spacer(modifier = Modifier.padding(top = 10.dp))
+        }
+        item {
+            if(!viewModel.state.value){
+                Row(
+                    modifier = Modifier
+                        .height(70.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(
+                            Alignment.CenterVertically
+                        )
+                    )
+                }
+            }
         }
         itemsIndexed(viewModel.artistAlbumDetail.value){index, item ->
-            AlbumItem(item = item.mediaItem){
+            AlbumItem(
+                item = item.mediaItem,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 8.dp, bottom = 12.dp)
+            ){
                 homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumId=${item.mediaId}")
-//                homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumIndex=$index")
             }
         }
     }

@@ -181,7 +181,7 @@ fun LocalAlbumDetail(
                 }
             }
         }
-        itemsIndexed(detailViewModel.albumDetail.value, key = {_,item->item.mediaId}){index, item ->
+        itemsIndexed(detailViewModel.albumDetail.value){index, item ->
             if(detailViewModel.state.value){
                 MusicItem(data = item,Modifier
                     .animateItemPlacement()) {
