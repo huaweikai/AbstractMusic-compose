@@ -41,21 +41,6 @@ fun HomeTopBar(
     var icon = remember {
         mutableStateOf(TopBarIconButton(Icons.Default.Search, "搜索"))
     }
-//    val backTitle = remember {
-//        mutableStateOf("")
-//    }
-//    val maps = HashMap<String, String>()
-//    maps[Screen.NetScreen.route] = "在线音乐"
-//    maps[Screen.LocalScreen.route] = "本地音乐"
-//    maps[Screen.MineScreen.route] = "我的"
-//    when{
-//        back?.route in maps.keys->{
-//            backTitle.value = maps[back?.route]?:""
-//        }
-//        back?.route?.startsWith(Screen.LocalAlbumDetail.route) == true->{
-//            backTitle.value = "专辑"
-//        }
-//    }
     ConstraintLayout(
         modifier = modifier
             .fillMaxWidth()

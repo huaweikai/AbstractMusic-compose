@@ -41,6 +41,7 @@ import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.other.Constant.ROOT_SCHEME
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.services.PlayerService
+import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.use_case.UseCase
 import com.hua.abstractmusic.utils.artist
 import com.hua.abstractmusic.utils.title
@@ -256,5 +257,9 @@ class HomeViewModel @Inject constructor(
     //记录主页控制中心，的navigationview是否要隐藏
     val navigationState = mutableStateOf(
         true
+    )
+
+    val homeNavigationState = mutableStateOf(
+        Screen.NetScreen.route
     )
 }

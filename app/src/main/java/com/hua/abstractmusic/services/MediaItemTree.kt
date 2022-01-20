@@ -10,6 +10,7 @@ import com.google.common.collect.ImmutableList
 import com.hua.abstractmusic.other.Constant.ALBUM_ID
 import com.hua.abstractmusic.other.Constant.ALL_ID
 import com.hua.abstractmusic.other.Constant.ARTIST_ID
+import com.hua.abstractmusic.other.Constant.ARTIST_TO_ALBUM
 import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ARTIST_ID
 import com.hua.abstractmusic.other.Constant.ROOT_SCHEME
@@ -161,7 +162,11 @@ class MediaItemTree(
                 val result = if(parentIdUri.lastPathSegment.isNullOrEmpty()){
                     scanner.scanArtistFromMediaStore(context, parentIdUri)
                 } else {
-                    scanner.scanArtistMusic(context, parentIdUri)
+                    if (parentId.contains(ARTIST_TO_ALBUM)){
+                        scanner.scanArtistAlbumFromMediaStore(context, parentIdUri)
+                    }else{
+                        scanner.scanArtistMusic(context, parentIdUri)
+                    }
                 }
                 if(treeNodes[parentId] == null){
                     treeNodes[parentId] = MediaItemNode(

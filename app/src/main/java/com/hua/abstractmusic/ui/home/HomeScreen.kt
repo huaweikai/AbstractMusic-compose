@@ -1,25 +1,23 @@
 package com.hua.abstractmusic.ui.home
 
+import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-
-
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.hua.abstractmusic.ui.home.playlist.HomePlayList
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.navigation.HomeNavigationNav
 import com.hua.abstractmusic.ui.route.Screen
-import com.hua.abstractmusic.utils.artist
-import com.hua.abstractmusic.utils.title
 import kotlinx.coroutines.launch
 
 /**
@@ -36,12 +34,30 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     homeNavController: NavHostController
 ) {
-//    viewModel.initializeController()
     val playListState = viewModel.playListState.value
     val scope = rememberCoroutineScope()
 
+    val routes = listOf(Screen.LocalScreen.route,Screen.NetScreen.route,Screen.MineScreen.route)
+
+    LaunchedEffect(homeNavController.currentBackStackEntryAsState().value){
+        homeNavController.currentDestination?.route.let {
+            when {
+                it in routes -> {
+                    viewModel.navigationState.value = true
+                }
+                it?.startsWith(Screen.LocalAlbumDetail.route) == true -> {
+                    viewModel.navigationState.value = false
+                }
+                it?.startsWith(Screen.LocalArtistDetail.route) == true -> {
+                    viewModel.navigationState.value = false
+                }
+            }
+        }
+    }
+
+
     val translationBottom by animateDpAsState(
-        if (viewModel.navigationState.value) 0.dp else 60.dp,
+        if (viewModel.navigationState.value) 120.dp else 60.dp,
         animationSpec = spring(1f, 100f)
     )
     HomePlayList(viewModel = viewModel) {
@@ -61,8 +77,12 @@ fun HomeScreen(
                     homeNavController, viewModel,
                     Modifier
                         .fillMaxWidth()
-                        .offset(0.dp, translationBottom)
-                        .height(120.dp)
+                        .background(
+                            Color.White,
+                            RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp)
+                        )
+//                        .offset(0.dp, translationBottom)
+                        .height(translationBottom)
                 ) {
                     scope.launch { playListState.show() }
                 }
@@ -71,6 +91,7 @@ fun HomeScreen(
         {
             HomeNavigationNav(
                 modifier = Modifier
+                    .background(Color.White)
                     .fillMaxSize()
                     .padding(bottom = (if (viewModel.navigationState.value) 120 else 60).dp),
                 homeNavController = homeNavController,

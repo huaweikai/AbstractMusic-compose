@@ -1,5 +1,7 @@
 package com.hua.abstractmusic.ui.home
 
+import android.view.LayoutInflater
+import android.widget.TextView
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -15,10 +17,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.media2.common.MediaItem
@@ -56,7 +61,7 @@ fun HomeController(
         modifier = modifier,
     ) {
         Controller(viewModel, playListClick)
-        HomeNavigation(navController = navController)
+        HomeNavigation(navController = navController,viewModel)
     }
 }
 
@@ -168,8 +173,8 @@ fun ControllerButton(
 
 
 @Composable
-fun HomeNavigation(navController: NavHostController) {
-    val back = navController.currentBackStackEntryAsState()
+fun HomeNavigation(navController: NavHostController,viewModel: HomeViewModel) {
+//    val back = navController.currentBackStackEntryAsState()
     val bars = listOf(
         BottomBarBean("网络音乐", R.drawable.ic_line, Screen.NetScreen.route),
         BottomBarBean("本地音乐", R.drawable.ic_music_icon, Screen.LocalScreen.route),
@@ -182,14 +187,13 @@ fun HomeNavigation(navController: NavHostController) {
         elevation = 0.dp
     ) {
         bars.forEachIndexed { index, item ->
-            val selected = item.route == back.value?.destination?.route
+            val selected = item.route == viewModel.homeNavigationState.value
             val color = if (selected) LightColor.playingTitleColor else Color.Black
             BottomNavigationItem(
                 selected = selected,
                 onClick = {
-                    navController.navigate(item.route) {
-                        launchSingleTop = true
-                    }
+                    navController.navigate(item.route)
+                    viewModel.homeNavigationState.value = item.route
                 },
                 icon = {
                     Icon(

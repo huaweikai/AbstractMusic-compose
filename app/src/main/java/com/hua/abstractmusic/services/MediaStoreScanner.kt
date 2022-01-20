@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.media2.common.MediaItem
 import androidx.media2.common.MediaMetadata
 import com.hua.abstractmusic.other.Constant.ALBUM_ART_URI
+import com.hua.abstractmusic.other.Constant.ALBUM_ID
 import com.hua.abstractmusic.other.Constant.DURATION
 import com.hua.abstractmusic.use_case.UseCase
 import com.hua.abstractmusic.utils.*
@@ -69,6 +70,7 @@ class MediaStoreScanner(
         )
         return handleMediaMusicCursor(cursor, parentId)
     }
+
     //从MediaStore媒体库中扫描专辑
     fun scanAlbumFromMediaStore(context: Context, parentId: Uri): List<MediaItem> {
         val cursor = context.contentResolver.query(
@@ -78,7 +80,7 @@ class MediaStoreScanner(
             null,
             MediaStore.Audio.Albums.DEFAULT_SORT_ORDER
         )
-        return handleAlbumCursor(cursor, parentId,context)
+        return handleAlbumCursor(cursor, parentId, context)
     }
 
     //从MediaStore中获取专辑中的音乐
@@ -154,7 +156,11 @@ class MediaStoreScanner(
         return localMusicList
     }
 
-    private fun handleAlbumCursor(cursor: Cursor?, parentId: Uri,context: Context): List<MediaItem> {
+    private fun handleAlbumCursor(
+        cursor: Cursor?,
+        parentId: Uri,
+        context: Context
+    ): List<MediaItem> {
         val albumList = mutableListOf<MediaItem>()
 
         cursor?.use {
@@ -171,9 +177,11 @@ class MediaStoreScanner(
                 val trackNum = it.getLong(trackNumColumn)
                 val year = it.getLong(yearColumn)
 
-                val id = parentId.buildUpon().appendPath(albumId.toString()).toString()
+//                val id = parentId.buildUpon().appendPath(albumId.toString()).toString()
+                //歌手专辑和专辑适用版
+                val id = Uri.parse(ALBUM_ID).buildUpon().appendPath(albumId.toString()).toString()
                 //去除秒数小于8的专辑
-                if(scanAlbumMusic(context, Uri.parse(id)).isEmpty()){
+                if (scanAlbumMusic(context, Uri.parse(id)).isEmpty()) {
                     continue
                 }
 
@@ -216,15 +224,33 @@ class MediaStoreScanner(
             null,
             MediaStore.Audio.Artists.DEFAULT_SORT_ORDER
         )
-        return handleArtistCursor(cursor, parentId,context)
+        return handleArtistCursor(cursor, parentId, context)
     }
 
-    private fun handleArtistCursor(cursor: Cursor?, parentId: Uri,context: Context): List<MediaItem> {
+    //从MediaStore中获取歌手的专辑
+    fun scanArtistAlbumFromMediaStore(context: Context,parentId: Uri):List<MediaItem>{
+        val artistId = parentId.lastPathSegment?.toLong()?:0
+        val cursor = context.contentResolver.query(
+            MediaStore.Audio.Artists.Albums.getContentUri("external",artistId),
+            albumProjection,
+            null,
+            null,
+            null
+        )
+        return handleAlbumCursor(cursor,parentId, context)
+    }
+
+    private fun handleArtistCursor(
+        cursor: Cursor?,
+        parentId: Uri,
+        context: Context
+    ): List<MediaItem> {
         val localArtists = mutableListOf<MediaItem>()
         cursor?.use {
             val artistIdColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID)
             val artistTitleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST)
-            val albumNumColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists.NUMBER_OF_ALBUMS)
+            val albumNumColumn =
+                cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists.NUMBER_OF_ALBUMS)
             while (it.moveToNext()) {
                 val artistId = it.getLong(artistIdColumn)
                 val artistName = it.getString(artistTitleColumn)

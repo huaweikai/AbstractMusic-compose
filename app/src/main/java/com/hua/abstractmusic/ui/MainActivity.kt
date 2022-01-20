@@ -64,11 +64,14 @@ class MainActivity : ComponentActivity() {
                 viewModel.releaseBrowser()
                 finish()
             }
-            currentRoute?.startsWith(Screen.LocalAlbumDetail.route) == true -> {
-                viewModel.navigationState.value = true
-                homeNavController.navigateUp()
-
-            }
+//            currentRoute?.startsWith(Screen.LocalAlbumDetail.route) == true -> {
+//                viewModel.navigationState.value = true
+//                homeNavController.navigateUp()
+//            }
+//            currentRoute?.startsWith(Screen.LocalArtistDetail.route) == true -> {
+//                viewModel.navigationState.value = true
+//                homeNavController.navigateUp()
+//            }
             else -> {
                 super.onBackPressed()
             }

@@ -20,6 +20,7 @@ object Constant {
     const val ROOT_SCHEME = "playerDemo://"
     const val TYPE_LASTPLAY="lastPlay"
     const val TYPE_ARTIST = "artist"
+    const val ARTIST_TO_ALBUM = "abAlbum"
     const val ALL_ID = "${ROOT_SCHEME}${TYPE_ROOT}"
     const val ALBUM_ID = "${ROOT_SCHEME}${TYPE_ALBUM}"
     //个人歌单

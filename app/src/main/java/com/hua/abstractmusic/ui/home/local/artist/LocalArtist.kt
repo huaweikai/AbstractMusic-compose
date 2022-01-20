@@ -1,6 +1,7 @@
 package com.hua.abstractmusic.ui.home.local.artist
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -14,6 +15,7 @@ import coil.transform.CircleCropTransformation
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.utils.albumArtUri
 import com.hua.abstractmusic.utils.displayDescription
@@ -42,6 +44,10 @@ fun LocalArtist(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 20.dp, bottom = 20.dp)
+                    .clickable {
+                        homeViewModel.navigationState.value = false
+                        homeNavHostController.navigate("${Screen.LocalArtistDetail.route}?artistIndex=${index}")
+                    }
             ) {
                 Image(
                     painter = rememberImagePainter(data = item.mediaItem.metadata?.albumArtUri){

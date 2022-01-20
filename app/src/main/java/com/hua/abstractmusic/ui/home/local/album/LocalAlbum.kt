@@ -69,7 +69,8 @@ fun LocalAlbum(
                         .size(190.dp)
                         .clickable {
                             viewModel.navigationState.value = false
-                            homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumIndex=${index}")
+                            homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumId=${item.mediaId}")
+//                            homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumIndex=${index}")
                         },
                     contentDescription = "",
                     contentScale = ContentScale.Crop,

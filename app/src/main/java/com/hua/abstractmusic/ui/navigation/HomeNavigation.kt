@@ -17,6 +17,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.ui.home.local.LocalScreen
 import com.hua.abstractmusic.ui.home.local.album.detail.LocalAlbumDetail
+import com.hua.abstractmusic.ui.home.local.artist.detail.LocalArtistDetail
 import com.hua.abstractmusic.ui.home.mine.MineScreen
 import com.hua.abstractmusic.ui.home.net.NetScreen
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
@@ -55,20 +56,38 @@ fun HomeNavigationNav(
             MineScreen(homeNavController)
         }
         composable(
-            route = "${Screen.LocalAlbumDetail.route}?albumIndex={albumIndex}",
+            route = "${Screen.LocalAlbumDetail.route}?albumId={albumId}",
             arguments = listOf(
                 navArgument(
-                    name = "albumIndex"
+                    name = "albumId"
+                ){
+                    type = NavType.StringType
+                    defaultValue = ""
+                }
+            ),
+        ){
+            val albumId =it.arguments?.getString("albumId","")
+            val item = viewModel.localAlbumList.value.find { it.mediaId == albumId }!!.mediaItem
+            LocalAlbumDetail(
+                item = item
+            )
+        }
+        composable(
+            route = "${Screen.LocalArtistDetail.route}?artistIndex={artistIndex}",
+            arguments = listOf(
+                navArgument(
+                    name = "artistIndex"
                 ){
                     type = NavType.IntType
                     defaultValue = -1
                 }
             ),
         ){
-            val index =it.arguments?.getInt("albumIndex",-1)
-            val item = viewModel.localAlbumList.value[index!!].mediaItem
-            LocalAlbumDetail(
+            val index =it.arguments?.getInt("artistIndex",-1)
+            val item = viewModel.localArtistList.value[index!!].mediaItem
+            LocalArtistDetail(
                 item = item,
+                homeNavController
             )
         }
     }
