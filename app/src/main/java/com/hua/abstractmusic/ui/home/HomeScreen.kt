@@ -27,9 +27,6 @@ import kotlinx.coroutines.launch
  * @Date   : 2022/01/07
  * @Desc   : 主界面，可以看作是activity
  */
-
-
-@ExperimentalPagerApi
 @OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun HomeScreen(

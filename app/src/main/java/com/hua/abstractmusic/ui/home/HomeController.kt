@@ -1,41 +1,28 @@
 package com.hua.abstractmusic.ui.home
 
-import android.util.Log
-import android.view.LayoutInflater
-import android.widget.TextView
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.*
-import androidx.compose.material3.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.media2.common.MediaItem
 import androidx.media2.common.SessionPlayer
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.rememberImagePainter
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.ui.home.BottomBarBean
 import com.hua.abstractmusic.bean.ui.home.ControllerBean
@@ -44,7 +31,6 @@ import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.theme.LightColor
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.utils.albumArtUri
-import com.hua.abstractmusic.utils.artUri
 import com.hua.abstractmusic.utils.artist
 import com.hua.abstractmusic.utils.title
 import kotlinx.coroutines.launch
@@ -176,7 +162,7 @@ fun Controller(
                             viewModel.playOrPause()
                         }
                         1 -> {
-                            viewModel.skipIem()
+                            viewModel.nextItem()
                         }
                         2 -> {
                             playListClick()

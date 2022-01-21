@@ -124,6 +124,7 @@ class PlayerService : MediaLibraryService() {
             if (list.isNotEmpty()) {
                 player.setPlaylist(list, null).addListener({
                     player.skipToPlaylistItem(index)
+                    player.prepare()
                 }, MoreExecutors.directExecutor())
             } else {
                 player.addPlaylistItem(
@@ -133,15 +134,6 @@ class PlayerService : MediaLibraryService() {
         }
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-//        intent?.let {
-//            when (it.action) {
-//                CLEAR_PLAY_LIST -> removeAllMusic()
-//                else -> null
-//            }
-//        }
-        return super.onStartCommand(intent, flags, startId)
-    }
 
     override fun onUpdateNotification(session: MediaSession): MediaNotification? {
         return null

@@ -14,8 +14,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -44,9 +43,12 @@ import com.hua.abstractmusic.services.PlayerService
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.use_case.UseCase
 import com.hua.abstractmusic.utils.artist
+import com.hua.abstractmusic.utils.duration
 import com.hua.abstractmusic.utils.title
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -63,6 +65,10 @@ class HomeViewModel @Inject constructor(
     private val mediaItemTree: MediaItemTree
 ) : BaseBrowserViewModel(application, useCase) {
 
+    val playSate = MutableStateFlow(SessionPlayer.PLAYER_STATE_IDLE)
+    val maxValue = mutableStateOf(0F)
+
+
     private val browserCallback = object : MediaBrowser.BrowserCallback() {
         override fun onConnected(
             controller: MediaController,
@@ -70,7 +76,7 @@ class HomeViewModel @Inject constructor(
         ) {
             init(NETWORK_ALBUM_ID)
             refresh()
-            browser?.subscribe("null",null)
+            browser?.subscribe("null", null)
             updateItem(browser?.currentMediaItem)
         }
 
@@ -87,10 +93,13 @@ class HomeViewModel @Inject constructor(
                 //延迟更新，不然会跳到第一个
                 delay(200L)
                 updateItem(browser?.currentMediaItem)
+                Log.d("TAG", "onCurrentMediaItemChanged: ${item?.metadata?.duration}")
+                maxValue.value = browser!!.currentMediaItem?.metadata?.duration?.toFloat()!!
             }
         }
 
         override fun onPlayerStateChanged(controller: MediaController, state: Int) {
+            controller.currentPosition
             updatePlayState(state)
         }
 
@@ -101,12 +110,29 @@ class HomeViewModel @Inject constructor(
             params: MediaLibraryService.LibraryParams?
         ) {
             //抓取数据完毕，直接去拿数据去更新
-                childrenInit(parentId)
+            childrenInit(parentId)
         }
 
     }
 
-    fun refresh(){
+    val currentPosition = mutableStateOf(0L)
+
+    init {
+        viewModelScope.launch {
+            playSate.collect {
+                if (it == SessionPlayer.PLAYER_STATE_PLAYING) {
+                    while (true) {
+                        delay(1000L)
+                        if (!actionSeekBar.value) {
+                            currentPosition.value = browser!!.currentPosition
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun refresh() {
         init(ALL_ID)
         init(ALBUM_ID)
         init(ARTIST_ID)
@@ -135,6 +161,7 @@ class HomeViewModel @Inject constructor(
 
     private val _localArtistList = mutableStateOf(emptyList<MediaData>())
     val localArtistList: State<List<MediaData>> get() = _localArtistList
+
     //当前播放的item，用户更新控制栏
     private val _currentItem = mutableStateOf(NULL_MEDIA_ITEM)
     val currentItem: State<MediaItem> get() = _currentItem
@@ -145,9 +172,11 @@ class HomeViewModel @Inject constructor(
     val playerState get() = _playerState
 
     private fun updatePlayState(@SessionPlayer.PlayerState playState: Int) {
+        playSate.value = playState
         _playerState.value = playState
     }
 
+    val actionSeekBar = mutableStateOf(false)
 
 
     //根据parentId去拿数据
@@ -171,18 +200,19 @@ class HomeViewModel @Inject constructor(
     private fun updateItem(item: MediaItem?) {
         browser ?: return
         _netAlbum.value = _netAlbum.value.toMutableList().map {
-            val isPlaying = if(item == null) false else it.mediaId == item.metadata?.mediaId
+            val isPlaying = if (item == null) false else it.mediaId == item.metadata?.mediaId
             it.copy(isPlaying = isPlaying)
         }
         _currentItem.value = item ?: NULL_MEDIA_ITEM
 
         _currentPlayList.value = browser!!.playlist?.map {
-            val isPlaying = if(item == null) false else it.metadata?.mediaId == item.metadata?.mediaId
+            val isPlaying =
+                if (item == null) false else it.metadata?.mediaId == item.metadata?.mediaId
             MediaData(it, isPlaying)
         } ?: emptyList()
 
         _localMusicList.value = _localMusicList.value.toMutableList().map {
-            val isPlaying = if(item == null) false else it.mediaId == item.metadata?.mediaId
+            val isPlaying = if (item == null) false else it.mediaId == item.metadata?.mediaId
             it.copy(isPlaying = isPlaying)
         }
 
@@ -191,7 +221,13 @@ class HomeViewModel @Inject constructor(
     }
 
     //下一首
-    fun skipIem() {
+    fun prevItem() {
+        val browser = browser ?: return
+        browser.skipToPreviousPlaylistItem()
+    }
+
+    //下一首
+    fun nextItem() {
         val browser = browser ?: return
         browser.skipToNextPlaylistItem()
     }
@@ -216,6 +252,10 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun seekTo(position: Long) {
+        val browser = browser ?: return
+        browser.seekTo(position)
+    }
 
     fun removePlayItem(position: Int) {
         val browser = browser ?: return
@@ -224,7 +264,7 @@ class HomeViewModel @Inject constructor(
 
     fun skipTo(position: Int) {
         val browser = browser ?: return
-        if(browser.currentMediaItemIndex != position){
+        if (browser.currentMediaItemIndex != position) {
             browser.skipToPlaylistItem(position)
             browser.play()
         }
@@ -232,7 +272,7 @@ class HomeViewModel @Inject constructor(
 
     fun clearPlayList() {
         val result = browser?.sendCustomCommand(
-            SessionCommand(CLEAR_PLAY_LIST,null),null
+            SessionCommand(CLEAR_PLAY_LIST, null), null
         )
 /*        getApplication<Application>()
             .startService(Intent(getApplication(),PlayerService::class.java).apply {
@@ -266,6 +306,7 @@ class HomeViewModel @Inject constructor(
     val homeNavigationState = mutableStateOf(
         Screen.NetScreen.route
     )
+
     //记录主页播放列表的打开和关闭
     val playScreenState = mutableStateOf(
         ModalBottomSheetState(ModalBottomSheetValue.Hidden, isSkipHalfExpanded = true)
@@ -274,4 +315,6 @@ class HomeViewModel @Inject constructor(
     val playScreenBoolean = mutableStateOf(false)
 
     val playListBoolean = mutableStateOf(false)
+
+    var progress = mutableStateOf(0f)
 }
