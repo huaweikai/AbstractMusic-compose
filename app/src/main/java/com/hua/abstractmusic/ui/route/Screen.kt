@@ -20,5 +20,5 @@ sealed class Screen(val route:String){
     object PlayScreen:Screen("play_screen")
 
     object RegisterScreen:Screen("register_screen")
-    object LoginScreen:Screen("register_screen")
+    object LoginScreen:Screen("login_screen")
 }

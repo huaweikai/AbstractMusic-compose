@@ -52,7 +52,7 @@ fun HomeScreen(
                 it?.startsWith(Screen.LocalArtistDetail.route) == true -> {
                     viewModel.navigationState.value = false
                 }
-                it == Screen.RegisterScreen.route ->{
+                it == Screen.LoginScreen.route ->{
                     viewModel.navigationState.value = false
                 }
             }

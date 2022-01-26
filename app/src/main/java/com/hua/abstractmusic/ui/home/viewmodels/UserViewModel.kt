@@ -55,14 +55,17 @@ class UserViewModel @Inject constructor(
     private val _codeText = mutableStateOf("点击获取验证码")
     val codeText: State<String> get() = _codeText
 
-    val emailText = mutableStateOf("")
-    val passwordText = mutableStateOf("")
-    val emailCode = mutableStateOf("")
+    val registerEmailText = mutableStateOf("")
+    val registerPasswordText = mutableStateOf("")
+    val registerPasswordAgainText = mutableStateOf("")
+    val registerEmailCode = mutableStateOf("")
 
     val loginEmailText = mutableStateOf("")
     val loginPasswordText = mutableStateOf("")
 
     val loginEmailError = mutableStateOf(false)
+    val registerEmailError = mutableStateOf(false)
+    val registerPassWordAgainError = mutableStateOf(false)
 
 //    private val countDown =
 
@@ -70,7 +73,7 @@ class UserViewModel @Inject constructor(
 
     suspend fun getEmailCode():String{
         _codeButton.value = false
-        val result = useCase.userRegisterCase.invoke(emailText.value)
+        val result = useCase.userRegisterCase.invoke(registerEmailText.value)
         if(result.code == 200){
             viewModelScope.launch {
                 for (i in 120 downTo 0){
@@ -87,13 +90,17 @@ class UserViewModel @Inject constructor(
     }
 
     suspend fun register(){
-        val result = useCase.userRegisterCase(emailText.value,passwordText.value,emailCode.value.toInt())
-//        if (result.code == 200){
-//            login(emailText.value,passwordText.value)
-//        }
+        val result = useCase.userRegisterCase(
+            registerEmailText.value,
+            registerPasswordText.value,
+            registerEmailCode.value.toInt())
     }
 
-    suspend fun login(email:String,password:String){
-        _userIsOut.value = useCase.userLoginCase(email, password)
+    suspend fun login():Boolean{
+        _userIsOut.value = !useCase.userLoginCase(
+            loginEmailText.value,
+            loginPasswordText.value
+        )
+        return _userIsOut.value
     }
 }
