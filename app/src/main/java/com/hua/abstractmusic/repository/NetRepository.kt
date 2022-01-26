@@ -18,7 +18,7 @@ class NetRepository(
     suspend fun selectAlbumList():List<MediaItem>{
         return try {
             val list = mutableListOf<MediaItem>()
-            service.getAlbumList().data.forEach {
+            service.getAlbumList().data?.forEach {
                 list.add(it.toMediaItem())
             }
             list
@@ -30,7 +30,7 @@ class NetRepository(
     suspend fun selectArtistList():List<MediaItem>{
         return try {
             val list = mutableListOf<MediaItem>()
-            service.getArtistList().data.forEach {
+            service.getArtistList().data?.forEach {
                 list.add(it.toMediaItem())
             }
             list
@@ -44,7 +44,7 @@ class NetRepository(
         return try {
             val list = mutableListOf<MediaItem>()
             id?.let {
-                service.getMusicByAlbum(it).data.forEach {
+                service.getMusicByAlbum(it).data?.forEach {
                     list.add(it.toMediaItem(parentId))
                 }
             }
@@ -59,7 +59,7 @@ class NetRepository(
         return try {
             val list = mutableListOf<MediaItem>()
             id?.let {
-                service.getMusicByArtist(it).data.forEach {
+                service.getMusicByArtist(it).data?.forEach {
                     list.add(it.toMediaItem(parentId))
                 }
             }

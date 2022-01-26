@@ -1,7 +1,7 @@
 package com.hua.abstractmusic.repository
 
 import com.example.mediasession2demo.ui.data.SongSheet
-import com.hua.abstractmusic.db.MusicDao
+import com.hua.abstractmusic.db.music.MusicDao
 import com.hua.abstractmusic.bean.CurrentPlayItem
 
 /**

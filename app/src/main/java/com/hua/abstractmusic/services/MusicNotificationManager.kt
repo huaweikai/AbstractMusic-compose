@@ -50,8 +50,12 @@ class MusicNotificationManager(
             setChannelDescriptionResourceId(R.string.notification_channel_description)
             setMediaDescriptionAdapter(DescriptionAdapter(mediaControllerCompat))
             setNotificationListener(notificationListener)
+            setNextActionIconResourceId(R.drawable.ic_play_next)
+            setPreviousActionIconResourceId(R.drawable.ic_play_prev)
             setSmallIconResourceId(R.drawable.music)
         }.build().apply {
+            setUseFastForwardAction(false)
+            setUseRewindAction(false)
             setMediaSessionToken(sessionToken)
         }
     }

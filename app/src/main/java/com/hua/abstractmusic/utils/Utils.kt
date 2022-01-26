@@ -16,3 +16,8 @@ fun getVersion(
     }
     return ""
 }
+
+fun String.isEmail():Boolean{
+    val regex = Regex(pattern = "^[A-Za-z\\d]+([-_.][A-Za-z\\d]+)*@([A-Za-z\\d]+[-.])+[A-Za-z\\d]{2,4}\$")
+    return regex.containsMatchIn(this)
+}

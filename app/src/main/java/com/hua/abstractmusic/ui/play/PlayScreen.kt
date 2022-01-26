@@ -35,6 +35,7 @@ import com.hua.abstractmusic.ui.home.local.artist.LocalArtist
 import com.hua.abstractmusic.ui.home.local.music.LocalMusic
 import com.hua.abstractmusic.ui.home.playlist.HomePlayList
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.play.detail.ListScreen
 import com.hua.abstractmusic.ui.play.detail.MusicScreen
 import kotlinx.coroutines.launch
 
@@ -105,7 +106,7 @@ fun PlayScreen(
                 ) { page ->
                     when (page) {
                         0->{
-                           Text(text = "${tabTitles[page]}")
+                           ListScreen(viewModel = homeViewModel)
                         }
                         1->{
                             MusicScreen(viewModel = homeViewModel)

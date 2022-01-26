@@ -8,6 +8,9 @@ import com.hua.abstractmusic.use_case.net.SelectNetArtistCase
 import com.hua.abstractmusic.use_case.sheet.GetSheetMusicListCase
 import com.hua.abstractmusic.use_case.sheet.GetSheetNameCase
 import com.hua.abstractmusic.use_case.sheet.InsertSheetCase
+import com.hua.abstractmusic.use_case.user.UserLoginCase
+import com.hua.abstractmusic.use_case.user.UserRegisterCase
+import com.hua.abstractmusic.use_case.user.UserTokenOut
 
 /**
  * @author : huaweikai
@@ -22,5 +25,8 @@ data class UseCase(
     val getSheetMusicListCase: GetSheetMusicListCase,
     val insertSheetCase: InsertSheetCase,
     val selectNetAlbumCase: SelectNetAlbumCase,
-    val selectNetArtistCase: SelectNetArtistCase
+    val selectNetArtistCase: SelectNetArtistCase,
+    val userRegisterCase: UserRegisterCase,
+    val userTokenOut: UserTokenOut,
+    val userLoginCase: UserLoginCase
 )

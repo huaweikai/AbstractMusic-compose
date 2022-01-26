@@ -36,7 +36,7 @@ fun String.toTime(): Long {
     }
 }
 
-fun NetAlbum.Data.toMediaItem(): MediaItem {
+fun NetAlbum.toMediaItem(): MediaItem {
     return MediaItem.Builder()
         .setMetadata(
             MediaMetadata.Builder().apply {
@@ -54,7 +54,25 @@ fun NetAlbum.Data.toMediaItem(): MediaItem {
         ).build()
 }
 
-fun NetArtist.Data.toMediaItem(): MediaItem {
+/*fun NetAlbum.Data.toMediaItem(): MediaItem {
+    return MediaItem.Builder()
+        .setMetadata(
+            MediaMetadata.Builder().apply {
+                id = "${Constant.NETWORK_ALBUM_ID}/${this@toMediaItem.id}"
+                title = this@toMediaItem.name
+                year = this@toMediaItem.time.toTime()
+                artist = this@toMediaItem.artistName
+                displayTitle = this@toMediaItem.name
+                displaySubtitle = this@toMediaItem.artistName
+                albumArtUri = this@toMediaItem.imgUrl
+                displayIconUri = this@toMediaItem.imgUrl
+                isPlayable = false
+                browserType = MediaMetadata.BROWSABLE_TYPE_ALBUMS
+            }.build()
+        ).build()
+}*/
+
+fun NetArtist.toMediaItem(): MediaItem {
     return MediaItem.Builder()
         .setMetadata(
             MediaMetadata.Builder().apply {
@@ -71,7 +89,7 @@ fun NetArtist.Data.toMediaItem(): MediaItem {
         ).build()
 }
 
-fun NetMusic.Data.toMediaItem(parentId:Uri):MediaItem{
+fun NetMusic.toMediaItem(parentId:Uri):MediaItem{
     return MediaItem.Builder()
         .setMetadata(
             MediaMetadata.Builder().apply {

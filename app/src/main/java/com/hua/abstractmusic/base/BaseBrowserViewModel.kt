@@ -50,13 +50,6 @@ abstract class BaseBrowserViewModel (
             .build()
     }
 
-    fun savePosition(){
-        val sp = getApplication<Application>().getSharedPreferences(LASTMEDIA,Context.MODE_PRIVATE)
-        browser?.currentMediaItemIndex?.let {
-            sp.edit().putInt(LASTMEDIAINDEX, it).apply()
-        }
-    }
-
     fun releaseBrowser(){
         browser?.close()
     }

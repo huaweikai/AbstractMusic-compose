@@ -78,7 +78,6 @@ fun LocalScreen(
         HorizontalPager(
             state = pagerState,
             count = 3,
-            reverseLayout = false,
             modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.Top
         ) { page ->

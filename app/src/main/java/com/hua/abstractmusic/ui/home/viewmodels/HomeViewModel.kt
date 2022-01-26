@@ -1,33 +1,17 @@
 package com.hua.abstractmusic.ui.home.viewmodels
 
 import android.app.Application
-import android.content.Intent
-import android.os.Bundle
-import android.se.omapi.Session
-import android.util.Log
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationVector
-import androidx.compose.animation.core.AnimationVector1D
-import androidx.compose.animation.core.VectorConverter
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.*
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-
 import androidx.lifecycle.viewModelScope
 import androidx.media2.common.MediaItem
 import androidx.media2.common.MediaMetadata
 import androidx.media2.common.SessionPlayer
 import androidx.media2.session.*
-import androidx.media2.session.SessionCommand.COMMAND_CODE_CUSTOM
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
-import com.google.android.exoplayer2.Player
-import com.google.common.util.concurrent.MoreExecutors
 import com.hua.abstractmusic.base.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant.ALBUM_ID
@@ -35,16 +19,11 @@ import com.hua.abstractmusic.other.Constant.ALL_ID
 import com.hua.abstractmusic.other.Constant.ARTIST_ID
 import com.hua.abstractmusic.other.Constant.CLEAR_PLAY_LIST
 import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
-import com.hua.abstractmusic.other.Constant.NETWORK_ARTIST_ID
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
-import com.hua.abstractmusic.other.Constant.ROOT_SCHEME
 import com.hua.abstractmusic.services.MediaItemTree
-import com.hua.abstractmusic.services.PlayerService
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.use_case.UseCase
-import com.hua.abstractmusic.utils.artist
 import com.hua.abstractmusic.utils.duration
-import com.hua.abstractmusic.utils.title
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,84 +44,9 @@ class HomeViewModel @Inject constructor(
     private val mediaItemTree: MediaItemTree
 ) : BaseBrowserViewModel(application, useCase) {
 
-    val playSate = MutableStateFlow(SessionPlayer.PLAYER_STATE_IDLE)
+    private val playSate = MutableStateFlow(SessionPlayer.PLAYER_STATE_IDLE)
     val maxValue = mutableStateOf(0F)
-
-
-    private val browserCallback = object : MediaBrowser.BrowserCallback() {
-        override fun onConnected(
-            controller: MediaController,
-            allowedCommands: SessionCommandGroup
-        ) {
-            init(NETWORK_ALBUM_ID)
-            refresh()
-            browser?.subscribe("null", null)
-            updateItem(browser?.currentMediaItem)
-        }
-
-        override fun onPlaylistChanged(
-            controller: MediaController,
-            list: MutableList<MediaItem>?,
-            metadata: MediaMetadata?
-        ) {
-            updatePlayList(list)
-        }
-
-        override fun onCurrentMediaItemChanged(controller: MediaController, item: MediaItem?) {
-            viewModelScope.launch {
-                //延迟更新，不然会跳到第一个
-                delay(200L)
-                updateItem(browser?.currentMediaItem)
-                Log.d("TAG", "onCurrentMediaItemChanged: ${item?.metadata?.duration}")
-                maxValue.value = browser!!.currentMediaItem?.metadata?.duration?.toFloat()!!
-            }
-        }
-
-        override fun onPlayerStateChanged(controller: MediaController, state: Int) {
-            controller.currentPosition
-            updatePlayState(state)
-        }
-
-        override fun onChildrenChanged(
-            browser: MediaBrowser,
-            parentId: String,
-            itemCount: Int,
-            params: MediaLibraryService.LibraryParams?
-        ) {
-            //抓取数据完毕，直接去拿数据去更新
-            childrenInit(parentId)
-        }
-
-    }
-
     val currentPosition = mutableStateOf(0L)
-
-    init {
-        viewModelScope.launch {
-            playSate.collect {
-                if (it == SessionPlayer.PLAYER_STATE_PLAYING) {
-                    while (true) {
-                        delay(1000L)
-                        if (!actionSeekBar.value) {
-                            currentPosition.value = browser!!.currentPosition
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    fun refresh() {
-        init(ALL_ID)
-        init(ALBUM_ID)
-        init(ARTIST_ID)
-    }
-
-    //初始化，连接service
-    override fun initializeController() {
-        connectBrowserService(browserCallback)
-//        browser!!.subscribe(ROOT_SCHEME,null)
-    }
 
     //当前播放列表
     private val _currentPlayList = mutableStateOf<List<MediaData>>(emptyList())
@@ -177,6 +81,83 @@ class HomeViewModel @Inject constructor(
     }
 
     val actionSeekBar = mutableStateOf(false)
+
+
+    val currentDuration = viewModelScope.launch {
+        playSate.collect {
+            if (it == SessionPlayer.PLAYER_STATE_PLAYING) {
+                while (true) {
+                    delay(1000L)
+                    if (!actionSeekBar.value) {
+                        currentPosition.value = browser!!.currentPosition
+                    }
+                }
+            }
+        }
+    }
+
+
+    private val browserCallback = object : MediaBrowser.BrowserCallback() {
+        override fun onConnected(
+            controller: MediaController,
+            allowedCommands: SessionCommandGroup
+        ) {
+            init(NETWORK_ALBUM_ID)
+            refresh()
+            updateItem(browser?.currentMediaItem)
+            currentPosition.value = browser?.currentPosition?:0L
+            currentDuration.start()
+            updatePlayState(browser?.playerState?:SessionPlayer.PLAYER_STATE_IDLE)
+        }
+
+        override fun onDisconnected(controller: MediaController) {
+            currentDuration.cancel()
+        }
+
+        override fun onPlaylistChanged(
+            controller: MediaController,
+            list: MutableList<MediaItem>?,
+            metadata: MediaMetadata?
+        ) {
+            updatePlayList(list)
+        }
+
+        override fun onCurrentMediaItemChanged(controller: MediaController, item: MediaItem?) {
+            viewModelScope.launch {
+                //延迟更新，不然会跳到第一个
+                delay(200L)
+                updateItem(browser?.currentMediaItem)
+            }
+        }
+
+        override fun onPlayerStateChanged(controller: MediaController, state: Int) {
+            controller.currentPosition
+            updatePlayState(state)
+        }
+
+        override fun onChildrenChanged(
+            browser: MediaBrowser,
+            parentId: String,
+            itemCount: Int,
+            params: MediaLibraryService.LibraryParams?
+        ) {
+            //抓取数据完毕，直接去拿数据去更新
+            childrenInit(parentId)
+        }
+
+    }
+
+    fun refresh() {
+        init(ALL_ID)
+        init(ALBUM_ID)
+        init(ARTIST_ID)
+    }
+
+    //初始化，连接service
+    override fun initializeController() {
+        connectBrowserService(browserCallback)
+    }
+
 
 
     //根据parentId去拿数据
@@ -215,8 +196,7 @@ class HomeViewModel @Inject constructor(
             val isPlaying = if (item == null) false else it.mediaId == item.metadata?.mediaId
             it.copy(isPlaying = isPlaying)
         }
-
-        savePosition()
+        maxValue.value = browser?.currentMediaItem?.metadata?.duration?.toFloat()?:0F
 
     }
 
@@ -274,14 +254,9 @@ class HomeViewModel @Inject constructor(
         val result = browser?.sendCustomCommand(
             SessionCommand(CLEAR_PLAY_LIST, null), null
         )
-/*        getApplication<Application>()
-            .startService(Intent(getApplication(),PlayerService::class.java).apply {
-                action = CLEAR_PLAY_LIST
-            })
-        viewModelScope.launch {
-            useCase.clearCurrentListCase()
-            savePosition()
-        }*/
+        if (result!!.get().resultCode == SessionResult.RESULT_SUCCESS) {
+            updateItem(null)
+        }
     }
 
 
@@ -303,10 +278,6 @@ class HomeViewModel @Inject constructor(
         true
     )
 
-    val homeNavigationState = mutableStateOf(
-        Screen.NetScreen.route
-    )
-
     //记录主页播放列表的打开和关闭
     val playScreenState = mutableStateOf(
         ModalBottomSheetState(ModalBottomSheetValue.Hidden, isSkipHalfExpanded = true)
@@ -315,6 +286,4 @@ class HomeViewModel @Inject constructor(
     val playScreenBoolean = mutableStateOf(false)
 
     val playListBoolean = mutableStateOf(false)
-
-    var progress = mutableStateOf(0f)
 }

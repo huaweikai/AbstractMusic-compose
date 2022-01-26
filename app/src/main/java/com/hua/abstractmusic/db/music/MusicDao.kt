@@ -1,4 +1,4 @@
-package com.hua.abstractmusic.db
+package com.hua.abstractmusic.db.music
 
 import androidx.room.*
 import com.example.mediasession2demo.ui.data.SongSheet

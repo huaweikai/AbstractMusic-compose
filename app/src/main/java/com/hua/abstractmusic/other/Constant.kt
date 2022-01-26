@@ -42,7 +42,9 @@ object Constant {
     const val LASTMEDIA = "LASTMEDIA"
     const val LASTMEDIAINDEX = "LASTMEDIAINDEX"
     const val LASTMEDIAID = "LASTMEDIAID"
-    const val ROOM_NAME = "MUSICDB"
+    const val MUSIC_ROOM_NAME = "MUSICDB"
+
+    const val USER_ROOM_NAME = "MUSICDB"
 
 
     const val BASE_URL = "http://192.168.123.199:8080"

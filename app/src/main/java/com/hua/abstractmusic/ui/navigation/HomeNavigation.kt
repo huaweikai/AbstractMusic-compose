@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -19,8 +20,11 @@ import com.hua.abstractmusic.ui.home.local.LocalScreen
 import com.hua.abstractmusic.ui.home.local.album.detail.LocalAlbumDetail
 import com.hua.abstractmusic.ui.home.local.artist.detail.LocalArtistDetail
 import com.hua.abstractmusic.ui.home.mine.MineScreen
+import com.hua.abstractmusic.ui.home.mine.register.LoginScreen
+import com.hua.abstractmusic.ui.home.mine.register.RegisterScreen
 import com.hua.abstractmusic.ui.home.net.NetScreen
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.home.viewmodels.UserViewModel
 import com.hua.abstractmusic.ui.play.PlayScreen
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.utils.title
@@ -38,7 +42,7 @@ fun HomeNavigationNav(
     modifier: Modifier,
     viewModel: HomeViewModel
 ) {
-    val pagerState = rememberPagerState(initialPage = 0)
+    val userViewModel:UserViewModel = hiltViewModel()
     NavHost(
         navController = homeNavController,
         startDestination = Screen.NetScreen.route,
@@ -54,7 +58,7 @@ fun HomeNavigationNav(
         }
         composable(route = Screen.MineScreen.route) {
             it.destination.label = "我的"
-            MineScreen(homeNavController)
+            MineScreen(homeNavController, userViewModel)
         }
         composable(
             route = "${Screen.LocalAlbumDetail.route}?albumId={albumId}",
@@ -92,11 +96,17 @@ fun HomeNavigationNav(
             )
         }
 
-//        composable(
-//            route = Screen.PlayScreen.route
-//        ){
-//            PlayScreen()
-//        }
+        composable(
+            route = Screen.RegisterScreen.route
+        ){
+            RegisterScreen(userViewModel)
+        }
+
+        composable(
+            route = Screen.LoginScreen.route
+        ){
+            LoginScreen(homeNavController,userViewModel)
+        }
     }
 
 }

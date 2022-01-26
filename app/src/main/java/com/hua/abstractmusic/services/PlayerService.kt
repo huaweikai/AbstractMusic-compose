@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.services
 
+import android.app.Application
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.os.Build
@@ -10,6 +11,8 @@ import androidx.media2.session.MediaLibraryService
 import androidx.media2.session.MediaSession
 import androidx.media2.session.SessionCommand
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.MediaMetadata
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.media2.SessionPlayerConnector
 import com.google.common.util.concurrent.MoreExecutors
@@ -21,10 +24,7 @@ import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.services.extensions.*
 import com.hua.abstractmusic.use_case.UseCase
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.concurrent.Executors
 import javax.inject.Inject
 
@@ -146,7 +146,7 @@ class PlayerService : MediaLibraryService() {
     }
 
     fun removeAllMusic() {
-            exoplayer.clearMediaItems()
+        exoplayer.clearMediaItems()
     }
 
     private inner class PlayerListener : Player.Listener {
@@ -167,5 +167,18 @@ class PlayerService : MediaLibraryService() {
                 stopForeground(false)
             }
         }
+
+        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            serviceScope.launch {
+                delay(200)
+                savePosition(player.currentMediaItemIndex)
+            }
+        }
+
+    }
+
+    fun savePosition(index: Int) {
+        val sp = application.getSharedPreferences(LASTMEDIA, Context.MODE_PRIVATE)
+        sp.edit().putInt(LASTMEDIAINDEX, index).apply()
     }
 }

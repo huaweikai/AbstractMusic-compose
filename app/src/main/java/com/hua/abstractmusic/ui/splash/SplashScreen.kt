@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
@@ -33,6 +34,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.ui.hello.PermissionGet
+import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.utils.getVersion
 import kotlinx.coroutines.*

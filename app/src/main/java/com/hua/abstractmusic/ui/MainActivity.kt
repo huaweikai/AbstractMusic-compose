@@ -11,6 +11,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -52,7 +53,8 @@ class MainActivity : ComponentActivity() {
             )
             AbstractMusicTheme {
                 val nextScreen =
-                    if (PermissionGet.checkReadPermission(this)) Screen.HomeScreen.route else Screen.HelloScreen.route
+                    if (PermissionGet.checkReadPermission(this)) Screen.HomeScreen.route
+                    else Screen.HelloScreen.route
                 viewModel = viewModel()
                 if (nextScreen == Screen.HomeScreen.route) {
                     viewModel.initializeController()
