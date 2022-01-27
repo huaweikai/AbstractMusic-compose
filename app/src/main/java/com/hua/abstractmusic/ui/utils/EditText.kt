@@ -99,19 +99,22 @@ fun EmailEditText(
 @Composable
 fun PassWordEditText(
     password: MutableState<String>,
-    modifier: Modifier
+    modifier: Modifier,
+    label: String,
+    onValueChange: (String) -> Unit = {
+        password.value = it
+    },
+    isError: Boolean = false
 ) {
     val passwordVis = remember {
         mutableStateOf(false)
     }
     EditText(
         value = password.value,
-        onValueChange = {
-            password.value = it
-        },
+        onValueChange = onValueChange,
         leftIcon = Icons.Default.Lock,
-        isError = false,
-        label = "密码",
+        isError = isError,
+        label = label,
         modifier = modifier,
         visualTransformation = if (passwordVis.value) VisualTransformation.None else PasswordVisualTransformation(),
         rightIcon = {

@@ -5,7 +5,12 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.hua.abstractmusic.base.BaseBrowserViewModel
+import com.hua.abstractmusic.other.NetWork.ERROR
+import com.hua.abstractmusic.other.NetWork.NO_USER
+import com.hua.abstractmusic.other.NetWork.SERVER_ERROR
+import com.hua.abstractmusic.other.NetWork.SUCCESS
 import com.hua.abstractmusic.use_case.UseCase
+import com.hua.abstractmusic.utils.isEmail
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -24,11 +29,6 @@ class UserViewModel @Inject constructor(
 
 ):BaseBrowserViewModel(application, useCase) {
 
-//    private val codeButton = mutableStateOf(true)
-//
-//    private val _codeText = mutableStateOf("点击获取验证码")
-//    val codeText:State<String> get() = _codeText
-
     private val _userIsOut = mutableStateOf(true)
     val userIsOut :State<Boolean> get() = _userIsOut
 
@@ -36,10 +36,8 @@ class UserViewModel @Inject constructor(
         viewModelScope.launch {
             val code = useCase.userTokenOut().code
             _userIsOut.value =when(code){
-                200 -> true
-                500 -> false
-                501 -> true
-                502 -> false
+                SUCCESS, ERROR -> true
+                SERVER_ERROR, NO_USER -> false
                 else -> false
             }
         }
@@ -55,19 +53,20 @@ class UserViewModel @Inject constructor(
     private val _codeText = mutableStateOf("点击获取验证码")
     val codeText: State<String> get() = _codeText
 
-    val registerEmailText = mutableStateOf("")
-    val registerPasswordText = mutableStateOf("")
-    val registerPasswordAgainText = mutableStateOf("")
-    val registerEmailCode = mutableStateOf("")
+
 
     val loginEmailText = mutableStateOf("")
     val loginPasswordText = mutableStateOf("")
 
     val loginEmailError = mutableStateOf(false)
+
+    val registerEmailText = mutableStateOf("")
+    val registerPasswordText = mutableStateOf("")
+    val registerPasswordAgainText = mutableStateOf("")
+    val registerEmailCode = mutableStateOf("")
     val registerEmailError = mutableStateOf(false)
     val registerPassWordAgainError = mutableStateOf(false)
-
-//    private val countDown =
+    val registerCodeError = mutableStateOf(false)
 
 
 
@@ -90,10 +89,12 @@ class UserViewModel @Inject constructor(
     }
 
     suspend fun register(){
-        val result = useCase.userRegisterCase(
-            registerEmailText.value,
-            registerPasswordText.value,
-            registerEmailCode.value.toInt())
+        if(!registerCodeError.value && !registerEmailError.value){
+            val result = useCase.userRegisterCase(
+                registerEmailText.value,
+                registerPasswordText.value,
+                registerEmailCode.value.toInt())
+        }
     }
 
     suspend fun login():Boolean{

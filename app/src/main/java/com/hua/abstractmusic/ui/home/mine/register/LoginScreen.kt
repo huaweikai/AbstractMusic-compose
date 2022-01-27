@@ -35,6 +35,8 @@ import com.hua.abstractmusic.R
 import com.hua.abstractmusic.ui.home.viewmodels.UserViewModel
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.EditText
+import com.hua.abstractmusic.ui.utils.EmailEditText
+import com.hua.abstractmusic.ui.utils.PassWordEditText
 import com.hua.abstractmusic.utils.isEmail
 import kotlinx.coroutines.launch
 
@@ -123,30 +125,10 @@ private fun LoginEd(
     Column(
         modifier = modifier
     ) {
-        EditText(
-            value = viewModel.loginEmailText.value,
-            onValueChange = {
-                if (it.isBlank()) {
-                    viewModel.loginEmailError.value = false
-                } else {
-                    viewModel.loginEmailError.value = !it.isEmail()
-                }
-                viewModel.loginEmailText.value = it
-
-            },
-            leftIcon = Icons.Default.Email,
-            isError = viewModel.loginEmailError.value,
-            label = "邮箱",
-            modifier = Modifier.fillMaxWidth(),
-            rightIcon = {
-                if (viewModel.loginEmailError.value) {
-                    Icon(
-                        painterResource(id = R.drawable.ic_login_warning),
-                        contentDescription = "",
-                        tint = Color.Red
-                    )
-                }
-            }
+        EmailEditText(
+            text = viewModel.loginEmailText,
+            error = viewModel.loginEmailError,
+            modifier = Modifier.fillMaxWidth()
         )
         Text(
             text = if (viewModel.loginEmailError.value) "请输入正确的邮箱" else "",
@@ -155,26 +137,10 @@ private fun LoginEd(
             textAlign = TextAlign.Start,
             fontSize = 12.sp
         )
-        EditText(
-            value = viewModel.loginPasswordText.value,
-            onValueChange = {
-                viewModel.loginPasswordText.value = it
-            },
-            leftIcon = Icons.Default.Lock,
-            isError = false,
-            label = "密码",
+        PassWordEditText(
+            password = viewModel.loginPasswordText,
             modifier = Modifier.fillMaxWidth(),
-            visualTransformation = if (passwordVis.value) VisualTransformation.None else PasswordVisualTransformation(),
-            rightIcon = {
-                Image(
-                    painter = painterResource(if (passwordVis.value) R.drawable.ic_login_eye_on else R.drawable.ic_login_eye_off),
-                    contentDescription = "",
-                    modifier = Modifier
-                        .clickable {
-                            passwordVis.value = !passwordVis.value
-                        }
-                )
-            }
+            label = "密码"
         )
     }
 }
