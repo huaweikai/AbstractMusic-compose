@@ -1,11 +1,13 @@
 package com.hua.abstractmusic.ui.home.mine.register
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
@@ -14,10 +16,7 @@ import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -35,9 +34,12 @@ import com.hua.abstractmusic.R
 import com.hua.abstractmusic.ui.home.viewmodels.UserViewModel
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.EditText
+import com.hua.abstractmusic.ui.utils.EmailCodeEditText
 import com.hua.abstractmusic.ui.utils.EmailEditText
 import com.hua.abstractmusic.ui.utils.PassWordEditText
+import com.hua.abstractmusic.utils.isCode
 import com.hua.abstractmusic.utils.isEmail
+import com.hua.abstractmusic.utils.isPassWord
 import kotlinx.coroutines.launch
 
 /**
@@ -52,11 +54,31 @@ fun LoginScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val loginMode = remember {
+        mutableStateOf(true)
+    }
     ConstraintLayout(
         modifier = Modifier.fillMaxSize()
     ) {
         val topPercent = createGuidelineFromTop(0.1f)
-        val (title, loginEd, loginButton, register) = createRefs()
+        val centerPercent = createGuidelineFromStart(0.5f)
+        val (title, loginEd, loginButton) = createRefs()
+        val (register, codeLogin) = createRefs()
+        val loginButtonEnabled = remember {
+            mutableStateOf(false)
+        }
+        LaunchedEffect(viewModel.loginPasswordText.value,
+            viewModel.loginEmailText.value
+        ) {
+            loginButtonEnabled.value =
+                viewModel.loginEmailText.value.isEmail()
+                        && viewModel.loginPasswordText.value.isPassWord()
+        }
+        DisposableEffect(Unit){
+            this.onDispose {
+                viewModel.loginClear()
+            }
+        }
         Text(
             text = "欢迎来到抽象音乐", modifier = Modifier
                 .constrainAs(title) {
@@ -76,17 +98,17 @@ fun LoginScreen(
                     end.linkTo(parent.end, 20.dp)
                     top.linkTo(title.bottom, 5.dp)
                     width = Dimension.fillToConstraints
-                }
+                },
+            loginMode
         )
         Button(
             onClick = {
-                if (viewModel.loginEmailError.value) {
-                    Toast.makeText(context, "邮箱输入不正确", Toast.LENGTH_SHORT).show()
-                } else {
-                    scope.launch {
-                        if (viewModel.login()) {
-                            navController.navigateUp()
-                        }
+                scope.launch {
+                    val result = viewModel.loginWithEmail()
+                    if (result.code == 200) {
+                        navController.navigateUp()
+                    } else {
+                        Toast.makeText(context, result.msg, Toast.LENGTH_SHORT).show()
                     }
                 }
             },
@@ -96,7 +118,8 @@ fun LoginScreen(
                     end.linkTo(loginEd.end)
                     top.linkTo(loginEd.bottom, 5.dp)
                     width = Dimension.fillToConstraints
-                }
+                },
+            enabled = loginButtonEnabled.value
         ) {
             Text(text = "登录")
         }
@@ -111,17 +134,28 @@ fun LoginScreen(
                     navController.navigate(Screen.RegisterScreen.route)
                 }
         )
+        Text(
+            text = if(loginMode.value)"验证码登录" else "密码登录",
+            modifier = Modifier
+                .constrainAs(codeLogin) {
+                    start.linkTo(centerPercent)
+                    end.linkTo(centerPercent)
+                    top.linkTo(register.top)
+                    bottom.linkTo(register.bottom)
+                }
+                .clickable {
+                    loginMode.value = !loginMode.value
+                }
+        )
     }
 }
 
 @Composable
 private fun LoginEd(
     viewModel: UserViewModel,
-    modifier: Modifier
+    modifier: Modifier,
+    loginMode:MutableState<Boolean>
 ) {
-    val passwordVis = remember {
-        mutableStateOf(false)
-    }
     Column(
         modifier = modifier
     ) {
@@ -137,10 +171,39 @@ private fun LoginEd(
             textAlign = TextAlign.Start,
             fontSize = 12.sp
         )
-        PassWordEditText(
-            password = viewModel.loginPasswordText,
-            modifier = Modifier.fillMaxWidth(),
-            label = "密码"
-        )
+        AnimatedVisibility(
+            visible = loginMode.value,
+            modifier =  Modifier.fillMaxWidth()
+        ) {
+            PassWordEditText(
+                password = viewModel.loginPasswordText,
+                modifier = Modifier.fillMaxWidth(),
+                label = "密码",
+                onValueChange = {
+                    if (it.isBlank()) {
+                        viewModel.loginPassWordError.value = false
+                    } else {
+                        viewModel.loginPassWordError.value = !it.isPassWord()
+                    }
+                    viewModel.loginPasswordText.value = it
+                },
+                isError = viewModel.loginPassWordError.value
+            )
+        }
+
+        AnimatedVisibility(
+            visible = !loginMode.value,
+            modifier =  Modifier.fillMaxWidth()
+        ) {
+            EmailCodeEditText(
+                text = viewModel.loginEmailCodeText,
+                codeError = viewModel.loginEmailCodeError,
+                buttonEnabled = viewModel.loginEmailCodeEnable,
+                buttonCodeText = viewModel.loginCodeText,
+                getCode = {
+                    viewModel.getLoginEmailCode()
+                }
+            )
+        }
     }
 }

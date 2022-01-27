@@ -1,10 +1,13 @@
 package com.hua.abstractmusic.repository
 
 import com.hua.abstractmusic.bean.net.NetData
+import com.hua.abstractmusic.bean.user.NetUser
+import com.hua.abstractmusic.bean.user.UserBean
 import com.hua.abstractmusic.db.user.UserDao
 import com.hua.abstractmusic.net.UserService
 import com.hua.abstractmusic.other.NetWork.ERROR
 import com.hua.abstractmusic.other.NetWork.NO_USER
+import com.hua.abstractmusic.other.NetWork.SUCCESS
 
 /**
  * @author : huaweikai
@@ -20,23 +23,33 @@ class UserRepository(
         return try {
             userService.getEmailCode(email)
         }catch (e:Throwable){
-            NetData(ERROR,null,"网络异常")
+            NetData(ERROR,null,"服务器或网络异常")
         }
     }
 
     suspend fun register(
         email: String,
+        username:String,
         passWord: String,
         code: Int
     ): NetData<String> {
-        return userService.register(email, passWord, code)
+        return try {
+            userService.register(email,username, passWord,code)
+        }catch (e:Throwable){
+            NetData(ERROR,null,"服务器或网络异常")
+        }
+
     }
 
     suspend fun loginWithEmail(
         email: String,
         passWord: String
     ): NetData<String> {
-        return userService.loginWithEmail(email, passWord)
+        return try {
+            userService.loginWithEmail(email, passWord)
+        }catch (e:Throwable){
+            NetData(ERROR,null,"服务器或网络异常")
+        }
     }
 
     suspend fun hasUser():NetData<Unit>{
@@ -48,8 +61,31 @@ class UserRepository(
         return try {
             userService.testToken(token)
         }catch (e:Throwable){
-            NetData(ERROR,null,"网络异常")
+            NetData(ERROR,null,"服务器或网络异常")
         }
     }
 
+    suspend fun getUser(token:String):NetData<NetUser>{
+        return try {
+            userService.getUser(token)
+        }catch (e:Throwable){
+            NetData(ERROR,null,"服务器或网络异常")
+        }
+    }
+
+    suspend fun getInfo():UserBean?{
+        return dao.getUserInfo()
+    }
+
+    suspend fun logoutUser(token: String):NetData<Unit>{
+        return try {
+            val result = userService.logoutUser(token)
+            if(result.code == SUCCESS) {
+                dao.deleteUser()
+            }
+            result
+        }catch (e:Throwable){
+            NetData(ERROR,null,"服务器或网络异常")
+        }
+    }
 }

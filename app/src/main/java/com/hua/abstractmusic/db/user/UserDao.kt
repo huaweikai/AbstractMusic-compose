@@ -17,9 +17,12 @@ interface UserDao {
     @Query("delete from userBean")
     suspend fun deleteUser()
 
-    @Query("select token from userBean where id = 0")
+    @Query("select token from userBean")
     suspend fun getToken():String
 
     @Query("select count(*) from userBean")
     suspend fun userInRoom():Int
+
+    @Query("select * from userbean")
+    suspend fun getUserInfo():UserBean?
 }

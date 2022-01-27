@@ -1,16 +1,28 @@
 package com.hua.abstractmusic.ui.home.mine
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
 import androidx.navigation.NavHostController
+import com.hua.abstractmusic.bean.user.UserBean
+import com.hua.abstractmusic.other.NetWork.SUCCESS
 import com.hua.abstractmusic.ui.home.viewmodels.UserViewModel
 import com.hua.abstractmusic.ui.route.Screen
+import kotlinx.coroutines.launch
 
 
 /**
@@ -24,15 +36,20 @@ fun MineScreen(
     navHostController: NavHostController,
     viewModel: UserViewModel
 ) {
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+
     Column(
-        Modifier.fillMaxSize()
-    ){
+        modifier = Modifier.fillMaxSize()
+    ) {
         if (viewModel.userIsOut.value) {
-            Mine()
+            NoLogin(navHostController = navHostController)
         } else {
-            NoLogin(navHostController)
+            Mine(viewModel)
         }
+
     }
+
+
 }
 
 @Composable
@@ -56,6 +73,33 @@ fun NoLogin(
 }
 
 @Composable
-fun Mine() {
+fun Mine(
+    viewModel: UserViewModel
+) {
+    val lifecycle = LocalLifecycleOwner.current
+    val scope = rememberCoroutineScope()
+    DisposableEffect(Unit) {
+        val observer = object : LifecycleObserver {
+            @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+            fun onCreate() {
+                viewModel.selectUserInfo()
+            }
+        }
+        lifecycle.lifecycle.addObserver(observer)
+        this.onDispose {
+            lifecycle.lifecycle.removeObserver(observer)
+        }
+    }
     Text(text = "已经登录了")
+    Text(text = viewModel.user.value.userName)
+    Button(onClick = {
+        scope.launch {
+            scope.launch {
+                viewModel.logoutUser()
+            }
+        }
+
+    }) {
+        Text(text = "退出登录")
+    }
 }

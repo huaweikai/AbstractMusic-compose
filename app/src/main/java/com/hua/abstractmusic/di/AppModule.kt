@@ -25,9 +25,7 @@ import com.hua.abstractmusic.use_case.net.SelectNetArtistCase
 import com.hua.abstractmusic.use_case.sheet.GetSheetMusicListCase
 import com.hua.abstractmusic.use_case.sheet.GetSheetNameCase
 import com.hua.abstractmusic.use_case.sheet.InsertSheetCase
-import com.hua.abstractmusic.use_case.user.UserLoginCase
-import com.hua.abstractmusic.use_case.user.UserRegisterCase
-import com.hua.abstractmusic.use_case.user.UserTokenOut
+import com.hua.abstractmusic.use_case.user.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -115,7 +113,9 @@ object AppModule {
             SelectNetArtistCase(netRepository),
             UserRegisterCase(userRepository),
             UserTokenOut(userRepository),
-            UserLoginCase(userRepository, dao)
+            UserLoginCase(userRepository, dao),
+            UserInfoCase(userRepository),
+            UserLogoutCase(userRepository)
         )
 
     @Provides

@@ -1,6 +1,7 @@
 package com.hua.abstractmusic.net
 
 import com.hua.abstractmusic.bean.net.NetData
+import com.hua.abstractmusic.bean.user.NetUser
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -19,6 +20,7 @@ interface UserService {
     @GET("/user/register")
     suspend fun register(
         @Query("email") email: String,
+        @Query("username") username: String,
         @Query("password") password: String,
         @Query("code") code: Int
     ): NetData<String>
@@ -38,5 +40,15 @@ interface UserService {
     @GET("/user/testToken")
     suspend fun testToken(
         @Query("token")token:String
+    ):NetData<Unit>
+
+    @GET("/user/get")
+    suspend fun getUser(
+        @Query("token")token:String
+    ):NetData<NetUser>
+
+    @GET("/user/logout")
+    suspend fun logoutUser(
+        @Query("token")token: String
     ):NetData<Unit>
 }

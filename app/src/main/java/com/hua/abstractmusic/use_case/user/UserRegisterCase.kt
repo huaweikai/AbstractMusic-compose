@@ -17,9 +17,10 @@ class UserRegisterCase(
 
     suspend operator fun invoke(
         email:String,
+        username:String,
         password:String,
         code:Int
     ):NetData<String>{
-        return userRepository.register(email,password,code)
+        return userRepository.register(email,username,password,code)
     }
 }
