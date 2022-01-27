@@ -38,6 +38,10 @@ fun HomeScreen(
     val playListState = viewModel.playListState.value
     val scope = rememberCoroutineScope()
 
+    val label = remember{
+        mutableStateOf("")
+    }
+
     val routes = listOf(Screen.LocalScreen.route, Screen.NetScreen.route, Screen.MineScreen.route)
 
     LaunchedEffect(homeNavController.currentBackStackEntryAsState().value) {
@@ -45,15 +49,19 @@ fun HomeScreen(
             when {
                 it in routes -> {
                     viewModel.navigationState.value = true
+                    label.value = "${homeNavController.currentDestination?.label}"
                 }
                 it?.startsWith(Screen.LocalAlbumDetail.route) == true -> {
                     viewModel.navigationState.value = false
+                    label.value = ""
                 }
                 it?.startsWith(Screen.LocalArtistDetail.route) == true -> {
                     viewModel.navigationState.value = false
+                    label.value = ""
                 }
                 it == Screen.LoginScreen.route ->{
                     viewModel.navigationState.value = false
+                    label.value = ""
                 }
             }
         }
@@ -87,7 +95,8 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 42.dp)
-                    .height(42.dp)
+                    .height(42.dp),
+                label = label
             )
         },
         bottomBar = {

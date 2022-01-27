@@ -12,9 +12,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.IconButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -35,12 +33,13 @@ import com.hua.abstractmusic.ui.route.Screen
 fun HomeTopBar(
     navHostController: NavHostController,
     viewModel: HomeViewModel,
+    label:MutableState<String>,
     modifier: Modifier
 ) {
-    val back = navHostController.currentBackStackEntryAsState()
     val icon = remember {
         mutableStateOf(TopBarIconButton(Icons.Default.Search, "搜索"))
     }
+
     ConstraintLayout(
         modifier = modifier
             .fillMaxWidth()
@@ -65,7 +64,7 @@ fun HomeTopBar(
                 .size((if (!viewModel.navigationState.value) 24.dp else 0.dp))
         )
         Text(
-            text = "${back.value?.destination?.label ?: ""}",
+            text = label.value,
             modifier = Modifier.constrainAs(title) {
                 start.linkTo(backBt.end, 10.dp)
                 top.linkTo(parent.top)

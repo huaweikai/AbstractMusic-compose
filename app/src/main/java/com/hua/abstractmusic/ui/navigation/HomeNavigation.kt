@@ -99,7 +99,7 @@ fun HomeNavigationNav(
         composable(
             route = Screen.RegisterScreen.route
         ){
-            RegisterScreen(userViewModel)
+            RegisterScreen(userViewModel,homeNavController)
         }
 
         composable(

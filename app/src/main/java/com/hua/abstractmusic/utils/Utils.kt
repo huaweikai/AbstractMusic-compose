@@ -17,12 +17,19 @@ fun getVersion(
     return ""
 }
 
-fun String.isEmail():Boolean{
-    val regex = Regex(pattern = "^[A-Za-z\\d]+([-_.][A-Za-z\\d]+)*@([A-Za-z\\d]+[-.])+[A-Za-z\\d]{2,4}\$")
-    return regex.containsMatchIn(this)
-}
+fun String.isEmail()=
+    Regex(pattern = "^[A-Za-z\\d]+([-_.][A-Za-z\\d]+)*@([A-Za-z\\d]+[-.])+[A-Za-z\\d]{2,4}\$")
+        .containsMatchIn(this)
 
-fun String.isCode():Boolean{
-    val regex = Regex(pattern = "^\\d{6}\$")
-    return regex.containsMatchIn(this)
-}
+
+fun String.isCode()=
+    Regex(pattern = "^\\d{6}\$")
+        .containsMatchIn(this)
+
+fun String.isPassWord() =
+    Regex(pattern = "^(?!^(\\d+|[a-zA-Z]+|[~!@#\$%^&*?/]+)\$)^[\\w~!@#\$%^&*?/]{8,16}\$")
+        .containsMatchIn(this)
+
+fun String.isUser() =
+    Regex(pattern = "^[\\u4e00-\\u9fa5_a-zA-Z0-9-]{2,16}\$")
+        .containsMatchIn(this)

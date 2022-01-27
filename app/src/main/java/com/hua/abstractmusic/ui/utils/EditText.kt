@@ -1,9 +1,9 @@
 package com.hua.abstractmusic.ui.utils
 
-import android.widget.EditText
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.TextField
@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.Dimension
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.utils.isEmail
+import com.hua.abstractmusic.utils.isUser
 
 
 /**
@@ -125,7 +127,40 @@ fun PassWordEditText(
                     .clickable {
                         passwordVis.value = !passwordVis.value
                     }
+                    .size(24.dp)
             )
+        }
+    )
+}
+
+@Composable
+fun UserEditText(
+    user: MutableState<String>,
+    isError: MutableState<Boolean>,
+    modifier: Modifier
+) {
+    EditText(
+        value = user.value,
+        onValueChange = {
+            if (it.isBlank()) {
+                isError.value = false
+            }else{
+                isError.value = !it.isUser()
+            }
+            user.value = it
+        },
+        leftIcon = Icons.Default.Person,
+        isError = isError.value,
+        label = "用户名(2-16位)",
+        modifier = modifier,
+        rightIcon = @Composable{
+            if (isError.value) {
+                Icon(
+                    painterResource(id = R.drawable.ic_login_warning),
+                    contentDescription = "",
+                    tint = Color.Red
+                )
+            }
         }
     )
 }
