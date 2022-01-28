@@ -110,12 +110,7 @@ object AppModule {
             GetSheetMusicListCase(repository),
             InsertSheetCase(repository),
             SelectNetAlbumCase(netRepository),
-            SelectNetArtistCase(netRepository),
-            UserRegisterCase(userRepository),
-            UserTokenOut(userRepository),
-            UserLoginCase(userRepository, dao),
-            UserInfoCase(userRepository),
-            UserLogoutCase(userRepository)
+            SelectNetArtistCase(netRepository)
         )
 
     @Provides

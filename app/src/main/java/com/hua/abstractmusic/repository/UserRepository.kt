@@ -46,8 +46,16 @@ class UserRepository(
         passWord: String
     ): NetData<String> {
         return try {
-            userService.loginWithEmail(email, passWord)
-        }catch (e:Throwable){
+            val result = userService.loginWithEmail(email, passWord)
+            if (result.code == 200) {
+                getUser(result.data!!).data?.let {
+                    dao.insertUser(
+                        UserBean(it.id!!, it.name, it.passwd, it.email, result.data)
+                    )
+                }
+            }
+            result
+        } catch (e: Throwable) {
             NetData(ERROR,null,"服务器或网络异常")
         }
     }
@@ -65,7 +73,7 @@ class UserRepository(
         }
     }
 
-    suspend fun getUser(token:String):NetData<NetUser>{
+    private suspend fun getUser(token:String):NetData<NetUser>{
         return try {
             userService.getUser(token)
         }catch (e:Throwable){
@@ -77,11 +85,40 @@ class UserRepository(
         return dao.getUserInfo()
     }
 
-    suspend fun logoutUser(token: String):NetData<Unit>{
+    suspend fun logoutUser():NetData<Unit>{
         return try {
+            val token = dao.getToken()
             val result = userService.logoutUser(token)
             if(result.code == SUCCESS) {
                 dao.deleteUser()
+            }
+            result
+        }catch (e:Throwable){
+            NetData(ERROR,null,"服务器或网络异常")
+        }
+    }
+
+    suspend fun getEmailCodeWithLogin(email: String):NetData<Unit>{
+        return try {
+            userService.getEmailCodeWithLogin(email)
+        }catch (e:Throwable){
+            NetData(ERROR,null,"服务器或网络异常")
+        }
+    }
+
+    suspend fun loginWithCode(
+        email: String,
+        code: Int
+    ):NetData<String>{
+        return try {
+            val result = userService.loginWithCode(email, code)
+            if(result.code == SUCCESS){
+                val user = userService.getUser(result.data!!).data
+                user?.let {
+                    dao.insertUser(
+                        UserBean(it.id!!,it.name,it.passwd,it.email,result.data)
+                    )
+                }
             }
             result
         }catch (e:Throwable){

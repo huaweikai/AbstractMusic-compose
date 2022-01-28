@@ -23,10 +23,5 @@ data class UseCase(
     val getSheetMusicListCase: GetSheetMusicListCase,
     val insertSheetCase: InsertSheetCase,
     val selectNetAlbumCase: SelectNetAlbumCase,
-    val selectNetArtistCase: SelectNetArtistCase,
-    val userRegisterCase: UserRegisterCase,
-    val userTokenOut: UserTokenOut,
-    val userLoginCase: UserLoginCase,
-    val userInfoCase: UserInfoCase,
-    val userLogoutCase: UserLogoutCase
+    val selectNetArtistCase: SelectNetArtistCase
 )

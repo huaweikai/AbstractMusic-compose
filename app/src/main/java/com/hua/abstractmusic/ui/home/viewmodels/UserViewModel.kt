@@ -12,6 +12,7 @@ import com.hua.abstractmusic.other.NetWork.ERROR
 import com.hua.abstractmusic.other.NetWork.NO_USER
 import com.hua.abstractmusic.other.NetWork.SERVER_ERROR
 import com.hua.abstractmusic.other.NetWork.SUCCESS
+import com.hua.abstractmusic.repository.UserRepository
 import com.hua.abstractmusic.use_case.UseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -27,7 +28,7 @@ import javax.inject.Inject
 class UserViewModel @Inject constructor(
     application: Application,
     useCase: UseCase,
-    private val dao: UserDao
+    private val repository: UserRepository
 ) : BaseBrowserViewModel(application, useCase) {
 
     private val _userIsOut = mutableStateOf(true)
@@ -35,7 +36,7 @@ class UserViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val code = useCase.userTokenOut().code
+            val code = repository.hasUser().code
             _userIsOut.value = when (code) {
                 SUCCESS, ERROR -> false
                 SERVER_ERROR, NO_USER -> true
@@ -52,14 +53,14 @@ class UserViewModel @Inject constructor(
 
     fun selectUserInfo() {
         viewModelScope.launch {
-            useCase.userInfoCase()?.let {
+            repository.getInfo()?.let {
                 user.value = it
             }
         }
     }
 
     suspend fun logoutUser() {
-        _userIsOut.value = useCase.userLogoutCase(dao.getToken()).code == SUCCESS
+        _userIsOut.value = repository.logoutUser().code == SUCCESS
     }
 
 
@@ -72,9 +73,10 @@ class UserViewModel @Inject constructor(
 
     val loginEmailText = mutableStateOf("")
     val loginPasswordText = mutableStateOf("")
+    val loginEmailCodeText = mutableStateOf("")
+    val loginCodeIsWait = mutableStateOf(false)
     val loginEmailError = mutableStateOf(false)
     val loginPassWordError = mutableStateOf(false)
-    val loginEmailCodeText = mutableStateOf("")
     val loginEmailCodeError = mutableStateOf(false)
     val loginEmailCodeEnable = mutableStateOf(false)
 
@@ -90,22 +92,19 @@ class UserViewModel @Inject constructor(
 
 
     //注册时，防止横屏数据消失
-
     val registerEmailText = mutableStateOf("")
     val registerPasswordText = mutableStateOf("")
     val registerPasswordAgainText = mutableStateOf("")
-    val registerEmailCode = mutableStateOf("")
+    val registerEmailCodeText = mutableStateOf("")
     val registerNameText = mutableStateOf("")
     val registerEmailError = mutableStateOf(false)
     val registerPassWordAgainError = mutableStateOf(false)
-    val registerCodeError = mutableStateOf(false)
+    val registerEmailCodeError = mutableStateOf(false)
     val registerPassWordError = mutableStateOf(false)
-    val registerButtonEnabled = mutableStateOf(false)
-    private val nullNetData = NetData<String>(0, null, "")
-    private val _registerState = mutableStateOf(nullNetData)
-    val registerState: State<NetData<String>> get() = _registerState
-    val registerCodeButton = mutableStateOf(false)
     val registerNameError = mutableStateOf(false)
+    val registerButtonEnabled = mutableStateOf(false)
+    val registerCodeButtonEnabled = mutableStateOf(false)
+
 
 
     fun registerClear() {
@@ -113,28 +112,29 @@ class UserViewModel @Inject constructor(
         registerEmailText.value = ""
         registerPasswordText.value = ""
         registerPasswordAgainText.value = ""
-        registerEmailCode.value = ""
+        registerEmailCodeText.value = ""
         registerEmailError.value = false
         registerPassWordAgainError.value = false
-        registerCodeError.value = false
+        registerEmailCodeError.value = false
         registerPassWordError.value = false
         registerButtonEnabled.value = false
-        _registerState.value = nullNetData
-        registerCodeButton.value = false
+        registerCodeButtonEnabled.value = false
         registerNameError.value = false
         registerNameText.value = ""
     }
 
     suspend fun getLoginEmailCode(): String {
         loginEmailCodeEnable.value = false
-        val result = useCase.userRegisterCase.invoke(registerEmailText.value)
+        val result = repository.getEmailCodeWithLogin(loginEmailText.value)
         if (result.code == SUCCESS) {
             viewModelScope.launch {
+                loginCodeIsWait.value = true
                 for (i in 120 downTo 0) {
                     _loginCodeText.value = "再获取还需${i}秒"
                     delay(1000L)
                 }
                 _loginCodeText.value = "点击获取验证码"
+                loginCodeIsWait.value = false
                 loginEmailCodeEnable.value = true
             }
         } else if (result.code == SERVER_ERROR || result.code == ERROR) {
@@ -144,8 +144,8 @@ class UserViewModel @Inject constructor(
     }
 
     suspend fun getRegisterEmailCode(): String {
-        registerCodeButton.value = false
-        val result = useCase.userRegisterCase.invoke(registerEmailText.value)
+        registerCodeButtonEnabled.value = false
+        val result = repository.getEmailCode(registerEmailText.value)
         if (result.code == SUCCESS) {
             viewModelScope.launch {
                 for (i in 120 downTo 0) {
@@ -153,29 +153,40 @@ class UserViewModel @Inject constructor(
                     delay(1000L)
                 }
                 _codeText.value = "点击获取验证码"
-                registerCodeButton.value = true
+                registerCodeButtonEnabled.value = true
             }
         } else if (result.code == SERVER_ERROR || result.code == ERROR) {
-            registerCodeButton.value = true
+            registerCodeButtonEnabled.value = true
         }
         return result.msg
     }
 
-    suspend fun register() {
-        if (!registerCodeError.value && !registerEmailError.value) {
-            _registerState.value = useCase.userRegisterCase(
-                registerEmailText.value,
-                registerNameText.value,
-                registerPasswordText.value,
-                registerEmailCode.value.toInt()
-            )
-        }
+    suspend fun register():NetData<String> {
+        return repository.register(
+            registerEmailText.value,
+            registerNameText.value,
+            registerPasswordText.value,
+            registerEmailCodeText.value.toInt()
+        )
+    }
+
+    suspend fun login(isPassWord:Boolean):NetData<String>{
+        return if (isPassWord) loginWithEmail() else loginWithCode()
     }
 
     suspend fun loginWithEmail(): NetData<String> {
-        val result = useCase.userLoginCase(
+        val result = repository.loginWithEmail(
             loginEmailText.value,
             loginPasswordText.value
+        )
+        _userIsOut.value = !(result.code == SUCCESS)
+        return result
+    }
+
+    suspend fun loginWithCode(): NetData<String> {
+        val result = repository.loginWithCode(
+            loginEmailText.value,
+            loginEmailCodeText.value.toInt()
         )
         _userIsOut.value = !(result.code == SUCCESS)
         return result

@@ -12,7 +12,7 @@ import retrofit2.http.Query
  */
 interface UserService {
 
-    @GET("/user/emailCode")
+    @GET("/user/emailCode/register")
     suspend fun getEmailCode(
         @Query("email") email: String
     ): NetData<Unit>
@@ -25,10 +25,10 @@ interface UserService {
         @Query("code") code: Int
     ): NetData<String>
 
-    @GET("/user/name/login")
-    suspend fun loginWithName(
-        @Query("username") username: String,
-        @Query("password") password: String
+    @GET("/user/code/login")
+    suspend fun loginWithCode(
+        @Query("email") email: String,
+        @Query("code") code: Int
     ): NetData<String>
 
     @GET("/user/email/login")
@@ -50,5 +50,10 @@ interface UserService {
     @GET("/user/logout")
     suspend fun logoutUser(
         @Query("token")token: String
+    ):NetData<Unit>
+
+    @GET("/user/emailCode/login")
+    suspend fun getEmailCodeWithLogin(
+        @Query("email")email: String
     ):NetData<Unit>
 }

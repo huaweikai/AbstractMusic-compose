@@ -31,22 +31,31 @@ fun RegisterScreen(
     viewModel: UserViewModel,
     navHostController: NavHostController
 ) {
-
     LaunchedEffect(viewModel.registerEmailText.value) {
-        viewModel.registerCodeButton.value = viewModel.registerEmailText.value.isEmail()
+        viewModel.registerCodeButtonEnabled.value = viewModel.registerEmailText.value.isEmail()
     }
     LaunchedEffect(
         viewModel.registerEmailError.value,
         viewModel.registerPassWordError.value,
         viewModel.registerPassWordAgainError.value,
-        viewModel.registerCodeError.value,
+        viewModel.registerEmailCodeError.value,
         viewModel.registerNameText.value
     ) {
         viewModel.registerButtonEnabled.value = viewModel.registerEmailText.value.isEmail() &&
                 viewModel.registerPasswordText.value.isPassWord() &&
                 viewModel.registerPasswordAgainText.value == viewModel.registerPasswordText.value &&
-                viewModel.registerEmailCode.value.isCode()&&
+                viewModel.registerEmailCodeText.value.isCode() &&
                 viewModel.registerNameText.value.isUser()
+    }
+    LaunchedEffect(
+        viewModel.registerPasswordText.value,
+        viewModel.registerPasswordAgainText.value
+    ) {
+        viewModel.registerPassWordAgainError.value = if(viewModel.registerPasswordAgainText.value.isBlank()){
+            false
+        }else{
+            viewModel.registerPasswordAgainText.value != viewModel.registerPasswordText.value
+        }
     }
     DisposableEffect(Unit) {
         this.onDispose {
@@ -56,15 +65,6 @@ fun RegisterScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    LaunchedEffect(viewModel.registerState.value) {
-        val data = viewModel.registerState.value
-        if(data.code != 0){
-            Toast.makeText(context, data.msg, Toast.LENGTH_SHORT).show()
-            if(data.code == 200){
-                navHostController.navigateUp()
-            }
-        }
-    }
 
     Column(
         modifier = Modifier
@@ -108,19 +108,13 @@ fun RegisterScreen(
             isError = viewModel.registerPassWordAgainError.value,
             onValueChange = {
                 viewModel.registerPasswordAgainText.value = it
-                if (it.isBlank()) {
-                    viewModel.registerPassWordAgainError.value = false
-                } else {
-                    viewModel.registerPassWordAgainError.value =
-                        it != viewModel.registerPasswordText.value
-                }
             }
         )
         Spacer(modifier = Modifier.padding(top = 10.dp))
         EmailCodeEditText(
-            text = viewModel.registerEmailCode,
-            codeError = viewModel.registerCodeError,
-            buttonEnabled = viewModel.registerCodeButton,
+            text = viewModel.registerEmailCodeText,
+            codeError = viewModel.registerEmailCodeError,
+            buttonEnabled = viewModel.registerCodeButtonEnabled,
             buttonCodeText = viewModel.codeText
         ) {
             viewModel.getRegisterEmailCode()
@@ -129,7 +123,11 @@ fun RegisterScreen(
         Button(
             onClick = {
                 scope.launch {
-                    viewModel.register()
+                    val data = viewModel.register()
+                    Toast.makeText(context, data.msg, Toast.LENGTH_SHORT).show()
+                    if (data.code == 200) {
+                        navHostController.navigateUp()
+                    }
                 }
             },
             enabled = viewModel.registerButtonEnabled.value,
