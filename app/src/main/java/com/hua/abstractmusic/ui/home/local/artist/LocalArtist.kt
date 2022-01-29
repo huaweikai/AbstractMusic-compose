@@ -8,9 +8,12 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
@@ -49,7 +52,19 @@ fun LocalArtist(
                         homeNavHostController.navigate("${Screen.LocalArtistDetail.route}?artistIndex=${index}")
                     }
             ) {
-                Image(
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .apply {
+                            data(item.mediaItem.metadata?.albumArtUri)
+                            error(R.drawable.music)
+                            transformations(CircleCropTransformation())
+                        }
+                        .build(),
+                    contentDescription = "",
+                    modifier = Modifier
+                        .size(45.dp)
+                )
+/*                Image(
                     painter = rememberImagePainter(data = item.mediaItem.metadata?.albumArtUri){
                           this.error(R.drawable.music)
                         this.transformations(CircleCropTransformation())
@@ -57,7 +72,7 @@ fun LocalArtist(
                     contentDescription = "",
                     Modifier
                         .size(45.dp)
-                )
+                )*/
                 Spacer(modifier = Modifier.padding(horizontal = 5.dp))
                 Column(
                     modifier = Modifier.align(Alignment.CenterVertically)

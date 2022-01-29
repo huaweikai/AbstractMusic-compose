@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight.Companion.W200
 import androidx.compose.ui.text.font.FontWeight.Companion.W300
 import androidx.compose.ui.text.font.FontWeight.Companion.W400
@@ -18,7 +19,9 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.media2.common.MediaItem
 import androidx.media2.common.MediaMetadata
+import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import coil.transform.Transformation
 import com.hua.abstractmusic.R
@@ -48,7 +51,24 @@ fun MusicItem(
             }
     ) {
         val (image,title) = createRefs()
-        Image(
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .apply {
+                    data(data.mediaItem.metadata?.albumArtUri)
+                    error(R.drawable.music)
+                    transformations(RoundedCornersTransformation(5f))
+                }
+                .build(),
+            contentDescription = "专辑图",
+            modifier = Modifier
+                .constrainAs(image) {
+                    start.linkTo(parent.start, 10.dp)
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                }
+                .size(50.dp)
+        )
+/*        Image(
             painter = rememberImagePainter(
                 data = data.mediaItem.metadata?.albumArtUri
             ) {
@@ -65,7 +85,7 @@ fun MusicItem(
                     bottom.linkTo(parent.bottom)
                 }
                 .size(50.dp)
-        )
+        )*/
         Column(
             modifier = Modifier
                 .constrainAs(title){

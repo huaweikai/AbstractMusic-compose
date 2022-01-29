@@ -20,6 +20,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -31,7 +32,9 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.media2.common.MediaItem
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.R
@@ -63,6 +66,7 @@ fun LocalArtistDetail(
     val lifecycle = LocalLifecycleOwner.current
     DisposableEffect(Unit) {
         val observer = object : LifecycleObserver {
+
             @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
             fun onCreate() {
                 viewModel.initializeController()
@@ -86,7 +90,19 @@ fun LocalArtistDetail(
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Image(
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .apply {
+                            data(item.metadata?.albumArtUri)
+                            error(R.drawable.music)
+                            transformations(CircleCropTransformation())
+                        }
+                        .build(),
+                    contentDescription = "",
+                    modifier = Modifier
+                        .size(100.dp)
+                )
+/*                Image(
                     painter = rememberImagePainter(
                         data = item.metadata?.albumArtUri
                     ){
@@ -96,7 +112,7 @@ fun LocalArtistDetail(
                     contentDescription = "",
                     modifier = Modifier
                         .size(100.dp)
-                )
+                )*/
                 Spacer(modifier = Modifier.padding(top = 10.dp))
                 Text(text = "${item.metadata?.title}")
             }

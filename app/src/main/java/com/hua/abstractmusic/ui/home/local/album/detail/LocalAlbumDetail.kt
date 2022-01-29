@@ -24,6 +24,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight.Companion.W400
@@ -41,7 +42,9 @@ import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media2.common.MediaItem
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.ui.home.MusicItem
@@ -90,7 +93,25 @@ fun LocalAlbumDetail(
                 val centerPercent = createGuidelineFromStart(140.dp)
                 val albumDescStartPercent = createGuidelineFromTop(20.dp)
                 val albumDescEndPercent = createGuidelineFromTop(180.dp)
-                Image(
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .apply {
+                            data(item.metadata?.albumArtUri)
+                            error(R.drawable.music)
+                            transformations(RoundedCornersTransformation(10f))
+                        }
+                        .build(),
+                    contentDescription = "",
+                    modifier = Modifier
+                        .constrainAs(albumArt) {
+                            start.linkTo(parent.start, 10.dp)
+                            top.linkTo(albumDescStartPercent)
+                            end.linkTo(centerPercent)
+                            bottom.linkTo(albumDescEndPercent)
+                        }
+                        .size(120.dp)
+                )
+/*                Image(
                     painter = rememberImagePainter(
                         data = item.metadata?.albumArtUri
                     ) {
@@ -106,7 +127,7 @@ fun LocalAlbumDetail(
                             bottom.linkTo(albumDescEndPercent)
                         }
                         .size(120.dp)
-                )
+                )*/
                 Column(
                     modifier = Modifier
                         .constrainAs(albumDesc) {

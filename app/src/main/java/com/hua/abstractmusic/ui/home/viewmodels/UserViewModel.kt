@@ -49,7 +49,7 @@ class UserViewModel @Inject constructor(
 
     }
 
-    val user = mutableStateOf(UserBean(0, "", "", "", ""))
+    val user = mutableStateOf(UserBean(0, "", "", "", "",null))
 
     fun selectUserInfo() {
         viewModelScope.launch {

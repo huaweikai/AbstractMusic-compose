@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -21,7 +22,10 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.media2.common.SessionPlayer
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
+import coil.transform.RoundedCornersTransformation
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.ui.home.BottomBarBean
@@ -78,7 +82,24 @@ fun Controller(
     ) {
         val (album, title, controller) = createRefs()
         val percent = createGuidelineFromStart(0.7f)
-        Image(
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .apply {
+                    data(data?.albumArtUri)
+                    error(R.drawable.music)
+                    transformations(RoundedCornersTransformation(10f))
+                }
+                .build(),
+            contentDescription = "专辑图",
+            modifier = Modifier
+                .constrainAs(album) {
+                    start.linkTo(parent.start, 10.dp)
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                }
+                .size(50.dp)
+        )
+/*        Image(
             painter = rememberImagePainter(data = data?.albumArtUri) {
                 this.error(R.drawable.music)
             },
@@ -90,7 +111,7 @@ fun Controller(
                     bottom.linkTo(parent.bottom)
                 }
                 .size(50.dp)
-        )
+        )*/
         Column(
             modifier = Modifier
                 .constrainAs(title) {

@@ -19,12 +19,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
 import coil.size.ViewSizeResolver
 import coil.transform.CircleCropTransformation
 import coil.transform.RoundedCornersTransformation
@@ -58,7 +61,24 @@ fun LocalAlbum(
                 modifier = Modifier
                     .padding(10.dp),
             ) {
-                Image(
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .apply {
+                            data(item.mediaItem.metadata?.albumArtUri)
+                            error(R.drawable.music)
+                            transformations(RoundedCornersTransformation(40f))
+                        }
+                        .build(),
+                    contentDescription = "",
+                    modifier = Modifier
+                        .size(190.dp)
+                        .clickable {
+                            viewModel.navigationState.value = false
+                            homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumId=${item.mediaId}")
+                        },
+                    contentScale = ContentScale.Crop,
+                )
+/*                Image(
                     painter = rememberImagePainter(
                         data = item.mediaItem.metadata?.albumArtUri
                     ) {
@@ -74,7 +94,7 @@ fun LocalAlbum(
                         },
                     contentDescription = "",
                     contentScale = ContentScale.Crop,
-                )
+                )*/
                 Text(
                     text = "${item.mediaItem.metadata?.title}",
                     Modifier

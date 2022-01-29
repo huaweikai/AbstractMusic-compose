@@ -9,8 +9,9 @@ import androidx.room.PrimaryKey
  * @Desc   :
  */
 data class NetUser(
-    var id :Int?,
+    var id: Int?,
     var name: String,
-    var email:String,
-    val passwd:String
+    var email: String,
+    val passwd: String,
+    val head: String?
 )

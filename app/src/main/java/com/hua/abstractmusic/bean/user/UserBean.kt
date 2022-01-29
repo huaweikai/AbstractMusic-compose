@@ -15,5 +15,6 @@ data class UserBean(
     val userName: String,
     val password: String,
     val email: String,
-    val token: String
+    val token: String,
+    val head: String?,
 )

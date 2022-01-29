@@ -91,6 +91,7 @@ fun Mine(
         }
     }
     Text(text = "已经登录了")
+
     Text(text = viewModel.user.value.userName)
     Button(onClick = {
         scope.launch {

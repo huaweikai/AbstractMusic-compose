@@ -50,7 +50,7 @@ class UserRepository(
             if (result.code == 200) {
                 getUser(result.data!!).data?.let {
                     dao.insertUser(
-                        UserBean(it.id!!, it.name, it.passwd, it.email, result.data)
+                        UserBean(it.id!!, it.name, it.passwd, it.email, result.data,null)
                     )
                 }
             }
@@ -116,7 +116,7 @@ class UserRepository(
                 val user = userService.getUser(result.data!!).data
                 user?.let {
                     dao.insertUser(
-                        UserBean(it.id!!,it.name,it.passwd,it.email,result.data)
+                        UserBean(it.id!!,it.name,it.passwd,it.email,result.data,null)
                     )
                 }
             }

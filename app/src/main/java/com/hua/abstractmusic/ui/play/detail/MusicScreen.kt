@@ -9,6 +9,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight.Companion.W300
 import androidx.compose.ui.text.style.TextAlign
@@ -17,7 +18,9 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.media2.common.SessionPlayer
+import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.google.android.exoplayer2.Player
 import com.hua.abstractmusic.R
@@ -42,7 +45,26 @@ fun MusicScreen(
         val imgEnd = createGuidelineFromStart(0.9f)
         val imgTop = createGuidelineFromTop(0.15f)
         val imgBottom = createGuidelineFromTop(0.5f)
-        Image(
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .apply {
+                    data(viewModel.currentItem.value.metadata?.albumArtUri)
+                    error(R.drawable.music)
+                    transformations(RoundedCornersTransformation(30f))
+                }
+                .build(),
+            contentDescription = "",
+            modifier = Modifier
+                .constrainAs(img) {
+                    top.linkTo(imgTop)
+                    start.linkTo(imgStart)
+                    end.linkTo(imgEnd)
+                    bottom.linkTo(imgBottom)
+                    width = Dimension.fillToConstraints
+                    height = Dimension.fillToConstraints
+                }
+        )
+/*        Image(
             painter = rememberImagePainter(data = viewModel.currentItem.value.metadata?.albumArtUri) {
                 this.transformations(RoundedCornersTransformation(30f))
                 this.error(R.drawable.music)
@@ -58,7 +80,7 @@ fun MusicScreen(
                     height = Dimension.fillToConstraints
                 }
 //                .aspectRatio(1f)
-        )
+        )*/
         Column(modifier = Modifier
             .constrainAs(title) {
                 top.linkTo(img.bottom, 32.dp)

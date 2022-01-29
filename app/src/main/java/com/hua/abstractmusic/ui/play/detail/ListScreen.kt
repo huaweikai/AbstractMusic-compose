@@ -10,10 +10,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
@@ -57,7 +60,24 @@ fun ListScreen(
                         .height(80.dp)
                 ) {
                     val (img, title) = createRefs()
-                    Image(
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .apply {
+                                data( item.mediaItem.metadata?.albumArtUri)
+                                error(R.drawable.music)
+                                transformations(RoundedCornersTransformation(30f))
+                            }
+                            .build(),
+                        contentDescription = "",
+                        modifier = Modifier
+                            .constrainAs(img) {
+                                start.linkTo(parent.start, 8.dp)
+                                bottom.linkTo(parent.bottom)
+                                top.linkTo(parent.top)
+                            }
+                            .size(70.dp)
+                    )
+/*                    Image(
                         painter = rememberImagePainter(
                             data = item.mediaItem.metadata?.albumArtUri
                         ) {
@@ -72,7 +92,7 @@ fun ListScreen(
                                 top.linkTo(parent.top)
                             }
                             .size(70.dp)
-                    )
+                    )*/
                     Column(
                         modifier = Modifier
                             .constrainAs(title) {
