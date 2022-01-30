@@ -22,7 +22,7 @@ fun Long.toTime(): String {
     return simpleDateFormat.format(date)
 }
 fun Long.toDate(): String {
-    val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.CHINESE)
+    val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINESE)
     val date = Date(this)
     return simpleDateFormat.format(date)
 }

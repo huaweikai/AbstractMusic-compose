@@ -60,4 +60,7 @@ object Constant {
                 albumArtUri = ""
             }.build()).build()
     const val CLEAR_PLAY_LIST = "clear_list"
+
+    const val BUCKET_NAME = "abstractmusic"
+    const val BUCKET_HEAD_IMG = "headImg"
 }

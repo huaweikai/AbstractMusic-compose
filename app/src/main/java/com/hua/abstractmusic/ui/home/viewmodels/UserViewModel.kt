@@ -1,20 +1,29 @@
 package com.hua.abstractmusic.ui.home.viewmodels
 
 import android.app.Application
+import android.content.ContentResolver
+import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.viewModelScope
 import com.hua.abstractmusic.base.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.net.NetData
 import com.hua.abstractmusic.bean.user.UserBean
 import com.hua.abstractmusic.db.user.UserDao
+import com.hua.abstractmusic.other.Constant.BUCKET_HEAD_IMG
 import com.hua.abstractmusic.other.NetWork.ERROR
 import com.hua.abstractmusic.other.NetWork.NO_USER
 import com.hua.abstractmusic.other.NetWork.SERVER_ERROR
 import com.hua.abstractmusic.other.NetWork.SUCCESS
 import com.hua.abstractmusic.repository.UserRepository
+import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.use_case.UseCase
+import com.hua.abstractmusic.utils.toDate
+import com.hua.abstractmusic.utils.toTime
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,22 +43,23 @@ class UserViewModel @Inject constructor(
     private val _userIsOut = mutableStateOf(true)
     val userIsOut: State<Boolean> get() = _userIsOut
 
-    init {
-        viewModelScope.launch {
-            val code = repository.hasUser().code
-            _userIsOut.value = when (code) {
-                SUCCESS, ERROR -> false
-                SERVER_ERROR, NO_USER -> true
-                else -> false
-            }
+
+    suspend fun checkUser():NetData<Unit>{
+        val result = repository.hasUser()
+        val code = result.code
+        _userIsOut.value = when (code) {
+            SUCCESS, ERROR -> false
+            SERVER_ERROR, NO_USER -> true
+            else -> false
         }
+        return result
     }
 
     override fun initializeController() {
 
     }
 
-    val user = mutableStateOf(UserBean(0, "", "", "", "",null))
+    val user = mutableStateOf(UserBean(0, "", "", "", "", null))
 
     fun selectUserInfo() {
         viewModelScope.launch {
@@ -59,8 +69,12 @@ class UserViewModel @Inject constructor(
         }
     }
 
-    suspend fun logoutUser() {
-        _userIsOut.value = repository.logoutUser().code == SUCCESS
+    fun logoutUser(){
+        viewModelScope.launch {
+            _userIsOut.value = repository.logoutUser().code == SUCCESS
+        }
+//        return repository.logoutUser().code
+
     }
 
 
@@ -104,7 +118,6 @@ class UserViewModel @Inject constructor(
     val registerNameError = mutableStateOf(false)
     val registerButtonEnabled = mutableStateOf(false)
     val registerCodeButtonEnabled = mutableStateOf(false)
-
 
 
     fun registerClear() {
@@ -161,7 +174,7 @@ class UserViewModel @Inject constructor(
         return result.msg
     }
 
-    suspend fun register():NetData<String> {
+    suspend fun register(): NetData<String> {
         return repository.register(
             registerEmailText.value,
             registerNameText.value,
@@ -170,11 +183,11 @@ class UserViewModel @Inject constructor(
         )
     }
 
-    suspend fun login(isPassWord:Boolean):NetData<String>{
+    suspend fun login(isPassWord: Boolean): NetData<String> {
         return if (isPassWord) loginWithEmail() else loginWithCode()
     }
 
-    suspend fun loginWithEmail(): NetData<String> {
+    private suspend fun loginWithEmail(): NetData<String> {
         val result = repository.loginWithEmail(
             loginEmailText.value,
             loginPasswordText.value
@@ -183,12 +196,36 @@ class UserViewModel @Inject constructor(
         return result
     }
 
-    suspend fun loginWithCode(): NetData<String> {
+    private suspend fun loginWithCode(): NetData<String> {
         val result = repository.loginWithCode(
             loginEmailText.value,
             loginEmailCodeText.value.toInt()
         )
         _userIsOut.value = !(result.code == SUCCESS)
         return result
+    }
+
+    fun putHeadPicture(
+        url: String,
+        contentResolver: ContentResolver
+    ) {
+        val uri = Uri.parse(url)
+        val byte = contentResolver.openInputStream(uri)?.readBytes()
+        val file = DocumentFile.fromSingleUri(getApplication(), uri)
+        viewModelScope.launch(Dispatchers.IO) {
+            val fileName = "${BUCKET_HEAD_IMG}/${user.value.id}-head-${
+                System.currentTimeMillis().toDate()
+            }.png"
+            val result = repository.putHeadPicture(
+                fileName,
+                byte,
+                file,
+            ) {
+                Log.d("TAG", "putHeadPicture: ${it.transferPercentage}")
+            }
+            if (result.code == 200) {
+                selectUserInfo()
+            }
+        }
     }
 }

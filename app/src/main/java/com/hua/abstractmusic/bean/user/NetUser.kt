@@ -12,6 +12,6 @@ data class NetUser(
     var id: Int?,
     var name: String,
     var email: String,
-    val passwd: String,
-    val head: String?
+    var passwd: String,
+    var head: String?
 )

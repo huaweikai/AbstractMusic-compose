@@ -11,5 +11,4 @@ object NetWork {
     const val SERVER_ERROR = 500
     const val ERROR = 501
     const val NO_USER = 502
-
 }

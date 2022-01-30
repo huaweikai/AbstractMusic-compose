@@ -1,6 +1,8 @@
 package com.hua.abstractmusic.di
 
 import android.content.Context
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.room.Room
 import com.hua.abstractmusic.db.music.MusicDao
 import com.hua.abstractmusic.db.music.MusicRoomBase
@@ -25,9 +27,12 @@ import com.hua.abstractmusic.use_case.net.SelectNetArtistCase
 import com.hua.abstractmusic.use_case.sheet.GetSheetMusicListCase
 import com.hua.abstractmusic.use_case.sheet.GetSheetNameCase
 import com.hua.abstractmusic.use_case.sheet.InsertSheetCase
+import com.hua.abstractmusic.utils.KEY
+import com.obs.services.ObsClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
@@ -90,16 +95,15 @@ object AppModule {
     @Singleton
     fun provideUserRepository(
         service: UserService,
-        dao: UserDao
-    ) = UserRepository(service,dao)
+        dao: UserDao,
+        obsClient: ObsClient
+    ) = UserRepository(service,dao,obsClient)
 
     @Provides
     @Singleton
     fun provideUseCase(
         repository: Repository,
-        netRepository: NetRepository,
-        userRepository: UserRepository,
-        dao: UserDao
+        netRepository: NetRepository
     ): UseCase =
         UseCase(
             InsertMusicToCurrentItemCase(repository),
@@ -156,4 +160,11 @@ object AppModule {
         retrofit: Retrofit
     ) = retrofit.create<UserService>()
 
+    @Provides
+    @Singleton
+    fun provideObsClient() = ObsClient(
+        KEY.AccessKeyId,
+        KEY.SecretAccessKey,
+        "obs.cn-north-4.myhuaweicloud.com"
+    )
 }
