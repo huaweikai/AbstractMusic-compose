@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -50,7 +51,6 @@ import com.hua.abstractmusic.R
 import com.hua.abstractmusic.ui.home.MusicItem
 import com.hua.abstractmusic.ui.home.viewmodels.AlbumDetailViewModel
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
-import com.hua.abstractmusic.ui.theme.LightColor
 import com.hua.abstractmusic.utils.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -111,23 +111,6 @@ fun LocalAlbumDetail(
                         }
                         .size(120.dp)
                 )
-/*                Image(
-                    painter = rememberImagePainter(
-                        data = item.metadata?.albumArtUri
-                    ) {
-                        transformations(RoundedCornersTransformation(10f))
-                        error(R.drawable.music)
-                    },
-                    contentDescription = "",
-                    modifier = Modifier
-                        .constrainAs(albumArt) {
-                            start.linkTo(parent.start, 10.dp)
-                            top.linkTo(albumDescStartPercent)
-                            end.linkTo(centerPercent)
-                            bottom.linkTo(albumDescEndPercent)
-                        }
-                        .size(120.dp)
-                )*/
                 Column(
                     modifier = Modifier
                         .constrainAs(albumDesc) {
@@ -153,9 +136,6 @@ fun LocalAlbumDetail(
             }
         }
         item{
-            Box{
-
-            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -171,7 +151,7 @@ fun LocalAlbumDetail(
                             )
                             .fillMaxHeight()
                             .background(
-                                LightColor.playingTitleColor,
+                                MaterialTheme.colorScheme.primary,
                                 shape = RoundedCornerShape(10.dp)
                             )
                             .weight(1f)

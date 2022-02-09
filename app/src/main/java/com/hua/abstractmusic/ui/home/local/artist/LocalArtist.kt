@@ -48,7 +48,7 @@ fun LocalArtist(
                     .fillMaxWidth()
                     .padding(start = 20.dp, bottom = 20.dp)
                     .clickable {
-                        homeViewModel.navigationState.value = false
+//                        homeViewModel.navigationState.value = false
                         homeNavHostController.navigate("${Screen.LocalArtistDetail.route}?artistIndex=${index}")
                     }
             ) {

@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.ScaffoldState
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -32,6 +34,7 @@ fun EmailCodeEditText(
     getCode: suspend ()->String
 ) {
     val scope = rememberCoroutineScope()
+
     val context = LocalContext.current
     ConstraintLayout(
         modifier = Modifier
@@ -69,7 +72,7 @@ fun EmailCodeEditText(
         Button(
             onClick = {
                 scope.launch {
-                    Toast.makeText(context,getCode() , Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context,getCode(),Toast.LENGTH_SHORT).show()
                 }
             },
             modifier = Modifier.constrainAs(button) {

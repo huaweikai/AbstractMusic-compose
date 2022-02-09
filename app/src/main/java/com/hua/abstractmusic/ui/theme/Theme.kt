@@ -26,6 +26,7 @@ private val LightColorPalette = lightColorScheme(
     onPrimary = Purple200,
     onPrimaryContainer = Purple200,
     onSecondary = Color.White,
+    background = Color.White,
     //md3 bottom阴影
     secondaryContainer = Color.White
 
@@ -58,7 +59,7 @@ fun AbstractMusicTheme(
 //    )
     MaterialTheme(
         colorScheme = colors,
-        typography = Typography(),
+        typography = Typography,
         content = content
     )
 }

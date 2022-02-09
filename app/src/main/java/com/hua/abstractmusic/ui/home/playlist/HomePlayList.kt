@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.ui.home.playlist
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,6 +14,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -26,9 +28,11 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
+import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
 import com.hua.abstractmusic.utils.artist
 import com.hua.abstractmusic.utils.title
+import kotlinx.coroutines.launch
 
 
 /**
@@ -39,11 +43,15 @@ import com.hua.abstractmusic.utils.title
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun HomePlayList(
-    viewModel: HomeViewModel,
+    playListState: ModalBottomSheetState,
+    viewModel: HomeViewModel = LocalHomeViewModel.current,
 ) {
-    val state = viewModel.playListState.value
+//    val state = viewModel.playListState.value
+
+    val scope = rememberCoroutineScope()
+
     ModalBottomSheetLayout(
-        sheetState = state,
+        sheetState = playListState,
         sheetContent = {
             Spacer(modifier = Modifier.height(10.dp))
             Row(Modifier.fillMaxWidth()) {
@@ -51,13 +59,15 @@ fun HomePlayList(
                     text = "播放列表",
                     fontSize = 20.sp,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .weight(1f)
                 )
                 Image(
                     painter = painterResource(id = R.drawable.ic_delete_all),
                     contentDescription = "清空",
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .weight(1f)
                         .clickable {
                             viewModel.clearPlayList()

@@ -11,17 +11,3 @@ val Purple500 = Color(0xFF03DAC5)
 val Purple700 = Color(0xFF3700B3)
 val Teal200 = Color(0xFF03DAC5)
 val SkyBule = Color(0xff77D3D0)
-
-@Composable
-fun Colors.compositedOnSurface(alpha: Float): Color {
-    return onSurface.copy(alpha = alpha).compositeOver(surface)
-}
-
-object LightColor{
-    val backgroundColor = Color.White
-    val playingTitleColor = Color(0xff77D3D0)
-}
-object NightColor{
-    val backgroundColor = Color.Black
-    val playingTitleColor = Color(0xff77D3D0)
-}

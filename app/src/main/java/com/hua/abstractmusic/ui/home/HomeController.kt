@@ -1,12 +1,14 @@
 package com.hua.abstractmusic.ui.home
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 
 import androidx.compose.runtime.*
@@ -20,19 +22,20 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.media2.common.SessionPlayer
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.AsyncImage
-import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.ui.home.BottomBarBean
-import com.hua.abstractmusic.bean.ui.home.ControllerBean
+import com.hua.abstractmusic.bean.ui.home.IconBean
+import com.hua.abstractmusic.ui.LocalHomeNavController
+import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.route.Screen
-import com.hua.abstractmusic.ui.theme.LightColor
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.utils.albumArtUri
 import com.hua.abstractmusic.utils.artist
@@ -48,36 +51,31 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun HomeController(
-    navController: NavHostController,
-    viewModel: HomeViewModel,
     modifier: Modifier,
-    playListClick: () -> Unit
+    playListClick: () -> Unit,
+    playScreenClick:()->Unit,
 ) {
     Column(
         modifier = modifier,
     ) {
-        Controller(viewModel, playListClick)
-        HomeNavigation(navController = navController, viewModel)
+        Controller(playListClick,playScreenClick)
+        HomeNavigation()
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
 @Composable
 fun Controller(
-    viewModel: HomeViewModel,
-    playListClick: () -> Unit
+    playListClick: () -> Unit,
+    playScreenClick:()->Unit,
+    viewModel: HomeViewModel = LocalHomeViewModel.current
 ) {
-    val scope = rememberCoroutineScope()
     val data = viewModel.currentItem.value.metadata
-    val state = viewModel.playScreenState.value
     ConstraintLayout(
         modifier = Modifier
             .height(60.dp)
             .clickable {
-                scope.launch {
-                    state.animateTo(ModalBottomSheetValue.Expanded)
-                    viewModel.playScreenBoolean.value = true
-                }
+                playScreenClick()
             }
     ) {
         val (album, title, controller) = createRefs()
@@ -99,19 +97,6 @@ fun Controller(
                 }
                 .size(50.dp)
         )
-/*        Image(
-            painter = rememberImagePainter(data = data?.albumArtUri) {
-                this.error(R.drawable.music)
-            },
-            contentDescription = "专辑图",
-            modifier = Modifier
-                .constrainAs(album) {
-                    start.linkTo(parent.start, 10.dp)
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                }
-                .size(50.dp)
-        )*/
         Column(
             modifier = Modifier
                 .constrainAs(title) {
@@ -127,30 +112,6 @@ fun Controller(
                 artist = "${data?.artist}"
             )
         }
-/*
-    HorizontalPager(
-            state = viewModel.controllerTitleViewPageState.value,
-            count = viewModel.currentPlayList.value.size,
-            modifier = Modifier
-                .constrainAs(title) {
-                    start.linkTo(album.end, 8.dp)
-                    top.linkTo(album.top)
-                    end.linkTo(percent, 10.dp)
-                    bottom.linkTo(album.bottom)
-                    width = Dimension.fillToConstraints
-                }
-        ) { pager ->
-            val item = viewModel.currentPlayList.value[pager].mediaItem.metadata
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center
-            ) {
-                TitleAndArtist(
-                    title = "${item?.title}",
-                    artist = "${item?.artist}"
-                )
-            }
-        }*/
         Row(
             modifier = Modifier.constrainAs(controller) {
                 top.linkTo(parent.top, 2.dp)
@@ -166,16 +127,16 @@ fun Controller(
                     R.drawable.ic_play
                 }
             val list = listOf(
-                ControllerBean(stateIcon, "播放"),
-                ControllerBean(R.drawable.ic_next, "下一首"),
-                ControllerBean(R.drawable.ic_playlist, "播放列表")
+                IconBean(stateIcon, "播放"),
+                IconBean(R.drawable.ic_next, "下一首"),
+                IconBean(R.drawable.ic_playlist, "播放列表")
             )
 
             for (i in 0..2) {
                 val button = list[i]
                 ControllerButton(
                     resId = button.resId,
-                    resDesc = button.resDesc,
+                    resDesc = button.desc,
                     modifier = Modifier
                 ) {
                     when (i) {
@@ -211,15 +172,16 @@ fun ControllerButton(
     ) {
         Icon(
             painter = painterResource(id = resId),
-            contentDescription = resDesc,
-            tint = Color(0xff77D3D0)
+            contentDescription = resDesc
         )
     }
 }
 
 
 @Composable
-fun HomeNavigation(navController: NavHostController, viewModel: HomeViewModel) {
+fun HomeNavigation(
+    navController: NavHostController = LocalHomeNavController.current
+) {
     val back = navController.currentBackStackEntryAsState()
     val bars = listOf(
         BottomBarBean("网络音乐", R.drawable.ic_line, Screen.NetScreen.route),
@@ -230,16 +192,21 @@ fun HomeNavigation(navController: NavHostController, viewModel: HomeViewModel) {
         modifier = Modifier
             .fillMaxWidth()
             .height(60.dp),
-        elevation = 0.dp
+        elevation = 0.dp,
+        backgroundColor = MaterialTheme.colorScheme.background
     ) {
-        bars.forEachIndexed { index, item ->
+        bars.forEach {item ->
             val selected = item.route == back.value?.destination?.route
-            val color = if (selected) LightColor.playingTitleColor else Color.Black
+            val color = if (selected) MaterialTheme.colorScheme.primary else Color.Black
             BottomNavigationItem(
                 selected = selected,
                 onClick = {
-                    navController.navigate(item.route) {
-                        this.launchSingleTop = true
+                    navController.navigate(item.route){
+                        popUpTo(navController.graph.findStartDestination().id){
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
                     }
                 },
                 icon = {
@@ -258,11 +225,33 @@ fun HomeNavigation(navController: NavHostController, viewModel: HomeViewModel) {
                     )
                 },
                 alwaysShowLabel = false,
-                selectedContentColor = LightColor.playingTitleColor,
-                modifier = Modifier
-                    .background(LightColor.backgroundColor)
+                selectedContentColor = MaterialTheme.colorScheme.primary
             )
         }
     }
 
 }
+/*
+    HorizontalPager(
+            state = viewModel.controllerTitleViewPageState.value,
+            count = viewModel.currentPlayList.value.size,
+            modifier = Modifier
+                .constrainAs(title) {
+                    start.linkTo(album.end, 8.dp)
+                    top.linkTo(album.top)
+                    end.linkTo(percent, 10.dp)
+                    bottom.linkTo(album.bottom)
+                    width = Dimension.fillToConstraints
+                }
+        ) { pager ->
+            val item = viewModel.currentPlayList.value[pager].mediaItem.metadata
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center
+            ) {
+                TitleAndArtist(
+                    title = "${item?.title}",
+                    artist = "${item?.artist}"
+                )
+            }
+        }*/

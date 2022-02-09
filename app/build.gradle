@@ -14,7 +14,6 @@ android {
         targetSdk 31
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
@@ -120,4 +119,6 @@ dependencies {
 
     //huawei obs
     implementation 'com.huaweicloud:esdk-obs-android:3.21.12'
+
+    implementation project(":taglib")
 }

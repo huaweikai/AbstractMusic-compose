@@ -1,7 +1,9 @@
 package com.hua.abstractmusic.ui.utils
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -26,17 +28,13 @@ fun TitleAndArtist(
         text = title,
         color = color,
         maxLines = 1,
-        fontSize = 16.sp,
-        fontWeight = FontWeight.W400,
-        textAlign = TextAlign.Start,
-        overflow = TextOverflow.Visible
+        overflow = TextOverflow.Visible,
+        style = MaterialTheme.typography.titleMedium
     )
     Text(
         text = artist,
         color = color,
         maxLines = 1,
-        fontSize = 14.sp,
-        fontWeight = FontWeight.W300,
-        textAlign = TextAlign.Start
+        style = MaterialTheme.typography.titleSmall
     )
 }

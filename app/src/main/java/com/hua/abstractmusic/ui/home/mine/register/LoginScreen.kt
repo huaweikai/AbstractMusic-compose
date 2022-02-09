@@ -44,24 +44,24 @@ fun LoginScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val loginMode = remember {
+    var loginMode by remember {
         mutableStateOf(true)
     }
-    val loginButtonEnabled = remember {
+    var loginButtonEnabled by remember {
         mutableStateOf(false)
     }
     LaunchedEffect(
         viewModel.loginPasswordText.value,
         viewModel.loginEmailText.value,
         viewModel.loginEmailCodeText.value,
-        loginMode.value
+        loginMode
     ) {
-        if (loginMode.value) {
-            loginButtonEnabled.value =
+        if (loginMode) {
+            loginButtonEnabled =
                 viewModel.loginEmailText.value.isEmail()
                         && viewModel.loginPasswordText.value.isPassWord()
         } else {
-            loginButtonEnabled.value =
+            loginButtonEnabled =
                 viewModel.loginEmailText.value.isEmail()
                         && viewModel.loginEmailCodeText.value.isCode()
         }
@@ -108,7 +108,7 @@ fun LoginScreen(
         Button(
             onClick = {
                 scope.launch {
-                    val result = viewModel.login(loginMode.value)
+                    val result = viewModel.login(loginMode)
                     if (result.code == 200) {
                         navController.navigateUp()
                     } else {
@@ -123,7 +123,7 @@ fun LoginScreen(
                     top.linkTo(loginEd.bottom, 5.dp)
                     width = Dimension.fillToConstraints
                 },
-            enabled = loginButtonEnabled.value
+            enabled = loginButtonEnabled
         ) {
             Text(text = "登录")
         }
@@ -139,7 +139,7 @@ fun LoginScreen(
                 }
         )
         Text(
-            text = if (loginMode.value) "验证码登录" else "密码登录",
+            text = if (loginMode) "验证码登录" else "密码登录",
             modifier = Modifier
                 .constrainAs(codeLogin) {
                     start.linkTo(centerPercent)
@@ -148,7 +148,7 @@ fun LoginScreen(
                     bottom.linkTo(register.bottom)
                 }
                 .clickable {
-                    loginMode.value = !loginMode.value
+                    loginMode = !loginMode
                 }
         )
     }
@@ -158,7 +158,7 @@ fun LoginScreen(
 private fun LoginEd(
     viewModel: UserViewModel,
     modifier: Modifier,
-    loginMode: MutableState<Boolean>
+    loginMode: Boolean
 ) {
     Column(
         modifier = modifier
@@ -176,7 +176,7 @@ private fun LoginEd(
             fontSize = 12.sp
         )
         AnimatedVisibility(
-            visible = loginMode.value,
+            visible = loginMode,
             modifier = Modifier.fillMaxWidth()
         ) {
             PassWordEditText(
@@ -196,7 +196,7 @@ private fun LoginEd(
         }
 
         AnimatedVisibility(
-            visible = !loginMode.value,
+            visible = !loginMode,
             modifier = Modifier.fillMaxWidth()
         ) {
             EmailCodeEditText(

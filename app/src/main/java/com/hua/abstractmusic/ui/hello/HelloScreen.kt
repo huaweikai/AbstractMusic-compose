@@ -1,5 +1,8 @@
 package com.hua.abstractmusic.ui.hello
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -8,7 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,8 +20,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.NavOptions
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.ui.hello.PermissionBean
+import com.hua.abstractmusic.ui.LocalAppNavController
+import com.hua.abstractmusic.ui.LocalHomeViewModel
+import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.theme.Purple200
 
 
@@ -29,12 +38,31 @@ import com.hua.abstractmusic.ui.theme.Purple200
  */
 @Composable
 fun HelloScreen(
-    onclick: () -> Unit
+    viewModel:HomeViewModel = LocalHomeViewModel.current,
+    appNavController:NavHostController = LocalAppNavController.current
 ) {
+    var isGet by remember {
+        mutableStateOf(true)
+    }
+    val permissionGet = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = {
+            it.forEach { map ->
+                if (!map.value) {
+                    isGet = false
+                }
+            }
+            if (isGet) {
+                val navOptions =
+                    NavOptions.Builder().setPopUpTo(Screen.HelloScreen.route, true).build()
+                viewModel.initializeController()
+                appNavController.navigate(Screen.HomeScreen.route, navOptions)
+            }
+        }
+    )
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
     ) {
         Spacer(modifier = Modifier.padding(top = 30.dp))
         Text(
@@ -61,7 +89,12 @@ fun HelloScreen(
                     backgroundColor = Purple200
                 ),
                 onClick = {
-                    onclick()
+                    permissionGet.launch(
+                        arrayOf(
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            Manifest.permission.READ_EXTERNAL_STORAGE
+                        )
+                    )
                 },
                 modifier = Modifier
                     .fillMaxWidth()

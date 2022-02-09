@@ -1,6 +1,7 @@
 package com.hua.abstractmusic.ui.home.viewmodels
 
 import android.app.Application
+import android.util.Log
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
@@ -24,6 +25,8 @@ import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.use_case.UseCase
 import com.hua.abstractmusic.utils.duration
+import com.hua.abstractmusic.utils.mediaUri
+import com.hua.taglib.NativeLib
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -260,30 +263,27 @@ class HomeViewModel @Inject constructor(
     }
 
 
-    //记录本地音乐的viewpager停在哪
-    var horViewPagerState = mutableStateOf(PagerState(0))
-
-    //记录控制栏标题
-    var controllerTitleViewPageState = mutableStateOf(PagerState(0))
-
-    //记录播放界面的进度
-    var playScreenViewPageState = mutableStateOf(PagerState(1))
-
-    //记录主页播放列表的打开和关闭
-    val playListState = mutableStateOf(ModalBottomSheetState(ModalBottomSheetValue.Hidden))
-
-
-    //记录主页控制中心，的navigationview是否要隐藏
-    val navigationState = mutableStateOf(
-        true
-    )
-
-    //记录主页播放列表的打开和关闭
-    val playScreenState = mutableStateOf(
-        ModalBottomSheetState(ModalBottomSheetValue.Hidden, isSkipHalfExpanded = true)
-    )
-
-    val playScreenBoolean = mutableStateOf(false)
-
-    val playListBoolean = mutableStateOf(false)
+//    //记录本地音乐的viewpager停在哪
+//    var horViewPagerState = mutableStateOf(PagerState(0))
+//
+//    //记录播放界面的进度
+//    var playScreenViewPageState = mutableStateOf(PagerState(1))
+//
+//    //记录主页播放列表的打开和关闭
+//    val playListState = mutableStateOf(ModalBottomSheetState(ModalBottomSheetValue.Hidden))
+//
+//
+//    //记录主页控制中心，的navigationview是否要隐藏
+//    val navigationState = mutableStateOf(
+//        true
+//    )
+//
+//    //记录主页播放列表的打开和关闭
+//    val playScreenState = mutableStateOf(
+//        ModalBottomSheetState(ModalBottomSheetValue.Hidden, isSkipHalfExpanded = true)
+//    )
+//
+//    val playScreenBoolean = mutableStateOf(false)
+//
+//    val playListBoolean = mutableStateOf(false)
 }

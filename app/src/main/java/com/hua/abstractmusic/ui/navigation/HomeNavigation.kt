@@ -16,6 +16,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
+import com.hua.abstractmusic.ui.LocalHomeNavController
+import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.home.local.LocalScreen
 import com.hua.abstractmusic.ui.home.local.album.detail.LocalAlbumDetail
 import com.hua.abstractmusic.ui.home.local.artist.detail.LocalArtistDetail
@@ -38,9 +40,9 @@ import com.hua.abstractmusic.utils.title
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun HomeNavigationNav(
-    homeNavController:NavHostController,
     modifier: Modifier,
-    viewModel: HomeViewModel
+    viewModel: HomeViewModel = LocalHomeViewModel.current,
+    homeNavController:NavHostController = LocalHomeNavController.current,
 ) {
     val userViewModel:UserViewModel = hiltViewModel()
     NavHost(
@@ -54,11 +56,11 @@ fun HomeNavigationNav(
         }
         composable(route = Screen.LocalScreen.route) {
             it.destination.label = "本地音乐"
-            LocalScreen(homeNavController,viewModel)
+            LocalScreen()
         }
         composable(route = Screen.MineScreen.route) {
             it.destination.label = "我的"
-            MineScreen(homeNavController, userViewModel)
+            MineScreen()
         }
         composable(
             route = "${Screen.LocalAlbumDetail.route}?albumId={albumId}",

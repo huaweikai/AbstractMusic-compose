@@ -5,10 +5,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.hua.abstractmusic.ui.LocalAppNavController
+import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.hello.HelloScreen
 import com.hua.abstractmusic.ui.hello.PermissionGet
 import com.hua.abstractmusic.ui.home.HomeScreen
@@ -23,55 +26,23 @@ import kotlinx.coroutines.launch
  * @Desc   : 整个界面的navigation
  */
 
-
 @Composable
-fun HomeNavigation(
-    nextRoute: String,
-    appNavController: NavHostController,
-    viewModel: HomeViewModel,
-    homeController: NavHostController
+fun AppNavigation(
+    appNavController:NavHostController = LocalAppNavController.current
 ) {
-    var isGet by remember {
-        mutableStateOf(true)
-    }
-    val scpoe = rememberCoroutineScope()
-
-    val s = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions(),
-        onResult = {
-            it.forEach { map ->
-                if (!map.value) {
-                    isGet = false
-                }
-            }
-            if (isGet) {
-                val navOptions =
-                    NavOptions.Builder().setPopUpTo(Screen.HelloScreen.route, true).build()
-                viewModel.initializeController()
-                appNavController.navigate(Screen.HomeScreen.route, navOptions)
-            }
-        }
-    )
     NavHost(
         navController = appNavController,
         startDestination = Screen.Splash.route
     ) {
         composable(route = Screen.Splash.route) {
-            SplashScreen(appNavHostController = appNavController, nextRoute = nextRoute)
+            SplashScreen()
         }
         composable(route = Screen.HelloScreen.route) {
-            HelloScreen {
-                //从欢迎界面传递过来的点击的lambda
-                s.launch(
-                    arrayOf(
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                        Manifest.permission.READ_EXTERNAL_STORAGE
-                    )
-                )
-            }
+            HelloScreen()
         }
         composable(route = Screen.HomeScreen.route) {
-            HomeScreen(appNaviController = appNavController, viewModel, homeController)
+            HomeScreen()
         }
     }
+
 }

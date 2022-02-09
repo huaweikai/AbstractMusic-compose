@@ -50,15 +50,6 @@ fun AlbumItem(
             modifier = Modifier
                 .size(80.dp)
         )
-/*        Image(
-            painter = rememberImagePainter(data = item.metadata?.albumArtUri) {
-                this.error(R.drawable.music)
-                this.transformations(RoundedCornersTransformation(30f))
-            },
-            contentDescription = "",
-            modifier = Modifier
-                .size(80.dp)
-        )*/
         Spacer(modifier = Modifier.padding(start = 8.dp))
         Column(
             modifier = Modifier.fillMaxHeight(),

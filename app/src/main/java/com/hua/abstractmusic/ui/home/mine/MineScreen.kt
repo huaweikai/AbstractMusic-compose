@@ -40,6 +40,9 @@ import com.hua.abstractmusic.other.NetWork.ERROR
 import com.hua.abstractmusic.other.NetWork.NO_USER
 import com.hua.abstractmusic.other.NetWork.SERVER_ERROR
 import com.hua.abstractmusic.other.NetWork.SUCCESS
+import com.hua.abstractmusic.ui.LocalHomeNavController
+import com.hua.abstractmusic.ui.LocalHomeViewModel
+import com.hua.abstractmusic.ui.LocalUserViewModel
 import com.hua.abstractmusic.ui.home.viewmodels.UserViewModel
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.utils.CropPhotoContract
@@ -55,10 +58,22 @@ import java.io.File
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MineScreen(
-    navHostController: NavHostController,
-    viewModel: UserViewModel
+    navHostController: NavHostController = LocalHomeNavController.current,
+    viewModel: UserViewModel = LocalUserViewModel.current
 ) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val contentResolver = LocalContext.current.contentResolver
+
+
+    val cropPicture = rememberLauncherForActivityResult(CropPhotoContract()) {
+        viewModel.putHeadPicture(it.toString(), contentResolver)
+    }
+
+    val selectPicture = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
+        it?.let {
+            cropPicture.launch(CropParams(uri = it))
+        }
+    }
 
     val context = LocalContext.current
     LaunchedEffect(Unit) {
@@ -67,10 +82,14 @@ fun MineScreen(
             Toast.makeText(context, result.msg, Toast.LENGTH_SHORT).show()
         }
     }
-    if(viewModel.userIsOut.value){
-        NoLogin(navHostController = navHostController)
-    }else{
-        Mine(viewModel = viewModel)
+    CompositionLocalProvider() {
+        if(viewModel.userIsOut.value){
+            NoLogin(navHostController = navHostController)
+        }else{
+            Mine(viewModel = viewModel){
+                selectPicture.launch("image/*")
+            }
+        }
     }
 }
 
@@ -96,21 +115,11 @@ fun NoLogin(
 
 @Composable
 fun Mine(
-    viewModel: UserViewModel
+    viewModel: UserViewModel,
+    selectPicture:()->Unit
 ) {
     val result = remember {
         mutableStateOf("")
-    }
-    val contentResolver = LocalContext.current.contentResolver
-    val cropPicture = rememberLauncherForActivityResult(CropPhotoContract()) {
-//        result.value = it.toString()
-        viewModel.putHeadPicture(it.toString(), contentResolver)
-    }
-
-    val selectPicture = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
-        it?.let {
-            cropPicture.launch(CropParams(uri = it))
-        }
     }
     LaunchedEffect(Unit) {
         viewModel.selectUserInfo()
@@ -128,7 +137,8 @@ fun Mine(
             modifier = Modifier
                 .size(60.dp)
                 .clickable {
-                    selectPicture.launch("image/*")
+                    selectPicture()
+//                    selectPicture.launch("image/*")
                 }
         )
 

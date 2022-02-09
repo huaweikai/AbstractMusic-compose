@@ -8,3 +8,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "AbstractMusic"
 include ':app'
+include ':taglib'

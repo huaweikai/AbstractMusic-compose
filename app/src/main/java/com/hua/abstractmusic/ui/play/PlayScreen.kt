@@ -1,39 +1,22 @@
 package com.hua.abstractmusic.ui.play
 
-import android.util.Log
-import android.view.KeyEvent.ACTION_UP
-import android.view.KeyEvent.KEYCODE_BACK
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
-import com.hua.abstractmusic.ui.home.local.album.LocalAlbum
-import com.hua.abstractmusic.ui.home.local.artist.LocalArtist
-import com.hua.abstractmusic.ui.home.local.music.LocalMusic
-import com.hua.abstractmusic.ui.home.playlist.HomePlayList
+import com.google.accompanist.pager.rememberPagerState
+import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.play.detail.ListScreen
 import com.hua.abstractmusic.ui.play.detail.MusicScreen
@@ -47,12 +30,16 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterialApi::class,ExperimentalPagerApi::class)
 @Composable
 fun PlayScreen(
-    homeViewModel: HomeViewModel
+    state:ModalBottomSheetState,
+    homeViewModel: HomeViewModel = LocalHomeViewModel.current,
 ) {
-    val state = homeViewModel.playScreenState.value
+//    val state = homeViewModel.playScreenState.value
     val scope = rememberCoroutineScope()
-    val viewPageState =homeViewModel.playScreenViewPageState.value
+//    val viewPageState =homeViewModel.playScreenViewPageState.value
+    val viewPageState = rememberPagerState()
     val tabTitles = listOf("列表","歌曲","歌词")
+
+
     ModalBottomSheetLayout(
         sheetState = state ,
         sheetContent = {
@@ -112,7 +99,7 @@ fun PlayScreen(
                             MusicScreen(viewModel = homeViewModel)
                         }
                         2->{
-                            Text(text = "${tabTitles[page]}")
+                            Text(text = tabTitles[page])
                         }
                     }
                 }

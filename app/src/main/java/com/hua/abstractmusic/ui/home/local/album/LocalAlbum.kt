@@ -32,6 +32,8 @@ import coil.size.ViewSizeResolver
 import coil.transform.CircleCropTransformation
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.R
+import com.hua.abstractmusic.ui.LocalHomeNavController
+import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.utils.albumArtUri
@@ -48,8 +50,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LocalAlbum(
-    viewModel: HomeViewModel,
-    homeNavController: NavHostController
+    homeNavController: NavHostController = LocalHomeNavController.current,
+    viewModel: HomeViewModel = LocalHomeViewModel.current,
 ) {
     val scope = rememberCoroutineScope()
     LazyVerticalGrid(
@@ -73,28 +75,11 @@ fun LocalAlbum(
                     modifier = Modifier
                         .size(190.dp)
                         .clickable {
-                            viewModel.navigationState.value = false
+//                            setNavToDetail(false)
                             homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumId=${item.mediaId}")
                         },
                     contentScale = ContentScale.Crop,
                 )
-/*                Image(
-                    painter = rememberImagePainter(
-                        data = item.mediaItem.metadata?.albumArtUri
-                    ) {
-                        transformations(RoundedCornersTransformation(40f))
-                        error(R.drawable.music)
-                    },
-                    modifier = Modifier
-                        .size(190.dp)
-                        .clickable {
-                            viewModel.navigationState.value = false
-                            homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumId=${item.mediaId}")
-//                            homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumIndex=${index}")
-                        },
-                    contentDescription = "",
-                    contentScale = ContentScale.Crop,
-                )*/
                 Text(
                     text = "${item.mediaItem.metadata?.title}",
                     Modifier

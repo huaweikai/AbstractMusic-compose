@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,6 +34,8 @@ import androidx.lifecycle.OnLifecycleEvent
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import com.hua.abstractmusic.R
+import com.hua.abstractmusic.ui.LocalAppNavController
+import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.hello.PermissionGet
 import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.route.Screen
@@ -47,59 +50,31 @@ import kotlinx.coroutines.*
  */
 @Composable
 fun SplashScreen(
-    nextRoute: String,
-    appNavHostController: NavHostController
+    appController: NavHostController = LocalAppNavController.current,
+    viewModel: HomeViewModel = LocalHomeViewModel.current
 ) {
-    val scope = rememberCoroutineScope()
-//    var state by remember {
-//        mutableStateOf(false)
-//    }
-    val lifecycleObserver = LocalLifecycleOwner.current
 
-//    LaunchedEffect(state){
-//        if(!state){
-//            delay(500L)
-//            state = true
-//        }
-//        if (state){
-//            delay(500L)
-//            val navOptions = NavOptions.Builder()
-//                .setPopUpTo(Screen.Splash.route,true)
-//                .build()
-//            appNavHostController.navigate(nextRoute,navOptions)
-//        }
-//    }
-    DisposableEffect(Unit) {
-        val observer = object : LifecycleObserver {
-            @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-            fun onResume() {
-                scope.launch {
-                    delay(500L)
-                    val navOptions = NavOptions.Builder()
-                        .setPopUpTo(Screen.Splash.route, true)
-                        .build()
-                    appNavHostController.navigate(nextRoute, navOptions)
-                }
-            }
-        }
-        lifecycleObserver.lifecycle.addObserver(observer)
-        this.onDispose {
-            lifecycleObserver.lifecycle.removeObserver(observer)
-            scope.cancel()
-        }
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        val nextRoute =
+            if (PermissionGet.checkReadPermission(context)) {
+                viewModel.initializeController()
+                Screen.HomeScreen.route
+            } else Screen.HelloScreen.route
+        delay(500L)
+        val navOptions = NavOptions.Builder()
+            .setPopUpTo(Screen.Splash.route, true)
+            .build()
+        appController.navigate(nextRoute, navOptions)
     }
 
-
-//    val animate by animateFloatAsState(
-//        if (!state) 0f else -50f,
-//        animationSpec = tween(150, easing = LinearEasing)
-//    )
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xff77D3D0))
+            .background(MaterialTheme.colorScheme.primary)
     ) {
-        val (launcher, appName,version) = createRefs()
+        val (launcher, appName, version) = createRefs()
         Image(
             painter = painterResource(id = R.drawable.ic_music_launcher),
             contentDescription = null,
@@ -117,16 +92,16 @@ fun SplashScreen(
             fontSize = 23.sp,
             modifier = Modifier
                 .constrainAs(appName) {
-                    top.linkTo(launcher.bottom,5.dp)
+                    top.linkTo(launcher.bottom, 5.dp)
                     start.linkTo(launcher.start)
                     end.linkTo(launcher.end)
                 }
         )
         Text(
-            text = "Version: ${getVersion(LocalContext.current)}",
+            text = "Version: ${getVersion(context)}",
             modifier = Modifier
-                .constrainAs(version){
-                    bottom.linkTo(parent.bottom,20.dp)
+                .constrainAs(version) {
+                    bottom.linkTo(parent.bottom, 20.dp)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 }

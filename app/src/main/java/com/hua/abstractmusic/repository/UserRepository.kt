@@ -84,7 +84,7 @@ class UserRepository(
         val token = dao.getToken()
         return try {
             val result = userService.testToken(token)
-            if(result.code == SERVER_ERROR){
+            if (result.code == SERVER_ERROR) {
                 dao.deleteUser()
             }
             result
@@ -114,7 +114,8 @@ class UserRepository(
             }
             result
         } catch (e: Throwable) {
-            NetData(ERROR, null, "服务器或网络异常")
+            dao.deleteUser()
+            NetData(SUCCESS, null, "服务器或网络异常")
         }
     }
 
@@ -151,7 +152,7 @@ class UserRepository(
         byte: ByteArray?,
         file: DocumentFile?,
         progress: (ProgressStatus) -> Unit
-    ): NetData<Unit>{
+    ): NetData<Unit> {
         return try {
             val request = PutObjectRequest(BUCKET_NAME, fileName)
                 .apply {
@@ -163,13 +164,13 @@ class UserRepository(
                         progress(it)
                     }
                 }
-           return updateUser(obsClient.putObject(request))
+            return updateUser(obsClient.putObject(request))
         } catch (e: ObsException) {
-            NetData(ERROR,null,"服务器异常")
+            NetData(ERROR, null, "服务器异常")
         }
     }
 
-    private suspend fun updateUser(objectResult: PutObjectResult):NetData<Unit>{
+    private suspend fun updateUser(objectResult: PutObjectResult): NetData<Unit> {
         val user = dao.getUserInfo()
         val netUser =
             NetUser(user?.id, user?.userName!!, user.email, user.password, objectResult.objectUrl)
@@ -179,17 +180,24 @@ class UserRepository(
                 if (result.code == 200) {
                     val data = result.data!!
                     dao.insertUser(
-                        UserBean(data.id!!,data.name,data.passwd,data.email,user.token,data.head)
+                        UserBean(
+                            data.id!!,
+                            data.name,
+                            data.passwd,
+                            data.email,
+                            user.token,
+                            data.head
+                        )
                     )
-                    NetData(SUCCESS,null,"成功")
-                }else{
-                    NetData(SERVER_ERROR,null,"服务器异常")
+                    NetData(SUCCESS, null, "成功")
+                } else {
+                    NetData(SERVER_ERROR, null, "服务器异常")
                 }
-            }else{
-                NetData(SERVER_ERROR,null,"服务器异常")
+            } else {
+                NetData(SERVER_ERROR, null, "服务器异常")
             }
-        } catch (e:Throwable){
-            NetData(ERROR,null,"服务器或网络异常")
+        } catch (e: Throwable) {
+            NetData(ERROR, null, "服务器或网络异常")
         }
     }
 }

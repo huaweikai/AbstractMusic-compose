@@ -15,6 +15,7 @@ import androidx.compose.material.*
 import androidx.compose.material.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,6 +25,8 @@ import androidx.media2.common.MediaMetadata
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.pager.*
+import com.hua.abstractmusic.ui.LocalHomeNavController
+import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.home.MusicItem
 import com.hua.abstractmusic.ui.home.local.album.LocalAlbum
 import com.hua.abstractmusic.ui.home.local.artist.LocalArtist
@@ -43,11 +46,12 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalPagerApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun LocalScreen(
-    navHostController: NavHostController,
-    viewModel: HomeViewModel
+    navHostController: NavHostController = LocalHomeNavController.current,
+    viewModel: HomeViewModel = LocalHomeViewModel.current
 ) {
+    val pagerState = rememberPagerState()
     val tabTitles = listOf("音乐", "专辑", "歌手")
-    val pagerState = viewModel.horViewPagerState.value
+//    val pagerState = viewModel.horViewPagerState.value
     val coroutineScope = rememberCoroutineScope()
     Column{
         TabRow(
@@ -86,7 +90,7 @@ fun LocalScreen(
                     LocalMusic(viewModel = viewModel)
                 }
                 1->{
-                    LocalAlbum(viewModel = viewModel,navHostController)
+                    LocalAlbum()
                 }
                 2 -> {
                     LocalArtist(homeViewModel = viewModel, homeNavHostController = navHostController)
