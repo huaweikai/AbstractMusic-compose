@@ -1,4 +1,4 @@
-package com.hua.abstractmusic.ui.home.viewmodels
+package com.hua.abstractmusic.ui.viewmodels
 
 import android.app.Application
 import android.content.ContentResolver
@@ -11,17 +11,14 @@ import androidx.lifecycle.viewModelScope
 import com.hua.abstractmusic.base.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.net.NetData
 import com.hua.abstractmusic.bean.user.UserBean
-import com.hua.abstractmusic.db.user.UserDao
 import com.hua.abstractmusic.other.Constant.BUCKET_HEAD_IMG
 import com.hua.abstractmusic.other.NetWork.ERROR
 import com.hua.abstractmusic.other.NetWork.NO_USER
 import com.hua.abstractmusic.other.NetWork.SERVER_ERROR
 import com.hua.abstractmusic.other.NetWork.SUCCESS
 import com.hua.abstractmusic.repository.UserRepository
-import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.use_case.UseCase
 import com.hua.abstractmusic.utils.toDate
-import com.hua.abstractmusic.utils.toTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -59,12 +56,15 @@ class UserViewModel @Inject constructor(
 
     }
 
-    val user = mutableStateOf(UserBean(0, "", "", "", "", null))
+    val user = mutableStateOf(UserBean(0, "", "", "", "", ""))
 
     fun selectUserInfo() {
         viewModelScope.launch {
             repository.getInfo()?.let {
+                Log.d("TAG", "selectUserInfo:${it.head} ")
+                Log.d("TAG", "selectUserInfo: ${Uri.parse(it.head)}")
                 user.value = it
+
             }
         }
     }
@@ -226,6 +226,7 @@ class UserViewModel @Inject constructor(
             if (result.code == 200) {
                 selectUserInfo()
             }
+            contentResolver.delete(uri,null,null)
         }
     }
 }

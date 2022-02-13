@@ -36,11 +36,11 @@ fun String.toTime(): Long {
     }
 }
 
-fun NetAlbum.toMediaItem(): MediaItem {
+fun NetAlbum.toMediaItem(parentId: String): MediaItem {
     return MediaItem.Builder()
         .setMetadata(
             MediaMetadata.Builder().apply {
-                id = "${Constant.NETWORK_ALBUM_ID}/${this@toMediaItem.id}"
+                id = "${parentId}/${this@toMediaItem.id}"
                 title = this@toMediaItem.name
                 year = this@toMediaItem.time.toTime()
                 artist = this@toMediaItem.artistName
@@ -53,24 +53,6 @@ fun NetAlbum.toMediaItem(): MediaItem {
             }.build()
         ).build()
 }
-
-/*fun NetAlbum.Data.toMediaItem(): MediaItem {
-    return MediaItem.Builder()
-        .setMetadata(
-            MediaMetadata.Builder().apply {
-                id = "${Constant.NETWORK_ALBUM_ID}/${this@toMediaItem.id}"
-                title = this@toMediaItem.name
-                year = this@toMediaItem.time.toTime()
-                artist = this@toMediaItem.artistName
-                displayTitle = this@toMediaItem.name
-                displaySubtitle = this@toMediaItem.artistName
-                albumArtUri = this@toMediaItem.imgUrl
-                displayIconUri = this@toMediaItem.imgUrl
-                isPlayable = false
-                browserType = MediaMetadata.BROWSABLE_TYPE_ALBUMS
-            }.build()
-        ).build()
-}*/
 
 fun NetArtist.toMediaItem(): MediaItem {
     return MediaItem.Builder()

@@ -60,10 +60,6 @@ class CropPhotoContract : ActivityResultContract<CropParams, Uri?>() {
     }
 
     override fun parseResult(resultCode: Int, intent: Intent?): Uri? {
-        return if(outputUri != null){
-            outputUri
-        }else{
-            intent?.data
-        }
+        return outputUri
     }
 }

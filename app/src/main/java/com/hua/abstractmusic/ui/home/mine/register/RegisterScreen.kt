@@ -10,7 +10,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.hua.abstractmusic.ui.home.viewmodels.UserViewModel
+import com.hua.abstractmusic.ui.viewmodels.UserViewModel
 import com.hua.abstractmusic.ui.utils.EmailCodeEditText
 import com.hua.abstractmusic.ui.utils.EmailEditText
 import com.hua.abstractmusic.ui.utils.PassWordEditText

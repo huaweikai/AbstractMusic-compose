@@ -1,13 +1,11 @@
 package com.hua.abstractmusic.ui.play.detail
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.Slider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -19,12 +17,11 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.media2.common.SessionPlayer
 import coil.compose.AsyncImage
-import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.google.android.exoplayer2.Player
 import com.hua.abstractmusic.R
-import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.utils.*
 
 /**

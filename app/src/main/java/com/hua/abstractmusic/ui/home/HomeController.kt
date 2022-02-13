@@ -4,8 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -28,19 +26,17 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
-import com.google.accompanist.pager.ExperimentalPagerApi
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.ui.home.BottomBarBean
 import com.hua.abstractmusic.bean.ui.home.IconBean
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalHomeViewModel
-import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.utils.albumArtUri
 import com.hua.abstractmusic.utils.artist
 import com.hua.abstractmusic.utils.title
-import kotlinx.coroutines.launch
 
 
 /**
@@ -63,7 +59,6 @@ fun HomeController(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
 @Composable
 fun Controller(
     playListClick: () -> Unit,
@@ -109,7 +104,7 @@ fun Controller(
         ) {
             TitleAndArtist(
                 title = "${data?.title}",
-                artist = "${data?.artist}"
+                subTitle = "${data?.artist}"
             )
         }
         Row(

@@ -11,6 +11,7 @@ import androidx.media2.common.MediaMetadata
 import com.hua.abstractmusic.other.Constant.ALBUM_ART_URI
 import com.hua.abstractmusic.other.Constant.ALBUM_ID
 import com.hua.abstractmusic.other.Constant.DURATION
+import com.hua.abstractmusic.repository.NetRepository
 import com.hua.abstractmusic.use_case.UseCase
 import com.hua.abstractmusic.utils.*
 import kotlinx.coroutines.runBlocking
@@ -25,6 +26,7 @@ import java.util.concurrent.TimeUnit
  */
 class MediaStoreScanner(
     private val useCase: UseCase,
+    private val repository: NetRepository
 ) {
 
     //获取音乐
@@ -265,6 +267,7 @@ class MediaStoreScanner(
                     this.displaySubtitle = albumNum.toString()
                     this.displayDescription = trackNum.toString()
                     this.albumArtUri = albumArtUri.toString()
+                    this.trackCount = data.size.toLong()
                     this.trackNumber = albumNum
                     this.isPlayable = false
                     this.browserType = MediaMetadata.BROWSABLE_TYPE_MIXED
@@ -313,7 +316,6 @@ class MediaStoreScanner(
         return Uri.withAppendedPath(artworkUri, albumId).toString()
     }
 
-    var executor: ExecutorService = Executors.newFixedThreadPool(5)
 
     suspend fun selectAlbumList(): List<MediaItem> {
         return useCase.selectNetAlbumCase()
@@ -329,5 +331,9 @@ class MediaStoreScanner(
 
     suspend fun selectMusicByArtist(parentId: Uri): List<MediaItem> {
         return useCase.selectNetArtistCase(parentId)
+    }
+
+    suspend fun selectBanner():List<MediaItem>{
+        return repository.getBanner()
     }
 }

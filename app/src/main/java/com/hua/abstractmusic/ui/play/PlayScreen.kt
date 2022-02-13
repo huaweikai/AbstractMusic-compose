@@ -1,7 +1,6 @@
 package com.hua.abstractmusic.ui.play
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -14,10 +13,9 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.ui.LocalHomeViewModel
-import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.play.detail.ListScreen
 import com.hua.abstractmusic.ui.play.detail.MusicScreen
 import kotlinx.coroutines.launch
@@ -27,16 +25,15 @@ import kotlinx.coroutines.launch
  * @Date   : 2022/01/20
  * @Desc   :
  */
-@OptIn(ExperimentalMaterialApi::class,ExperimentalPagerApi::class)
+@ExperimentalPagerApi
+@ExperimentalMaterialApi
 @Composable
 fun PlayScreen(
     state:ModalBottomSheetState,
     homeViewModel: HomeViewModel = LocalHomeViewModel.current,
 ) {
-//    val state = homeViewModel.playScreenState.value
     val scope = rememberCoroutineScope()
-//    val viewPageState =homeViewModel.playScreenViewPageState.value
-    val viewPageState = rememberPagerState()
+    val viewPageState = rememberPagerState(1)
     val tabTitles = listOf("列表","歌曲","歌词")
 
 

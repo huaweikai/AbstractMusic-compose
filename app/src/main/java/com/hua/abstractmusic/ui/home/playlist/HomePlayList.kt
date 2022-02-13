@@ -1,19 +1,15 @@
 package com.hua.abstractmusic.ui.home.playlist
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,10 +25,9 @@ import androidx.constraintlayout.compose.Dimension
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.ui.LocalHomeViewModel
-import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.utils.artist
 import com.hua.abstractmusic.utils.title
-import kotlinx.coroutines.launch
 
 
 /**
@@ -40,14 +35,13 @@ import kotlinx.coroutines.launch
  * @Date   : 2022/01/10
  * @Desc   : item
  */
-@OptIn(ExperimentalMaterialApi::class)
+
+@ExperimentalMaterialApi
 @Composable
 fun HomePlayList(
     playListState: ModalBottomSheetState,
     viewModel: HomeViewModel = LocalHomeViewModel.current,
 ) {
-//    val state = viewModel.playListState.value
-
     val scope = rememberCoroutineScope()
 
     ModalBottomSheetLayout(
@@ -134,7 +128,5 @@ fun HomePlayList(
                 }
             }
         }
-    ) {
-//        ScaffoldContent()
-    }
+    ) {}
 }

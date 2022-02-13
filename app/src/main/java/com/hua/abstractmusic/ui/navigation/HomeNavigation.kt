@@ -1,21 +1,15 @@
 package com.hua.abstractmusic.ui.navigation
 
-import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.home.local.LocalScreen
@@ -25,11 +19,9 @@ import com.hua.abstractmusic.ui.home.mine.MineScreen
 import com.hua.abstractmusic.ui.home.mine.register.LoginScreen
 import com.hua.abstractmusic.ui.home.mine.register.RegisterScreen
 import com.hua.abstractmusic.ui.home.net.NetScreen
-import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
-import com.hua.abstractmusic.ui.home.viewmodels.UserViewModel
-import com.hua.abstractmusic.ui.play.PlayScreen
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.viewmodels.UserViewModel
 import com.hua.abstractmusic.ui.route.Screen
-import com.hua.abstractmusic.utils.title
 
 /**
  * @author : huaweikai
@@ -37,14 +29,15 @@ import com.hua.abstractmusic.utils.title
  * @Desc   : 主页的小navigation，用于跳转在线音乐，本地音乐和我的界面
  */
 
-@OptIn(ExperimentalPagerApi::class)
+@ExperimentalPagerApi
+@ExperimentalFoundationApi
 @Composable
 fun HomeNavigationNav(
     modifier: Modifier,
     viewModel: HomeViewModel = LocalHomeViewModel.current,
     homeNavController:NavHostController = LocalHomeNavController.current,
 ) {
-    val userViewModel:UserViewModel = hiltViewModel()
+    val userViewModel: UserViewModel = hiltViewModel()
     NavHost(
         navController = homeNavController,
         startDestination = Screen.NetScreen.route,
@@ -52,7 +45,7 @@ fun HomeNavigationNav(
     ) {
         composable(route = Screen.NetScreen.route) {
             it.destination.label = "在线音乐"
-            NetScreen(homeNavController,viewModel)
+            NetScreen()
         }
         composable(route = Screen.LocalScreen.route) {
             it.destination.label = "本地音乐"

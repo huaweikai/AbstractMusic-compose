@@ -26,4 +26,7 @@ interface MusicService {
     @GET("artist/{id}/music")
     suspend fun getMusicByArtist(@Path("id")id:String):NetData<List<NetMusic>>
 
+    @GET("sheet/banner")
+    suspend fun getBanner():NetData<List<NetAlbum>>
+
 }

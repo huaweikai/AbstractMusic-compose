@@ -77,7 +77,7 @@ abstract class BaseBrowserViewModel (
     open fun detailInit(parentId: String){
         viewModelScope.launch {
             _state.value = false
-            delay(500L)
+            delay(1000L)
             init(parentId)
         }
     }

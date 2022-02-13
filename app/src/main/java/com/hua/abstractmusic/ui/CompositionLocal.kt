@@ -2,10 +2,10 @@ package com.hua.abstractmusic.ui
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.navigation.NavHostController
-import com.hua.abstractmusic.ui.home.viewmodels.AlbumDetailViewModel
-import com.hua.abstractmusic.ui.home.viewmodels.ArtistDetailViewModel
-import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
-import com.hua.abstractmusic.ui.home.viewmodels.UserViewModel
+import com.hua.abstractmusic.ui.viewmodels.AlbumDetailViewModel
+import com.hua.abstractmusic.ui.viewmodels.ArtistDetailViewModel
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.viewmodels.UserViewModel
 
 
 /**

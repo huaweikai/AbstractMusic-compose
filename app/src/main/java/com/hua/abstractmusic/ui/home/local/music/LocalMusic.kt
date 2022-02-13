@@ -1,20 +1,16 @@
 package com.hua.abstractmusic.ui.home.local.music
 
-import android.util.Log
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.media2.common.MediaMetadata
-import com.hua.abstractmusic.ui.home.MusicItem
-import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.LocalHomeViewModel
+import com.hua.abstractmusic.ui.utils.MusicItem
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.utils.browserType
 import com.hua.abstractmusic.utils.isPlayable
-import com.hua.abstractmusic.utils.title
 
 
 /**
@@ -24,12 +20,12 @@ import com.hua.abstractmusic.utils.title
  */
 @Composable
 fun LocalMusic(
-    viewModel: HomeViewModel
+    viewModel: HomeViewModel = LocalHomeViewModel.current
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxWidth()
     ) {
-        itemsIndexed(viewModel.localMusicList.value, key = {index, item ->
+        itemsIndexed(viewModel.localMusicList.value, key = {_, item ->
             item.mediaId
         }) { index, item ->
             MusicItem(

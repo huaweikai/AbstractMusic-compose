@@ -4,7 +4,6 @@ import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,7 +25,7 @@ import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.ui.hello.PermissionBean
 import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalHomeViewModel
-import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.theme.Purple200
 
@@ -38,7 +37,7 @@ import com.hua.abstractmusic.ui.theme.Purple200
  */
 @Composable
 fun HelloScreen(
-    viewModel:HomeViewModel = LocalHomeViewModel.current,
+    viewModel: HomeViewModel = LocalHomeViewModel.current,
     appNavController:NavHostController = LocalAppNavController.current
 ) {
     var isGet by remember {

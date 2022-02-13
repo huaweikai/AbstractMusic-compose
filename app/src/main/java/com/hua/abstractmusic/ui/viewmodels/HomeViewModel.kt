@@ -1,10 +1,7 @@
-package com.hua.abstractmusic.ui.home.viewmodels
+package com.hua.abstractmusic.ui.viewmodels
 
 import android.app.Application
-import android.util.Log
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.runtime.*
 import androidx.lifecycle.viewModelScope
 import androidx.media2.common.MediaItem
@@ -12,7 +9,6 @@ import androidx.media2.common.MediaMetadata
 import androidx.media2.common.SessionPlayer
 import androidx.media2.session.*
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.PagerState
 import com.hua.abstractmusic.base.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant.ALBUM_ID
@@ -22,15 +18,11 @@ import com.hua.abstractmusic.other.Constant.CLEAR_PLAY_LIST
 import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.services.MediaItemTree
-import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.use_case.UseCase
 import com.hua.abstractmusic.utils.duration
-import com.hua.abstractmusic.utils.mediaUri
-import com.hua.taglib.NativeLib
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -105,12 +97,11 @@ class HomeViewModel @Inject constructor(
             controller: MediaController,
             allowedCommands: SessionCommandGroup
         ) {
-            init(NETWORK_ALBUM_ID)
             refresh()
             updateItem(browser?.currentMediaItem)
-            currentPosition.value = browser?.currentPosition?:0L
+            currentPosition.value = browser?.currentPosition ?: 0L
             currentDuration.start()
-            updatePlayState(browser?.playerState?:SessionPlayer.PLAYER_STATE_IDLE)
+            updatePlayState(browser?.playerState ?: SessionPlayer.PLAYER_STATE_IDLE)
         }
 
         override fun onDisconnected(controller: MediaController) {
@@ -162,7 +153,6 @@ class HomeViewModel @Inject constructor(
     }
 
 
-
     //根据parentId去拿数据
     fun childrenInit(parentId: String) {
         mediaItemTree.getChildItem(parentId).map {
@@ -199,7 +189,7 @@ class HomeViewModel @Inject constructor(
             val isPlaying = if (item == null) false else it.mediaId == item.metadata?.mediaId
             it.copy(isPlaying = isPlaying)
         }
-        maxValue.value = browser?.currentMediaItem?.metadata?.duration?.toFloat()?:0F
+        maxValue.value = browser?.currentMediaItem?.metadata?.duration?.toFloat() ?: 0F
 
     }
 
@@ -261,29 +251,4 @@ class HomeViewModel @Inject constructor(
             updateItem(null)
         }
     }
-
-
-//    //记录本地音乐的viewpager停在哪
-//    var horViewPagerState = mutableStateOf(PagerState(0))
-//
-//    //记录播放界面的进度
-//    var playScreenViewPageState = mutableStateOf(PagerState(1))
-//
-//    //记录主页播放列表的打开和关闭
-//    val playListState = mutableStateOf(ModalBottomSheetState(ModalBottomSheetValue.Hidden))
-//
-//
-//    //记录主页控制中心，的navigationview是否要隐藏
-//    val navigationState = mutableStateOf(
-//        true
-//    )
-//
-//    //记录主页播放列表的打开和关闭
-//    val playScreenState = mutableStateOf(
-//        ModalBottomSheetState(ModalBottomSheetValue.Hidden, isSkipHalfExpanded = true)
-//    )
-//
-//    val playScreenBoolean = mutableStateOf(false)
-//
-//    val playListBoolean = mutableStateOf(false)
 }

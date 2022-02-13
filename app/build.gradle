@@ -60,6 +60,7 @@ dependencies {
     implementation 'androidx.activity:activity-ktx:1.4.0'
     implementation 'androidx.activity:activity:1.4.0'
     implementation "androidx.compose.material3:material3:1.0.0-alpha03"
+    implementation "androidx.compose.ui:ui-util:$compose_version"
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
@@ -111,8 +112,8 @@ dependencies {
 
     //compose组件
     implementation 'com.google.accompanist:accompanist-systemuicontroller:0.22.0-rc'
-    implementation 'com.google.accompanist:accompanist-pager:0.22.0-rc'
-    implementation 'com.google.accompanist:accompanist-pager-indicators:0.22.0-rc'
+    implementation 'com.google.accompanist:accompanist-pager:0.20.3'
+    implementation 'com.google.accompanist:accompanist-pager-indicators:0.20.3'
     implementation 'com.google.accompanist:accompanist-insets:0.22.0-rc'
 
     implementation "androidx.constraintlayout:constraintlayout-compose:1.0.0-rc02"

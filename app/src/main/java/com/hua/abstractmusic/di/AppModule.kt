@@ -119,9 +119,10 @@ object AppModule {
     @Provides
     @Singleton
     fun provideScanner(
-        useCase: UseCase
+        useCase: UseCase,
+        netRepository: NetRepository
     ): MediaStoreScanner =
-        MediaStoreScanner(useCase)
+        MediaStoreScanner(useCase,netRepository)
 
     @Provides
     @Singleton

@@ -1,6 +1,5 @@
 package com.hua.abstractmusic.ui.play.detail
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,11 +14,10 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import coil.compose.AsyncImage
-import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.R
-import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.utils.albumArtUri
 import com.hua.abstractmusic.utils.artist
@@ -107,7 +105,7 @@ fun ListScreen(
                     ) {
                         TitleAndArtist(
                             title = "${item.mediaItem.metadata?.title}",
-                            artist = "${item.mediaItem.metadata?.artist}"
+                            subTitle = "${item.mediaItem.metadata?.artist}"
                         )
                     }
                 }

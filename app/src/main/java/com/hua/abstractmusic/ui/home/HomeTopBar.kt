@@ -1,7 +1,6 @@
 package com.hua.abstractmusic.ui.home
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
@@ -18,15 +17,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
-import androidx.navigation.Navigation
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.hua.abstractmusic.bean.ui.home.TopBarIconButton
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalHomeViewModel
-import com.hua.abstractmusic.ui.home.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.route.Screen
 
 /**

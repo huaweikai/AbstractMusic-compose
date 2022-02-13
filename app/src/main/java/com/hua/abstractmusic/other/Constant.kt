@@ -16,15 +16,16 @@ object Constant {
     const val ALBUM_ART_URI = "content://media/external/audio/albumart"
     const val TYPE_ROOT = "root"
     const val TYPE_ALBUM = "album"
-    const val TYPE_SHEET ="songSheet"
+    const val TYPE_SHEET = "songSheet"
     const val ROOT_SCHEME = "playerDemo://"
-    const val TYPE_LASTPLAY="lastPlay"
+    const val TYPE_LASTPLAY = "lastPlay"
     const val TYPE_ARTIST = "artist"
     const val ARTIST_TO_ALBUM = "abAlbum"
     const val ALL_ID = "${ROOT_SCHEME}${TYPE_ROOT}"
     const val ALBUM_ID = "${ROOT_SCHEME}${TYPE_ALBUM}"
+
     //个人歌单
-    const val SHEET_ID="${ROOT_SCHEME}${TYPE_SHEET}"
+    const val SHEET_ID = "${ROOT_SCHEME}${TYPE_SHEET}"
     const val LASTPLAY_ID = "${ROOT_SCHEME}${TYPE_LASTPLAY}"
     const val ARTIST_ID = "${ROOT_SCHEME}${TYPE_ARTIST}"
 
@@ -35,6 +36,10 @@ object Constant {
     //在线歌手
     const val TYPE_NETWORK_ARTIST = "network_artist"
     const val NETWORK_ARTIST_ID = "${ROOT_SCHEME}$TYPE_NETWORK_ARTIST"
+
+    //banner
+    const val TYPE_NETWORK_BANNER = "network_banner"
+    const val NETWORK_BANNER_ID = "$ROOT_SCHEME$TYPE_NETWORK_BANNER"
 
 
     const val TOALBUMDESC = "TOALBUMDESC"
@@ -47,7 +52,8 @@ object Constant {
     const val USER_ROOM_NAME = "MUSICDB"
 
 
-    const val BASE_URL = "http://119.3.175.64:8080"
+    //    const val BASE_URL = "http://119.3.175.64:8080"
+    const val BASE_URL = "http://192.168.123.199:8080"
 
     const val NOTIFICATION_CHANNEL_ID = "music_notification"
     const val NOTIFICATION_ID = 1
@@ -58,7 +64,8 @@ object Constant {
                 title = "欢迎进入音乐的世界"
                 artist = "暂无选中歌单"
                 albumArtUri = ""
-            }.build()).build()
+            }.build()
+    ).build()
     const val CLEAR_PLAY_LIST = "clear_list"
 
     const val BUCKET_NAME = "abstractmusic"

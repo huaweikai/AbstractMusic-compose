@@ -1,16 +1,16 @@
 package com.hua.abstractmusic.ui.utils
 
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.sp
-import com.hua.abstractmusic.utils.artist
-import com.hua.abstractmusic.utils.title
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 
 
 /**
@@ -20,21 +20,28 @@ import com.hua.abstractmusic.utils.title
  */
 @Composable
 fun TitleAndArtist(
-    title:String,
-    artist:String,
-    color: Color = Color.Black
-){
+    title: String,
+    subTitle: String,
+    modifier: Modifier = Modifier,
+    titleStyle :TextStyle.()->TextStyle = {this},
+    subTitleStyle: TextStyle.()->TextStyle = {this},
+    height:Dp = 0.dp,
+    color: Color = MaterialTheme.colorScheme.onBackground
+) {
     Text(
+        modifier = modifier,
         text = title,
         color = color,
         maxLines = 1,
         overflow = TextOverflow.Visible,
-        style = MaterialTheme.typography.titleMedium
+        style = MaterialTheme.typography.titleMedium.titleStyle()
     )
+    Spacer(modifier = Modifier.height(height))
     Text(
-        text = artist,
+        modifier = modifier,
+        text = subTitle,
         color = color,
         maxLines = 1,
-        style = MaterialTheme.typography.titleSmall
+        style = MaterialTheme.typography.titleSmall.subTitleStyle()
     )
 }
