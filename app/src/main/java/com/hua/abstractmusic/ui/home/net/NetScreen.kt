@@ -24,7 +24,7 @@ fun NetScreen(
     netViewModel: NetViewModel = hiltViewModel()
 ) {
     DisposableEffect(Unit) {
-        netViewModel.initializeController()
+//        netViewModel.initializeController()
 
         this.onDispose {
             netViewModel.releaseBrowser()

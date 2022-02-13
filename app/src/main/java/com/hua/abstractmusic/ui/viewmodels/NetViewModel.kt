@@ -27,45 +27,22 @@ import javax.inject.Inject
 class NetViewModel @Inject constructor(
     application: Application,
     useCase: UseCase,
-    private val itemTree: MediaItemTree
-) : BaseBrowserViewModel(application, useCase) {
+    itemTree: MediaItemTree
+) : BaseBrowserViewModel(application, useCase,itemTree) {
 
-    private val browserCallback = object : MediaBrowser.BrowserCallback() {
-        override fun onConnected(
-            controller: MediaController,
-            allowedCommands: SessionCommandGroup
-        ) {
-            init(NETWORK_BANNER_ID)
-        }
-
-        override fun onChildrenChanged(
-            browser: MediaBrowser,
-            parentId: String,
-            itemCount: Int,
-            params: MediaLibraryService.LibraryParams?
-        ) {
-            childrenInit(parentId)
-            _state.value = true
-        }
+    override fun onMediaConnected(
+        controller: MediaController,
+        allowedCommands: SessionCommandGroup
+    ) {
+        init(NETWORK_BANNER_ID)
     }
 
-    private fun childrenInit(parentId: String) {
-        itemTree.getChildItem(parentId).map {
-            MediaData(
-                it,
-                it.metadata?.mediaId == browser?.currentMediaItem?.metadata?.mediaId
-            )
-        }.apply {
-            when (parentId) {
-                NETWORK_BANNER_ID -> _bannerList.value = this
-            }
+    override fun onMediaChildrenInit(parentId: String, items: List<MediaData>) {
+        when (parentId) {
+            NETWORK_BANNER_ID -> _bannerList.value = items
         }
     }
 
     private val _bannerList = mutableStateOf<List<MediaData>>(emptyList())
     val bannerList: State<List<MediaData>> get() = _bannerList
-
-    override fun initializeController() {
-        connectBrowserService(browserCallback)
-    }
 }

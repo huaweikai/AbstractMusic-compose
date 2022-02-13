@@ -37,7 +37,7 @@ import com.hua.abstractmusic.ui.theme.Purple200
  */
 @Composable
 fun HelloScreen(
-    viewModel: HomeViewModel = LocalHomeViewModel.current,
+//    viewModel: HomeViewModel = LocalHomeViewModel.current,
     appNavController:NavHostController = LocalAppNavController.current
 ) {
     var isGet by remember {
@@ -54,7 +54,7 @@ fun HelloScreen(
             if (isGet) {
                 val navOptions =
                     NavOptions.Builder().setPopUpTo(Screen.HelloScreen.route, true).build()
-                viewModel.initializeController()
+//                viewModel.initializeController()
                 appNavController.navigate(Screen.HomeScreen.route, navOptions)
             }
         }

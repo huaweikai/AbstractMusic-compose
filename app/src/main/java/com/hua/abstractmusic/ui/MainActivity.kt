@@ -25,7 +25,6 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val localHomeViewModel by viewModels<HomeViewModel>()
-    private val userViewModel by viewModels<UserViewModel>()
 
     @OptIn(ExperimentalMaterialApi::class,
         ExperimentalPagerApi::class,
@@ -46,8 +45,8 @@ class MainActivity : ComponentActivity() {
             )
             AbstractMusicTheme {
                 CompositionLocalProvider(
+                    // 可提前加载信息，不会造成空白
                     LocalHomeViewModel provides localHomeViewModel,
-                    LocalUserViewModel provides userViewModel,
                     LocalAppNavController provides appNavHostController,
                     LocalHomeNavController provides homeNavHostController
                 ) {

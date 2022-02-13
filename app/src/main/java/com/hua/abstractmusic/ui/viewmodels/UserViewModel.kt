@@ -17,6 +17,7 @@ import com.hua.abstractmusic.other.NetWork.NO_USER
 import com.hua.abstractmusic.other.NetWork.SERVER_ERROR
 import com.hua.abstractmusic.other.NetWork.SUCCESS
 import com.hua.abstractmusic.repository.UserRepository
+import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.use_case.UseCase
 import com.hua.abstractmusic.utils.toDate
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,8 +35,9 @@ import javax.inject.Inject
 class UserViewModel @Inject constructor(
     application: Application,
     useCase: UseCase,
+    itemTree: MediaItemTree,
     private val repository: UserRepository
-) : BaseBrowserViewModel(application, useCase) {
+) : BaseBrowserViewModel(application, useCase,itemTree) {
 
     private val _userIsOut = mutableStateOf(true)
     val userIsOut: State<Boolean> get() = _userIsOut
@@ -52,17 +54,12 @@ class UserViewModel @Inject constructor(
         return result
     }
 
-    override fun initializeController() {
-
-    }
 
     val user = mutableStateOf(UserBean(0, "", "", "", "", ""))
 
     fun selectUserInfo() {
         viewModelScope.launch {
             repository.getInfo()?.let {
-                Log.d("TAG", "selectUserInfo:${it.head} ")
-                Log.d("TAG", "selectUserInfo: ${Uri.parse(it.head)}")
                 user.value = it
 
             }

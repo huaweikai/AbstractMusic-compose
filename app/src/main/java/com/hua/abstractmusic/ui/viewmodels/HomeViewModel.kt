@@ -36,8 +36,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     application: Application,
     useCase: UseCase,
-    private val mediaItemTree: MediaItemTree
-) : BaseBrowserViewModel(application, useCase) {
+    mediaItemTree: MediaItemTree
+) : BaseBrowserViewModel(application, useCase,mediaItemTree) {
 
     private val playSate = MutableStateFlow(SessionPlayer.PLAYER_STATE_IDLE)
     val maxValue = mutableStateOf(0F)
@@ -78,7 +78,7 @@ class HomeViewModel @Inject constructor(
     val actionSeekBar = mutableStateOf(false)
 
 
-    val currentDuration = viewModelScope.launch {
+    private val currentDuration = viewModelScope.launch {
         playSate.collect {
             if (it == SessionPlayer.PLAYER_STATE_PLAYING) {
                 while (true) {
@@ -91,54 +91,31 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    override fun onMediaConnected(
+        controller: MediaController,
+        allowedCommands: SessionCommandGroup
+    ) {
+        refresh()
+//        updateItem(browser?.currentMediaItem)
+        currentPosition.value = browser?.currentPosition ?: 0L
+        currentDuration.start()
+        updatePlayState(browser?.playerState ?: SessionPlayer.PLAYER_STATE_IDLE)
+    }
 
-    private val browserCallback = object : MediaBrowser.BrowserCallback() {
-        override fun onConnected(
-            controller: MediaController,
-            allowedCommands: SessionCommandGroup
-        ) {
-            refresh()
-            updateItem(browser?.currentMediaItem)
-            currentPosition.value = browser?.currentPosition ?: 0L
-            currentDuration.start()
-            updatePlayState(browser?.playerState ?: SessionPlayer.PLAYER_STATE_IDLE)
-        }
+    override fun onMediaDisConnected(controller: MediaController) {
+        currentDuration.cancel()
+    }
 
-        override fun onDisconnected(controller: MediaController) {
-            currentDuration.cancel()
-        }
+    override fun onMediaPlaylistChanged(
+        controller: MediaController,
+        list: MutableList<MediaItem>?,
+        metadata: MediaMetadata?
+    ) {
+        updatePlayList(list)
+    }
 
-        override fun onPlaylistChanged(
-            controller: MediaController,
-            list: MutableList<MediaItem>?,
-            metadata: MediaMetadata?
-        ) {
-            updatePlayList(list)
-        }
-
-        override fun onCurrentMediaItemChanged(controller: MediaController, item: MediaItem?) {
-            viewModelScope.launch {
-                //延迟更新，不然会跳到第一个
-                delay(200L)
-                updateItem(browser?.currentMediaItem)
-            }
-        }
-
-        override fun onPlayerStateChanged(controller: MediaController, state: Int) {
-            controller.currentPosition
-            updatePlayState(state)
-        }
-
-        override fun onChildrenChanged(
-            browser: MediaBrowser,
-            parentId: String,
-            itemCount: Int,
-            params: MediaLibraryService.LibraryParams?
-        ) {
-            //抓取数据完毕，直接去拿数据去更新
-            childrenInit(parentId)
-        }
-
+    override fun onMediaPlayerStateChanged(controller: MediaController, state: Int) {
+        updatePlayState(state)
     }
 
     fun refresh() {
@@ -147,30 +124,20 @@ class HomeViewModel @Inject constructor(
         init(ARTIST_ID)
     }
 
-    //初始化，连接service
-    override fun initializeController() {
-        connectBrowserService(browserCallback)
-    }
-
-
     //根据parentId去拿数据
-    fun childrenInit(parentId: String) {
-        mediaItemTree.getChildItem(parentId).map {
-            MediaData(
-                it,
-                it.metadata?.mediaId == browser?.currentMediaItem?.metadata?.mediaId
-            )
-        }.apply {
-            when (parentId) {
-                ALL_ID -> _localMusicList.value = this
-                ALBUM_ID -> _localAlbumList.value = this
-                ARTIST_ID -> _localArtistList.value = this
-                else -> _netAlbum.value = this
-            }
+    override fun onMediaChildrenInit(parentId: String, items: List<MediaData>) {
+        when (parentId) {
+            ALL_ID -> _localMusicList.value = items
+            ALBUM_ID -> _localAlbumList.value = items
+            ARTIST_ID -> _localArtistList.value = items
         }
     }
 
     //更新item的方法，当回调到item改变就调用这个方法
+    override fun onMediaCurrentMediaItemChanged(controller: MediaController, item: MediaItem?) {
+        updateItem(item)
+    }
+
     private fun updateItem(item: MediaItem?) {
         browser ?: return
         _netAlbum.value = _netAlbum.value.toMutableList().map {
@@ -190,7 +157,6 @@ class HomeViewModel @Inject constructor(
             it.copy(isPlaying = isPlaying)
         }
         maxValue.value = browser?.currentMediaItem?.metadata?.duration?.toFloat() ?: 0F
-
     }
 
     //下一首
@@ -216,7 +182,7 @@ class HomeViewModel @Inject constructor(
     }
 
     //更新播放列表的方法
-    fun updatePlayList(mediaItems: List<MediaItem>?) {
+    private fun updatePlayList(mediaItems: List<MediaItem>?) {
         mediaItems ?: return
         val browser = browser ?: return
         _currentPlayList.value = mediaItems.map {

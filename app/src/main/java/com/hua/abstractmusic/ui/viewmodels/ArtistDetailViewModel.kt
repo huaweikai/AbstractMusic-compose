@@ -29,68 +29,40 @@ import javax.inject.Inject
 class ArtistDetailViewModel @Inject constructor(
     application: Application,
     useCase: UseCase,
-    private val itemTree: MediaItemTree
-) : BaseBrowserViewModel(application, useCase) {
+    itemTree: MediaItemTree
+) : BaseBrowserViewModel(application, useCase,itemTree) {
     private var artistAlbumId: String? = null
     var artistId: String? = null
-     set(value) {
-         field = value
-         val id = Uri.parse(value).lastPathSegment
-         artistAlbumId = "$ARTIST_ID/abAlbum/$id"
-     }
-
-    private val browserCallback = object : MediaBrowser.BrowserCallback() {
-        override fun onConnected(
-            controller: MediaController,
-            allowedCommands: SessionCommandGroup
-        ) {
-            artistId?.let {
-                detailInit(it)
-                detailInit(artistAlbumId!!)
-            }
+        set(value) {
+            field = value
+            val id = Uri.parse(value).lastPathSegment
+            artistAlbumId = "$ARTIST_ID/abAlbum/$id"
         }
 
-        override fun onCurrentMediaItemChanged(controller: MediaController, item: MediaItem?) {
-            viewModelScope.launch {
-                delay(200L)
-                updateItem(browser?.currentMediaItem)
-            }
-        }
-
-        override fun onChildrenChanged(
-            browser: MediaBrowser,
-            parentId: String,
-            itemCount: Int,
-            params: MediaLibraryService.LibraryParams?
-        ) {
-            getItem(parentId)
-            _state.value = true
+    override fun onMediaConnected(
+        controller: MediaController,
+        allowedCommands: SessionCommandGroup
+    ) {
+        artistId?.let {
+            detailInit(it)
+            detailInit(artistAlbumId!!)
         }
     }
 
-    override fun initializeController() {
-        connectBrowserService(browserCallback)
-    }
     private val _artistDetail = mutableStateOf<List<MediaData>>(emptyList())
-    val artistDetail:State<List<MediaData>> get() = _artistDetail
+    val artistDetail: State<List<MediaData>> get() = _artistDetail
 
     private val _artistAlbumDetail = mutableStateOf<List<MediaData>>(emptyList())
-    val artistAlbumDetail:State<List<MediaData>> get() = _artistAlbumDetail
+    val artistAlbumDetail: State<List<MediaData>> get() = _artistAlbumDetail
 
-    private fun getItem(parentId: String) {
-        itemTree.getChildItem(parentId).map {
-            MediaData(
-                it,
-                it.metadata?.mediaId == browser?.currentMediaItem?.metadata?.mediaId
-            )
-        }.apply {
-            when(parentId){
-                artistId-> _artistDetail.value = this
-                artistAlbumId->_artistAlbumDetail.value = this
-            }
+    override fun onMediaChildrenInit(parentId: String, items: List<MediaData>) {
+        when (parentId) {
+            artistId -> _artistDetail.value = items
+            artistAlbumId -> _artistAlbumDetail.value = items
         }
     }
-    fun updateItem(item: MediaItem?) {
+
+    override fun onMediaCurrentMediaItemChanged(controller: MediaController, item: MediaItem?) {
         _artistDetail.value = _artistDetail.value.toMutableList().map {
             it.copy(
                 isPlaying = if (item == null) false else it.mediaId == item.metadata?.mediaId

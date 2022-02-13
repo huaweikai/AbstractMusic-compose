@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -19,6 +20,7 @@ import com.hua.abstractmusic.ui.home.playlist.HomePlayList
 import com.hua.abstractmusic.ui.navigation.HomeNavigationNav
 import com.hua.abstractmusic.ui.play.PlayScreen
 import com.hua.abstractmusic.ui.route.Screen
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 
 /**
  * @author : huaweikai

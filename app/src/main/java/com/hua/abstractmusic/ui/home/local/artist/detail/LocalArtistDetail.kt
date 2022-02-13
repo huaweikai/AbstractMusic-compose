@@ -36,7 +36,7 @@ fun LocalArtistDetail(
     viewModel: ArtistDetailViewModel = hiltViewModel()
 ) {
     DisposableEffect(Unit) {
-        viewModel.initializeController()
+//        viewModel.initializeController()
         viewModel.artistId = item.metadata?.mediaId ?: ""
         this.onDispose {
             viewModel.releaseBrowser()

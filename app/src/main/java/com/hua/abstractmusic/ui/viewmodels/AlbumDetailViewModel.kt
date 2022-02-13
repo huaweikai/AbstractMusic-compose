@@ -27,58 +27,26 @@ import javax.inject.Inject
 class AlbumDetailViewModel @Inject constructor(
     application: Application,
     useCase: UseCase,
-    private val itemTree: MediaItemTree
-) : BaseBrowserViewModel(application, useCase) {
+    itemTree: MediaItemTree
+) : BaseBrowserViewModel(application, useCase,itemTree) {
     var id: String? = null
-    private val browserCallback = object : MediaBrowser.BrowserCallback() {
-        override fun onConnected(
-            controller: MediaController,
-            allowedCommands: SessionCommandGroup
-        ) {
-            id?.let {
-                detailInit(it)
-            }
+    override fun onMediaConnected(
+        controller: MediaController,
+        allowedCommands: SessionCommandGroup
+    ) {
+        id?.let {
+            detailInit(it)
         }
-
-        override fun onCurrentMediaItemChanged(controller: MediaController, item: MediaItem?) {
-            viewModelScope.launch {
-                delay(200L)
-                updateItem(browser?.currentMediaItem)
-            }
-        }
-
-        override fun onChildrenChanged(
-            browser: MediaBrowser,
-            parentId: String,
-            itemCount: Int,
-            params: MediaLibraryService.LibraryParams?
-        ) {
-            getItem(parentId)
-            _state.value = true
-        }
-
     }
-
-    override fun initializeController() {
-        connectBrowserService(browserCallback)
-    }
-
 
     private val _albumDetail = mutableStateOf<List<MediaData>>(emptyList())
     val albumDetail: State<List<MediaData>> get() = _albumDetail
 
-    fun getItem(parentId: String) {
-        itemTree.getChildItem(parentId).map {
-            MediaData(
-                it,
-                it.metadata?.mediaId == browser?.currentMediaItem?.metadata?.mediaId
-            )
-        }.apply {
-            _albumDetail.value = this
-        }
+    override fun onMediaChildrenInit(parentId: String, items: List<MediaData>) {
+        _albumDetail.value = items
     }
 
-    fun updateItem(item: MediaItem?) {
+    override fun onMediaCurrentMediaItemChanged(controller: MediaController, item: MediaItem?) {
         _albumDetail.value = _albumDetail.value.toMutableList().map {
             it.copy(
                 isPlaying = if (item == null) false else it.mediaId == item.metadata?.mediaId
