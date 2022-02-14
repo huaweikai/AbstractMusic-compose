@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.media2.common.MediaMetadata
+import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.utils.MusicItem
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
@@ -22,21 +23,30 @@ import com.hua.abstractmusic.utils.isPlayable
 fun LocalMusic(
     viewModel: HomeViewModel = LocalHomeViewModel.current
 ) {
+    MusicLazyItems(list = viewModel.localMusicList.value) {
+        viewModel.setPlaylist(it, viewModel.localMusicList.value)
+    }
+}
+
+@Composable
+fun MusicLazyItems(
+    list: List<MediaData>,
+    onclick: (Int) -> Unit
+) {
     LazyColumn(
         modifier = Modifier.fillMaxWidth()
     ) {
-        itemsIndexed(viewModel.localMusicList.value, key = {_, item ->
+        itemsIndexed(list, key = { _, item ->
             item.mediaId
         }) { index, item ->
             MusicItem(
                 data = item
-            ){
+            ) {
                 if (item.mediaItem.metadata?.isPlayable == true &&
                     item.mediaItem.metadata?.browserType == MediaMetadata.BROWSABLE_TYPE_NONE
                 ) {
-                    viewModel.setPlaylist(index, viewModel.localMusicList.value)
-                } else {
-                    viewModel.init(item.mediaId)
+                    onclick(index)
+//                    viewModel.setPlaylist(index, viewModel.localMusicList.value)
                 }
             }
         }

@@ -30,4 +30,7 @@ interface MusicService {
     @GET("sheet/recommend")
     suspend fun getRecommendList(): NetData<List<NetSheet>>
 
+    @GET("music/list")
+    suspend fun getAllMusic():NetData<List<NetMusic>>
+
 }

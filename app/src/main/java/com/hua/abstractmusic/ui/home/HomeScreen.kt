@@ -95,20 +95,12 @@ fun HomeScreen(
 
     LaunchedEffect(homeNavController.currentBackStackEntryAsState().value) {
         homeNavController.currentDestination?.route.let {
-            when {
-                it in routes -> {
+            when (it) {
+                in routes -> {
                     navToDetailState.value = true
                     label.value = "${homeNavController.currentDestination?.label}"
                 }
-                it?.startsWith(Screen.LocalAlbumDetail.route) == true -> {
-                    navToDetailState.value = false
-                    label.value = ""
-                }
-                it?.startsWith(Screen.LocalArtistDetail.route) == true -> {
-                    navToDetailState.value = false
-                    label.value = ""
-                }
-                it == Screen.LoginScreen.route -> {
+                else -> {
                     navToDetailState.value = false
                     label.value = ""
                 }

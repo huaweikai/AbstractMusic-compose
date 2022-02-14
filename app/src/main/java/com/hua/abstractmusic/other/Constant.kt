@@ -33,6 +33,10 @@ object Constant {
     const val TYPE_NETWORK_ALBUM = "network_album"
     const val NETWORK_ALBUM_ID = "${ROOT_SCHEME}$TYPE_NETWORK_ALBUM"
 
+    //在线所有
+    const val TYPE_NETWORK_ALL_MUSIC = "network_all_music"
+    const val NETWORK_ALL_MUSIC_ID = "$ROOT_SCHEME$TYPE_NETWORK_ALL_MUSIC"
+
     //在线歌手
     const val TYPE_NETWORK_ARTIST = "network_artist"
     const val NETWORK_ARTIST_ID = "${ROOT_SCHEME}$TYPE_NETWORK_ARTIST"
@@ -76,4 +80,9 @@ object Constant {
 
     const val BUCKET_NAME = "abstractmusic"
     const val BUCKET_HEAD_IMG = "headImg"
+
+
+    const val ALL_MUSIC_TYPE = "all_music_type"
+    const val NET_ALBUM_TYPE = "net_album_type"
+    const val NET_ARTIST_TYPE = "net_artist_type"
 }

@@ -27,14 +27,21 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
+import com.hua.abstractmusic.other.Constant.ALL_MUSIC_TYPE
+import com.hua.abstractmusic.other.Constant.NET_ALBUM_TYPE
+import com.hua.abstractmusic.other.Constant.TYPE_ALBUM
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalNetViewModel
 import com.hua.abstractmusic.ui.home.local.artist.detail.interval
+import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.AlbumArtImage
 import com.hua.abstractmusic.ui.utils.HorizontalBanner
+import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.viewmodels.NetViewModel
 import com.hua.abstractmusic.utils.albumArtUri
+import com.hua.abstractmusic.utils.art
+import com.hua.abstractmusic.utils.artist
 import com.hua.abstractmusic.utils.title
 
 
@@ -62,9 +69,11 @@ fun NetScreen(
 
                 }
             }
-            glide("推荐歌单", {})
+            glide("大家都在听"){
+                navHostController.navigate("${Screen.NetDetailScreen.route}?type=$ALL_MUSIC_TYPE")
+            }
             item {
-                if (netViewModel.recommendList.value.isNotEmpty()) {
+                if (netViewModel.musicList.value.isNotEmpty()) {
                     HorizontalPager(
                         count = 2,
                         modifier = Modifier
@@ -73,42 +82,22 @@ fun NetScreen(
                         contentPadding = PaddingValues(end = 32.dp)
                     ) { page ->
                         RecommendItem(
-                            netViewModel.recommendList.value,
+                            netViewModel.musicList.value,
                             page
                         )
                     }
                 }
             }
-            glide("最新专辑", {})
+            glide("推荐歌单", {})
+            item {
+                NewItems(list = netViewModel.recommendList.value)
+            }
+            glide("最新专辑"){
+                navHostController.navigate("${Screen.NetDetailScreen.route}?type=$NET_ALBUM_TYPE")
+            }
             item {
                 if (netViewModel.albumList.value.isNotEmpty()) {
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState())
-                    ) {
-                        repeat(5) {
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Box {
-                                AlbumArtImage(
-                                    modifier = Modifier.size(100.dp),
-                                    uri = netViewModel.albumList.value[it].mediaItem.metadata?.albumArtUri,
-                                    desc = "",
-                                    transformation = RoundedCornersTransformation(10f)
-                                )
-                                Icon(
-                                    imageVector = Icons.Default.PlayArrow,
-                                    contentDescription = "",
-                                    modifier = Modifier
-                                        .align(
-                                            Alignment.BottomEnd
-                                        )
-                                        .size(22.dp)
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(8.dp))
-                        }
-                    }
+                    NewItems(list = netViewModel.albumList.value)
                 }
             }
         }
@@ -136,7 +125,12 @@ private fun RecommendItem(list: List<MediaData>, page: Int) {
                     transformation = RoundedCornersTransformation(10f)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "${data?.title}", modifier = Modifier.align(Alignment.CenterVertically))
+                Column(
+                    Modifier.fillMaxHeight(),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    TitleAndArtist(title = "${data?.title}", subTitle = "${data?.artist}")
+                }
             }
         }
     }
@@ -158,5 +152,46 @@ private fun LazyListScope.glide(
             Text(text = "更多 >", fontSize = 18.sp, modifier = Modifier.clickable { onclick() })
         }
         Spacer(modifier = Modifier.height(10.dp))
+    }
+}
+
+@Composable
+private fun NewItems(
+    list: List<MediaData>
+) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+    ) {
+        repeat(5) {
+            Spacer(modifier = Modifier.width(8.dp))
+            Column(
+                Modifier.height(IntrinsicSize.Min),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box {
+                    AlbumArtImage(
+                        modifier = Modifier.size(100.dp),
+                        uri = list[it].mediaItem.metadata?.albumArtUri,
+                        desc = "",
+                        transformation = RoundedCornersTransformation(10f)
+                    )
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "",
+                        modifier = Modifier
+                            .align(
+                                Alignment.BottomEnd
+                            )
+                            .size(22.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(3.dp))
+                Text(text = "${list[it].mediaItem.metadata?.title}")
+                Spacer(modifier = Modifier.height(3.dp))
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+        }
     }
 }

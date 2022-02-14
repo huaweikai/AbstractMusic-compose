@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.google.accompanist.pager.ExperimentalPagerApi
+import com.hua.abstractmusic.other.Constant.ALL_MUSIC_TYPE
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.home.local.LocalScreen
@@ -19,6 +20,7 @@ import com.hua.abstractmusic.ui.home.mine.MineScreen
 import com.hua.abstractmusic.ui.home.mine.register.LoginScreen
 import com.hua.abstractmusic.ui.home.mine.register.RegisterScreen
 import com.hua.abstractmusic.ui.home.net.NetScreen
+import com.hua.abstractmusic.ui.home.net.detail.NetDetail
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.viewmodels.UserViewModel
 import com.hua.abstractmusic.ui.route.Screen
@@ -101,6 +103,21 @@ fun HomeNavigationNav(
             route = Screen.LoginScreen.route
         ){
             LoginScreen(homeNavController,userViewModel)
+        }
+
+        composable(
+            route = "${Screen.NetDetailScreen.route}?type={type}",
+            arguments = arrayListOf(
+                navArgument(
+                    name = "type"
+                ){
+                    type = NavType.StringType
+                    defaultValue = ALL_MUSIC_TYPE
+                }
+            )
+        ){
+            val type = it.arguments?.getString("type")
+            NetDetail(type!!)
         }
     }
 

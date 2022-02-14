@@ -17,7 +17,7 @@ sealed class Screen(val route:String){
     object LocalAlbumDetail:Screen("local_album_screen")
     object LocalArtistDetail:Screen("local_artist_screen")
 
-    object PlayScreen:Screen("play_screen")
+    object NetDetailScreen:Screen("net_detail_screen")
 
     object RegisterScreen:Screen("register_screen")
     object LoginScreen:Screen("login_screen")

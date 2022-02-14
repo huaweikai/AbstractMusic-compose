@@ -13,6 +13,7 @@ import com.hua.abstractmusic.base.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
+import com.hua.abstractmusic.other.Constant.NETWORK_ALL_MUSIC_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_BANNER_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_RECOMMEND_ID
 import com.hua.abstractmusic.services.MediaItemTree
@@ -41,10 +42,14 @@ class NetViewModel @Inject constructor(
     private val _albumList = mutableStateOf<List<MediaData>>(emptyList())
     val albumList: State<List<MediaData>> get() = _albumList
 
+    private val _musicList = mutableStateOf<List<MediaData>>(emptyList())
+    val musicList: State<List<MediaData>> get() = _musicList
+
     init {
         listMap[NETWORK_BANNER_ID] = _bannerList
         listMap[NETWORK_ALBUM_ID] = _albumList
         listMap[NETWORK_RECOMMEND_ID] = _recommendList
+        listMap[NETWORK_ALL_MUSIC_ID] = _musicList
     }
 
     override fun onMediaConnected(

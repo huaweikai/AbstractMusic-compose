@@ -12,6 +12,7 @@ import com.hua.abstractmusic.other.Constant.ALL_ID
 import com.hua.abstractmusic.other.Constant.ARTIST_ID
 import com.hua.abstractmusic.other.Constant.ARTIST_TO_ALBUM
 import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
+import com.hua.abstractmusic.other.Constant.NETWORK_ALL_MUSIC_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ARTIST_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_BANNER_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_RECOMMEND_ID
@@ -20,6 +21,7 @@ import com.hua.abstractmusic.other.Constant.SHEET_ID
 import com.hua.abstractmusic.other.Constant.TYPE_ALBUM
 import com.hua.abstractmusic.other.Constant.TYPE_ARTIST
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ALBUM
+import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ALL_MUSIC
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ARTIST
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_BANNER
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_RECOMMEND
@@ -49,7 +51,7 @@ class MediaItemTree(
             ROOT_SCHEME, ALL_ID, ALBUM_ID,
             ARTIST_ID, SHEET_ID, NETWORK_ALBUM_ID,
             NETWORK_ARTIST_ID, NETWORK_BANNER_ID,
-            NETWORK_RECOMMEND_ID
+            NETWORK_RECOMMEND_ID, NETWORK_ALL_MUSIC_ID
         )
         list.forEach {
             treeNodes[it] = MediaItemNode(
@@ -63,7 +65,7 @@ class MediaItemTree(
                     )
                     .build()
             )
-            if(it != ROOT_SCHEME){
+            if (it != ROOT_SCHEME) {
                 treeNodes[ROOT_SCHEME]?.addChild(listOf(treeNodes[it]!!.item))
             }
         }
@@ -121,17 +123,24 @@ class MediaItemTree(
                     scanner.selectMusicByArtist(parentIdUri)
                 }
             }
-            TYPE_NETWORK_BANNER->{
-                if (parentIdUri.lastPathSegment.isNullOrBlank()){
+            TYPE_NETWORK_BANNER -> {
+                if (parentIdUri.lastPathSegment.isNullOrBlank()) {
                     scanner.selectBanner()
-                }else{
+                } else {
                     null
                 }
             }
-            TYPE_NETWORK_RECOMMEND->{
-                if (parentIdUri.lastPathSegment.isNullOrBlank()){
+            TYPE_NETWORK_RECOMMEND -> {
+                if (parentIdUri.lastPathSegment.isNullOrBlank()) {
                     scanner.selectRecommend()
-                }else{
+                } else {
+                    null
+                }
+            }
+            TYPE_NETWORK_ALL_MUSIC -> {
+                if (parentIdUri.lastPathSegment.isNullOrBlank()) {
+                    scanner.selectAllMusic(parentIdUri)
+                } else {
                     null
                 }
             }

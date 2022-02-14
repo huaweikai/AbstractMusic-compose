@@ -92,4 +92,15 @@ class NetRepository(
             emptyList()
         }
     }
+    suspend fun getAllMusic(parentId: Uri):List<MediaItem>{
+        return try {
+            val list = mutableListOf<MediaItem>()
+            service.getAllMusic().data?.forEach {
+                list.add(it.toMediaItem(parentId))
+            }
+            list
+        }catch (e:Exception){
+            emptyList()
+        }
+    }
 }

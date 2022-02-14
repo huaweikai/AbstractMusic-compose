@@ -12,6 +12,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.transform.RoundedCornersTransformation
+import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.utils.AlbumArtImage
@@ -32,11 +33,19 @@ fun LocalAlbum(
     viewModel: HomeViewModel = LocalHomeViewModel.current,
     onClick:(String)->Unit
 ) {
+    AlbumLazyItem(viewModel.localAlbumList.value,onClick)
+}
+@ExperimentalFoundationApi
+@Composable
+fun AlbumLazyItem(
+    list: List<MediaData>,
+    onClick: (String) -> Unit
+){
     LazyVerticalGrid(
         cells = GridCells.Fixed(2),
         contentPadding = PaddingValues(16.dp)
     ) {
-        items(viewModel.localAlbumList.value) {item ->
+        items(list) {item ->
             Column(
                 modifier = Modifier
                     .padding(10.dp),
