@@ -81,5 +81,15 @@ class NetRepository(
             emptyList()
         }
     }
-
+    suspend fun getRecommend():List<MediaItem>{
+        return try {
+            val list = mutableListOf<MediaItem>()
+            service.getRecommendList().data?.forEach {
+                list.add(it.toMediaItem())
+            }
+            list
+        }catch (e:Exception){
+            emptyList()
+        }
+    }
 }

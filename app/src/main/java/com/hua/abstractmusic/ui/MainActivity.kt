@@ -26,7 +26,8 @@ class MainActivity : ComponentActivity() {
 
     private val localHomeViewModel by viewModels<HomeViewModel>()
 
-    @OptIn(ExperimentalMaterialApi::class,
+    @OptIn(
+        ExperimentalMaterialApi::class,
         ExperimentalPagerApi::class,
         ExperimentalFoundationApi::class
     )
@@ -37,7 +38,6 @@ class MainActivity : ComponentActivity() {
         setContent {
 
             val appNavHostController = rememberNavController()
-            val homeNavHostController = rememberNavController()
 
             rememberSystemUiController().setStatusBarColor(
                 Color.Transparent,
@@ -47,8 +47,7 @@ class MainActivity : ComponentActivity() {
                 CompositionLocalProvider(
                     // 可提前加载信息，不会造成空白
                     LocalHomeViewModel provides localHomeViewModel,
-                    LocalAppNavController provides appNavHostController,
-                    LocalHomeNavController provides homeNavHostController
+                    LocalAppNavController provides appNavHostController
                 ) {
                    Surface{
                        AppNavigation()

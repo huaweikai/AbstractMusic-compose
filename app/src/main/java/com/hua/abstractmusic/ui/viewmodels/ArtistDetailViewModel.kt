@@ -30,7 +30,7 @@ class ArtistDetailViewModel @Inject constructor(
     application: Application,
     useCase: UseCase,
     itemTree: MediaItemTree
-) : BaseBrowserViewModel(application, useCase,itemTree) {
+) : BaseBrowserViewModel(application, useCase, itemTree) {
     private var artistAlbumId: String? = null
     var artistId: String? = null
         set(value) {
@@ -43,9 +43,11 @@ class ArtistDetailViewModel @Inject constructor(
         controller: MediaController,
         allowedCommands: SessionCommandGroup
     ) {
-        artistId?.let {
+        listMap[artistId!!] = _artistDetail
+        listMap[artistAlbumId!!] = _artistAlbumDetail
+        playListMap[artistId!!] = _artistDetail
+        listMap.keys.forEach {
             detailInit(it)
-            detailInit(artistAlbumId!!)
         }
     }
 
@@ -54,19 +56,4 @@ class ArtistDetailViewModel @Inject constructor(
 
     private val _artistAlbumDetail = mutableStateOf<List<MediaData>>(emptyList())
     val artistAlbumDetail: State<List<MediaData>> get() = _artistAlbumDetail
-
-    override fun onMediaChildrenInit(parentId: String, items: List<MediaData>) {
-        when (parentId) {
-            artistId -> _artistDetail.value = items
-            artistAlbumId -> _artistAlbumDetail.value = items
-        }
-    }
-
-    override fun onMediaCurrentMediaItemChanged(controller: MediaController, item: MediaItem?) {
-        _artistDetail.value = _artistDetail.value.toMutableList().map {
-            it.copy(
-                isPlaying = if (item == null) false else it.mediaId == item.metadata?.mediaId
-            )
-        }
-    }
 }

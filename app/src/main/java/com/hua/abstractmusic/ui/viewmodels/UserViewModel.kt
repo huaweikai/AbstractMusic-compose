@@ -70,8 +70,6 @@ class UserViewModel @Inject constructor(
         viewModelScope.launch {
             _userIsOut.value = repository.logoutUser().code == SUCCESS
         }
-//        return repository.logoutUser().code
-
     }
 
 

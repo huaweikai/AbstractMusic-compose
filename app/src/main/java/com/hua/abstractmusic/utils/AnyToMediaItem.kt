@@ -7,7 +7,9 @@ import androidx.media2.common.MediaMetadata
 import com.hua.abstractmusic.bean.net.NetAlbum
 import com.hua.abstractmusic.bean.net.NetArtist
 import com.hua.abstractmusic.bean.net.NetMusic
+import com.hua.abstractmusic.bean.net.NetSheet
 import com.hua.abstractmusic.other.Constant
+import com.hua.abstractmusic.other.Constant.NETWORK_RECOMMEND_ID
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -21,6 +23,7 @@ fun Long.toTime(): String {
     val date = Date(this)
     return simpleDateFormat.format(date)
 }
+
 fun Long.toDate(): String {
     val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINESE)
     val date = Date(this)
@@ -71,7 +74,7 @@ fun NetArtist.toMediaItem(): MediaItem {
         ).build()
 }
 
-fun NetMusic.toMediaItem(parentId:Uri):MediaItem{
+fun NetMusic.toMediaItem(parentId: Uri): MediaItem {
     return MediaItem.Builder()
         .setMetadata(
             MediaMetadata.Builder().apply {
@@ -91,6 +94,17 @@ fun NetMusic.toMediaItem(parentId:Uri):MediaItem{
         )
         .build()
 }
+
+fun NetSheet.toMediaItem() =
+    MediaItem.Builder()
+        .setMetadata(
+            MediaMetadata.Builder().apply {
+                id = "$NETWORK_RECOMMEND_ID/${this@toMediaItem.id}"
+                albumArtUri = this@toMediaItem.sheetImg
+                title = this@toMediaItem.sheetName
+            }.build()
+        )
+        .build()
 
 /**
  * 根据手机的分辨率从 px(像素) 的单位 转成为 dp

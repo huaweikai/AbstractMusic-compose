@@ -336,4 +336,8 @@ class MediaStoreScanner(
     suspend fun selectBanner():List<MediaItem>{
         return repository.getBanner()
     }
+
+    suspend fun selectRecommend():List<MediaItem>{
+        return repository.getRecommend()
+    }
 }

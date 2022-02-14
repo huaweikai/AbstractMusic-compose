@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.services.extensions
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -25,24 +26,23 @@ class MediaCommand(
     private val service: PlayerService,
     private val scope: CoroutineScope
 ): SessionCallbackBuilder.CustomCommandProvider{
+
+    @SuppressLint("RestrictedApi")
     override fun onCustomCommand(
         session: MediaSession,
         controllerInfo: MediaSession.ControllerInfo,
         customCommand: SessionCommand,
         args: Bundle?
     ): SessionResult {
-        val handler = object :Handler(Looper.getMainLooper()){
-
-        }
+        val handler = object :Handler(Looper.getMainLooper()){}
         return when(customCommand.customAction){
             CLEAR_PLAY_LIST ->{
                 handler.post {
                     service.removeAllMusic()
                 }
                 SessionResult(SessionResult.RESULT_SUCCESS,null)
-
             }
-            else-> {SessionResult(SessionResult.RESULT_ERROR_NOT_SUPPORTED,null)}
+            else -> SessionResult(SessionResult.RESULT_ERROR_BAD_VALUE,null)
         }
     }
 

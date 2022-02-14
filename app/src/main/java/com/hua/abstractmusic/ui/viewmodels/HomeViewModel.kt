@@ -15,7 +15,7 @@ import com.hua.abstractmusic.other.Constant.ALBUM_ID
 import com.hua.abstractmusic.other.Constant.ALL_ID
 import com.hua.abstractmusic.other.Constant.ARTIST_ID
 import com.hua.abstractmusic.other.Constant.CLEAR_PLAY_LIST
-import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
+import com.hua.abstractmusic.other.Constant.CURRENT_PLAY_LIST
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.use_case.UseCase
@@ -37,20 +37,11 @@ class HomeViewModel @Inject constructor(
     application: Application,
     useCase: UseCase,
     mediaItemTree: MediaItemTree
-) : BaseBrowserViewModel(application, useCase,mediaItemTree) {
-
-    private val playSate = MutableStateFlow(SessionPlayer.PLAYER_STATE_IDLE)
-    val maxValue = mutableStateOf(0F)
-    val currentPosition = mutableStateOf(0L)
+) : BaseBrowserViewModel(application, useCase, mediaItemTree) {
 
     //当前播放列表
     private val _currentPlayList = mutableStateOf<List<MediaData>>(emptyList())
     val currentPlayList: State<List<MediaData>> get() = _currentPlayList
-
-
-    //网络请求的数据，到时候会清理掉，仅仅只是测试使用
-    private val _netAlbum = mutableStateOf<List<MediaData>>(emptyList())
-    val netAlbum: State<List<MediaData>> get() = _netAlbum
 
     private val _localMusicList = mutableStateOf(emptyList<MediaData>())
     val localMusicList: State<List<MediaData>> get() = _localMusicList
@@ -60,6 +51,20 @@ class HomeViewModel @Inject constructor(
 
     private val _localArtistList = mutableStateOf(emptyList<MediaData>())
     val localArtistList: State<List<MediaData>> get() = _localArtistList
+
+    init {
+        listMap[ALL_ID] = _localMusicList
+        listMap[ALBUM_ID] = _localAlbumList
+        listMap[ARTIST_ID] = _localArtistList
+
+        playListMap[CURRENT_PLAY_LIST] = _currentPlayList
+        playListMap[ALL_ID] = _localMusicList
+    }
+
+    private val playSate = MutableStateFlow(SessionPlayer.PLAYER_STATE_IDLE)
+    val maxValue = mutableStateOf(0F)
+    val currentPosition = mutableStateOf(0L)
+
 
     //当前播放的item，用户更新控制栏
     private val _currentItem = mutableStateOf(NULL_MEDIA_ITEM)
@@ -96,7 +101,6 @@ class HomeViewModel @Inject constructor(
         allowedCommands: SessionCommandGroup
     ) {
         refresh()
-//        updateItem(browser?.currentMediaItem)
         currentPosition.value = browser?.currentPosition ?: 0L
         currentDuration.start()
         updatePlayState(browser?.playerState ?: SessionPlayer.PLAYER_STATE_IDLE)
@@ -106,115 +110,21 @@ class HomeViewModel @Inject constructor(
         currentDuration.cancel()
     }
 
-    override fun onMediaPlaylistChanged(
-        controller: MediaController,
-        list: MutableList<MediaItem>?,
-        metadata: MediaMetadata?
-    ) {
-        updatePlayList(list)
-    }
-
     override fun onMediaPlayerStateChanged(controller: MediaController, state: Int) {
         updatePlayState(state)
     }
 
     fun refresh() {
-        init(ALL_ID)
-        init(ALBUM_ID)
-        init(ARTIST_ID)
-    }
-
-    //根据parentId去拿数据
-    override fun onMediaChildrenInit(parentId: String, items: List<MediaData>) {
-        when (parentId) {
-            ALL_ID -> _localMusicList.value = items
-            ALBUM_ID -> _localAlbumList.value = items
-            ARTIST_ID -> _localArtistList.value = items
+        listMap.keys.forEach {
+            init(it)
         }
     }
 
     //更新item的方法，当回调到item改变就调用这个方法
-    override fun onMediaCurrentMediaItemChanged(controller: MediaController, item: MediaItem?) {
-        updateItem(item)
-    }
-
-    private fun updateItem(item: MediaItem?) {
+    override fun updateItem(item: MediaItem?) {
+        super.updateItem(item)
         browser ?: return
-        _netAlbum.value = _netAlbum.value.toMutableList().map {
-            val isPlaying = if (item == null) false else it.mediaId == item.metadata?.mediaId
-            it.copy(isPlaying = isPlaying)
-        }
         _currentItem.value = item ?: NULL_MEDIA_ITEM
-
-        _currentPlayList.value = browser!!.playlist?.map {
-            val isPlaying =
-                if (item == null) false else it.metadata?.mediaId == item.metadata?.mediaId
-            MediaData(it, isPlaying)
-        } ?: emptyList()
-
-        _localMusicList.value = _localMusicList.value.toMutableList().map {
-            val isPlaying = if (item == null) false else it.mediaId == item.metadata?.mediaId
-            it.copy(isPlaying = isPlaying)
-        }
         maxValue.value = browser?.currentMediaItem?.metadata?.duration?.toFloat() ?: 0F
-    }
-
-    //下一首
-    fun prevItem() {
-        val browser = browser ?: return
-        browser.skipToPreviousPlaylistItem()
-    }
-
-    //下一首
-    fun nextItem() {
-        val browser = browser ?: return
-        browser.skipToNextPlaylistItem()
-    }
-
-    //播放还是暂停？
-    fun playOrPause() {
-        val browser = browser ?: return
-        if (browser.playerState == SessionPlayer.PLAYER_STATE_PLAYING) {
-            browser.pause()
-        } else {
-            browser.play()
-        }
-    }
-
-    //更新播放列表的方法
-    private fun updatePlayList(mediaItems: List<MediaItem>?) {
-        mediaItems ?: return
-        val browser = browser ?: return
-        _currentPlayList.value = mediaItems.map {
-            val isPlaying = it.metadata?.mediaId == browser.currentMediaItem?.metadata?.mediaId
-            MediaData(it, isPlaying)
-        }
-    }
-
-    fun seekTo(position: Long) {
-        val browser = browser ?: return
-        browser.seekTo(position)
-    }
-
-    fun removePlayItem(position: Int) {
-        val browser = browser ?: return
-        browser.removePlaylistItem(position)
-    }
-
-    fun skipTo(position: Int) {
-        val browser = browser ?: return
-        if (browser.currentMediaItemIndex != position) {
-            browser.skipToPlaylistItem(position)
-            browser.play()
-        }
-    }
-
-    fun clearPlayList() {
-        val result = browser?.sendCustomCommand(
-            SessionCommand(CLEAR_PLAY_LIST, null), null
-        )
-        if (result!!.get().resultCode == SessionResult.RESULT_SUCCESS) {
-            updateItem(null)
-        }
     }
 }

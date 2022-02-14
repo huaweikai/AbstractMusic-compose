@@ -14,6 +14,7 @@ import com.hua.abstractmusic.other.Constant.ARTIST_TO_ALBUM
 import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ARTIST_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_BANNER_ID
+import com.hua.abstractmusic.other.Constant.NETWORK_RECOMMEND_ID
 import com.hua.abstractmusic.other.Constant.ROOT_SCHEME
 import com.hua.abstractmusic.other.Constant.SHEET_ID
 import com.hua.abstractmusic.other.Constant.TYPE_ALBUM
@@ -21,6 +22,7 @@ import com.hua.abstractmusic.other.Constant.TYPE_ARTIST
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ALBUM
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ARTIST
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_BANNER
+import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_RECOMMEND
 import com.hua.abstractmusic.other.Constant.TYPE_ROOT
 import com.hua.abstractmusic.other.Constant.TYPE_SHEET
 import com.hua.abstractmusic.utils.*
@@ -46,7 +48,8 @@ class MediaItemTree(
         val list = listOf(
             ROOT_SCHEME, ALL_ID, ALBUM_ID,
             ARTIST_ID, SHEET_ID, NETWORK_ALBUM_ID,
-            NETWORK_ARTIST_ID, NETWORK_BANNER_ID
+            NETWORK_ARTIST_ID, NETWORK_BANNER_ID,
+            NETWORK_RECOMMEND_ID
         )
         list.forEach {
             treeNodes[it] = MediaItemNode(
@@ -121,6 +124,13 @@ class MediaItemTree(
             TYPE_NETWORK_BANNER->{
                 if (parentIdUri.lastPathSegment.isNullOrBlank()){
                     scanner.selectBanner()
+                }else{
+                    null
+                }
+            }
+            TYPE_NETWORK_RECOMMEND->{
+                if (parentIdUri.lastPathSegment.isNullOrBlank()){
+                    scanner.selectRecommend()
                 }else{
                     null
                 }

@@ -104,7 +104,7 @@ fun LocalArtistDetail(
     }
 }
 
-private fun LazyListScope.interval(
+fun LazyListScope.interval(
     desc: String
 ) {
     item {

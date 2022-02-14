@@ -8,10 +8,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.hua.abstractmusic.ui.LocalAppNavController
-import com.hua.abstractmusic.ui.LocalHomeViewModel
-import com.hua.abstractmusic.ui.LocalUserViewModel
+import com.hua.abstractmusic.ui.*
 import com.hua.abstractmusic.ui.hello.HelloScreen
 import com.hua.abstractmusic.ui.home.HomeScreen
 import com.hua.abstractmusic.ui.route.Screen
@@ -43,6 +42,8 @@ fun AppNavigation(
         }
         composable(route = Screen.HomeScreen.route) {
             CompositionLocalProvider(
+                LocalHomeNavController provides rememberNavController(),
+                LocalNetViewModel provides hiltViewModel(),
                 LocalUserViewModel provides hiltViewModel()
             ){
                 HomeScreen()

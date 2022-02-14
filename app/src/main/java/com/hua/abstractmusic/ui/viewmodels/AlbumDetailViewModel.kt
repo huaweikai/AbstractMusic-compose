@@ -28,29 +28,19 @@ class AlbumDetailViewModel @Inject constructor(
     application: Application,
     useCase: UseCase,
     itemTree: MediaItemTree
-) : BaseBrowserViewModel(application, useCase,itemTree) {
+) : BaseBrowserViewModel(application, useCase, itemTree) {
     var id: String? = null
     override fun onMediaConnected(
         controller: MediaController,
         allowedCommands: SessionCommandGroup
     ) {
-        id?.let {
+        listMap[id!!] = _albumDetail
+        playListMap[id!!] = _albumDetail
+        listMap.keys.forEach {
             detailInit(it)
         }
     }
 
     private val _albumDetail = mutableStateOf<List<MediaData>>(emptyList())
     val albumDetail: State<List<MediaData>> get() = _albumDetail
-
-    override fun onMediaChildrenInit(parentId: String, items: List<MediaData>) {
-        _albumDetail.value = items
-    }
-
-    override fun onMediaCurrentMediaItemChanged(controller: MediaController, item: MediaItem?) {
-        _albumDetail.value = _albumDetail.value.toMutableList().map {
-            it.copy(
-                isPlaying = if (item == null) false else it.mediaId == item.metadata?.mediaId
-            )
-        }
-    }
 }

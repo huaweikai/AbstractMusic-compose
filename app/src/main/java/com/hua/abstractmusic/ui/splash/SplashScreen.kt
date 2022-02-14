@@ -33,8 +33,7 @@ import kotlinx.coroutines.*
  */
 @Composable
 fun SplashScreen(
-    appController: NavHostController = LocalAppNavController.current,
-//    viewModel: HomeViewModel = LocalHomeViewModel.current
+    appController: NavHostController = LocalAppNavController.current
 ) {
 
     val context = LocalContext.current
@@ -42,7 +41,6 @@ fun SplashScreen(
     LaunchedEffect(Unit) {
         val nextRoute =
             if (PermissionGet.checkReadPermission(context)) {
-//                viewModel.initializeController()
                 Screen.HomeScreen.route
             } else Screen.HelloScreen.route
         delay(500L)

@@ -41,6 +41,10 @@ object Constant {
     const val TYPE_NETWORK_BANNER = "network_banner"
     const val NETWORK_BANNER_ID = "$ROOT_SCHEME$TYPE_NETWORK_BANNER"
 
+    //recommend
+    const val TYPE_NETWORK_RECOMMEND = "network_recommend"
+    const val NETWORK_RECOMMEND_ID = "$ROOT_SCHEME$TYPE_NETWORK_RECOMMEND"
+
 
     const val TOALBUMDESC = "TOALBUMDESC"
 
@@ -67,6 +71,8 @@ object Constant {
             }.build()
     ).build()
     const val CLEAR_PLAY_LIST = "clear_list"
+
+    const val CURRENT_PLAY_LIST = "current_play_list"
 
     const val BUCKET_NAME = "abstractmusic"
     const val BUCKET_HEAD_IMG = "headImg"

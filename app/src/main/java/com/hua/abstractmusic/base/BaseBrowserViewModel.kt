@@ -3,18 +3,24 @@ package com.hua.abstractmusic.base
 import android.app.Application
 import android.content.ComponentName
 import android.content.Context
+import android.os.Bundle
 import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media2.common.MediaItem
 import androidx.media2.common.MediaMetadata
+import androidx.media2.common.SessionPlayer
 import androidx.media2.session.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.common.util.concurrent.MoreExecutors
 import com.hua.abstractmusic.bean.MediaData
+import com.hua.abstractmusic.other.Constant
+import com.hua.abstractmusic.other.Constant.CURRENT_PLAY_LIST
 import com.hua.abstractmusic.other.Constant.LASTMEDIA
 import com.hua.abstractmusic.other.Constant.LASTMEDIAINDEX
 import com.hua.abstractmusic.services.MediaItemTree
@@ -36,13 +42,17 @@ abstract class BaseBrowserViewModel(
     val useCase: UseCase,
     val itemTree: MediaItemTree
 ) : AndroidViewModel(application) {
+
+    val listMap = HashMap<String, MutableState<List<MediaData>>>()
+    val playListMap = HashMap<String, MutableState<List<MediaData>>>()
+
     private val browserCallback = object : MediaBrowser.BrowserCallback() {
         override fun onConnected(
             controller: MediaController,
             allowedCommands: SessionCommandGroup
         ) {
             onMediaConnected(controller, allowedCommands)
-            onCurrentMediaItemChanged(controller,browser?.currentMediaItem)
+            onCurrentMediaItemChanged(controller, browser?.currentMediaItem)
         }
 
         override fun onChildrenChanged(
@@ -57,16 +67,28 @@ abstract class BaseBrowserViewModel(
                     it.metadata?.mediaId == browser.currentMediaItem?.metadata?.mediaId
                 )
             }
-            onMediaChildrenInit(parentId,mediaItems)
+            //根据parentId去拿数据
+            listMap[parentId]!!.value = mediaItems
             _state.value = true
         }
 
+        //更新播放列表的方法
         override fun onPlaylistChanged(
             controller: MediaController,
             list: MutableList<MediaItem>?,
             metadata: MediaMetadata?
         ) {
-            onMediaPlaylistChanged(controller, list, metadata)
+            val items = list ?: return
+            if (items.size == 0) {
+                updateItem(null)
+            }
+            playListMap[CURRENT_PLAY_LIST]?.let {
+                it.value = list.map {
+                    val isPlaying =
+                        it.metadata?.mediaId == browser?.currentMediaItem?.metadata?.mediaId
+                    MediaData(it, isPlaying)
+                }
+            }
         }
 
         override fun onDisconnected(controller: MediaController) {
@@ -76,7 +98,7 @@ abstract class BaseBrowserViewModel(
         override fun onCurrentMediaItemChanged(controller: MediaController, item: MediaItem?) {
             viewModelScope.launch {
                 delay(200L)
-                onMediaCurrentMediaItemChanged(controller, item)
+                updateItem(browser?.currentMediaItem)
             }
         }
 
@@ -90,20 +112,7 @@ abstract class BaseBrowserViewModel(
     }
 
     open fun onMediaConnected(controller: MediaController, allowedCommands: SessionCommandGroup) {}
-    open fun onMediaChildrenInit(parentId: String,items: List<MediaData>){}
-    open fun onMediaChildrenChanged(
-        browser: MediaBrowser,
-        parentId: String,
-        itemCount: Int,
-        params: MediaLibraryService.LibraryParams?
-    ) {
-    }
 
-    open fun onMediaPlaylistChanged(controller: MediaController,
-                                    list: MutableList<MediaItem>?,
-                                    metadata: MediaMetadata?) {}
-
-    open fun onMediaCurrentMediaItemChanged(controller: MediaController, item: MediaItem?) {}
     open fun onMediaDisConnected(controller: MediaController) {}
     open fun onMediaPlayerStateChanged(controller: MediaController, state: Int) {}
 
@@ -161,10 +170,64 @@ abstract class BaseBrowserViewModel(
 
     //加载音乐列表，根据父ID来进行加载
     open fun init(parentId: String) {
+        _state.value = false
         val browser = browser ?: return
         //订阅
         browser.subscribe(parentId, null)
         //去获取数据
         browser.getChildren(parentId, 0, Int.MAX_VALUE, null)
+    }
+
+    open fun updateItem(item: MediaItem?) {
+        playListMap.keys.forEach { key ->
+            playListMap[key]!!.value = playListMap[key]!!.value.toMutableList().map {
+                val isPlaying = if (item == null) false else it.mediaId == item.metadata?.mediaId
+                it.copy(isPlaying = isPlaying)
+            }
+        }
+    }
+
+    //上一首
+    fun prevItem() {
+        val browser = browser ?: return
+        browser.skipToPreviousPlaylistItem()
+    }
+
+    //下一首
+    fun nextItem() {
+        val browser = browser ?: return
+        browser.skipToNextPlaylistItem()
+    }
+
+    //播放还是暂停？
+    fun playOrPause() {
+        val browser = browser ?: return
+        if (browser.playerState == SessionPlayer.PLAYER_STATE_PLAYING) {
+            browser.pause()
+        } else {
+            browser.play()
+        }
+    }
+
+    fun seekTo(position: Long) {
+        val browser = browser ?: return
+        browser.seekTo(position)
+    }
+
+    fun removePlayItem(position: Int) {
+        val browser = browser ?: return
+        browser.removePlaylistItem(position)
+    }
+
+    fun skipTo(position: Int) {
+        val browser = browser ?: return
+        if (browser.currentMediaItemIndex != position) {
+            browser.skipToPlaylistItem(position)
+            browser.play()
+        }
+    }
+
+    fun clearPlayList() {
+        browser?.sendCustomCommand(SessionCommand(Constant.CLEAR_PLAY_LIST, null), null)
     }
 }

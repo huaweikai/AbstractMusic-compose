@@ -2,10 +2,7 @@ package com.hua.abstractmusic.ui
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.navigation.NavHostController
-import com.hua.abstractmusic.ui.viewmodels.AlbumDetailViewModel
-import com.hua.abstractmusic.ui.viewmodels.ArtistDetailViewModel
-import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
-import com.hua.abstractmusic.ui.viewmodels.UserViewModel
+import com.hua.abstractmusic.ui.viewmodels.*
 
 
 /**
@@ -24,6 +21,10 @@ val LocalAlbumViewModel = staticCompositionLocalOf<AlbumDetailViewModel>{
 
 val LocalArtistViewModel = staticCompositionLocalOf<ArtistDetailViewModel>{
     error("LocalArtistViewModel is NULL")
+}
+
+val LocalNetViewModel = staticCompositionLocalOf<NetViewModel>{
+    error("LocalNetViewModel is Null")
 }
 
 val LocalUserViewModel = staticCompositionLocalOf<UserViewModel>{
