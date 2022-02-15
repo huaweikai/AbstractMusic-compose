@@ -90,10 +90,10 @@ fun PlayScreen(
                 ) { page ->
                     when (page) {
                         0->{
-                           ListScreen(viewModel = homeViewModel)
+                           ListScreen()
                         }
                         1->{
-                            MusicScreen(viewModel = homeViewModel)
+                            MusicScreen()
                         }
                         2->{
                             Text(text = tabTitles[page])

@@ -2,6 +2,8 @@ package com.hua.abstractmusic.ui.viewmodels
 
 import android.app.Application
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.runtime.*
 import androidx.lifecycle.viewModelScope
 import androidx.media2.common.MediaItem
@@ -127,4 +129,7 @@ class HomeViewModel @Inject constructor(
         _currentItem.value = item ?: NULL_MEDIA_ITEM
         maxValue.value = browser?.currentMediaItem?.metadata?.duration?.toFloat() ?: 0F
     }
+
+    val sheetPlayListState = mutableStateOf(ModalBottomSheetState(ModalBottomSheetValue.Hidden))
+    val sheetPlayScreen = mutableStateOf(ModalBottomSheetState(ModalBottomSheetValue.Hidden, isSkipHalfExpanded = true))
 }

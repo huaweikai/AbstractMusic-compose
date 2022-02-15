@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -49,12 +50,12 @@ import com.hua.abstractmusic.utils.title
 fun HomeController(
     modifier: Modifier,
     playListClick: () -> Unit,
-    playScreenClick:()->Unit,
+    playScreenClick: () -> Unit,
 ) {
     Column(
         modifier = modifier,
     ) {
-        Controller(playListClick,playScreenClick)
+        Controller(playListClick, playScreenClick)
         HomeNavigation()
     }
 }
@@ -62,7 +63,7 @@ fun HomeController(
 @Composable
 fun Controller(
     playListClick: () -> Unit,
-    playScreenClick:()->Unit,
+    playScreenClick: () -> Unit,
     viewModel: HomeViewModel = LocalHomeViewModel.current
 ) {
     val data = viewModel.currentItem.value.metadata
@@ -122,30 +123,24 @@ fun Controller(
                     R.drawable.ic_play
                 }
             val list = listOf(
-                IconBean(stateIcon, "播放"),
-                IconBean(R.drawable.ic_next, "下一首"),
-                IconBean(R.drawable.ic_playlist, "播放列表")
+                IconBean(stateIcon, "播放", size = 48.dp, onClick = {
+                    viewModel.playOrPause()
+                }),
+                IconBean(R.drawable.ic_next, "下一首", size = 20.dp, onClick = {
+                    viewModel.nextItem()
+                }),
+                IconBean(R.drawable.ic_playlist, "播放列表", size = 20.dp, onClick = {
+                    playListClick()
+                })
             )
-
             for (i in 0..2) {
                 val button = list[i]
                 ControllerButton(
                     resId = button.resId,
                     resDesc = button.desc,
-                    modifier = Modifier
-                ) {
-                    when (i) {
-                        0 -> {
-                            viewModel.playOrPause()
-                        }
-                        1 -> {
-                            viewModel.nextItem()
-                        }
-                        2 -> {
-                            playListClick()
-                        }
-                    }
-                }
+                    onclick = button.onClick,
+                    size = button.size
+                )
             }
         }
 
@@ -157,7 +152,8 @@ fun ControllerButton(
     resId: Int,
     resDesc: String,
     modifier: Modifier = Modifier,
-    onclick: () -> Unit
+    onclick: () -> Unit,
+    size: Dp
 ) {
     IconButton(
         modifier = modifier,
@@ -167,7 +163,8 @@ fun ControllerButton(
     ) {
         Icon(
             painter = painterResource(id = resId),
-            contentDescription = resDesc
+            contentDescription = resDesc,
+            modifier = Modifier.size(size)
         )
     }
 }
@@ -190,14 +187,14 @@ fun HomeNavigation(
         elevation = 0.dp,
         backgroundColor = MaterialTheme.colorScheme.background
     ) {
-        bars.forEach {item ->
+        bars.forEach { item ->
             val selected = item.route == back.value?.destination?.route
             val color = if (selected) MaterialTheme.colorScheme.primary else Color.Black
             BottomNavigationItem(
                 selected = selected,
                 onClick = {
-                    navController.navigate(item.route){
-                        popUpTo(navController.graph.findStartDestination().id){
+                    navController.navigate(item.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
                             saveState = true
                         }
                         launchSingleTop = true

@@ -84,6 +84,7 @@ fun AlbumArtImage(
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
             .apply {
+                placeholder(R.drawable.ic_music_launcher)
                 data(uri)
                 error(R.drawable.music)
                 transformations(transformation)

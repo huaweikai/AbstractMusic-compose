@@ -19,6 +19,7 @@ import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.viewmodels.UserViewModel
 import com.hua.abstractmusic.ui.navigation.AppNavigation
 import com.hua.abstractmusic.ui.theme.AbstractMusicTheme
+import com.hua.abstractmusic.ui.utils.rememberWindowSizeClass
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -43,11 +44,13 @@ class MainActivity : ComponentActivity() {
                 Color.Transparent,
                 darkIcons = MaterialTheme.colors.isLight
             )
+            val windowSize = rememberWindowSizeClass()
             AbstractMusicTheme {
                 CompositionLocalProvider(
                     // 可提前加载信息，不会造成空白
                     LocalHomeViewModel provides localHomeViewModel,
-                    LocalAppNavController provides appNavHostController
+                    LocalAppNavController provides appNavHostController,
+                    LocalScreenSize provides windowSize
                 ) {
                    Surface{
                        AppNavigation()

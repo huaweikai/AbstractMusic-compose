@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.mapSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -16,6 +18,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.hua.abstractmusic.ui.LocalHomeNavController
+import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.home.playlist.HomePlayList
 import com.hua.abstractmusic.ui.navigation.HomeNavigationNav
 import com.hua.abstractmusic.ui.play.PlayScreen
@@ -47,17 +50,22 @@ fun HomeScreen(
         mutableStateOf(false)
     }
 
-    val sheetListState by remember {
-        mutableStateOf(
-            ModalBottomSheetState(ModalBottomSheetValue.Hidden)
-        )
-    }
 
-    val sheetPlayState by remember {
-        mutableStateOf(
-            ModalBottomSheetState(ModalBottomSheetValue.Hidden, isSkipHalfExpanded = true)
-        )
-    }
+    // 翻转屏幕导致失效，stateSaver保存失败
+    val sheetListState = LocalHomeViewModel.current.sheetPlayListState.value
+    val sheetPlayState = LocalHomeViewModel.current.sheetPlayScreen.value
+
+//    val sheetListState by rememberSaveable(stateSaver = sheetSaver){
+//        mutableStateOf(
+//            ModalBottomSheetState(ModalBottomSheetValue.Hidden)
+//        )
+//    }
+//
+//    val sheetPlayState by rememberSaveable(stateSaver = sheetSaver){
+//        mutableStateOf(
+//            ModalBottomSheetState(ModalBottomSheetValue.Hidden, isSkipHalfExpanded = true)
+//        )
+//    }
 
     LaunchedEffect(sheetListState.currentValue) {
         if (!sheetListState.isVisible) {

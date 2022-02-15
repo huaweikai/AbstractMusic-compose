@@ -17,6 +17,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.R
+import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.utils.albumArtUri
@@ -31,7 +32,7 @@ import com.hua.abstractmusic.utils.title
  */
 @Composable
 fun ListScreen(
-    viewModel: HomeViewModel
+    viewModel: HomeViewModel = LocalHomeViewModel.current
 ) {
     Column(
         modifier = Modifier
@@ -75,22 +76,6 @@ fun ListScreen(
                             }
                             .size(70.dp)
                     )
-/*                    Image(
-                        painter = rememberImagePainter(
-                            data = item.mediaItem.metadata?.albumArtUri
-                        ) {
-                            this.error(R.drawable.music)
-                            transformations(RoundedCornersTransformation(30f))
-                        },
-                        contentDescription = null,
-                        modifier = Modifier
-                            .constrainAs(img) {
-                                start.linkTo(parent.start, 8.dp)
-                                bottom.linkTo(parent.bottom)
-                                top.linkTo(parent.top)
-                            }
-                            .size(70.dp)
-                    )*/
                     Column(
                         modifier = Modifier
                             .constrainAs(title) {

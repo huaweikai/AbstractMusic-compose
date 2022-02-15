@@ -1,35 +1,53 @@
 package com.hua.abstractmusic.ui.play.detail
 
-import android.graphics.Bitmap
+import android.content.res.Configuration
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
+import androidx.annotation.DrawableRes
+import androidx.compose.animation.Animatable
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.SpringSpec
+import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight.Companion.W300
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
-import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toBitmap
+import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.media2.common.SessionPlayer
 import coil.ImageLoader
-import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import coil.request.SuccessResult
+import coil.transform.CircleCropTransformation
 import coil.transform.RoundedCornersTransformation
 import com.google.android.exoplayer2.Player
 import com.hua.abstractmusic.R
+import com.hua.abstractmusic.bean.ui.home.IconBean
+import com.hua.abstractmusic.ui.LocalHomeViewModel
+import com.hua.abstractmusic.ui.LocalMusicScreenSecondColor
+import com.hua.abstractmusic.ui.LocalScreenSize
+import com.hua.abstractmusic.ui.home.local.album.detail.PlayIcon
+import com.hua.abstractmusic.ui.utils.AlbumArtImage
+import com.hua.abstractmusic.ui.utils.TitleAndArtist
+import com.hua.abstractmusic.ui.utils.WindowSize
+import com.hua.abstractmusic.ui.utils.rememberWindowSizeClass
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.utils.*
 import kotlinx.coroutines.launch
@@ -41,274 +59,302 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun MusicScreen(
-    viewModel: HomeViewModel,
+    viewModel: HomeViewModel = LocalHomeViewModel.current,
     isDark: Boolean = isSystemInDarkTheme()
 ) {
     val imageLoader = ImageLoader(LocalContext.current)
     val context = LocalContext.current
-    val defaultColor = Pair(context.getColor(R.color.black), context.getColor(R.color.black))
-    val bitmap = remember {
-        mutableStateOf(defaultColor)
+    val firstColor = remember {
+        Animatable(Color.Black)
     }
-    val scope = rememberCoroutineScope()
+    val secondColor = remember {
+        Animatable(Color.Black)
+    }
     LaunchedEffect(viewModel.currentItem.value) {
         val request = ImageRequest.Builder(context)
             .data(viewModel.currentItem.value.metadata?.albumArtUri)
+            .error(R.drawable.ic_music_launcher)
             .allowHardware(false)
-            .target(
-                onSuccess = {
-                    scope.launch {
-                        bitmap.value = PaletteUtils.resolveBitmap(
-                            isDark,
-                            it.toBitmap(),
-                            context.getColor(R.color.black)
-                        )
-                    }
-                },
-                onError = {
-                    scope.launch {
-                        bitmap.value = PaletteUtils.resolveBitmap(
-                            isDark,
-                            BitmapFactory.decodeResource(
-                                context.resources,
-                                R.drawable.music
-                            ),
-                            context.getColor(R.color.black)
-                        )
-                    }
-                }
-            )
             .build()
-        imageLoader.execute(request)
+        val result = imageLoader.execute(request)
+        val bitmap = try {
+            (result.drawable as BitmapDrawable).bitmap
+        } catch (e: Exception) {
+            BitmapFactory.decodeResource(
+                context.resources,
+                R.drawable.music
+            )
+        }
+
+        val pair = PaletteUtils.resolveBitmap(
+            isDark,
+            bitmap,
+            context.getColor(R.color.black)
+        )
+        firstColor.animateTo(
+            Color(pair.first),
+            animationSpec = TweenSpec(500, easing = LinearOutSlowInEasing)
+        )
+        secondColor.animateTo(Color(pair.second))
     }
-    val color by animateColorAsState(
-        Color(bitmap.value.first)
-    )
-    CompositionLocalProvider(LocalContentColor provides color) {
-        ConstraintLayout(
+    val screenWidth = LocalConfiguration.current.screenWidthDp
+    CompositionLocalProvider(
+        LocalContentColor provides firstColor.value,
+        LocalMusicScreenSecondColor provides secondColor.value
+    ) {
+        val windowSize = LocalScreenSize.current
+        if(windowSize == WindowSize.Expanded){
+            HorizontalScreen()
+        } else if(windowSize == WindowSize.Compact){
+            VerticalScreen()
+        }
+//        BoxWithConstraints {
+//            if(maxWidth < 500.dp){
+//                VerticalScreen()
+//            }else{
+//
+//            }
+//        }
+    }
+}
+
+@Composable
+private fun VerticalScreen(
+    configuration: Configuration = LocalConfiguration.current,
+    viewModel: HomeViewModel = LocalHomeViewModel.current
+) {
+    val topGlide = configuration.screenHeightDp * 0.15
+    val data = viewModel.currentItem.value.metadata
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Spacer(modifier = Modifier.height(topGlide.dp))
+        AlbumArtImage(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth(0.8f)
+                .aspectRatio(1f)
+                .align(CenterHorizontally),
+            uri = data?.albumArtUri,
+            desc = "",
+            transformation = RoundedCornersTransformation(30f)
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+        TitleAndArtist(
+            title = "${data?.title}",
+            subTitle = "${data?.artist}",
+            height = 12.dp,
+            titleStyle = {
+                this.copy(fontSize = 22.sp)
+            },
+            subTitleStyle = {
+                this.copy(fontSize = 16.sp)
+            },
+            color = LocalContentColor.current,
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .align(CenterHorizontally)
+        )
+        Mode(
+            modifier = Modifier
+                .align(Alignment.End)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        MusicSlider(
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .align(CenterHorizontally)
+        )
+        SecondText(
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .align(CenterHorizontally)
+        )
+        Spacer(modifier = Modifier.height(18.dp))
+        PlayController(modifier = Modifier.align(CenterHorizontally))
+    }
+}
+
+@Composable
+private fun HorizontalScreen(
+    configuration: Configuration = LocalConfiguration.current,
+    viewModel: HomeViewModel = LocalHomeViewModel.current
+) {
+    val screenHeight = configuration.screenHeightDp
+    val startGlide = screenHeight * 0.1
+    val data = viewModel.currentItem.value.metadata
+    Row(
+        Modifier
+            .fillMaxSize()
+            .padding(start = startGlide.dp)
+    ) {
+        AlbumArtImage(
+            modifier = Modifier
+                .fillMaxHeight(0.8f)
+                .align(CenterVertically)
+                .aspectRatio(1f),
+            uri = data?.albumArtUri,
+            desc = "",
+            transformation = RoundedCornersTransformation(30f)
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        Column(
+            Modifier
+                .fillMaxHeight()
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.Center
         ) {
-            val (img, title, mode, seekBar, second, controller) = createRefs()
-            val imgStart = createGuidelineFromStart(0.1f)
-            val imgEnd = createGuidelineFromStart(0.9f)
-            val imgTop = createGuidelineFromTop(0.15f)
-            val imgBottom = createGuidelineFromTop(0.5f)
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .apply {
-                        data(viewModel.currentItem.value.metadata?.albumArtUri)
-                        error(R.drawable.music)
-                        transformations(RoundedCornersTransformation(30f))
-                    }
-                    .build(),
-                contentDescription = "",
-                modifier = Modifier
-                    .constrainAs(img) {
-                        top.linkTo(imgTop)
-                        start.linkTo(imgStart)
-                        end.linkTo(imgEnd)
-                        bottom.linkTo(imgBottom)
-                        width = Dimension.fillToConstraints
-                        height = Dimension.fillToConstraints
-                    }
-            )
-            Column(modifier = Modifier
-                .constrainAs(title) {
-                    top.linkTo(img.bottom, 32.dp)
-                    start.linkTo(img.start)
-                    end.linkTo(img.end)
-                    height = Dimension.preferredValue(40.dp)
-                    width = Dimension.fillToConstraints
-                }
-            ) {
-                Title(
-                    title = "${viewModel.currentItem.value.metadata?.title}",
-                    desc = "${viewModel.currentItem.value.metadata?.artist} - ${viewModel.currentItem.value.metadata?.album}"
-                )
-            }
-            Row(modifier = Modifier
-                .constrainAs(mode) {
-                    top.linkTo(title.bottom)
-                    end.linkTo(parent.end, 16.dp)
-                    height = Dimension.preferredValue(32.dp)
-                }
-            ) {
-                Mode()
-            }
-            Slider(
-                value = viewModel.currentPosition.value.toFloat(),
-                valueRange = 0f..viewModel.maxValue.value,
-                onValueChange = {
-                    //点击准备改变时，先设置我已经对seekbar操作，让更新seekbar暂停。
-                    viewModel.actionSeekBar.value = true
-                    viewModel.currentPosition.value = it.toLong()
+            TitleAndArtist(
+                title = "${data?.title}",
+                subTitle = "${data?.artist}",
+                height = 5.dp,
+                titleStyle = {
+                    this.copy(fontSize = 22.sp)
                 },
-                onValueChangeFinished = {
-                    //结束后，先去seekto再去更新ui
-                    viewModel.seekTo(viewModel.currentPosition.value)
-                    viewModel.actionSeekBar.value = false
+                subTitleStyle = {
+                    this.copy(fontSize = 16.sp)
                 },
-                colors = SliderDefaults.colors(
-                    thumbColor = LocalContentColor.current,
-                    inactiveTrackColor = Color(bitmap.value.second),
-                    activeTrackColor = Color(bitmap.value.first)
-                ),
-                modifier = Modifier
-                    .constrainAs(seekBar) {
-                        start.linkTo(parent.start, 32.dp)
-                        end.linkTo(parent.end, 32.dp)
-                        top.linkTo(mode.bottom, 8.dp)
-                        width = Dimension.fillToConstraints
-                        height = Dimension.preferredValue(16.dp)
-                    }
+                color = LocalContentColor.current,
             )
-
-            ConstraintLayout(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .constrainAs(second) {
-                        top.linkTo(seekBar.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end, 16.dp)
-                    }
-            ) {
-                val (current, max) = createRefs()
-                Text(
-                    text = viewModel.currentPosition.value.toTime(),
-                    modifier = Modifier
-                        .constrainAs(current) {
-                            start.linkTo(parent.start, 16.dp)
-                            top.linkTo(parent.top)
-                        }
-                )
-                Text(
-                    text = viewModel.maxValue.value.toLong().toTime(),
-                    modifier = Modifier
-                        .constrainAs(max) {
-                            end.linkTo(parent.end, 16.dp)
-                            top.linkTo(parent.top)
-                        }
-                )
-            }
-            Column(
-                modifier = Modifier
-                    .constrainAs(controller) {
-                        top.linkTo(second.bottom, 10.dp)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                        bottom.linkTo(parent.bottom)
-                        width = Dimension.fillToConstraints
-                        height = Dimension.fillToConstraints
-                    }
-            ) {
-                PlayController(state = viewModel.playerState.value, {
-                    viewModel.playOrPause()
-                }, {
-                    viewModel.prevItem()
-                }, {
-                    viewModel.nextItem()
-                }
-                )
-            }
-
+            MusicSlider(modifier = Modifier.fillMaxWidth())
+            SecondText(modifier = Modifier.fillMaxWidth())
+            PlayController(modifier = Modifier.fillMaxWidth())
         }
     }
 }
 
 @Composable
-private fun Title(
-    title: String,
-    desc: String
+private fun MusicSlider(
+    modifier: Modifier,
+    viewModel: HomeViewModel = LocalHomeViewModel.current
 ) {
-    Text(
-        text = title,
-        textAlign = TextAlign.Start,
-        fontSize = 22.sp
-    )
-    Spacer(modifier = Modifier.padding(top = 12.dp))
-    Text(
-        text = desc,
-        textAlign = TextAlign.Start,
-        fontSize = 16.sp,
-        fontWeight = W300
+    Slider(
+        value = viewModel.currentPosition.value.toFloat(),
+        valueRange = 0f..viewModel.maxValue.value,
+        onValueChange = {
+            //点击准备改变时，先设置我已经对seekbar操作，让更新seekbar暂停。
+            viewModel.actionSeekBar.value = true
+            viewModel.currentPosition.value = it.toLong()
+        },
+        onValueChangeFinished = {
+            //结束后，先去seekto再去更新ui
+            viewModel.seekTo(viewModel.currentPosition.value)
+            viewModel.actionSeekBar.value = false
+        },
+        colors = SliderDefaults.colors(
+            thumbColor = LocalContentColor.current,
+            inactiveTrackColor = LocalMusicScreenSecondColor.current,
+            activeTrackColor = LocalContentColor.current
+        ),
+        modifier = modifier
     )
 }
 
 @Composable
-private fun Mode() {
-    Icon(
-        painter = painterResource(id = R.drawable.ic_mode_shuffle),
-        contentDescription = ""
-    )
-    Spacer(modifier = Modifier.padding(start = 16.dp))
-    Icon(
-        painter = painterResource(id = R.drawable.ic_mode_order_play),
-        contentDescription = ""
-    )
+private fun SecondText(
+    modifier: Modifier,
+    viewModel: HomeViewModel = LocalHomeViewModel.current
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = viewModel.currentPosition.value.toTime())
+        Text(text = viewModel.maxValue.value.toLong().toTime())
+    }
+}
+
+@Composable
+private fun Mode(
+    modifier: Modifier
+) {
+    Row(
+        modifier = modifier
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_mode_shuffle),
+            contentDescription = ""
+        )
+        Spacer(modifier = Modifier.padding(start = 16.dp))
+        Icon(
+            painter = painterResource(id = R.drawable.ic_mode_order_play),
+            contentDescription = ""
+        )
+    }
+
 }
 
 @Composable
 private fun PlayController(
-    @Player.State state: Int,
-    onPlayClick: () -> Unit,
-    onPrevClick: () -> Unit,
-    onNextClick: () -> Unit,
+    modifier: Modifier,
+    viewModel: HomeViewModel = LocalHomeViewModel.current
 ) {
-    ConstraintLayout(
-        modifier = Modifier
-            .fillMaxSize()
+    Row(
+        modifier.width(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        val (prev, play, next) = createRefs()
-        Icon(
-            painter = painterResource(
-                if (state == SessionPlayer.PLAYER_STATE_PLAYING) R.drawable.ic_play_pause
-                else R.drawable.ic_play_play
+        val stateIcon =
+            if (viewModel.playerState.value == SessionPlayer.PLAYER_STATE_PLAYING) {
+                R.drawable.ic_pause
+            } else {
+                R.drawable.ic_play
+            }
+        val controller = listOf(
+            IconBean(
+                R.drawable.ic_play_prev, "上一曲",
+                onClick = {
+                    viewModel.prevItem()
+                }
             ),
-            contentDescription = "",
-            modifier = Modifier
-                .constrainAs(play) {
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
+            IconBean(
+                stateIcon, "播放", size = 96.dp,
+                width = 50.dp,
+                onClick = {
+                    viewModel.playOrPause()
                 }
-                .size(70.dp)
-                .clickable {
-                    onPlayClick()
+            ),
+            IconBean(
+                R.drawable.ic_play_next, "下一曲",
+                onClick = {
+                    viewModel.nextItem()
                 }
+            )
         )
+        controller.forEach {
+            ControllerItem(
+                it.resId,
+                it.desc,
+                it.size,
+                it.width,
+                onClick = it.onClick
+            )
+        }
+    }
+}
+
+@Composable
+private fun ControllerItem(
+    @DrawableRes resId: Int,
+    desc: String,
+    size: Dp,
+    width: Dp,
+    onClick: () -> Unit
+) {
+    Spacer(modifier = Modifier.width(width))
+    IconButton(
+        onClick = { onClick() }
+    ) {
         Icon(
             painter = painterResource(
-                R.drawable.ic_play_prev
+                resId
             ),
-            contentDescription = "",
+            contentDescription = desc,
             modifier = Modifier
-                .constrainAs(prev) {
-                    end.linkTo(play.start, 50.dp)
-                    top.linkTo(play.top)
-                    bottom.linkTo(play.bottom)
-                }
-                .size(33.dp)
-                .clickable {
-                    onPrevClick()
-                }
-        )
-        Icon(
-            painter = painterResource(
-                R.drawable.ic_play_next
-            ),
-            contentDescription = "",
-            modifier = Modifier
-                .constrainAs(next) {
-                    start.linkTo(play.end, 50.dp)
-                    top.linkTo(play.top)
-                    bottom.linkTo(play.bottom)
-                }
-                .size(33.dp)
-                .clickable {
-                    onNextClick()
-                }
+                .clip(CircleShape)
+                .size(size)
         )
     }
+    Spacer(modifier = Modifier.width(width))
+
 }

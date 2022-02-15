@@ -122,4 +122,6 @@ dependencies {
     implementation 'com.huaweicloud:esdk-obs-android:3.21.12'
 
     implementation project(":taglib")
+
+    implementation "androidx.window:window:1.0.0"
 }
