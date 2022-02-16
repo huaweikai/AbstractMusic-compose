@@ -175,6 +175,9 @@ class PlayerService : MediaLibraryService() {
             }
         }
 
+        override fun onPlaylistMetadataChanged(mediaMetadata: MediaMetadata) {
+            super.onPlaylistMetadataChanged(mediaMetadata)
+        }
     }
 
     fun savePosition(index: Int) {

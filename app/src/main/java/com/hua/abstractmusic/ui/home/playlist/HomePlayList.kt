@@ -41,6 +41,7 @@ import com.hua.abstractmusic.utils.title
 fun HomePlayList(
     playListState: ModalBottomSheetState,
     viewModel: HomeViewModel = LocalHomeViewModel.current,
+    content:@Composable ()->Unit
 ) {
     val scope = rememberCoroutineScope()
 
@@ -128,5 +129,7 @@ fun HomePlayList(
                 }
             }
         }
-    ) {}
+    ) {
+        content()
+    }
 }

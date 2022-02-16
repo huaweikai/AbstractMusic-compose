@@ -51,8 +51,11 @@ class PlayerLibraryItemProvider(
         params: MediaLibraryService.LibraryParams?
     ): LibraryResult {
         scope.launch {
-            mediaItemTree.getChildren(parentId)
-            session.notifyChildrenChanged(parentId, 0, null)
+            if(mediaItemTree.getChildren(parentId).isNullOrEmpty()){
+                session.notifyChildrenChanged(parentId, 0, null)
+            }else{
+                session.notifyChildrenChanged(parentId, 1, null)
+            }
         }
         return LibraryResult(LibraryResult.RESULT_ERROR_NOT_SUPPORTED)
     }

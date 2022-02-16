@@ -344,4 +344,8 @@ class MediaStoreScanner(
     suspend fun selectAllMusic(parentId: Uri):List<MediaItem>{
         return repository.getAllMusic(parentId)
     }
+
+    suspend fun selectRecommendList(parentId: Uri):List<MediaItem>{
+        return repository.getRecommendList(parentId)
+    }
 }

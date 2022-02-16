@@ -67,7 +67,7 @@ fun LocalArtistDetail(
         }
         interval(desc = "歌曲")
         artItem(
-            viewModel.state.value,
+            viewModel.screenState.value,
             item.metadata?.trackCount!!.toInt(),
             viewModel.artistDetail.value,
             {
@@ -80,7 +80,7 @@ fun LocalArtistDetail(
         )
         interval(desc = "专辑")
         artItem(
-            viewModel.state.value,
+            viewModel.screenState.value,
             item.metadata?.trackNumber!!.toInt(),
             viewModel.artistAlbumDetail.value,
             {
@@ -115,17 +115,17 @@ fun LazyListScope.interval(
 }
 
 fun LazyListScope.artItem(
-    visible: Boolean,
+    state: LCE,
     loadingCount: Int,
     items: List<MediaData>,
     loadingItem: @Composable () -> Unit,
     content: @Composable LazyItemScope.(Int, MediaData) -> Unit
 ) {
-    if (!visible) {
+    if(state == LCE.Loading){
         items(loadingCount) {
             loadingItem()
         }
-    } else {
+    }else if(state == LCE.Success){
         itemsIndexed(items) { index, item ->
             content(index, item)
         }

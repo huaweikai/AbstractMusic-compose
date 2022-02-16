@@ -82,7 +82,7 @@ fun LocalAlbumDetail(
             Spacer(modifier = Modifier.height(10.dp))
         }
         artItem(
-            detailViewModel.state.value,
+            detailViewModel.screenState.value,
             item.metadata?.trackCount!!.toInt(),
             detailViewModel.albumDetail.value,
             {

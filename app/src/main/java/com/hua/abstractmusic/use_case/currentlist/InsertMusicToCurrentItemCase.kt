@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.use_case.currentlist
 
+import androidx.media2.common.MediaItem
 import com.hua.abstractmusic.bean.CurrentPlayItem
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.repository.Repository
@@ -13,10 +14,18 @@ import com.hua.abstractmusic.utils.*
 class InsertMusicToCurrentItemCase(
     private val repository: Repository
 ) {
+    @JvmName("mediaDataSave")
     suspend operator fun invoke(mediaItems:List<MediaData>?){
-        mediaItems?.let { items->
-            items.forEach { mediaData ->
-                val item = mediaData.mediaItem.metadata ?: return@let
+        val items = mediaItems?.map {
+            it.mediaItem
+        }
+        invoke(items)
+    }
+    @JvmName("mediaItemSave")
+    suspend operator fun invoke(mediaItems:List<MediaItem>?){
+        mediaItems?.let { list ->
+            list.forEach {
+                val item = it.metadata?:return@let
                 val currentPlayItem = CurrentPlayItem(
                     item.mediaId!!,
                     item.title.toString(),

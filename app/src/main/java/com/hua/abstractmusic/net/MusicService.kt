@@ -28,9 +28,14 @@ interface MusicService {
     suspend fun getBanner(): NetData<List<NetAlbum>>
 
     @GET("sheet/recommend")
-    suspend fun getRecommendList(): NetData<List<NetSheet>>
+    suspend fun getRecommend(): NetData<List<NetSheet>>
 
     @GET("music/list")
     suspend fun getAllMusic():NetData<List<NetMusic>>
+
+    @GET("sheet/recommend/{id}/list")
+    suspend fun getRecommendList(
+        @Path("id")id:String
+    ):NetData<List<NetMusic>>
 
 }

@@ -52,12 +52,30 @@ class NetViewModel @Inject constructor(
         listMap[NETWORK_ALL_MUSIC_ID] = _musicList
     }
 
+    var recommendId: String? = null
+    var albumId: String? = null
+
+    override fun onMediaChildrenChanged(
+        browser: MediaBrowser,
+        parentId: String,
+        itemCount: Int,
+        params: MediaLibraryService.LibraryParams?
+    ) {
+        if (itemCount != 0) {
+            setPlayList(0, itemTree.getChildItem(parentId))
+        }
+    }
+
+    fun listInit(parentId: String) {
+        val browser = this.browser ?: return
+        browser.subscribe(parentId, null)
+        browser.getChildren(parentId, 0, Int.MAX_VALUE, null)
+    }
+
     override fun onMediaConnected(
         controller: MediaController,
         allowedCommands: SessionCommandGroup
     ) {
-        listMap.keys.forEach {
-            init(it)
-        }
+        refresh()
     }
 }

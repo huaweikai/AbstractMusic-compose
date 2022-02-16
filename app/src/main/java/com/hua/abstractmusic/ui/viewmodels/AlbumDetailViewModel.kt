@@ -36,9 +36,10 @@ class AlbumDetailViewModel @Inject constructor(
     ) {
         listMap[id!!] = _albumDetail
         playListMap[id!!] = _albumDetail
-        listMap.keys.forEach {
-            detailInit(it)
-        }
+        refresh()
+//        listMap.keys.forEach {
+//            detailInit(it)
+//        }
     }
 
     private val _albumDetail = mutableStateOf<List<MediaData>>(emptyList())

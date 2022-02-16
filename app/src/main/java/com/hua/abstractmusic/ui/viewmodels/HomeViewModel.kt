@@ -116,12 +116,6 @@ class HomeViewModel @Inject constructor(
         updatePlayState(state)
     }
 
-    fun refresh() {
-        listMap.keys.forEach {
-            init(it)
-        }
-    }
-
     //更新item的方法，当回调到item改变就调用这个方法
     override fun updateItem(item: MediaItem?) {
         super.updateItem(item)
@@ -129,7 +123,4 @@ class HomeViewModel @Inject constructor(
         _currentItem.value = item ?: NULL_MEDIA_ITEM
         maxValue.value = browser?.currentMediaItem?.metadata?.duration?.toFloat() ?: 0F
     }
-
-    val sheetPlayListState = mutableStateOf(ModalBottomSheetState(ModalBottomSheetValue.Hidden))
-    val sheetPlayScreen = mutableStateOf(ModalBottomSheetState(ModalBottomSheetValue.Hidden, isSkipHalfExpanded = true))
 }

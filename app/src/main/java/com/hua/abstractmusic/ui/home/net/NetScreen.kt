@@ -1,46 +1,33 @@
 package com.hua.abstractmusic.ui.home.net
 
-import androidx.compose.foundation.Image
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.transform.RoundedCornersTransformation
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
-import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant.ALL_MUSIC_TYPE
 import com.hua.abstractmusic.other.Constant.NET_ALBUM_TYPE
-import com.hua.abstractmusic.other.Constant.TYPE_ALBUM
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalNetViewModel
-import com.hua.abstractmusic.ui.home.local.artist.detail.interval
 import com.hua.abstractmusic.ui.route.Screen
-import com.hua.abstractmusic.ui.utils.AlbumArtImage
-import com.hua.abstractmusic.ui.utils.HorizontalBanner
-import com.hua.abstractmusic.ui.utils.TitleAndArtist
-import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.utils.*
 import com.hua.abstractmusic.ui.viewmodels.NetViewModel
 import com.hua.abstractmusic.utils.albumArtUri
-import com.hua.abstractmusic.utils.art
 import com.hua.abstractmusic.utils.artist
 import com.hua.abstractmusic.utils.title
 
@@ -56,53 +43,82 @@ fun NetScreen(
     navHostController: NavHostController = LocalHomeNavController.current,
     netViewModel: NetViewModel = LocalNetViewModel.current
 ) {
-    if (netViewModel.state.value) {
-        LazyColumn(
-            verticalArrangement = Arrangement.Top
-        ) {
-            item {
-                HorizontalBanner(
-                    netViewModel.bannerList.value.map {
-                        it.mediaItem.metadata?.albumArtUri
-                    }
-                ) {
-
-                }
+    when (netViewModel.screenState.value) {
+        LCE.Loading -> {
+            Loading()
+        }
+        LCE.Error -> {
+            Error {
+                netViewModel.refresh()
             }
-            glide("大家都在听"){
-                navHostController.navigate("${Screen.NetDetailScreen.route}?type=$ALL_MUSIC_TYPE")
-            }
-            item {
-                if (netViewModel.musicList.value.isNotEmpty()) {
-                    HorizontalPager(
-                        count = 2,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 20.dp),
-                        contentPadding = PaddingValues(end = 32.dp)
-                    ) { page ->
-                        RecommendItem(
-                            netViewModel.musicList.value,
-                            page
-                        )
-                    }
-                }
-            }
-            glide("推荐歌单", {})
-            item {
-                NewItems(list = netViewModel.recommendList.value)
-            }
-            glide("最新专辑"){
-                navHostController.navigate("${Screen.NetDetailScreen.route}?type=$NET_ALBUM_TYPE")
-            }
-            item {
-                if (netViewModel.albumList.value.isNotEmpty()) {
-                    NewItems(list = netViewModel.albumList.value)
-                }
-            }
+        }
+        LCE.Success -> {
+            SuccessContent()
         }
     }
 }
+
+@ExperimentalPagerApi
+@Composable
+private fun SuccessContent(
+    navHostController: NavHostController = LocalHomeNavController.current,
+    netViewModel: NetViewModel = LocalNetViewModel.current
+) {
+    LazyColumn(
+        verticalArrangement = Arrangement.Top
+    ) {
+        item {
+            HorizontalBanner(
+                netViewModel.bannerList.value.map {
+                    it.mediaItem.metadata?.albumArtUri
+                }
+            ) {
+
+            }
+        }
+        glide("大家都在听") {
+            navHostController.navigate("${Screen.NetDetailScreen.route}?type=$ALL_MUSIC_TYPE")
+        }
+        item {
+            HorizontalPager(
+                count = 2,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp),
+                contentPadding = PaddingValues(end = 32.dp)
+            ) { page ->
+                if (netViewModel.musicList.value.isNotEmpty()) {
+                    RecommendItem(
+                        netViewModel.musicList.value,
+                        page
+                    )
+                }
+            }
+        }
+        glide("推荐歌单", {})
+        item {
+            NewItems(list = netViewModel.recommendList.value, {
+
+            }, {
+                netViewModel.recommendId = it.mediaId
+                netViewModel.listInit(it.mediaId)
+            })
+        }
+        glide("最新专辑") {
+            navHostController.navigate("${Screen.NetDetailScreen.route}?type=$NET_ALBUM_TYPE")
+        }
+        item {
+            NewItems(list = netViewModel.albumList.value, {
+
+            }, {
+                netViewModel.albumId = it.mediaId
+                Log.d("TAG", "SuccessContent: ${it.mediaId}")
+                netViewModel.listInit(it.mediaId)
+            })
+        }
+    }
+}
+
 
 @Composable
 private fun RecommendItem(list: List<MediaData>, page: Int) {
@@ -157,23 +173,25 @@ private fun LazyListScope.glide(
 
 @Composable
 private fun NewItems(
-    list: List<MediaData>
+    list: List<MediaData>,
+    onclick: (MediaData) -> Unit,
+    onPlay: (MediaData) -> Unit
 ) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-    ) {
-        repeat(5) {
+    LazyRow {
+        items(list) { item ->
             Spacer(modifier = Modifier.width(8.dp))
             Column(
-                Modifier.height(IntrinsicSize.Min),
+                Modifier
+                    .height(IntrinsicSize.Min)
+                    .clickable {
+                        onclick(item)
+                    },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box {
                     AlbumArtImage(
                         modifier = Modifier.size(100.dp),
-                        uri = list[it].mediaItem.metadata?.albumArtUri,
+                        uri = item.mediaItem.metadata?.albumArtUri,
                         desc = "",
                         transformation = RoundedCornersTransformation(10f)
                     )
@@ -185,10 +203,13 @@ private fun NewItems(
                                 Alignment.BottomEnd
                             )
                             .size(22.dp)
+                            .clickable {
+                                onPlay(item)
+                            }
                     )
                 }
                 Spacer(modifier = Modifier.height(3.dp))
-                Text(text = "${list[it].mediaItem.metadata?.title}")
+                Text(text = "${item.mediaItem.metadata?.title}")
                 Spacer(modifier = Modifier.height(3.dp))
             }
             Spacer(modifier = Modifier.width(8.dp))

@@ -2,7 +2,6 @@ package com.hua.abstractmusic.repository
 
 import android.net.Uri
 import androidx.media2.common.MediaItem
-import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.net.MusicService
 import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.utils.toMediaItem
@@ -84,7 +83,7 @@ class NetRepository(
     suspend fun getRecommend():List<MediaItem>{
         return try {
             val list = mutableListOf<MediaItem>()
-            service.getRecommendList().data?.forEach {
+            service.getRecommend().data?.forEach {
                 list.add(it.toMediaItem())
             }
             list
@@ -96,6 +95,19 @@ class NetRepository(
         return try {
             val list = mutableListOf<MediaItem>()
             service.getAllMusic().data?.forEach {
+                list.add(it.toMediaItem(parentId))
+            }
+            list
+        }catch (e:Exception){
+            emptyList()
+        }
+    }
+
+    suspend fun getRecommendList(parentId: Uri):List<MediaItem>{
+        val id = parentId.lastPathSegment
+        return try {
+            val list = mutableListOf<MediaItem>()
+            service.getRecommendList(id!!).data?.forEach {
                 list.add(it.toMediaItem(parentId))
             }
             list

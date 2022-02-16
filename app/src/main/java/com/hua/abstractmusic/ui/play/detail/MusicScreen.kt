@@ -108,13 +108,6 @@ fun MusicScreen(
         } else if(windowSize == WindowSize.Compact){
             VerticalScreen()
         }
-//        BoxWithConstraints {
-//            if(maxWidth < 500.dp){
-//                VerticalScreen()
-//            }else{
-//
-//            }
-//        }
     }
 }
 
@@ -292,7 +285,7 @@ private fun PlayController(
     Row(
         modifier.width(IntrinsicSize.Min),
         horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = CenterVertically
     ) {
         val stateIcon =
             if (viewModel.playerState.value == SessionPlayer.PLAYER_STATE_PLAYING) {
@@ -334,7 +327,7 @@ private fun PlayController(
 }
 
 @Composable
-private fun ControllerItem(
+fun ControllerItem(
     @DrawableRes resId: Int,
     desc: String,
     size: Dp,

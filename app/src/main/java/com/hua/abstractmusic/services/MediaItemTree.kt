@@ -134,7 +134,7 @@ class MediaItemTree(
                 if (parentIdUri.lastPathSegment.isNullOrBlank()) {
                     scanner.selectRecommend()
                 } else {
-                    null
+                    scanner.selectRecommendList(parentIdUri)
                 }
             }
             TYPE_NETWORK_ALL_MUSIC -> {
