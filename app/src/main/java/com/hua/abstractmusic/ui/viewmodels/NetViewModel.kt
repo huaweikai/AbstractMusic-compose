@@ -46,10 +46,10 @@ class NetViewModel @Inject constructor(
     val musicList: State<List<MediaData>> get() = _musicList
 
     init {
-        listMap[NETWORK_BANNER_ID] = _bannerList
-        listMap[NETWORK_ALBUM_ID] = _albumList
-        listMap[NETWORK_RECOMMEND_ID] = _recommendList
-        listMap[NETWORK_ALL_MUSIC_ID] = _musicList
+        netListMap[NETWORK_BANNER_ID] = _bannerList
+        netListMap[NETWORK_ALBUM_ID] = _albumList
+        netListMap[NETWORK_RECOMMEND_ID] = _recommendList
+        netListMap[NETWORK_ALL_MUSIC_ID] = _musicList
     }
 
     var recommendId: String? = null

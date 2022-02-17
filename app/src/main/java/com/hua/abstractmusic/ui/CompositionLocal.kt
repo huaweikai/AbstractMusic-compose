@@ -1,12 +1,12 @@
 package com.hua.abstractmusic.ui
 
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
 import com.hua.abstractmusic.ui.utils.WindowSize
 import com.hua.abstractmusic.ui.viewmodels.*
+import com.hua.abstractmusic.utils.ComposeUtils
 
 
 /**
@@ -51,5 +51,9 @@ val LocalMusicScreenSecondColor = staticCompositionLocalOf<Color>{
     error("color is null")
 }
 val LocalScreenSize = compositionLocalOf<WindowSize> {
+    error("")
+}
+
+val LocalComposeUtils = staticCompositionLocalOf<ComposeUtils> {
     error("")
 }

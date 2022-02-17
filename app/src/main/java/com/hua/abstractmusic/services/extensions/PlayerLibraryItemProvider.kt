@@ -3,6 +3,7 @@ package com.hua.abstractmusic.services.extensions
 import android.media.Session2Command.Result.RESULT_SUCCESS
 import android.os.Bundle
 import android.util.Log
+import androidx.media2.common.BaseResult.RESULT_ERROR_NOT_SUPPORTED
 import androidx.media2.common.MediaItem
 import androidx.media2.session.*
 import androidx.media2.session.MediaLibraryService.MediaLibrarySession.MediaLibrarySessionCallback
@@ -10,6 +11,7 @@ import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ARTIST_ID
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.services.PlayerService
+import com.hua.abstractmusic.utils.isLocal
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.concurrent.ExecutorService
@@ -50,16 +52,24 @@ class PlayerLibraryItemProvider(
         pageSize: Int,
         params: MediaLibraryService.LibraryParams?
     ): LibraryResult {
-        scope.launch {
-            if(mediaItemTree.getChildren(parentId).isNullOrEmpty()){
-                session.notifyChildrenChanged(parentId, 0, null)
-            }else{
-                session.notifyChildrenChanged(parentId, 1, null)
+        if (parentId.isLocal()) {
+            val children = mediaItemTree.getChildren(parentId)
+            return if (children == null) {
+                LibraryResult(RESULT_ERROR_NOT_SUPPORTED)
+            } else {
+                LibraryResult(LibraryResult.RESULT_SUCCESS, children, null)
             }
+        } else {
+            scope.launch {
+                if (mediaItemTree.networkGetChildren(parentId).isNullOrEmpty()) {
+                    session.notifyChildrenChanged(parentId, 0, null)
+                } else {
+                    session.notifyChildrenChanged(parentId, 1, null)
+                }
+            }
+            return LibraryResult(LibraryResult.RESULT_ERROR_NOT_SUPPORTED)
         }
-        return LibraryResult(LibraryResult.RESULT_ERROR_NOT_SUPPORTED)
     }
-
     override fun onSubscribe(
         session: MediaLibraryService.MediaLibrarySession,
         controller: MediaSession.ControllerInfo,

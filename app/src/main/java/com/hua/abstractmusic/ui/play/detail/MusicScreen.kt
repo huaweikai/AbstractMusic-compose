@@ -1,15 +1,10 @@
 package com.hua.abstractmusic.ui.play.detail
 
 import android.content.res.Configuration
-import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.Animatable
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.TweenSpec
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -24,33 +19,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight.Companion.W300
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.core.graphics.drawable.toBitmap
-import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.media2.common.SessionPlayer
 import coil.ImageLoader
-import coil.request.ImageRequest
-import coil.transform.CircleCropTransformation
 import coil.transform.RoundedCornersTransformation
-import com.google.android.exoplayer2.Player
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.ui.home.IconBean
+import com.hua.abstractmusic.ui.LocalComposeUtils
 import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.LocalMusicScreenSecondColor
 import com.hua.abstractmusic.ui.LocalScreenSize
-import com.hua.abstractmusic.ui.home.local.album.detail.PlayIcon
 import com.hua.abstractmusic.ui.utils.AlbumArtImage
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.ui.utils.WindowSize
-import com.hua.abstractmusic.ui.utils.rememberWindowSizeClass
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.utils.*
-import kotlinx.coroutines.launch
 
 /**
  * @author : huaweikai
@@ -60,6 +45,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MusicScreen(
     viewModel: HomeViewModel = LocalHomeViewModel.current,
+    composeUtils: ComposeUtils = LocalComposeUtils.current,
     isDark: Boolean = isSystemInDarkTheme()
 ) {
     val imageLoader = ImageLoader(LocalContext.current)
@@ -71,24 +57,9 @@ fun MusicScreen(
         Animatable(Color.Black)
     }
     LaunchedEffect(viewModel.currentItem.value) {
-        val request = ImageRequest.Builder(context)
-            .data(viewModel.currentItem.value.metadata?.albumArtUri)
-            .error(R.drawable.ic_music_launcher)
-            .allowHardware(false)
-            .build()
-        val result = imageLoader.execute(request)
-        val bitmap = try {
-            (result.drawable as BitmapDrawable).bitmap
-        } catch (e: Exception) {
-            BitmapFactory.decodeResource(
-                context.resources,
-                R.drawable.music
-            )
-        }
-
         val pair = PaletteUtils.resolveBitmap(
             isDark,
-            bitmap,
+            composeUtils.coilToBitmap(viewModel.currentItem.value.metadata?.albumArtUri),
             context.getColor(R.color.black)
         )
         firstColor.animateTo(
@@ -97,15 +68,14 @@ fun MusicScreen(
         )
         secondColor.animateTo(Color(pair.second))
     }
-    val screenWidth = LocalConfiguration.current.screenWidthDp
     CompositionLocalProvider(
         LocalContentColor provides firstColor.value,
         LocalMusicScreenSecondColor provides secondColor.value
     ) {
         val windowSize = LocalScreenSize.current
-        if(windowSize == WindowSize.Expanded){
+        if (windowSize == WindowSize.Expanded) {
             HorizontalScreen()
-        } else if(windowSize == WindowSize.Compact){
+        } else if (windowSize == WindowSize.Compact) {
             VerticalScreen()
         }
     }

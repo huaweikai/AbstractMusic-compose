@@ -3,7 +3,11 @@ package com.hua.abstractmusic.repository
 import android.net.Uri
 import androidx.media2.common.MediaItem
 import com.hua.abstractmusic.net.MusicService
-import com.hua.abstractmusic.other.Constant
+import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ALBUM
+import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ALL_MUSIC
+import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ARTIST
+import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_BANNER
+import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_RECOMMEND
 import com.hua.abstractmusic.utils.toMediaItem
 
 /**
@@ -15,103 +19,71 @@ class NetRepository(
     private val service: MusicService
 ) {
 
-    suspend fun selectAlbumList():List<MediaItem>{
+    suspend fun selectList(parentId: Uri): List<MediaItem>? {
         return try {
-            val list = mutableListOf<MediaItem>()
-            service.getAlbumList().data?.forEach {
-                list.add(it.toMediaItem(Constant.NETWORK_ALBUM_ID))
+            val result = mutableListOf<MediaItem>()
+            when (parentId.authority) {
+                TYPE_NETWORK_ALBUM -> {
+                    service.getAlbumList().data?.forEach {
+                        result.add(it.toMediaItem(parentId))
+                    }
+                }
+                TYPE_NETWORK_ALL_MUSIC -> {
+                    service.getAllMusic().data?.forEach {
+                        result.add(it.toMediaItem(parentId))
+                    }
+                }
+                TYPE_NETWORK_ARTIST -> {
+                    service.getArtistList().data?.forEach {
+                        result.add(it.toMediaItem(parentId))
+                    }
+                }
+                TYPE_NETWORK_BANNER -> {
+                    service.getBanner().data?.forEach {
+                        result.add(it.toMediaItem(parentId))
+                    }
+                }
+                TYPE_NETWORK_RECOMMEND -> {
+                    service.getRecommend().data?.forEach {
+                        result.add(it.toMediaItem(parentId))
+                    }
+                }
+                else -> emptyList<MediaItem>()
             }
-            list
-        }catch (e:Exception){
+            result
+        } catch (e: Exception) {
             emptyList()
         }
     }
 
-    suspend fun selectArtistList():List<MediaItem>{
+    suspend fun selectMusicById(parentId: Uri): List<MediaItem>? {
         return try {
-            val list = mutableListOf<MediaItem>()
-            service.getArtistList().data?.forEach {
-                list.add(it.toMediaItem())
-            }
-            list
-        }catch (e:Exception){
-            emptyList()
-        }
-    }
-
-    suspend fun selectMusicByAlbum(parentId:Uri):List<MediaItem>{
-        val id = parentId.lastPathSegment
-        return try {
-            val list = mutableListOf<MediaItem>()
-            id?.let {
-                service.getMusicByAlbum(it).data?.forEach {
-                    list.add(it.toMediaItem(parentId))
+            val result = mutableListOf<MediaItem>()
+            val id = parentId.lastPathSegment
+            val list = if (id == null) {
+                emptyList()
+            } else {
+                when (parentId.authority) {
+                    TYPE_NETWORK_ALBUM -> {
+                        service.getMusicByAlbum(id).data
+                    }
+                    TYPE_NETWORK_ARTIST -> {
+                        service.getMusicByArtist(id).data
+                    }
+                    TYPE_NETWORK_BANNER -> {
+                        service.getBannerById(id).data
+                    }
+                    TYPE_NETWORK_RECOMMEND -> {
+                        service.getRecommendList(id).data
+                    }
+                    else -> emptyList()
                 }
             }
-            list
-        }catch (e:Exception){
-            emptyList()
-        }
-    }
-
-    suspend fun selectMusicByArtist(parentId:Uri):List<MediaItem>{
-        val id = parentId.lastPathSegment
-        return try {
-            val list = mutableListOf<MediaItem>()
-            id?.let {
-                service.getMusicByArtist(it).data?.forEach {
-                    list.add(it.toMediaItem(parentId))
-                }
+            list?.forEach {
+                result.add(it.toMediaItem(parentId))
             }
-            list
-        }catch (e:Exception){
-            emptyList()
-        }
-    }
-
-    suspend fun getBanner():List<MediaItem>{
-        return try{
-            val list = mutableListOf<MediaItem>()
-            service.getBanner().data?.forEach {
-                list.add(it.toMediaItem(Constant.NETWORK_BANNER_ID))
-            }
-            list
-        }catch (e:Exception){
-            emptyList()
-        }
-    }
-    suspend fun getRecommend():List<MediaItem>{
-        return try {
-            val list = mutableListOf<MediaItem>()
-            service.getRecommend().data?.forEach {
-                list.add(it.toMediaItem())
-            }
-            list
-        }catch (e:Exception){
-            emptyList()
-        }
-    }
-    suspend fun getAllMusic(parentId: Uri):List<MediaItem>{
-        return try {
-            val list = mutableListOf<MediaItem>()
-            service.getAllMusic().data?.forEach {
-                list.add(it.toMediaItem(parentId))
-            }
-            list
-        }catch (e:Exception){
-            emptyList()
-        }
-    }
-
-    suspend fun getRecommendList(parentId: Uri):List<MediaItem>{
-        val id = parentId.lastPathSegment
-        return try {
-            val list = mutableListOf<MediaItem>()
-            service.getRecommendList(id!!).data?.forEach {
-                list.add(it.toMediaItem(parentId))
-            }
-            list
-        }catch (e:Exception){
+            result
+        } catch (e: Exception) {
             emptyList()
         }
     }

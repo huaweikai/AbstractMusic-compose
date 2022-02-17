@@ -12,10 +12,10 @@ import com.hua.abstractmusic.repository.NetRepository
 class SelectNetArtistCase(
     private val repository: NetRepository
 ) {
-    suspend operator fun invoke():List<MediaItem>{
-        return repository.selectArtistList()
-    }
-    suspend operator fun invoke(parentId:Uri):List<MediaItem>{
-        return repository.selectMusicByArtist(parentId)
-    }
+//    suspend operator fun invoke():List<MediaItem>{
+//        return repository.selectArtistList()
+//    }
+//    suspend operator fun invoke(parentId:Uri):List<MediaItem>{
+//        return repository.selectMusicByArtist(parentId)
+//    }
 }

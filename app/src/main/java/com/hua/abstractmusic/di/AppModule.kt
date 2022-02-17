@@ -1,18 +1,15 @@
 package com.hua.abstractmusic.di
 
 import android.content.Context
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.room.Room
+import coil.ImageLoader
 import com.hua.abstractmusic.db.music.MusicDao
 import com.hua.abstractmusic.db.music.MusicRoomBase
 import com.hua.abstractmusic.db.user.UserDao
-import com.hua.abstractmusic.db.user.UserRoomBase
 import com.hua.abstractmusic.net.MusicService
 import com.hua.abstractmusic.net.UserService
 import com.hua.abstractmusic.other.Constant.BASE_URL
 import com.hua.abstractmusic.other.Constant.MUSIC_ROOM_NAME
-import com.hua.abstractmusic.other.Constant.USER_ROOM_NAME
 import com.hua.abstractmusic.repository.NetRepository
 import com.hua.abstractmusic.repository.Repository
 import com.hua.abstractmusic.repository.UserRepository
@@ -27,12 +24,12 @@ import com.hua.abstractmusic.use_case.net.SelectNetArtistCase
 import com.hua.abstractmusic.use_case.sheet.GetSheetMusicListCase
 import com.hua.abstractmusic.use_case.sheet.GetSheetNameCase
 import com.hua.abstractmusic.use_case.sheet.InsertSheetCase
+import com.hua.abstractmusic.utils.ComposeUtils
 import com.hua.abstractmusic.utils.KEY
 import com.obs.services.ObsClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
@@ -168,4 +165,17 @@ object AppModule {
         KEY.SecretAccessKey,
         "obs.cn-north-4.myhuaweicloud.com"
     )
+
+    @Provides
+    @Singleton
+    fun provideImageLoader(
+        @ApplicationContext context: Context
+    ) = ImageLoader(context)
+
+    @Provides
+    @Singleton
+    fun provideComposeUtils(
+        imageLoader: ImageLoader,
+        @ApplicationContext context: Context
+    ) = ComposeUtils(imageLoader, context)
 }

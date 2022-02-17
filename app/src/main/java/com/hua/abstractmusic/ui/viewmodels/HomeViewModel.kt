@@ -55,9 +55,9 @@ class HomeViewModel @Inject constructor(
     val localArtistList: State<List<MediaData>> get() = _localArtistList
 
     init {
-        listMap[ALL_ID] = _localMusicList
-        listMap[ALBUM_ID] = _localAlbumList
-        listMap[ARTIST_ID] = _localArtistList
+        localListMap[ALL_ID] = _localMusicList
+        localListMap[ALBUM_ID] = _localAlbumList
+        localListMap[ARTIST_ID] = _localArtistList
 
         playListMap[CURRENT_PLAY_LIST] = _currentPlayList
         playListMap[ALL_ID] = _localMusicList

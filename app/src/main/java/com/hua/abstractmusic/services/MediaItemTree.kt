@@ -1,9 +1,7 @@
 package com.hua.abstractmusic.services
 
 import android.content.Context
-import android.media.browse.MediaBrowser
 import android.net.Uri
-import android.util.Log
 import androidx.media2.common.MediaItem
 import androidx.media2.common.MediaMetadata
 import com.google.common.collect.ImmutableList
@@ -18,15 +16,10 @@ import com.hua.abstractmusic.other.Constant.NETWORK_BANNER_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_RECOMMEND_ID
 import com.hua.abstractmusic.other.Constant.ROOT_SCHEME
 import com.hua.abstractmusic.other.Constant.SHEET_ID
-import com.hua.abstractmusic.other.Constant.TYPE_ALBUM
-import com.hua.abstractmusic.other.Constant.TYPE_ARTIST
-import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ALBUM
-import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ALL_MUSIC
-import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ARTIST
-import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_BANNER
-import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_RECOMMEND
-import com.hua.abstractmusic.other.Constant.TYPE_ROOT
-import com.hua.abstractmusic.other.Constant.TYPE_SHEET
+import com.hua.abstractmusic.other.Constant.TYPE_LOCAL_ALBUM
+import com.hua.abstractmusic.other.Constant.TYPE_LOCAL_ARTIST
+import com.hua.abstractmusic.other.Constant.TYPE_LOCAL_ALL
+import com.hua.abstractmusic.other.Constant.TYPE_LOCAL_SHEET
 import com.hua.abstractmusic.utils.*
 
 
@@ -75,76 +68,25 @@ class MediaItemTree(
         return treeNodes[ROOT_SCHEME]!!.item
     }
 
-    suspend fun getChildren(parentId: String): List<MediaItem>? {
-        //把之前的逻辑删了，并且把addchild换成setChild，
-        // 目的是请求一次都是新的数据,网络请求也可以刷新获取新的，不然只会把第一次请求的返回去
+    fun getChildren(parentId: String): List<MediaItem>? {
+        return scanner.selectLocalList(context, parentId).apply {
+            if (treeNodes[parentId] == null) {
+                treeNodes[parentId] = MediaItemNode(
+                    MediaItem.Builder().build()
+                )
+            }
+            this?.let {
+                treeNodes[parentId]!!.setChild(it)
+            }
+        }
+    }
+
+    suspend fun networkGetChildren(parentId: String): List<MediaItem>? {
         val parentIdUri = Uri.parse(parentId)
-        return when (parentIdUri.authority) {
-            TYPE_ROOT -> {
-                scanner.scanAllFromMediaStore(context, parentIdUri)
-            }
-            TYPE_ALBUM -> {
-                if (parentIdUri.lastPathSegment.isNullOrEmpty()) {
-                    scanner.scanAlbumFromMediaStore(context, parentIdUri)
-                } else {
-                    scanner.scanAlbumMusic(context, parentIdUri)
-                }
-            }
-            TYPE_ARTIST -> {
-                if (parentIdUri.lastPathSegment.isNullOrEmpty()) {
-                    scanner.scanArtistFromMediaStore(context, parentIdUri)
-                } else {
-                    if (parentId.contains(ARTIST_TO_ALBUM)) {
-                        scanner.scanArtistAlbumFromMediaStore(context, parentIdUri)
-                    } else {
-                        scanner.scanArtistMusic(context, parentIdUri)
-                    }
-                }
-            }
-            TYPE_SHEET -> {
-                //TODO(自定义歌单逻辑，先不动)
-                if (parentIdUri.lastPathSegment.isNullOrEmpty()) {
-                    scanner.scanSheetListFromRoom(parentIdUri)
-                } else {
-                    scanner.scanSheetDecs(parentIdUri)
-                }
-            }
-            TYPE_NETWORK_ALBUM -> {
-                if (parentIdUri.lastPathSegment.isNullOrEmpty()) {
-                    scanner.selectAlbumList()
-                } else {
-                    scanner.selectMusicByAlbum(parentIdUri)
-                }
-            }
-            TYPE_NETWORK_ARTIST -> {
-                if (parentIdUri.lastPathSegment.isNullOrEmpty()) {
-                    scanner.selectArtistList()
-                } else {
-                    scanner.selectMusicByArtist(parentIdUri)
-                }
-            }
-            TYPE_NETWORK_BANNER -> {
-                if (parentIdUri.lastPathSegment.isNullOrBlank()) {
-                    scanner.selectBanner()
-                } else {
-                    null
-                }
-            }
-            TYPE_NETWORK_RECOMMEND -> {
-                if (parentIdUri.lastPathSegment.isNullOrBlank()) {
-                    scanner.selectRecommend()
-                } else {
-                    scanner.selectRecommendList(parentIdUri)
-                }
-            }
-            TYPE_NETWORK_ALL_MUSIC -> {
-                if (parentIdUri.lastPathSegment.isNullOrBlank()) {
-                    scanner.selectAllMusic(parentIdUri)
-                } else {
-                    null
-                }
-            }
-            else -> null
+        return if (parentIdUri.lastPathSegment.isNullOrEmpty()) {
+            scanner.selectList(parentIdUri)
+        } else {
+            scanner.selectMusicById(parentIdUri)
         }.apply {
             if (treeNodes[parentId] == null) {
                 treeNodes[parentId] = MediaItemNode(

@@ -121,13 +121,13 @@ fun LazyListScope.artItem(
     loadingItem: @Composable () -> Unit,
     content: @Composable LazyItemScope.(Int, MediaData) -> Unit
 ) {
-    if(state == LCE.Loading){
-        items(loadingCount) {
-            loadingItem()
-        }
-    }else if(state == LCE.Success){
+//    if(state == LCE.Loading){
+//        items(loadingCount) {
+//            loadingItem()
+//        }
+//    }else if(state == LCE.Success){
         itemsIndexed(items) { index, item ->
             content(index, item)
         }
-    }
+//    }
 }

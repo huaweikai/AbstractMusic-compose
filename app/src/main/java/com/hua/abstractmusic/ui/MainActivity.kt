@@ -16,16 +16,20 @@ import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
-import com.hua.abstractmusic.ui.viewmodels.UserViewModel
 import com.hua.abstractmusic.ui.navigation.AppNavigation
 import com.hua.abstractmusic.ui.theme.AbstractMusicTheme
 import com.hua.abstractmusic.ui.utils.rememberWindowSizeClass
+import com.hua.abstractmusic.utils.ComposeUtils
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val localHomeViewModel by viewModels<HomeViewModel>()
+
+    @Inject
+    lateinit var composeUtils: ComposeUtils
 
     @OptIn(
         ExperimentalMaterialApi::class,
@@ -50,7 +54,8 @@ class MainActivity : ComponentActivity() {
                     // 可提前加载信息，不会造成空白
                     LocalHomeViewModel provides localHomeViewModel,
                     LocalAppNavController provides appNavHostController,
-                    LocalScreenSize provides windowSize
+                    LocalScreenSize provides windowSize,
+                    LocalComposeUtils provides composeUtils
                 ) {
                    Surface{
                        AppNavigation()

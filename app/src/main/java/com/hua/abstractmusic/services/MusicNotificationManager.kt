@@ -21,6 +21,7 @@ import com.hua.abstractmusic.other.Constant.NOTIFICATION_ID
 import com.hua.abstractmusic.utils.albumArtUri
 import com.hua.abstractmusic.utils.artist
 import com.hua.abstractmusic.utils.title
+import javax.inject.Inject
 
 /**
  * @ProjectName : 抽象音乐
@@ -34,6 +35,8 @@ class MusicNotificationManager(
     notificationListener: PlayerNotificationManager.NotificationListener
 ){
     private val notificationManager:PlayerNotificationManager
+//    @Inject
+//    lateinit var imageLoader: ImageLoader
     private val imageLoader = ImageLoader(context)
 
     init {

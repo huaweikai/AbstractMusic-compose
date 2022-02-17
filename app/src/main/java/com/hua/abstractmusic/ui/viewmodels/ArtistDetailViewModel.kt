@@ -13,6 +13,7 @@ import androidx.media2.session.SessionCommandGroup
 import com.hua.abstractmusic.base.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant.ARTIST_ID
+import com.hua.abstractmusic.other.Constant.ARTIST_TO_ALBUM
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.use_case.UseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,15 +37,15 @@ class ArtistDetailViewModel @Inject constructor(
         set(value) {
             field = value
             val id = Uri.parse(value).lastPathSegment
-            artistAlbumId = "$ARTIST_ID/abAlbum/$id"
+            artistAlbumId = "$ARTIST_ID/${ARTIST_TO_ALBUM}/$id"
         }
 
     override fun onMediaConnected(
         controller: MediaController,
         allowedCommands: SessionCommandGroup
     ) {
-        listMap[artistId!!] = _artistDetail
-        listMap[artistAlbumId!!] = _artistAlbumDetail
+        localListMap[artistId!!] = _artistDetail
+        localListMap[artistAlbumId!!] = _artistAlbumDetail
         playListMap[artistId!!] = _artistDetail
         refresh()
 //        listMap.keys.forEach {

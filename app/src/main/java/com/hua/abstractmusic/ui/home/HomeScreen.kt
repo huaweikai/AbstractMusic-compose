@@ -121,7 +121,7 @@ fun HomeScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 42.dp)
-                            .height(42.dp),
+                            .height(50.dp),
                         label = label.value,
                         navToDetail = navToDetailState.value,
                         onPreviewClick = {

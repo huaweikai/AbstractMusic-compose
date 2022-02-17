@@ -76,10 +76,12 @@ fun HomeTopBar(
             navigationIcon.value = null
         }
     }
-
     TopAppBar(
         title = {
-            Text(text = label)
+            Text(
+                text = label,
+                style = MaterialTheme.typography.titleLarge
+            )
         },
         navigationIcon = navigationIcon.value,
         actions = {
@@ -121,6 +123,6 @@ private fun NavigationIcon(
             .clickable {
                 onClick()
             }
-            .size(24.dp)
+            .size(36.dp)
     )
 }

@@ -39,11 +39,11 @@ fun String.toTime(): Long {
     }
 }
 
-fun NetAlbum.toMediaItem(parentId: String): MediaItem {
+fun NetAlbum.toMediaItem(parentId: Uri): MediaItem {
     return MediaItem.Builder()
         .setMetadata(
             MediaMetadata.Builder().apply {
-                id = "${parentId}/${this@toMediaItem.id}"
+                id = parentId.buildUpon().appendPath(this@toMediaItem.id.toString()).toString()
                 title = this@toMediaItem.name
                 year = this@toMediaItem.time.toTime()
                 artist = this@toMediaItem.artistName
@@ -57,11 +57,11 @@ fun NetAlbum.toMediaItem(parentId: String): MediaItem {
         ).build()
 }
 
-fun NetArtist.toMediaItem(): MediaItem {
+fun NetArtist.toMediaItem(parentId: Uri): MediaItem {
     return MediaItem.Builder()
         .setMetadata(
             MediaMetadata.Builder().apply {
-                id = "${Constant.NETWORK_ARTIST_ID}/${this@toMediaItem.id}"
+                id = parentId.buildUpon().appendPath(this@toMediaItem.id.toString()).toString()
                 title = this@toMediaItem.name
                 artist = this@toMediaItem.name
                 displayTitle = this@toMediaItem.name
@@ -95,11 +95,11 @@ fun NetMusic.toMediaItem(parentId: Uri): MediaItem {
         .build()
 }
 
-fun NetSheet.toMediaItem() =
+fun NetSheet.toMediaItem(parentId: Uri) =
     MediaItem.Builder()
         .setMetadata(
             MediaMetadata.Builder().apply {
-                id = "$NETWORK_RECOMMEND_ID/${this@toMediaItem.id}"
+                id = parentId.buildUpon().appendPath(this@toMediaItem.id.toString()).toString()
                 albumArtUri = this@toMediaItem.sheetImg
                 title = this@toMediaItem.sheetName
             }.build()

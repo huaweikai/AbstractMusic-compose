@@ -8,6 +8,7 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.media2.common.MediaItem
 import androidx.media2.common.MediaMetadata
+import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.other.Constant.ALBUM_ART_URI
 import com.hua.abstractmusic.other.Constant.ALBUM_ID
 import com.hua.abstractmusic.other.Constant.DURATION
@@ -230,16 +231,16 @@ class MediaStoreScanner(
     }
 
     //从MediaStore中获取歌手的专辑
-    fun scanArtistAlbumFromMediaStore(context: Context,parentId: Uri):List<MediaItem>{
-        val artistId = parentId.lastPathSegment?.toLong()?:0
+    fun scanArtistAlbumFromMediaStore(context: Context, parentId: Uri): List<MediaItem> {
+        val artistId = parentId.lastPathSegment?.toLong() ?: 0
         val cursor = context.contentResolver.query(
-            MediaStore.Audio.Artists.Albums.getContentUri("external",artistId),
+            MediaStore.Audio.Artists.Albums.getContentUri("external", artistId),
             albumProjection,
             null,
             null,
             null
         )
-        return handleAlbumCursor(cursor,parentId, context)
+        return handleAlbumCursor(cursor, parentId, context)
     }
 
     private fun handleArtistCursor(
@@ -298,11 +299,11 @@ class MediaStoreScanner(
 
 
     //处理逻辑都放在了usecase
-    fun scanSheetListFromRoom(parentId: Uri): List<MediaItem> {
+    private fun scanSheetListFromRoom(parentId: Uri): List<MediaItem> {
         return useCase.getSheetNameCase(parentId)
     }
 
-    fun scanSheetDecs(parentId: Uri): List<MediaItem>? {
+    private fun scanSheetDecs(parentId: Uri): List<MediaItem>? {
         if (parentId.lastPathSegment.isNullOrEmpty()) return null
         return useCase.getSheetMusicListCase(parentId.lastPathSegment!!, parentId)
     }
@@ -316,36 +317,49 @@ class MediaStoreScanner(
         return Uri.withAppendedPath(artworkUri, albumId).toString()
     }
 
-
-    suspend fun selectAlbumList(): List<MediaItem> {
-        return useCase.selectNetAlbumCase()
+    fun selectLocalList(context: Context,parentId: String):List<MediaItem>?{
+        //把之前的逻辑删了，并且把addchild换成setChild，
+        // 目的是请求一次都是新的数据,网络请求也可以刷新获取新的，不然只会把第一次请求的返回去
+        val parentIdUri = Uri.parse(parentId)
+        return when (parentIdUri.authority) {
+            Constant.TYPE_LOCAL_ALL -> {
+                scanAllFromMediaStore(context, parentIdUri)
+            }
+            Constant.TYPE_LOCAL_ALBUM -> {
+                if (parentIdUri.lastPathSegment.isNullOrEmpty()) {
+                    scanAlbumFromMediaStore(context, parentIdUri)
+                } else {
+                    scanAlbumMusic(context, parentIdUri)
+                }
+            }
+            Constant.TYPE_LOCAL_ARTIST -> {
+                if (parentIdUri.lastPathSegment.isNullOrEmpty()) {
+                    scanArtistFromMediaStore(context, parentIdUri)
+                } else {
+                    if (parentId.contains(Constant.ARTIST_TO_ALBUM)) {
+                        scanArtistAlbumFromMediaStore(context, parentIdUri)
+                    } else {
+                        scanArtistMusic(context, parentIdUri)
+                    }
+                }
+            }
+            Constant.TYPE_LOCAL_SHEET -> {
+                //TODO(自定义歌单逻辑，先不动)
+                if (parentIdUri.lastPathSegment.isNullOrEmpty()) {
+                    scanSheetListFromRoom(parentIdUri)
+                } else {
+                    scanSheetDecs(parentIdUri)
+                }
+            }
+            else -> null
+        }
     }
 
-    suspend fun selectMusicByAlbum(parentId: Uri): List<MediaItem> {
-        return useCase.selectNetAlbumCase(parentId)
+    suspend fun selectList(parentId: Uri): List<MediaItem>? {
+        return repository.selectList(parentId)
     }
 
-    suspend fun selectArtistList(): List<MediaItem> {
-        return useCase.selectNetArtistCase()
-    }
-
-    suspend fun selectMusicByArtist(parentId: Uri): List<MediaItem> {
-        return useCase.selectNetArtistCase(parentId)
-    }
-
-    suspend fun selectBanner():List<MediaItem>{
-        return repository.getBanner()
-    }
-
-    suspend fun selectRecommend():List<MediaItem>{
-        return repository.getRecommend()
-    }
-
-    suspend fun selectAllMusic(parentId: Uri):List<MediaItem>{
-        return repository.getAllMusic(parentId)
-    }
-
-    suspend fun selectRecommendList(parentId: Uri):List<MediaItem>{
-        return repository.getRecommendList(parentId)
+    suspend fun selectMusicById(parentId: Uri): List<MediaItem>? {
+        return repository.selectMusicById(parentId)
     }
 }

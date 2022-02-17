@@ -100,12 +100,17 @@ fun EmailEditText(
 
 @Composable
 fun PassWordEditText(
+    //密码文字
     password: MutableState<String>,
+    //修饰符
     modifier: Modifier,
+    //标题
     label: String,
+    //当文字发生改变时
     onValueChange: (String) -> Unit = {
         password.value = it
     },
+    // 是否要报错，也就是输入的不是标准密码
     isError: Boolean = false
 ) {
     val passwordVis = remember {

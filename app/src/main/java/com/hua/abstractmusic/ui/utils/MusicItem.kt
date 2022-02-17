@@ -76,7 +76,7 @@ fun MusicItem(
 @Composable
 fun AlbumArtImage(
     modifier: Modifier,
-    uri:Uri?,
+    uri:Any?,
     desc:String,
     transformation: Transformation,
     contentScale:ContentScale = ContentScale.Fit,

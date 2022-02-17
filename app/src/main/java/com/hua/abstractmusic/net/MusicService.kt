@@ -12,13 +12,13 @@ import retrofit2.http.Query
  */
 interface MusicService {
 
-    @GET("/album/list")
+    @GET("album/list")
     suspend fun getAlbumList(): NetData<List<NetAlbum>>
 
-    @GET("/artist/list")
+    @GET("artist/list")
     suspend fun getArtistList(): NetData<List<NetArtist>>
 
-    @GET("/album/{id}/music")
+    @GET("album/{id}/music")
     suspend fun getMusicByAlbum(@Path("id") id: String): NetData<List<NetMusic>>
 
     @GET("artist/{id}/music")
@@ -26,6 +26,9 @@ interface MusicService {
 
     @GET("sheet/banner")
     suspend fun getBanner(): NetData<List<NetAlbum>>
+
+    @GET("sheet/banner/{id}/list")
+    suspend fun getBannerById(@Path("id")id:String):NetData<List<NetMusic>>
 
     @GET("sheet/recommend")
     suspend fun getRecommend(): NetData<List<NetSheet>>

@@ -37,7 +37,8 @@ abstract class BaseBrowserViewModel(
     val itemTree: MediaItemTree
 ) : AndroidViewModel(application) {
 
-    val listMap = HashMap<String, MutableState<List<MediaData>>>()
+    val localListMap = HashMap<String, MutableState<List<MediaData>>>()
+    val netListMap = HashMap<String, MutableState<List<MediaData>>>()
     val playListMap = HashMap<String, MutableState<List<MediaData>>>()
 
     private val browserCallback = object : MediaBrowser.BrowserCallback() {
@@ -55,7 +56,7 @@ abstract class BaseBrowserViewModel(
             itemCount: Int,
             params: MediaLibraryService.LibraryParams?
         ) {
-            if (parentId in listMap.keys) {
+            if (parentId in netListMap.keys) {
                 when (itemCount) {
                     1 -> {
                         val mediaItems = itemTree.getChildItem(parentId).map {
@@ -65,7 +66,7 @@ abstract class BaseBrowserViewModel(
                             )
                         }
                         //根据parentId去拿数据
-                        listMap[parentId]!!.value = mediaItems
+                        netListMap[parentId]!!.value = mediaItems
                         _screenState.value = LCE.Success
                     }
                     0 -> {
@@ -194,11 +195,27 @@ abstract class BaseBrowserViewModel(
 
     //加载音乐列表，根据父ID来进行加载
     open fun init(parentId: String) {
+        val browser = browser ?: return
+        val childrenFeature = browser.getChildren(
+            parentId, 0, Int.MAX_VALUE, null
+        )
+        childrenFeature.addListener({
+            childrenFeature.get().mediaItems?.map {
+                MediaData(
+                    it,
+                    it.metadata?.mediaId == browser.currentMediaItem?.metadata?.mediaId
+                )
+            }.apply {
+                localListMap[parentId]!!.value = this ?: emptyList()
+            }
+        }, MoreExecutors.directExecutor())
+    }
+
+    open fun delayInit(parentId: String) {
         _screenState.value = LCE.Loading
         val browser = browser ?: return
         viewModelScope.launch {
-            //获取太快了
-            delay(1000L)
+            delay(1000)
             //订阅
             browser.subscribe(parentId, null)
             //去获取数据
@@ -216,8 +233,11 @@ abstract class BaseBrowserViewModel(
     }
 
     open fun refresh() {
-        listMap.keys.forEach {
+        localListMap.keys.forEach {
             init(it)
+        }
+        netListMap.keys.forEach {
+            delayInit(it)
         }
     }
 

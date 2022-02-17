@@ -90,8 +90,6 @@ fun LocalAlbumDetail(
             }, { index, item ->
                 MusicItem(
                     data = item,
-                    Modifier
-                        .animateItemPlacement()
                 ) {
                     detailViewModel.setPlaylist(index, detailViewModel.albumDetail.value)
                 }
