@@ -3,8 +3,6 @@ package com.hua.abstractmusic.ui.utils
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -185,3 +183,4 @@ private fun Modifier.moreClick(
             }
         }
     }
+

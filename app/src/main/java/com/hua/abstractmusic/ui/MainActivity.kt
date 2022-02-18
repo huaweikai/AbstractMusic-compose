@@ -10,15 +10,17 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.navigation.AppNavigation
 import com.hua.abstractmusic.ui.theme.AbstractMusicTheme
 import com.hua.abstractmusic.ui.utils.rememberWindowSizeClass
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.utils.ComposeUtils
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -49,13 +51,17 @@ class MainActivity : ComponentActivity() {
                 darkIcons = MaterialTheme.colors.isLight
             )
             val windowSize = rememberWindowSizeClass()
+            val popupWindow = remember{
+                mutableStateOf(false)
+            }
             AbstractMusicTheme {
                 CompositionLocalProvider(
                     // 可提前加载信息，不会造成空白
                     LocalHomeViewModel provides localHomeViewModel,
                     LocalAppNavController provides appNavHostController,
                     LocalScreenSize provides windowSize,
-                    LocalComposeUtils provides composeUtils
+                    LocalComposeUtils provides composeUtils,
+                    LocalPopWindow provides popupWindow
                 ) {
                    Surface{
                        AppNavigation()

@@ -31,7 +31,7 @@ import com.hua.abstractmusic.ui.LocalComposeUtils
 import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.LocalMusicScreenSecondColor
 import com.hua.abstractmusic.ui.LocalScreenSize
-import com.hua.abstractmusic.ui.utils.AlbumArtImage
+import com.hua.abstractmusic.ui.utils.ArtImage
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.ui.utils.WindowSize
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
@@ -93,7 +93,7 @@ private fun VerticalScreen(
             .fillMaxSize()
     ) {
         Spacer(modifier = Modifier.height(topGlide.dp))
-        AlbumArtImage(
+        ArtImage(
             modifier = Modifier
                 .fillMaxWidth(0.8f)
                 .aspectRatio(1f)
@@ -151,7 +151,7 @@ private fun HorizontalScreen(
             .fillMaxSize()
             .padding(start = startGlide.dp)
     ) {
-        AlbumArtImage(
+        ArtImage(
             modifier = Modifier
                 .fillMaxHeight(0.8f)
                 .align(CenterVertically)

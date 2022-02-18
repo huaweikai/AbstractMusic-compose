@@ -21,7 +21,7 @@ import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalUserViewModel
 import com.hua.abstractmusic.ui.viewmodels.UserViewModel
 import com.hua.abstractmusic.ui.route.Screen
-import com.hua.abstractmusic.ui.utils.AlbumArtImage
+import com.hua.abstractmusic.ui.utils.ArtImage
 import com.hua.abstractmusic.utils.CropPhotoContract
 
 
@@ -88,7 +88,7 @@ fun Mine(
 
     Column(Modifier.fillMaxSize()) {
         Text(text = "已经登录了")
-        AlbumArtImage(
+        ArtImage(
             modifier = Modifier
                 .size(60.dp)
                 .clickable {

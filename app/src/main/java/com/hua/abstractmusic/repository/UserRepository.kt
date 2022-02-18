@@ -1,9 +1,5 @@
 package com.hua.abstractmusic.repository
 
-import android.content.ContentResolver
-import android.content.Context
-import android.net.Uri
-import android.provider.MediaStore
 import androidx.documentfile.provider.DocumentFile
 import com.hua.abstractmusic.bean.net.NetData
 import com.hua.abstractmusic.bean.user.NetUser
@@ -21,8 +17,7 @@ import com.obs.services.model.ObjectMetadata
 import com.obs.services.model.ProgressStatus
 import com.obs.services.model.PutObjectRequest
 import com.obs.services.model.PutObjectResult
-import java.io.ByteArrayInputStream
-import java.io.InputStreamReader
+import java.io.InputStream
 
 /**
  * @author : huaweikai
@@ -147,9 +142,9 @@ class UserRepository(
         }
     }
 
-    suspend fun putHeadPicture(
+     suspend fun putHeadPicture(
         fileName: String,
-        byte: ByteArray?,
+        byte: InputStream?,
         file: DocumentFile?,
         progress: (ProgressStatus) -> Unit
     ): NetData<Unit> {
@@ -159,7 +154,7 @@ class UserRepository(
                     metadata = ObjectMetadata().apply {
                         this.contentLength = file?.length()
                     }
-                    input = ByteArrayInputStream(byte)
+                    input = byte
                     setProgressListener {
                         progress(it)
                     }

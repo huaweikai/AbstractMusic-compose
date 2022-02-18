@@ -4,8 +4,10 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,12 +23,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media2.common.MediaItem
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.R
-import com.hua.abstractmusic.ui.home.local.artist.detail.artItem
+import com.hua.abstractmusic.ui.utils.ArtImage
 import com.hua.abstractmusic.ui.utils.MusicItem
-import com.hua.abstractmusic.ui.viewmodels.AlbumDetailViewModel
-import com.hua.abstractmusic.ui.utils.AlbumArtImage
-import com.hua.abstractmusic.ui.utils.AnimateAlbumEmptyItem
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
+import com.hua.abstractmusic.ui.viewmodels.AlbumDetailViewModel
 import com.hua.abstractmusic.utils.*
 
 
@@ -56,8 +56,6 @@ fun LocalAlbumDetail(
     ) {
         item {
             AlbumDetailDesc(item = item)
-        }
-        item {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -81,24 +79,19 @@ fun LocalAlbumDetail(
             }
             Spacer(modifier = Modifier.height(10.dp))
         }
-        artItem(
-            detailViewModel.screenState.value,
-            item.metadata?.trackCount!!.toInt(),
-            detailViewModel.albumDetail.value,
-            {
-                AnimateAlbumEmptyItem()
-            }, { index, item ->
-                MusicItem(
-                    data = item,
-                ) {
+        itemsIndexed(detailViewModel.albumDetail.value) { index, item ->
+            MusicItem(
+                data = item,
+                onClick = {
                     detailViewModel.setPlaylist(index, detailViewModel.albumDetail.value)
                 }
-            }
-        )
+            )
+        }
         item {
             AlbumDetailTail(item = item)
         }
     }
+
 }
 
 @Composable
@@ -112,7 +105,7 @@ private fun AlbumDetailDesc(
             .height(IntrinsicSize.Min)
             .padding(top = 20.dp, end = 20.dp)
     ) {
-        AlbumArtImage(
+        ArtImage(
             modifier = Modifier
                 .padding(start = 10.dp)
                 .size(120.dp),

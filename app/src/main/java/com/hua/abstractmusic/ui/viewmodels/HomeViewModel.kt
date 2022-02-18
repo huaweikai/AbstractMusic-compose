@@ -2,26 +2,28 @@ package com.hua.abstractmusic.ui.viewmodels
 
 import android.app.Application
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.runtime.*
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import androidx.media2.common.MediaItem
-import androidx.media2.common.MediaMetadata
 import androidx.media2.common.SessionPlayer
-import androidx.media2.session.*
+import androidx.media2.session.MediaController
+import androidx.media2.session.SessionCommandGroup
 import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.PagerState
 import com.hua.abstractmusic.base.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.MediaData
+import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.other.Constant.ALBUM_ID
 import com.hua.abstractmusic.other.Constant.ALL_ID
 import com.hua.abstractmusic.other.Constant.ARTIST_ID
-import com.hua.abstractmusic.other.Constant.CLEAR_PLAY_LIST
 import com.hua.abstractmusic.other.Constant.CURRENT_PLAY_LIST
+import com.hua.abstractmusic.other.Constant.LASTMEDIA
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.use_case.UseCase
 import com.hua.abstractmusic.utils.duration
+import com.tencent.mmkv.MMKV
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,6 +56,9 @@ class HomeViewModel @Inject constructor(
     private val _localArtistList = mutableStateOf(emptyList<MediaData>())
     val localArtistList: State<List<MediaData>> get() = _localArtistList
 
+    val mmkv = MMKV.mmkvWithID(LASTMEDIA)
+    val currentPager :PagerState
+
     init {
         localListMap[ALL_ID] = _localMusicList
         localListMap[ALBUM_ID] = _localAlbumList
@@ -61,6 +66,7 @@ class HomeViewModel @Inject constructor(
 
         playListMap[CURRENT_PLAY_LIST] = _currentPlayList
         playListMap[ALL_ID] = _localMusicList
+        currentPager = PagerState(mmkv.decodeInt(Constant.LASTMEDIAINDEX, 0))
     }
 
     private val playSate = MutableStateFlow(SessionPlayer.PLAYER_STATE_IDLE)
@@ -118,9 +124,9 @@ class HomeViewModel @Inject constructor(
 
     //更新item的方法，当回调到item改变就调用这个方法
     override fun updateItem(item: MediaItem?) {
+        val browser = browser ?: return
         super.updateItem(item)
-        browser ?: return
         _currentItem.value = item ?: NULL_MEDIA_ITEM
-        maxValue.value = browser?.currentMediaItem?.metadata?.duration?.toFloat() ?: 0F
+        maxValue.value = browser.currentMediaItem?.metadata?.duration?.toFloat() ?: 0F
     }
 }

@@ -1,28 +1,26 @@
 package com.hua.abstractmusic.services
 
-import android.app.Application
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
+import android.content.Intent
 import android.os.Build
-import android.content.*
-import android.util.Log
-import androidx.media2.common.SessionPlayer
 import androidx.media2.session.MediaLibraryService
 import androidx.media2.session.MediaSession
-import androidx.media2.session.SessionCommand
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.MediaMetadata
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.media2.SessionPlayerConnector
 import com.google.common.util.concurrent.MoreExecutors
-import com.hua.abstractmusic.ui.MainActivity
-import com.hua.abstractmusic.other.Constant.CLEAR_PLAY_LIST
 import com.hua.abstractmusic.other.Constant.LASTMEDIA
 import com.hua.abstractmusic.other.Constant.LASTMEDIAINDEX
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
-import com.hua.abstractmusic.services.extensions.*
+import com.hua.abstractmusic.services.extensions.LibrarySessionCallbackBuilder
+import com.hua.abstractmusic.services.extensions.MediaCommand
+import com.hua.abstractmusic.services.extensions.PlayerLibraryItemProvider
+import com.hua.abstractmusic.services.extensions.PlayerMediaItemProvider
+import com.hua.abstractmusic.ui.MainActivity
 import com.hua.abstractmusic.use_case.UseCase
+import com.tencent.mmkv.MMKV
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import java.util.concurrent.Executors
@@ -50,6 +48,8 @@ class PlayerService : MediaLibraryService() {
 
     @Inject
     lateinit var useCase: UseCase
+
+    private val mmkv = MMKV.mmkvWithID(LASTMEDIA)
 
     lateinit var sessionCallback: MediaLibrarySession.MediaLibrarySessionCallback
 
@@ -118,8 +118,7 @@ class PlayerService : MediaLibraryService() {
         )
 
         serviceScope.launch(Dispatchers.IO) {
-            val sp = applicationContext.getSharedPreferences(LASTMEDIA, Context.MODE_PRIVATE)
-            val index = sp.getInt(LASTMEDIAINDEX, 0)
+            val index = mmkv.decodeInt(LASTMEDIAINDEX, 0)
             val list = useCase.getCurrentListCase()
             if (list.isNotEmpty()) {
                 player.setPlaylist(list, null).addListener({
@@ -171,17 +170,15 @@ class PlayerService : MediaLibraryService() {
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             serviceScope.launch {
                 delay(200)
-                savePosition(player.currentMediaItemIndex)
+                mmkv.encode(LASTMEDIAINDEX, player.currentMediaItemIndex)
+//                mmkv.putInt(LASTMEDIAINDEX, player.currentMediaItemIndex).apply()
+//                savePosition(player.currentMediaItemIndex)
             }
         }
-
-        override fun onPlaylistMetadataChanged(mediaMetadata: MediaMetadata) {
-            super.onPlaylistMetadataChanged(mediaMetadata)
-        }
     }
 
-    fun savePosition(index: Int) {
-        val sp = application.getSharedPreferences(LASTMEDIA, Context.MODE_PRIVATE)
-        sp.edit().putInt(LASTMEDIAINDEX, index).apply()
-    }
+//    fun savePosition(index: Int) {
+//        val sp = application.getSharedPreferences(LASTMEDIA, Context.MODE_PRIVATE)
+//        sp.edit().putInt(LASTMEDIAINDEX, index).apply()
+//    }
 }

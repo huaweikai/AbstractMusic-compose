@@ -21,9 +21,9 @@ import com.hua.abstractmusic.ui.home.mine.register.LoginScreen
 import com.hua.abstractmusic.ui.home.mine.register.RegisterScreen
 import com.hua.abstractmusic.ui.home.net.NetScreen
 import com.hua.abstractmusic.ui.home.net.detail.NetDetail
+import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.viewmodels.UserViewModel
-import com.hua.abstractmusic.ui.route.Screen
 
 /**
  * @author : huaweikai
@@ -88,8 +88,7 @@ fun HomeNavigationNav(
             val index =it.arguments?.getInt("artistIndex",-1)
             val item = viewModel.localArtistList.value[index!!].mediaItem
             LocalArtistDetail(
-                item = item,
-                homeNavController
+                item = item
             )
         }
 

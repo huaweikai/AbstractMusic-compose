@@ -1,23 +1,17 @@
 package com.hua.abstractmusic.ui.home
 
-import android.content.Context
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.HorizontalAlignmentLine
+import androidx.compose.ui.input.pointer.*
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -37,23 +31,19 @@ import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.bean.ui.home.BottomBarBean
 import com.hua.abstractmusic.bean.ui.home.IconBean
-import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.play.detail.ControllerItem
-import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.utils.albumArtUri
 import com.hua.abstractmusic.utils.artist
 import com.hua.abstractmusic.utils.title
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 
 /**
@@ -71,7 +61,7 @@ fun HomeController(
 ) {
     Column(
         modifier = modifier
-    ){
+    ) {
         Controller(
             playListClick,
             playScreenClick
@@ -88,21 +78,24 @@ fun Controller(
     viewModel: HomeViewModel = LocalHomeViewModel.current
 ) {
     val context = LocalContext.current
-    val titleState = rememberPagerState(
-        context.getSharedPreferences(Constant.LASTMEDIA, Context.MODE_PRIVATE)
-            .getInt(Constant.LASTMEDIAINDEX, 0)
-    )
 
-    LaunchedEffect(titleState.currentPage) {
-        viewModel.skipTo(titleState.currentPage)
+    val isTouch = remember{
+        mutableStateOf(false)
     }
 
     LaunchedEffect(viewModel.currentItem.value) {
-        delay(100L)
-        val index = viewModel.currentPlayList.value.indexOf(
-            MediaData(viewModel.currentItem.value, true)
-        )
-        titleState.scrollToPage(if (index < 0) 0 else index)
+        if(!isTouch.value){
+            val index = viewModel.currentPlayList.value.indexOf(
+                MediaData(viewModel.currentItem.value, true)
+            )
+            viewModel.currentPager.scrollToPage(if (index < 0) 0 else index)
+        }
+        isTouch.value = false
+    }
+    LaunchedEffect(viewModel.currentPager.currentPage) {
+        if(isTouch.value){
+            viewModel.skipTo(viewModel.currentPager.currentPage,true)
+        }
     }
 
     ConstraintLayout(
@@ -115,10 +108,11 @@ fun Controller(
         constraintSet = controllerConstrains(8.dp)
     ) {
         HorizontalPager(
-            state = titleState,
+            state = viewModel.currentPager,
             count = viewModel.currentPlayList.value.size,
             modifier = Modifier
-                .layoutId("pager"),
+                .layoutId("pager")
+                .isTouch(isTouch),
             verticalAlignment = CenterVertically
         ) { page ->
             val item = viewModel.currentPlayList.value[page].mediaItem.metadata
@@ -257,3 +251,27 @@ fun HomeNavigation(
     }
 
 }
+
+@ExperimentalPagerApi
+private fun Modifier.isTouch(
+    isTouch: MutableState<Boolean> = mutableStateOf(false)
+) =
+    this.pointerInput(Unit) {
+        awaitPointerEventScope {
+            while (true) {
+                val event = awaitPointerEvent(PointerEventPass.Initial)
+                val dragEvent = event.changes.firstOrNull()
+                when {
+                    dragEvent!!.positionChangeConsumed() -> {
+                        return@awaitPointerEventScope
+                    }
+                    dragEvent.changedToDownIgnoreConsumed() -> {
+                        isTouch.value = true
+                    }
+                    dragEvent.changedToUpIgnoreConsumed() -> {
+
+                    }
+                }
+            }
+        }
+    }

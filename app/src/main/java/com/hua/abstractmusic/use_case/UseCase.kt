@@ -3,8 +3,6 @@ package com.hua.abstractmusic.use_case
 import com.hua.abstractmusic.use_case.currentlist.ClearCurrentListCase
 import com.hua.abstractmusic.use_case.currentlist.GetCurrentListCase
 import com.hua.abstractmusic.use_case.currentlist.InsertMusicToCurrentItemCase
-import com.hua.abstractmusic.use_case.net.SelectNetAlbumCase
-import com.hua.abstractmusic.use_case.net.SelectNetArtistCase
 import com.hua.abstractmusic.use_case.sheet.GetSheetMusicListCase
 import com.hua.abstractmusic.use_case.sheet.GetSheetNameCase
 import com.hua.abstractmusic.use_case.sheet.InsertSheetCase
@@ -20,7 +18,5 @@ data class UseCase(
     val getCurrentListCase: GetCurrentListCase,
     val getSheetNameCase: GetSheetNameCase,
     val getSheetMusicListCase: GetSheetMusicListCase,
-    val insertSheetCase: InsertSheetCase,
-    val selectNetAlbumCase: SelectNetAlbumCase,
-    val selectNetArtistCase: SelectNetArtistCase
+    val insertSheetCase: InsertSheetCase
 )

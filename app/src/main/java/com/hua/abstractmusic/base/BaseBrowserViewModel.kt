@@ -88,7 +88,7 @@ abstract class BaseBrowserViewModel(
             if (items.size == 0) {
                 updateItem(null)
             }
-            playListMap[CURRENT_PLAY_LIST]?.let {
+            playListMap[CURRENT_PLAY_LIST]?.let { it ->
                 it.value = if (items.size > 0) {
                     list.map {
                         val isPlaying =
@@ -106,7 +106,7 @@ abstract class BaseBrowserViewModel(
         }
 
         override fun onCurrentMediaItemChanged(controller: MediaController, item: MediaItem?) {
-            viewModelScope.launch {
+            viewModelScope.launch(Dispatchers.Main){
                 delay(200L)
                 updateItem(browser?.currentMediaItem)
             }
@@ -273,11 +273,11 @@ abstract class BaseBrowserViewModel(
         browser.removePlaylistItem(position)
     }
 
-    fun skipTo(position: Int) {
+    fun skipTo(position: Int, autoPlay: Boolean = false) {
         val browser = browser ?: return
         if (browser.currentMediaItemIndex != position) {
             browser.skipToPlaylistItem(position)
-            browser.play()
+            if (autoPlay) browser.play()
         }
     }
 

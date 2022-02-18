@@ -2,20 +2,22 @@ package com.hua.abstractmusic.ui.navigation
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
+import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.ui.*
 import com.hua.abstractmusic.ui.hello.HelloScreen
 import com.hua.abstractmusic.ui.home.HomeScreen
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.splash.SplashScreen
-import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 
 /**
  * @author : huaweikai
@@ -41,10 +43,14 @@ fun AppNavigation(
             HelloScreen()
         }
         composable(route = Screen.HomeScreen.route) {
+            val popItem = remember{
+                mutableStateOf(NULL_MEDIA_ITEM)
+            }
             CompositionLocalProvider(
                 LocalHomeNavController provides rememberNavController(),
                 LocalNetViewModel provides hiltViewModel(),
-                LocalUserViewModel provides hiltViewModel()
+                LocalUserViewModel provides hiltViewModel(),
+                LocalPopWindowItem provides popItem
             ){
                 HomeScreen()
             }

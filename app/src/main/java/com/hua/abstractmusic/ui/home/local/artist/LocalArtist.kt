@@ -11,9 +11,9 @@ import androidx.compose.ui.unit.dp
 import coil.transform.CircleCropTransformation
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.ui.LocalHomeViewModel
-import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
-import com.hua.abstractmusic.ui.utils.AlbumArtImage
+import com.hua.abstractmusic.ui.utils.ArtImage
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.utils.albumArtUri
 import com.hua.abstractmusic.utils.displayDescription
 import com.hua.abstractmusic.utils.title
@@ -45,7 +45,7 @@ fun LocalArtist(
                         onClick(index)
                     }
             ) {
-                AlbumArtImage(
+                ArtImage(
                     modifier = Modifier
                         .size(45.dp),
                     uri = item.mediaItem.metadata?.albumArtUri!!,

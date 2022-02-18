@@ -19,8 +19,6 @@ import com.hua.abstractmusic.use_case.UseCase
 import com.hua.abstractmusic.use_case.currentlist.ClearCurrentListCase
 import com.hua.abstractmusic.use_case.currentlist.GetCurrentListCase
 import com.hua.abstractmusic.use_case.currentlist.InsertMusicToCurrentItemCase
-import com.hua.abstractmusic.use_case.net.SelectNetAlbumCase
-import com.hua.abstractmusic.use_case.net.SelectNetArtistCase
 import com.hua.abstractmusic.use_case.sheet.GetSheetMusicListCase
 import com.hua.abstractmusic.use_case.sheet.GetSheetNameCase
 import com.hua.abstractmusic.use_case.sheet.InsertSheetCase
@@ -99,8 +97,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideUseCase(
-        repository: Repository,
-        netRepository: NetRepository
+        repository: Repository
     ): UseCase =
         UseCase(
             InsertMusicToCurrentItemCase(repository),
@@ -108,9 +105,7 @@ object AppModule {
             GetCurrentListCase(repository),
             GetSheetNameCase(repository),
             GetSheetMusicListCase(repository),
-            InsertSheetCase(repository),
-            SelectNetAlbumCase(netRepository),
-            SelectNetArtistCase(netRepository)
+            InsertSheetCase(repository)
         )
 
     @Provides

@@ -1,11 +1,19 @@
 package com.hua.abstractmusic.ui.home.local.artist.detail
 
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.Tab
+import androidx.compose.material.TabRow
+import androidx.compose.material.TabRowDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -13,15 +21,19 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media2.common.MediaItem
 import androidx.navigation.NavHostController
 import coil.transform.CircleCropTransformation
-import com.hua.abstractmusic.bean.MediaData
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.pagerTabIndicatorOffset
+import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.ui.LocalHomeNavController
-import com.hua.abstractmusic.ui.viewmodels.ArtistDetailViewModel
 import com.hua.abstractmusic.ui.route.Screen
-import com.hua.abstractmusic.ui.utils.*
+import com.hua.abstractmusic.ui.utils.AlbumItem
+import com.hua.abstractmusic.ui.utils.ArtImage
+import com.hua.abstractmusic.ui.utils.MusicItem
+import com.hua.abstractmusic.ui.viewmodels.ArtistDetailViewModel
 import com.hua.abstractmusic.utils.albumArtUri
 import com.hua.abstractmusic.utils.title
-import com.hua.abstractmusic.utils.trackCount
-import com.hua.abstractmusic.utils.trackNumber
+import kotlinx.coroutines.launch
 
 /**
  * @author : huaweikai
@@ -29,105 +41,106 @@ import com.hua.abstractmusic.utils.trackNumber
  * @Desc   : detail
  */
 
+@ExperimentalPagerApi
 @Composable
 fun LocalArtistDetail(
     item: MediaItem,
-    homeNavController: NavHostController = LocalHomeNavController.current,
     viewModel: ArtistDetailViewModel = hiltViewModel()
 ) {
+
     DisposableEffect(Unit) {
-//        viewModel.initializeController()
         viewModel.artistId = item.metadata?.mediaId ?: ""
         this.onDispose {
             viewModel.releaseBrowser()
         }
     }
-    LazyColumn(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 10.dp)
     ) {
-        item {
-            Spacer(modifier = Modifier.padding(top = 20.dp))
-            Column(
+        Spacer(modifier = Modifier.padding(top = 20.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            ArtImage(
                 modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .size(100.dp),
+                uri = item.metadata?.albumArtUri,
+                desc = "",
+                transformation = CircleCropTransformation()
+            )
+            Spacer(modifier = Modifier.padding(top = 10.dp))
+            Text(text = "${item.metadata?.title}")
+        }
+        ArtistHorizontalPager(viewModel = viewModel)
+    }
+}
+
+@ExperimentalPagerApi
+@Composable
+private fun ArtistHorizontalPager(
+    viewModel: ArtistDetailViewModel,
+    homeNavController: NavHostController = LocalHomeNavController.current
+) {
+    val scope = rememberCoroutineScope()
+    val pagerState = rememberPagerState()
+    TabRow(
+        selectedTabIndex = pagerState.currentPage,
+        indicator = {
+            TabRowDefaults.Indicator(
+                Modifier.pagerTabIndicatorOffset(pagerState, it),
+                color = MaterialTheme.colorScheme.primary
+            )
+        },
+        modifier = Modifier.height(50.dp)
+    ) {
+        val tabTitles = listOf("音乐", "专辑")
+        tabTitles.forEachIndexed { index, s ->
+            Tab(
+                selected = pagerState.currentPage == index,
+                onClick = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(index)
+                    }
+                },
+                modifier = Modifier.background(
+                    MaterialTheme.colorScheme.background
+                ),
             ) {
-                AlbumArtImage(
-                    modifier = Modifier
-                        .size(100.dp),
-                    uri = item.metadata?.albumArtUri,
-                    desc = "",
-                    transformation = CircleCropTransformation()
-                )
-                Spacer(modifier = Modifier.padding(top = 10.dp))
-                Text(text = "${item.metadata?.title}")
+                Text(text = tabTitles[index])
             }
         }
-        interval(desc = "歌曲")
-        artItem(
-            viewModel.screenState.value,
-            item.metadata?.trackCount!!.toInt(),
-            viewModel.artistDetail.value,
-            {
-                AnimateAlbumEmptyItem()
-            }, { index, item ->
-                MusicItem(data = item) {
-                    viewModel.setPlaylist(index, viewModel.artistDetail.value)
+    }
+    HorizontalPager(
+        count = 2,
+        state = pagerState,
+        verticalAlignment = Alignment.Top,
+        modifier = Modifier.fillMaxSize()
+    ) { index ->
+        when (index) {
+            0 -> {
+                LazyColumn(Modifier.fillMaxWidth()) {
+                    itemsIndexed(viewModel.artistDetail.value) { index, item ->
+                        MusicItem(data = item,
+                            onClick = {
+                                viewModel.setPlaylist(index, viewModel.artistDetail.value)
+
+                            }
+                        )
+                    }
                 }
             }
-        )
-        interval(desc = "专辑")
-        artItem(
-            viewModel.screenState.value,
-            item.metadata?.trackNumber!!.toInt(),
-            viewModel.artistAlbumDetail.value,
-            {
-                AnimateAlbumItem(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(start = 8.dp, bottom = 12.dp)
-                )
-            },
-            { _, item ->
-                AlbumItem(
-                    item = item.mediaItem,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 8.dp, bottom = 12.dp)
-                ) {
-                    homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumId=${item.mediaId}")
+            1 -> {
+                LazyColumn(Modifier.fillMaxWidth()) {
+                    items(viewModel.artistAlbumDetail.value) { item ->
+                        AlbumItem(item = item.mediaItem, modifier = Modifier.fillMaxWidth()) {
+                            homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumId=${item.mediaId}")
+                        }
+                    }
                 }
             }
-        )
-    }
-}
-
-fun LazyListScope.interval(
-    desc: String
-) {
-    item {
-        Spacer(modifier = Modifier.padding(top = 10.dp))
-        Text(text = desc, Modifier.padding(start = 10.dp))
-        Spacer(modifier = Modifier.padding(top = 10.dp))
-    }
-}
-
-fun LazyListScope.artItem(
-    state: LCE,
-    loadingCount: Int,
-    items: List<MediaData>,
-    loadingItem: @Composable () -> Unit,
-    content: @Composable LazyItemScope.(Int, MediaData) -> Unit
-) {
-//    if(state == LCE.Loading){
-//        items(loadingCount) {
-//            loadingItem()
-//        }
-//    }else if(state == LCE.Success){
-        itemsIndexed(items) { index, item ->
-            content(index, item)
         }
-//    }
+    }
 }

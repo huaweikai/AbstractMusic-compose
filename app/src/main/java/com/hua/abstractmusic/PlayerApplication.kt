@@ -1,8 +1,7 @@
 package com.hua.abstractmusic
 
 import android.app.Application
-import coil.ImageLoader
-import coil.ImageLoaderFactory
+import com.tencent.mmkv.MMKV
 import dagger.hilt.android.HiltAndroidApp
 
 /**
@@ -11,4 +10,9 @@ import dagger.hilt.android.HiltAndroidApp
  * @Desc   : Application
  */
 @HiltAndroidApp
-class PlayerApplication :Application()
+class PlayerApplication :Application(){
+    override fun onCreate() {
+        super.onCreate()
+        MMKV.initialize(this)
+    }
+}

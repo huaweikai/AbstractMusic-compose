@@ -22,6 +22,10 @@ android {
 
     buildTypes {
         release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -61,6 +65,7 @@ dependencies {
     implementation 'androidx.activity:activity:1.4.0'
     implementation "androidx.compose.material3:material3:1.0.0-alpha03"
     implementation "androidx.compose.ui:ui-util:$compose_version"
+    implementation 'com.tencent:mmkv:1.2.12'
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
@@ -116,6 +121,7 @@ dependencies {
     implementation 'com.google.accompanist:accompanist-pager-indicators:0.20.3'
     implementation 'com.google.accompanist:accompanist-insets:0.22.0-rc'
     implementation "com.google.accompanist:accompanist-swiperefresh:0.24.2-alpha"
+    implementation "com.google.accompanist:accompanist-flowlayout:0.24.2-alpha"
 
     implementation "androidx.constraintlayout:constraintlayout-compose:1.0.0"
 

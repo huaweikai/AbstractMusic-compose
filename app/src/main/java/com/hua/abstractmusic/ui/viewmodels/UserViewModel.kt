@@ -205,7 +205,7 @@ class UserViewModel @Inject constructor(
         contentResolver: ContentResolver
     ) {
         val uri = Uri.parse(url)
-        val byte = contentResolver.openInputStream(uri)?.readBytes()
+        val byte = contentResolver.openInputStream(uri)/*?.readBytes()*/
         val file = DocumentFile.fromSingleUri(getApplication(), uri)
         viewModelScope.launch(Dispatchers.IO) {
             val fileName = "${BUCKET_HEAD_IMG}/${user.value.id}-head-${

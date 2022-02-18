@@ -1,9 +1,13 @@
 package com.hua.abstractmusic.ui.home.net
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
@@ -13,15 +17,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Paint
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -144,7 +141,7 @@ private fun RecommendItem(list: List<MediaData>, page: Int) {
                     .fillMaxWidth()
                     .height(70.dp)
             ) {
-                AlbumArtImage(
+                ArtImage(
                     modifier = Modifier.size(60.dp),
                     uri = data?.albumArtUri,
                     desc = "歌单图",
@@ -215,7 +212,7 @@ private fun NewItems(
                         .size(130.dp),
                     contentAlignment = Alignment.TopCenter
                 ) {
-                    AlbumArtImage(
+                    ArtImage(
                         modifier = Modifier
                             .fillMaxHeight(0.9f)
                             .aspectRatio(1f),

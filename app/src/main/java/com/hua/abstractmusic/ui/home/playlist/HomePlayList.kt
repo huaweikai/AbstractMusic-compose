@@ -81,7 +81,7 @@ fun HomePlayList(
                         modifier = Modifier
                             .fillMaxSize()
                             .clickable {
-                                viewModel.skipTo(index)
+                                viewModel.skipTo(index,true)
                             }
                     ) {
                         val (text, delete) = createRefs()

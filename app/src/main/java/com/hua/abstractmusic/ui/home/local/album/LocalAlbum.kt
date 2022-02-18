@@ -15,7 +15,7 @@ import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
-import com.hua.abstractmusic.ui.utils.AlbumArtImage
+import com.hua.abstractmusic.ui.utils.ArtImage
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.utils.albumArtUri
 import com.hua.abstractmusic.utils.artist
@@ -50,7 +50,7 @@ fun AlbumLazyItem(
                 modifier = Modifier
                     .padding(10.dp),
             ) {
-                AlbumArtImage(
+                ArtImage(
                     modifier = Modifier
                         .size(190.dp)
                         .clickable {

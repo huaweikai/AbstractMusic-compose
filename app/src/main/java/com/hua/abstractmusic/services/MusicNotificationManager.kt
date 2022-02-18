@@ -1,14 +1,10 @@
 package com.hua.abstractmusic.services
 
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
-import androidx.core.app.NotificationCompat.VISIBILITY_PRIVATE
-import androidx.core.app.NotificationCompat.VISIBILITY_PUBLIC
 import androidx.core.graphics.drawable.toBitmap
 import androidx.media2.session.MediaController
 import coil.ImageLoader
@@ -21,7 +17,6 @@ import com.hua.abstractmusic.other.Constant.NOTIFICATION_ID
 import com.hua.abstractmusic.utils.albumArtUri
 import com.hua.abstractmusic.utils.artist
 import com.hua.abstractmusic.utils.title
-import javax.inject.Inject
 
 /**
  * @ProjectName : 抽象音乐
@@ -97,16 +92,19 @@ class MusicNotificationManager(
             player: Player,
             callback: PlayerNotificationManager.BitmapCallback
         ): Bitmap? {
+            var bitmap:Bitmap? = null
             val request=ImageRequest.Builder(context)
                 .data(mediaControllerCompat.currentMediaItem?.metadata?.albumArtUri)
                 .target(
                     onSuccess = {
-                        callback.onBitmap(it.toBitmap())
+                        bitmap = it.toBitmap()
+                        callback.onBitmap(bitmap!!)
                     },
                     onError = {
-                        callback.onBitmap(BitmapFactory.decodeResource(context.resources,
+                        bitmap = BitmapFactory.decodeResource(context.resources,
                             R.drawable.music
-                        ))
+                        )
+                        callback.onBitmap(bitmap!!)
                     }
                 )
                 .build()
