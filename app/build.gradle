@@ -6,12 +6,12 @@ plugins {
 }
 
 android {
-    compileSdk 31
+    compileSdk Version.compileSdkVersion
 
     defaultConfig {
         applicationId "com.hua.abstractmusic"
-        minSdk 23
-        targetSdk 31
+        minSdk Version.minSdkVersion
+        targetSdk Version.targetSdkVersion
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -42,8 +42,8 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion compose_version
-        kotlinCompilerVersion '1.6.10'
+        kotlinCompilerExtensionVersion Version.compose_version
+        kotlinCompilerVersion Version.kotlin_version
     }
     packagingOptions {
         resources {
@@ -54,18 +54,59 @@ android {
 
 dependencies {
 
-    implementation 'androidx.core:core-ktx:1.7.0'
-    implementation 'androidx.appcompat:appcompat:1.3.1'
-    implementation 'com.google.android.material:material:1.4.0'
-    implementation "androidx.compose.ui:ui:$compose_version"
-    implementation "androidx.compose.material:material:$compose_version"
-    implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
-    implementation 'androidx.activity:activity-compose:1.3.1'
-    implementation 'androidx.activity:activity-ktx:1.4.0'
-    implementation 'androidx.activity:activity:1.4.0'
-    implementation "androidx.compose.material3:material3:1.0.0-alpha03"
-    implementation "androidx.compose.ui:ui-util:$compose_version"
-    implementation 'com.tencent:mmkv:1.2.12'
+    implementation AndroidX.core
+    implementation AndroidX.appcompat
+    implementation AndroidX.activity
+    implementation AndroidX.activity_ktx
+
+    implementation AndroidX.media3_session
+    implementation AndroidX.media3_exoplayer
+    implementation AndroidX.media3_ui
+    implementation AndroidX.media_okhttp_datasource
+
+    implementation AndroidX.room_runtime
+    kapt AndroidX.room_compiler
+    implementation AndroidX.room_ktx
+
+    implementation AndroidX.lifecycle_runtime_ktx
+    implementation AndroidX.lifecycle_viewModel_ktx
+    implementation AndroidX.lifecycle_viewModel_compose
+
+    implementation AndroidX.palette
+
+    implementation AndroidX.window
+
+    implementation Google.material
+    implementation Google.hilt_android
+    kapt Google.hilt_compiler
+    implementation Google.hilt_viewModel
+
+
+    implementation Compose.compose_ui
+    implementation Compose.compose_material
+    implementation Compose.compose_ui_tool_preview
+    implementation Compose.compose_activity
+    implementation Compose.compose_material_md3
+    implementation Compose.compose_ui_util
+    implementation Compose.compose_navigation
+    implementation Compose.compose_hilt_navigation
+    implementation Compose.compose_systemuiController
+    implementation Compose.compose_pager
+    implementation Compose.compose_pager_indicator
+    implementation Compose.compose_insets
+    implementation Compose.compose_swipeRefresh
+    implementation Compose.compose_constraintlayout
+
+    implementation Other.mmkv
+
+    implementation Other.coil
+
+    implementation Other.retrofit2
+    implementation Other.retrofit2_gson
+
+    implementation Other.huawei_obs
+    implementation project(Other.taglib)
+
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
@@ -73,62 +114,4 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
 
 
-    def media2_version = "1.2.0"
-
-    // MediaSession2
-    implementation "androidx.media2:media2-session:$media2_version"
-    // optional - UI widgets for VideoView and MediaControlView
-    implementation "androidx.media2:media2-widget:$media2_version"
-    // optional - Implementation of a SessionPlayer
-    implementation "androidx.media2:media2-player:$media2_version"
-
-    implementation "androidx.navigation:navigation-compose:2.4.0-rc01"
-
-    //coil
-    implementation "io.coil-kt:coil-compose:2.0.0-alpha06"
-
-    // Hilt
-    implementation "com.google.dagger:hilt-android:2.40.5"
-    kapt "com.google.dagger:hilt-compiler:2.40.5"
-    implementation 'androidx.hilt:hilt-navigation-compose:1.0.0-alpha03'
-    implementation 'androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03'
-
-    //Room
-    implementation "androidx.room:room-runtime:2.4.0"
-    kapt("androidx.room:room-compiler:2.4.0")
-    implementation("androidx.room:room-ktx:2.4.0")
-
-    //retrofit
-    implementation "com.squareup.retrofit2:retrofit:2.9.0"
-    implementation "com.squareup.retrofit2:converter-gson:2.9.0"
-
-    //lifecycle
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0-alpha02'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
-
-    // ExoPlayer
-    implementation 'com.google.android.exoplayer:exoplayer-core:2.16.1'
-    implementation 'com.google.android.exoplayer:exoplayer-ui:2.16.1'
-    implementation 'com.google.android.exoplayer:extension-media2:2.16.1'
-
-    //取色器
-    implementation 'androidx.palette:palette-ktx:1.0.0'
-
-    //compose组件
-    implementation 'com.google.accompanist:accompanist-systemuicontroller:0.22.0-rc'
-    implementation 'com.google.accompanist:accompanist-pager:0.20.3'
-    implementation 'com.google.accompanist:accompanist-pager-indicators:0.20.3'
-    implementation 'com.google.accompanist:accompanist-insets:0.22.0-rc'
-    implementation "com.google.accompanist:accompanist-swiperefresh:0.24.2-alpha"
-    implementation "com.google.accompanist:accompanist-flowlayout:0.24.2-alpha"
-
-    implementation "androidx.constraintlayout:constraintlayout-compose:1.0.0"
-
-    //huawei obs
-    implementation 'com.huaweicloud:esdk-obs-android:3.21.12'
-
-    implementation project(":taglib")
-
-    implementation "androidx.window:window:1.0.0"
 }
