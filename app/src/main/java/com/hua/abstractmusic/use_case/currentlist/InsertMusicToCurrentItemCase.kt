@@ -1,16 +1,18 @@
 package com.hua.abstractmusic.use_case.currentlist
 
-import androidx.media2.common.MediaItem
+
+import android.annotation.SuppressLint
+import androidx.media3.common.MediaItem
 import com.hua.abstractmusic.bean.CurrentPlayItem
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.repository.Repository
-import com.hua.abstractmusic.utils.*
 
 /**
  * @author : huaweikai
  * @Date   : 2021/11/27
  * @Desc   : 保存当前播放歌单
  */
+@SuppressLint("UnsafeOptInUsageError")
 class InsertMusicToCurrentItemCase(
     private val repository: Repository
 ) {
@@ -24,19 +26,18 @@ class InsertMusicToCurrentItemCase(
     @JvmName("mediaItemSave")
     suspend operator fun invoke(mediaItems:List<MediaItem>?){
         mediaItems?.let { list ->
-            list.forEach {
-                val item = it.metadata?:return@let
+            list.forEach { it->
+                val item = it.mediaMetadata
                 val currentPlayItem = CurrentPlayItem(
-                    item.mediaId!!,
+                    it.mediaId,
                     item.title.toString(),
                     item.displayTitle.toString(),
-                    item.displaySubtitle.toString(),
-                    item.album.toString(),
+                    item.subtitle.toString(),
+                    item.albumTitle.toString(),
                     item.artist.toString(),
-                    item.duration,
-                    item.trackNumber,
+                    item.trackNumber?.toLong() ?: 0L,
                     item.mediaUri.toString(),
-                    item.albumArtUri.toString()
+                    item.artworkUri.toString()
                 )
                 repository.insertIntoCurrentPlayList(currentPlayItem)
             }

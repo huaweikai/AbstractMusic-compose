@@ -1,15 +1,14 @@
 package com.hua.abstractmusic.utils
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
-import androidx.media2.common.MediaItem
-import androidx.media2.common.MediaMetadata
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import com.hua.abstractmusic.bean.net.NetAlbum
 import com.hua.abstractmusic.bean.net.NetArtist
 import com.hua.abstractmusic.bean.net.NetMusic
 import com.hua.abstractmusic.bean.net.NetSheet
-import com.hua.abstractmusic.other.Constant
-import com.hua.abstractmusic.other.Constant.NETWORK_RECOMMEND_ID
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -38,72 +37,74 @@ fun String.toTime(): Long {
         0
     }
 }
-
+@SuppressLint("UnsafeOptInUsageError")
 fun NetAlbum.toMediaItem(parentId: Uri): MediaItem {
     return MediaItem.Builder()
-        .setMetadata(
-            MediaMetadata.Builder().apply {
-                id = parentId.buildUpon().appendPath(this@toMediaItem.id.toString()).toString()
-                title = this@toMediaItem.name
-                year = this@toMediaItem.time.toTime()
-                artist = this@toMediaItem.artistName
-                displayTitle = this@toMediaItem.name
-                displaySubtitle = this@toMediaItem.artistName
-                albumArtUri = this@toMediaItem.imgUrl
-                displayIconUri = this@toMediaItem.imgUrl
-                isPlayable = false
-                browserType = MediaMetadata.BROWSABLE_TYPE_ALBUMS
-            }.build()
-        ).build()
+        .setMediaMetadata(
+            MediaMetadata.Builder()
+                .setTitle(this@toMediaItem.name)
+                .setReleaseYear(this@toMediaItem.time.toTime().toInt())
+                .setArtist(this@toMediaItem.artistName)
+                .setDisplayTitle(this@toMediaItem.name)
+                .setArtworkUri(Uri.parse(this@toMediaItem.imgUrl))
+                .setSubtitle(this@toMediaItem.artistName)
+                .setFolderType(MediaMetadata.FOLDER_TYPE_ALBUMS)
+                .setIsPlayable(false)
+                .build()
+        )
+        .setMediaId(parentId.buildUpon().appendPath(this@toMediaItem.id.toString()).toString())
+        .build()
 }
-
+@SuppressLint("UnsafeOptInUsageError")
 fun NetArtist.toMediaItem(parentId: Uri): MediaItem {
     return MediaItem.Builder()
-        .setMetadata(
-            MediaMetadata.Builder().apply {
-                id = parentId.buildUpon().appendPath(this@toMediaItem.id.toString()).toString()
-                title = this@toMediaItem.name
-                artist = this@toMediaItem.name
-                displayTitle = this@toMediaItem.name
-                albumArtUri = this@toMediaItem.imgUrl
-                displayIconUri = this@toMediaItem.imgUrl
-                displaySubtitle = this@toMediaItem.artistDesc
-                isPlayable = false
-                browserType = MediaMetadata.BROWSABLE_TYPE_ARTISTS
-            }.build()
-        ).build()
-}
-
-fun NetMusic.toMediaItem(parentId: Uri): MediaItem {
-    return MediaItem.Builder()
-        .setMetadata(
-            MediaMetadata.Builder().apply {
-                id = parentId.buildUpon().appendPath(this@toMediaItem.id.toString()).toString()
-                mediaUri = this@toMediaItem.musicUrl
-                displayIconUri = this@toMediaItem.imgUrl
-                artUri = this@toMediaItem.imgUrl
-                albumArtUri = this@toMediaItem.imgUrl
-                artist = this@toMediaItem.artist
-                album = this@toMediaItem.albumName
-                title = this@toMediaItem.name
-                displayTitle = this@toMediaItem.name
-                displaySubtitle = this@toMediaItem.artist
-                isPlayable = true
-                browserType = MediaMetadata.BROWSABLE_TYPE_NONE
-            }.build()
+        .setMediaMetadata(
+            MediaMetadata.Builder()
+                .setTitle(this@toMediaItem.name)
+                .setArtist(this@toMediaItem.name)
+                .setDisplayTitle(this@toMediaItem.name)
+                .setArtworkUri(Uri.parse(this@toMediaItem.imgUrl))
+                .setSubtitle(this@toMediaItem.artistDesc)
+                .setIsPlayable(false)
+                .setFolderType(MediaMetadata.FOLDER_TYPE_ARTISTS)
+                .build()
         )
+        .setMediaId(parentId.buildUpon().appendPath(this@toMediaItem.id.toString()).toString())
         .build()
 }
 
+@SuppressLint("UnsafeOptInUsageError")
+fun NetMusic.toMediaItem(parentId: Uri): MediaItem {
+    return MediaItem.Builder()
+        .setMediaMetadata(
+            MediaMetadata.Builder()
+                .setTitle(this@toMediaItem.name)
+                .setDisplayTitle(this@toMediaItem.name)
+                .setSubtitle(this@toMediaItem.artist)
+                .setArtist(this@toMediaItem.artist)
+                .setArtworkUri(Uri.parse(this@toMediaItem.imgUrl))
+                .setIsPlayable(true)
+                .setAlbumTitle(this@toMediaItem.albumName)
+                .setAlbumArtist(this@toMediaItem.artist)
+                .setFolderType(MediaMetadata.FOLDER_TYPE_NONE)
+                .build()
+        )
+        .setMediaId(parentId.buildUpon().appendPath(this@toMediaItem.id.toString()).toString())
+        .setUri(this.musicUrl)
+        .build()
+}
+@SuppressLint("UnsafeOptInUsageError")
 fun NetSheet.toMediaItem(parentId: Uri) =
     MediaItem.Builder()
-        .setMetadata(
-            MediaMetadata.Builder().apply {
-                id = parentId.buildUpon().appendPath(this@toMediaItem.id.toString()).toString()
-                albumArtUri = this@toMediaItem.sheetImg
-                title = this@toMediaItem.sheetName
-            }.build()
+        .setMediaMetadata(
+            MediaMetadata.Builder()
+                .setTitle(this@toMediaItem.sheetName)
+                .setIsPlayable(false)
+                .setFolderType(MediaMetadata.FOLDER_TYPE_PLAYLISTS)
+                .setArtworkUri(Uri.parse(this.sheetImg))
+                .build()
         )
+        .setMediaId(parentId.buildUpon().appendPath(this@toMediaItem.id.toString()).toString())
         .build()
 
 /**

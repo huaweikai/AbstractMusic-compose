@@ -62,7 +62,12 @@ dependencies {
     implementation AndroidX.media3_session
     implementation AndroidX.media3_exoplayer
     implementation AndroidX.media3_ui
+    implementation AndroidX.media3_common
     implementation AndroidX.media_okhttp_datasource
+
+//    implementation AndroidX.media2_player
+//    implementation AndroidX.media2_session
+//    implementation AndroidX.media2_widget
 
     implementation AndroidX.room_runtime
     kapt AndroidX.room_compiler

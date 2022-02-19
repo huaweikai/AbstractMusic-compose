@@ -1,7 +1,7 @@
 package com.hua.abstractmusic.db.music
 
 import androidx.room.*
-import com.example.mediasession2demo.ui.data.SongSheet
+import com.hua.abstractmusic.bean.SongSheet
 import com.hua.abstractmusic.bean.CurrentPlayItem
 
 /**

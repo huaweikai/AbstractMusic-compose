@@ -1,16 +1,17 @@
 package com.hua.abstractmusic.use_case.sheet
 
+import android.annotation.SuppressLint
 import android.net.Uri
-import androidx.media2.common.MediaItem
-import androidx.media2.common.MediaMetadata
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import com.hua.abstractmusic.repository.Repository
-import com.hua.abstractmusic.utils.*
 
 /**
  * @author : huaweikai
  * @Date   : 2021/11/27
  * @Desc   : 获取歌单具体的列表
  */
+@SuppressLint("UnsafeOptInUsageError")
 class GetSheetMusicListCase(
     private val repository: Repository
 ) {
@@ -18,24 +19,20 @@ class GetSheetMusicListCase(
         val sheets = repository.getSheet(sheetName)
         val mediaItems = mutableListOf<MediaItem>()
         sheets?.forEach {
-            val metadataBuilder = MediaMetadata.Builder().apply {
-                //由于存的时候用的所有音乐的mediaid，为了播放不冲突，取出最后一个，然后添加歌单的前缀
-                this.id = parentId.buildUpon().appendPath(it.musicId).toString()
-                this.title = it.title
-                this.displayTitle = it.displayTitle
-                this.displaySubtitle = it.displaySubtitle
-                this.album = it.album
-                this.artist = it.artist
-                this.trackCount = it.trackerNumber
-                this.mediaUri = it.mediaUri
-                this.albumArtUri = it.albumUri
-                this.displayIconUri =it.albumUri
-                this.isPlayable = true
-                this.browserType = MediaMetadata.BROWSABLE_TYPE_NONE
-            }.build()
+            val mediaMetadata = MediaMetadata.Builder()
+                .setTitle(it.title)
+                .setArtist(it.artist)
+                .setArtworkUri(Uri.parse(it.albumUri))
+                .setIsPlayable(true)
+                .setAlbumTitle(it.album)
+                .setDisplayTitle(it.displayTitle)
+                .setFolderType(it.browserType)
+                .setSubtitle(it.displaySubtitle)
+                .build()
             mediaItems.add(
                 MediaItem.Builder()
-                    .setMetadata(metadataBuilder)
+                    .setMediaId(parentId.buildUpon().appendPath(it.musicId).toString())
+                    .setMediaMetadata(mediaMetadata)
                     .build()
             )
         }

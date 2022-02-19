@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.ui.home.net
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -37,7 +38,8 @@ import com.hua.abstractmusic.ui.LocalNetViewModel
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.*
 import com.hua.abstractmusic.ui.viewmodels.NetViewModel
-import com.hua.abstractmusic.utils.*
+import com.hua.abstractmusic.utils.ComposeUtils
+import com.hua.abstractmusic.utils.PaletteUtils
 
 
 /**
@@ -46,6 +48,7 @@ import com.hua.abstractmusic.utils.*
  * @Desc   : 在线音乐的screen
  */
 @OptIn(ExperimentalPagerApi::class)
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun NetScreen(
     navHostController: NavHostController = LocalHomeNavController.current,
@@ -73,6 +76,7 @@ fun NetScreen(
 }
 
 @ExperimentalPagerApi
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 private fun SuccessContent(
     navHostController: NavHostController = LocalHomeNavController.current,
@@ -85,7 +89,7 @@ private fun SuccessContent(
     ) {
         HorizontalBanner(
             netViewModel.bannerList.value.map {
-                it.mediaItem.metadata?.albumArtUri
+                it.mediaItem.mediaMetadata.artworkUri
             }
         ) {
 
@@ -126,7 +130,7 @@ private fun SuccessContent(
     }
 }
 
-
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 private fun RecommendItem(list: List<MediaData>, page: Int) {
     Column(
@@ -135,7 +139,7 @@ private fun RecommendItem(list: List<MediaData>, page: Int) {
         verticalArrangement = Arrangement.Center
     ) {
         repeat(3) {
-            val data = list[page * 3 + it].mediaItem.metadata
+            val data = list[page * 3 + it].mediaItem.mediaMetadata
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -143,7 +147,7 @@ private fun RecommendItem(list: List<MediaData>, page: Int) {
             ) {
                 ArtImage(
                     modifier = Modifier.size(60.dp),
-                    uri = data?.albumArtUri,
+                    uri = data.artworkUri,
                     desc = "歌单图",
                     transformation = RoundedCornersTransformation(10f)
                 )
@@ -177,6 +181,7 @@ private fun Glide(
     Spacer(modifier = Modifier.height(10.dp))
 }
 
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 private fun NewItems(
     list: List<MediaData>,
@@ -192,7 +197,7 @@ private fun NewItems(
                 mutableStateOf(Color.Gray)
             }
             LaunchedEffect(Unit) {
-                val bitmap = composeUtils.coilToBitmap(item.mediaItem.metadata?.albumArtUri)
+                val bitmap = composeUtils.coilToBitmap(item.mediaItem.mediaMetadata.artworkUri)
                 val pair =
                     PaletteUtils.resolveBitmap(false, bitmap, context.getColor(R.color.black))
                 background.value = Color(pair.first)
@@ -216,7 +221,7 @@ private fun NewItems(
                         modifier = Modifier
                             .fillMaxHeight(0.9f)
                             .aspectRatio(1f),
-                        uri = item.mediaItem.metadata?.albumArtUri,
+                        uri = item.mediaItem.mediaMetadata.artworkUri,
                         desc = "",
                         transformation = RoundedCornersTransformation(10f)
                     )
@@ -235,7 +240,7 @@ private fun NewItems(
                     }
                 }
                 Spacer(modifier = Modifier.height(3.dp))
-                Text(text = "${item.mediaItem.metadata?.title}")
+                Text(text = "${item.mediaItem.mediaMetadata.title}")
             }
             Spacer(modifier = Modifier.width(5.dp))
         }

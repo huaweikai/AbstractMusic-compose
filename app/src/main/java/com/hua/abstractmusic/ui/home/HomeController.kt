@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.ui.home
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.BottomNavigation
@@ -22,7 +23,6 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
-import androidx.media2.common.SessionPlayer
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -41,9 +41,6 @@ import com.hua.abstractmusic.ui.play.detail.ControllerItem
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
-import com.hua.abstractmusic.utils.albumArtUri
-import com.hua.abstractmusic.utils.artist
-import com.hua.abstractmusic.utils.title
 
 
 /**
@@ -71,6 +68,7 @@ fun HomeController(
 }
 
 @ExperimentalPagerApi
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun Controller(
     playListClick: () -> Unit,
@@ -115,7 +113,7 @@ fun Controller(
                 .isTouch(isTouch),
             verticalAlignment = CenterVertically
         ) { page ->
-            val item = viewModel.currentPlayList.value[page].mediaItem.metadata
+            val item = viewModel.currentPlayList.value[page].mediaItem.mediaMetadata
             Row(
                 Modifier.fillMaxSize(),
                 verticalAlignment = Alignment.CenterVertically
@@ -123,7 +121,7 @@ fun Controller(
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .apply {
-                            data(item?.albumArtUri)
+                            data(item.artworkUri)
                             error(R.drawable.music)
                             transformations(RoundedCornersTransformation(10f))
                         }
@@ -138,8 +136,8 @@ fun Controller(
                     verticalArrangement = Arrangement.Center
                 ) {
                     TitleAndArtist(
-                        title = "${item?.title}",
-                        subTitle = "${item?.artist}"
+                        title = "${item.title}",
+                        subTitle = "${item.artist}"
                     )
                 }
             }
@@ -148,8 +146,9 @@ fun Controller(
             modifier = Modifier.layoutId("controller"),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val playState = viewModel.playerState.collectAsState()
             val stateIcon =
-                if (viewModel.playerState.value == SessionPlayer.PLAYER_STATE_PLAYING) {
+                if (playState.value) {
                     R.drawable.ic_pause
                 } else {
                     R.drawable.ic_play

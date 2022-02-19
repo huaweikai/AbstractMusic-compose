@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.ui.home.net.detail
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,6 +19,7 @@ import com.hua.abstractmusic.ui.viewmodels.NetViewModel
  * @Desc   :
  */
 @ExperimentalFoundationApi
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun NetDetail(
     type: String,

@@ -38,6 +38,7 @@ class MainActivity : ComponentActivity() {
         ExperimentalPagerApi::class,
         ExperimentalFoundationApi::class
     )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         //不会在系统视图下面绘制
         WindowCompat.setDecorFitsSystemWindows(window, false)

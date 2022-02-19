@@ -1,6 +1,6 @@
-package com.example.mediasession2demo.ui.data
+package com.hua.abstractmusic.bean
 
-import androidx.media2.common.MediaMetadata
+import androidx.media3.common.MediaMetadata
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -10,6 +10,7 @@ import androidx.room.PrimaryKey
  * @Desc   : 自定义歌单数据类
  *
  */
+@androidx.media3.common.util.UnstableApi
 @Entity
 data class SongSheet (
     val sheetName:String,
@@ -19,12 +20,11 @@ data class SongSheet (
     val displaySubtitle :String,
     val album :String,
     val artist:String,
-    val duration :Long,
     val trackerNumber:Long,
     val mediaUri :String,
     val albumUri :String,
     val isPlayable:Boolean = true,
-    val browserType :Long = MediaMetadata.BROWSABLE_TYPE_NONE
+    val browserType :Int = MediaMetadata.FOLDER_TYPE_NONE
 ){
    @PrimaryKey(autoGenerate = true) var id :Int = 0
 }

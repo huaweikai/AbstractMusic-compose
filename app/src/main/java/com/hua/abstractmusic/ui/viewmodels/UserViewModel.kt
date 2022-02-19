@@ -8,7 +8,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.viewModelScope
-import com.hua.abstractmusic.base.BaseBrowserViewModel
+import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.net.NetData
 import com.hua.abstractmusic.bean.user.UserBean
 import com.hua.abstractmusic.other.Constant.BUCKET_HEAD_IMG
@@ -31,6 +31,7 @@ import javax.inject.Inject
  * @Date   : 2022/01/25
  * @Desc   :
  */
+
 @HiltViewModel
 class UserViewModel @Inject constructor(
     application: Application,

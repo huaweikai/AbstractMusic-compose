@@ -18,7 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.media2.common.MediaItem
+import androidx.media3.common.MediaItem
 import androidx.navigation.NavHostController
 import coil.transform.CircleCropTransformation
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -31,8 +31,6 @@ import com.hua.abstractmusic.ui.utils.AlbumItem
 import com.hua.abstractmusic.ui.utils.ArtImage
 import com.hua.abstractmusic.ui.utils.MusicItem
 import com.hua.abstractmusic.ui.viewmodels.ArtistDetailViewModel
-import com.hua.abstractmusic.utils.albumArtUri
-import com.hua.abstractmusic.utils.title
 import kotlinx.coroutines.launch
 
 /**
@@ -40,7 +38,7 @@ import kotlinx.coroutines.launch
  * @Date   : 2022/01/19
  * @Desc   : detail
  */
-
+@androidx.media3.common.util.UnstableApi
 @ExperimentalPagerApi
 @Composable
 fun LocalArtistDetail(
@@ -49,7 +47,7 @@ fun LocalArtistDetail(
 ) {
 
     DisposableEffect(Unit) {
-        viewModel.artistId = item.metadata?.mediaId ?: ""
+        viewModel.artistId = item.mediaId
         this.onDispose {
             viewModel.releaseBrowser()
         }
@@ -67,18 +65,19 @@ fun LocalArtistDetail(
             ArtImage(
                 modifier = Modifier
                     .size(100.dp),
-                uri = item.metadata?.albumArtUri,
+                uri = item.mediaMetadata.artworkUri,
                 desc = "",
                 transformation = CircleCropTransformation()
             )
             Spacer(modifier = Modifier.padding(top = 10.dp))
-            Text(text = "${item.metadata?.title}")
+            Text(text = "${item.mediaMetadata.title}")
         }
         ArtistHorizontalPager(viewModel = viewModel)
     }
 }
 
 @ExperimentalPagerApi
+@androidx.media3.common.util.UnstableApi
 @Composable
 private fun ArtistHorizontalPager(
     viewModel: ArtistDetailViewModel,

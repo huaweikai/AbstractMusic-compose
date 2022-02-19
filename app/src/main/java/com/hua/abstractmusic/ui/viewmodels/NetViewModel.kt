@@ -1,17 +1,13 @@
 package com.hua.abstractmusic.ui.viewmodels
 
+import android.annotation.SuppressLint
 import android.app.Application
-import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.media2.common.MediaItem
-import androidx.media2.session.MediaBrowser
-import androidx.media2.session.MediaController
-import androidx.media2.session.MediaLibraryService
-import androidx.media2.session.SessionCommandGroup
-import com.hua.abstractmusic.base.BaseBrowserViewModel
+import androidx.media3.session.MediaBrowser
+import androidx.media3.session.MediaLibraryService
+import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.MediaData
-import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ALL_MUSIC_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_BANNER_ID
@@ -26,6 +22,7 @@ import javax.inject.Inject
  * @Date   : 2022/02/12
  * @Desc   :
  */
+@SuppressLint("UnsafeOptInUsageError")
 @HiltViewModel
 class NetViewModel @Inject constructor(
     application: Application,
@@ -55,6 +52,8 @@ class NetViewModel @Inject constructor(
     var recommendId: String? = null
     var albumId: String? = null
 
+
+
     override fun onMediaChildrenChanged(
         browser: MediaBrowser,
         parentId: String,
@@ -72,10 +71,7 @@ class NetViewModel @Inject constructor(
         browser.getChildren(parentId, 0, Int.MAX_VALUE, null)
     }
 
-    override fun onMediaConnected(
-        controller: MediaController,
-        allowedCommands: SessionCommandGroup
-    ) {
+    override fun onMediaConnected() {
         refresh()
     }
 }

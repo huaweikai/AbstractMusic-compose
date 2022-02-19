@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.ui.play.detail
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,11 +19,8 @@ import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.ui.LocalHomeViewModel
-import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
-import com.hua.abstractmusic.utils.albumArtUri
-import com.hua.abstractmusic.utils.artist
-import com.hua.abstractmusic.utils.title
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 
 
 /**
@@ -30,6 +28,7 @@ import com.hua.abstractmusic.utils.title
  * @Date   : 2022/01/22
  * @Desc   :
  */
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun ListScreen(
     viewModel: HomeViewModel = LocalHomeViewModel.current
@@ -62,7 +61,7 @@ fun ListScreen(
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
                             .apply {
-                                data( item.mediaItem.metadata?.albumArtUri)
+                                data( item.mediaItem.mediaMetadata.artworkUri)
                                 error(R.drawable.music)
                                 transformations(RoundedCornersTransformation(30f))
                             }
@@ -89,8 +88,8 @@ fun ListScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         TitleAndArtist(
-                            title = "${item.mediaItem.metadata?.title}",
-                            subTitle = "${item.mediaItem.metadata?.artist}"
+                            title = "${item.mediaItem.mediaMetadata.title}",
+                            subTitle = "${item.mediaItem.mediaMetadata.artist}"
                         )
                     }
                 }

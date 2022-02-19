@@ -1,24 +1,17 @@
 package com.hua.abstractmusic.ui.viewmodels
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.viewModelScope
-import androidx.media2.common.MediaItem
-import androidx.media2.session.MediaBrowser
-import androidx.media2.session.MediaController
-import androidx.media2.session.MediaLibraryService
-import androidx.media2.session.SessionCommandGroup
-import com.hua.abstractmusic.base.BaseBrowserViewModel
+import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant.ARTIST_ID
 import com.hua.abstractmusic.other.Constant.ARTIST_TO_ALBUM
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.use_case.UseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -26,6 +19,7 @@ import javax.inject.Inject
  * @Date   : 2022/01/19
  * @Desc   : view
  */
+@SuppressLint("UnsafeOptInUsageError")
 @HiltViewModel
 class ArtistDetailViewModel @Inject constructor(
     application: Application,
@@ -40,17 +34,11 @@ class ArtistDetailViewModel @Inject constructor(
             artistAlbumId = "$ARTIST_ID/${ARTIST_TO_ALBUM}/$id"
         }
 
-    override fun onMediaConnected(
-        controller: MediaController,
-        allowedCommands: SessionCommandGroup
-    ) {
+    override fun onMediaConnected() {
         localListMap[artistId!!] = _artistDetail
         localListMap[artistAlbumId!!] = _artistAlbumDetail
         playListMap[artistId!!] = _artistDetail
         refresh()
-//        listMap.keys.forEach {
-//            detailInit(it)
-//        }
     }
 
     private val _artistDetail = mutableStateOf<List<MediaData>>(emptyList())

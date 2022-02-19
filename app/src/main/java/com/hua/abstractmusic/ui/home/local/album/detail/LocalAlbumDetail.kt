@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.ui.home.local.album.detail
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -20,14 +21,13 @@ import androidx.compose.ui.text.font.FontWeight.Companion.W400
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.media2.common.MediaItem
+import androidx.media3.common.MediaItem
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.ui.utils.ArtImage
 import com.hua.abstractmusic.ui.utils.MusicItem
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.ui.viewmodels.AlbumDetailViewModel
-import com.hua.abstractmusic.utils.*
 
 
 /**
@@ -37,6 +37,7 @@ import com.hua.abstractmusic.utils.*
  */
 
 @ExperimentalFoundationApi
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun LocalAlbumDetail(
     item: MediaItem,
@@ -45,7 +46,7 @@ fun LocalAlbumDetail(
 
     DisposableEffect(Unit) {
 //        detailViewModel.initializeController()
-        detailViewModel.id = item.metadata?.id ?: ""
+        detailViewModel.id = item.mediaId
         this.onDispose {
             detailViewModel.releaseBrowser()
         }
@@ -94,6 +95,7 @@ fun LocalAlbumDetail(
 
 }
 
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 private fun AlbumDetailDesc(
     item: MediaItem
@@ -109,7 +111,7 @@ private fun AlbumDetailDesc(
             modifier = Modifier
                 .padding(start = 10.dp)
                 .size(120.dp),
-            uri = item.metadata?.albumArtUri,
+            uri = item.mediaMetadata.artworkUri,
             desc = "",
             transformation = RoundedCornersTransformation(10f)
         )
@@ -121,8 +123,8 @@ private fun AlbumDetailDesc(
             verticalArrangement = Arrangement.Center
         ) {
             TitleAndArtist(
-                title = "${item.metadata?.title}",
-                subTitle = item.metadata?.artist ?: "-",
+                title = "${item.mediaMetadata.title}",
+                subTitle = "${item.mediaMetadata.artist}",
                 titleStyle = {
                     this.copy(fontSize = 22.sp)
                 },
@@ -169,6 +171,7 @@ fun PlayIcon(
     }
 }
 
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 private fun AlbumDetailTail(
     item: MediaItem
@@ -176,15 +179,15 @@ private fun AlbumDetailTail(
     Column(
         modifier = Modifier.padding(start = 10.dp)
     ) {
-        val year = item.metadata?.year
+        val year = item.mediaMetadata.releaseYear
         val yearText = if (year != null && year > 0L) {
-            year.toDate()
+            "$year"
         } else {
             "-"
         }
         TitleAndArtist(
             title = "发行年份: $yearText",
-            subTitle = "歌曲数量: ${item.metadata?.trackCount}",
+            subTitle = "歌曲数量: ${item.mediaMetadata.trackNumber}",
             subTitleStyle = {
                 this.copy(fontWeight = W400, fontSize = 14.sp)
             },

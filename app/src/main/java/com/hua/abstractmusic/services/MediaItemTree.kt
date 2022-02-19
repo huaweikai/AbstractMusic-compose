@@ -1,14 +1,14 @@
 package com.hua.abstractmusic.services
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
-import androidx.media2.common.MediaItem
-import androidx.media2.common.MediaMetadata
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import com.google.common.collect.ImmutableList
 import com.hua.abstractmusic.other.Constant.ALBUM_ID
 import com.hua.abstractmusic.other.Constant.ALL_ID
 import com.hua.abstractmusic.other.Constant.ARTIST_ID
-import com.hua.abstractmusic.other.Constant.ARTIST_TO_ALBUM
 import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ALL_MUSIC_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ARTIST_ID
@@ -16,11 +16,6 @@ import com.hua.abstractmusic.other.Constant.NETWORK_BANNER_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_RECOMMEND_ID
 import com.hua.abstractmusic.other.Constant.ROOT_SCHEME
 import com.hua.abstractmusic.other.Constant.SHEET_ID
-import com.hua.abstractmusic.other.Constant.TYPE_LOCAL_ALBUM
-import com.hua.abstractmusic.other.Constant.TYPE_LOCAL_ARTIST
-import com.hua.abstractmusic.other.Constant.TYPE_LOCAL_ALL
-import com.hua.abstractmusic.other.Constant.TYPE_LOCAL_SHEET
-import com.hua.abstractmusic.utils.*
 
 
 /**
@@ -28,6 +23,7 @@ import com.hua.abstractmusic.utils.*
  * @Date   : 2021/11/26
  * @Desc   : mediaItem树
  */
+@SuppressLint("UnsafeOptInUsageError")
 class MediaItemTree(
     private val context: Context,
     private val scanner: MediaStoreScanner
@@ -49,13 +45,13 @@ class MediaItemTree(
         list.forEach {
             treeNodes[it] = MediaItemNode(
                 MediaItem.Builder()
-                    .setMetadata(
-                        MediaMetadata.Builder().apply {
-                            id = it
-                            isPlayable = false
-                            browserType = MediaMetadata.BROWSABLE_TYPE_MIXED
-                        }.build()
+                    .setMediaMetadata(
+                        MediaMetadata.Builder()
+                            .setIsPlayable(false)
+                            .setFolderType(MediaMetadata.FOLDER_TYPE_MIXED)
+                            .build()
                     )
+                    .setMediaId(it)
                     .build()
             )
             if (it != ROOT_SCHEME) {
@@ -113,7 +109,7 @@ class MediaItemTree(
         val parentId = mediaId.substring(0, parentIndex - 1)
         val children = treeNodes[parentId]?.getChildren() ?: return null
         return children.find {
-            it.metadata?.mediaId == mediaId
+            it.mediaId == mediaId
         }
     }
 

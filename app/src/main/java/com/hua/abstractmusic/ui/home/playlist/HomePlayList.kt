@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.ui.home.playlist
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -26,8 +27,6 @@ import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
-import com.hua.abstractmusic.utils.artist
-import com.hua.abstractmusic.utils.title
 
 
 /**
@@ -37,6 +36,7 @@ import com.hua.abstractmusic.utils.title
  */
 
 @ExperimentalMaterialApi
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun HomePlayList(
     playListState: ModalBottomSheetState,
@@ -93,10 +93,10 @@ fun HomePlayList(
                                 )
                             ) {
                                 withStyle(style = SpanStyle(fontSize = 20.sp)) {
-                                    append("${item.mediaItem.metadata?.title} - ")
+                                    append("${item.mediaItem.mediaMetadata.title} - ")
                                 }
                                 withStyle(style = SpanStyle(fontSize = 15.sp)) {
-                                    append("${item.mediaItem.metadata?.artist}")
+                                    append("${item.mediaItem.mediaMetadata.artist}")
                                 }
                             }
                         }

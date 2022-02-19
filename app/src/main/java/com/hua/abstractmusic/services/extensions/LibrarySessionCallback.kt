@@ -1,11 +1,17 @@
 package com.hua.abstractmusic.services.extensions
 
-import android.net.Uri
-import android.os.Bundle
-import androidx.media2.common.MediaItem
-import androidx.media2.common.Rating
-import androidx.media2.session.*
-import com.google.android.exoplayer2.ext.media2.SessionCallbackBuilder
+import android.annotation.SuppressLint
+import androidx.media3.common.MediaItem
+import androidx.media3.session.LibraryResult
+import androidx.media3.session.MediaLibraryService
+import androidx.media3.session.MediaSession
+import com.google.common.collect.ImmutableList
+import com.google.common.util.concurrent.Futures
+import com.google.common.util.concurrent.ListenableFuture
+import com.hua.abstractmusic.services.MediaItemTree
+import com.hua.abstractmusic.utils.isLocal
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /**
  * @author Xiaoc
@@ -13,158 +19,69 @@ import com.google.android.exoplayer2.ext.media2.SessionCallbackBuilder
  *
  * 用于构建[MediaLibraryService.MediaLibrarySession]的回调扩展
  */
+@SuppressLint("UnsafeOptInUsageError")
 class LibrarySessionCallback(
-    sessionCallbackBuilder: SessionCallbackBuilder,
-    private val libraryItemProvider: LibraryItemProvider,
-): MediaLibraryService.MediaLibrarySession.MediaLibrarySessionCallback() {
-
-    private val sessionCallback = sessionCallbackBuilder.build()
-
+    private val itemTree: MediaItemTree,
+    private val scope: CoroutineScope
+) : MediaLibraryService.MediaLibrarySession.MediaLibrarySessionCallback {
     override fun onGetLibraryRoot(
         session: MediaLibraryService.MediaLibrarySession,
-        controller: MediaSession.ControllerInfo,
+        browser: MediaSession.ControllerInfo,
         params: MediaLibraryService.LibraryParams?
-    ): LibraryResult {
-        return libraryItemProvider.onGetLibraryRoot(session, controller, params)
-    }
-
-    override fun onGetChildren(
-        session: MediaLibraryService.MediaLibrarySession,
-        controller: MediaSession.ControllerInfo,
-        parentId: String,
-        page: Int,
-        pageSize: Int,
-        params: MediaLibraryService.LibraryParams?
-    ): LibraryResult {
-        return libraryItemProvider.onGetChildren(session, controller, parentId, page, pageSize, params)
+    ): ListenableFuture<LibraryResult<MediaItem>> {
+        return Futures.immediateFuture(LibraryResult.ofItem(itemTree.getRootItem(), params))
     }
 
     override fun onGetItem(
         session: MediaLibraryService.MediaLibrarySession,
-        controller: MediaSession.ControllerInfo,
+        browser: MediaSession.ControllerInfo,
         mediaId: String
-    ): LibraryResult {
-        return libraryItemProvider.onGetItem(session, controller, mediaId)
+    ): ListenableFuture<LibraryResult<MediaItem>> {
+        val item = itemTree.getItem(mediaId) ?: return Futures.immediateFuture(
+            LibraryResult.ofError(LibraryResult.RESULT_ERROR_BAD_VALUE)
+        )
+        return Futures.immediateFuture(LibraryResult.ofItem(item, null))
     }
 
-    override fun onGetSearchResult(
+    override fun onGetChildren(
         session: MediaLibraryService.MediaLibrarySession,
-        controller: MediaSession.ControllerInfo,
-        query: String,
+        browser: MediaSession.ControllerInfo,
+        parentId: String,
         page: Int,
         pageSize: Int,
         params: MediaLibraryService.LibraryParams?
-    ): LibraryResult {
-        return libraryItemProvider.onGetSearchResult(session, controller, query, page, pageSize, params)
-    }
-
-    override fun onSearch(
-        session: MediaLibraryService.MediaLibrarySession,
-        controller: MediaSession.ControllerInfo,
-        query: String,
-        params: MediaLibraryService.LibraryParams?
-    ): Int {
-        return libraryItemProvider.onSearch(session, controller, query, params)
+    ): ListenableFuture<LibraryResult<ImmutableList<MediaItem>>> {
+        if (parentId.isLocal()) {
+            val children = itemTree.getChildren(parentId)
+            return if (children == null) {
+                Futures.immediateFuture(
+                    LibraryResult.ofError(LibraryResult.RESULT_ERROR_BAD_VALUE)
+                )
+            } else {
+                Futures.immediateFuture(LibraryResult.ofItemList(children, params))
+            }
+        } else {
+            scope.launch {
+                if (itemTree.networkGetChildren(parentId).isNullOrEmpty()) {
+                    session.notifyChildrenChanged(parentId, 0, null)
+                } else {
+                    session.notifyChildrenChanged(parentId, 1, null)
+                }
+            }
+            return Futures.immediateFuture(
+                LibraryResult.ofError(LibraryResult.RESULT_ERROR_BAD_VALUE)
+            )
+        }
     }
 
     override fun onSubscribe(
         session: MediaLibraryService.MediaLibrarySession,
-        controller: MediaSession.ControllerInfo,
+        browser: MediaSession.ControllerInfo,
         parentId: String,
         params: MediaLibraryService.LibraryParams?
-    ): Int {
-        return libraryItemProvider.onSubscribe(session, controller, parentId, params)
+    ): ListenableFuture<LibraryResult<Void>> {
+        return Futures.immediateFuture(
+            LibraryResult.ofVoid()
+        )
     }
-
-    override fun onUnsubscribe(
-        session: MediaLibraryService.MediaLibrarySession,
-        controller: MediaSession.ControllerInfo,
-        parentId: String
-    ): Int {
-        return libraryItemProvider.onUnsubscribe(session, controller, parentId)
-    }
-
-    override fun onConnect(
-        session: MediaSession,
-        controller: MediaSession.ControllerInfo
-    ): SessionCommandGroup? {
-        return sessionCallback.onConnect(session,controller)
-    }
-
-    override fun onPostConnect(session: MediaSession, controller: MediaSession.ControllerInfo) {
-        return sessionCallback.onPostConnect(session,controller)
-    }
-
-    override fun onDisconnected(session: MediaSession, controller: MediaSession.ControllerInfo) {
-        return sessionCallback.onDisconnected(session,controller)
-    }
-
-    override fun onCommandRequest(
-        session: MediaSession,
-        controller: MediaSession.ControllerInfo,
-        command: SessionCommand
-    ): Int {
-        return sessionCallback.onCommandRequest(session, controller, command)
-    }
-
-    override fun onCreateMediaItem(
-        session: MediaSession,
-        controller: MediaSession.ControllerInfo,
-        mediaId: String
-    ): MediaItem? {
-        return sessionCallback.onCreateMediaItem(session, controller, mediaId)
-    }
-
-    override fun onSetRating(
-        session: MediaSession,
-        controller: MediaSession.ControllerInfo,
-        mediaId: String,
-        rating: Rating
-    ): Int {
-        return sessionCallback.onSetRating(session, controller, mediaId, rating)
-    }
-
-    override fun onSetMediaUri(
-        session: MediaSession,
-        controller: MediaSession.ControllerInfo,
-        uri: Uri,
-        extras: Bundle?
-    ): Int {
-        return sessionCallback.onSetMediaUri(session, controller, uri, extras)
-    }
-
-    override fun onCustomCommand(
-        session: MediaSession,
-        controller: MediaSession.ControllerInfo,
-        customCommand: SessionCommand,
-        args: Bundle?
-    ): SessionResult {
-        return sessionCallback.onCustomCommand(session, controller, customCommand, args)
-    }
-
-    override fun onFastForward(
-        session: MediaSession,
-        controller: MediaSession.ControllerInfo
-    ): Int {
-        return sessionCallback.onFastForward(session, controller)
-    }
-
-    override fun onRewind(session: MediaSession, controller: MediaSession.ControllerInfo): Int {
-        return sessionCallback.onRewind(session, controller)
-    }
-
-    override fun onSkipBackward(
-        session: MediaSession,
-        controller: MediaSession.ControllerInfo
-    ): Int {
-        return sessionCallback.onSkipBackward(session, controller)
-    }
-
-    override fun onSkipForward(
-        session: MediaSession,
-        controller: MediaSession.ControllerInfo
-    ): Int {
-        return sessionCallback.onSkipForward(session, controller)
-    }
-
 }

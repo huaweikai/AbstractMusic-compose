@@ -1,23 +1,19 @@
 package com.hua.abstractmusic.services
 
+import android.annotation.SuppressLint
 import android.content.ContentUris
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.provider.MediaStore
-import android.util.Log
-import androidx.media2.common.MediaItem
-import androidx.media2.common.MediaMetadata
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.other.Constant.ALBUM_ART_URI
 import com.hua.abstractmusic.other.Constant.ALBUM_ID
 import com.hua.abstractmusic.other.Constant.DURATION
 import com.hua.abstractmusic.repository.NetRepository
 import com.hua.abstractmusic.use_case.UseCase
-import com.hua.abstractmusic.utils.*
-import kotlinx.coroutines.runBlocking
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 /**
@@ -25,6 +21,7 @@ import java.util.concurrent.TimeUnit
  * @Date   : 2021/11/27
  * @Desc   : 扫描音乐和从数据库提取音乐
  */
+@SuppressLint("UnsafeOptInUsageError")
 class MediaStoreScanner(
     private val useCase: UseCase,
     private val repository: NetRepository
@@ -130,28 +127,23 @@ class MediaStoreScanner(
 
                 val musicUri =
                     ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id)
-
-                val metaDataBuilder = MediaMetadata.Builder().apply {
-                    this.id = parentId.buildUpon().appendPath(id.toString()).toString()
-                    this.title = title
-                    this.displayTitle = title
-                    this.displaySubtitle = artist
-                    this.displayDescription = album
-                    this.album = album
-                    this.artist = artist
-                    this.duration = duration
-                    this.trackNumber = track.toLong()
-                    this.mediaUri = musicUri.toString()
-                    this.isPlayable = true
-                    this.browserType = MediaMetadata.BROWSABLE_TYPE_NONE
-                }
                 val albumUri = getAlbumUri(albumId.toString())
-                metaDataBuilder.albumArtUri = albumUri
-                metaDataBuilder.displayIconUri = albumUri
-
+                val metadata = MediaMetadata.Builder()
+                    .setTitle(title)
+                    .setArtist(artist)
+                    .setDisplayTitle(title)
+                    .setAlbumTitle(album)
+                    .setDescription(album)
+                    .setTrackNumber(track)
+                    .setArtworkUri(albumUri)
+                    .setIsPlayable(true)
+                    .setFolderType(MediaMetadata.FOLDER_TYPE_NONE)
+                    .build()
                 localMusicList.add(
                     MediaItem.Builder()
-                        .setMetadata(metaDataBuilder.build())
+                        .setMediaId(parentId.buildUpon().appendPath(id.toString()).toString())
+                        .setMediaMetadata(metadata)
+                        .setUri(musicUri)
                         .build()
                 )
             }
@@ -188,27 +180,23 @@ class MediaStoreScanner(
                     continue
                 }
 
-                val metadataBuilder = MediaMetadata.Builder().apply {
-                    this.id = id
-                    this.title = albumTitle
-                    this.displayTitle = albumTitle
-                    this.displaySubtitle = artist
-                    this.displayDescription = trackNum.toString()
-                    this.album = albumTitle
-                    this.artist = artist
-                    this.trackCount = trackNum
-                    this.year = year
-                    this.isPlayable = false
-                    this.browserType = MediaMetadata.BROWSABLE_TYPE_ALBUMS
-                }
-
                 val albumUri = getAlbumUri(albumId.toString())
-                metadataBuilder.albumArtUri = albumUri
-                metadataBuilder.displayIconUri = albumUri
+                val mediaMetadata = MediaMetadata.Builder()
+                    .setArtworkUri(albumUri)
+                    .setReleaseYear(year.toInt())
+                    .setTitle(albumTitle)
+                    .setAlbumArtist(artist)
+                    .setAlbumTitle(albumTitle)
+                    .setTrackNumber(trackNum.toInt())
+                    .setIsPlayable(false)
+                    .setFolderType(MediaMetadata.FOLDER_TYPE_ALBUMS)
+                    .setArtist(artist)
+                    .build()
 
                 albumList.add(
                     MediaItem.Builder()
-                        .setMetadata(metadataBuilder.build())
+                        .setMediaId(id)
+                        .setMediaMetadata(mediaMetadata)
                         .build()
                 )
             }
@@ -260,22 +248,21 @@ class MediaStoreScanner(
                 val albumNum = it.getLong(albumNumColumn)
                 val id = parentId.buildUpon().appendPath(artistId.toString()).toString()
                 val data = scanArtistMusic(context, Uri.parse(id))
-                val albumArtUri = data[0].metadata?.albumArtUri
+                val albumArtUri = data[0].mediaMetadata.artworkUri
                 val trackNum = data.size
-                val metadataBuilder = MediaMetadata.Builder().apply {
-                    this.id = id
-                    this.title = artistName
-                    this.displaySubtitle = albumNum.toString()
-                    this.displayDescription = trackNum.toString()
-                    this.albumArtUri = albumArtUri.toString()
-                    this.trackCount = data.size.toLong()
-                    this.trackNumber = albumNum
-                    this.isPlayable = false
-                    this.browserType = MediaMetadata.BROWSABLE_TYPE_MIXED
-                }
+                val metadata = MediaMetadata.Builder()
+                    .setTitle(artistName)
+                    .setSubtitle(albumNum.toString())
+                    .setTrackNumber(trackNum)
+                    .setDiscNumber(albumNum.toInt())
+                    .setArtworkUri(albumArtUri)
+                    .setIsPlayable(false)
+                    .setFolderType((MediaMetadata.FOLDER_TYPE_ARTISTS))
+                    .build()
                 localArtists.add(
                     MediaItem.Builder()
-                        .setMetadata(metadataBuilder.build())
+                        .setMediaId(id)
+                        .setMediaMetadata(metadata)
                         .build()
                 )
             }
@@ -312,12 +299,12 @@ class MediaStoreScanner(
         return useCase.getCurrentListCase()
     }
 
-    private fun getAlbumUri(albumId: String): String {
+    private fun getAlbumUri(albumId: String): Uri {
         val artworkUri = Uri.parse(ALBUM_ART_URI)
-        return Uri.withAppendedPath(artworkUri, albumId).toString()
+        return Uri.withAppendedPath(artworkUri, albumId)
     }
 
-    fun selectLocalList(context: Context,parentId: String):List<MediaItem>?{
+    fun selectLocalList(context: Context, parentId: String): List<MediaItem>? {
         //把之前的逻辑删了，并且把addchild换成setChild，
         // 目的是请求一次都是新的数据,网络请求也可以刷新获取新的，不然只会把第一次请求的返回去
         val parentIdUri = Uri.parse(parentId)

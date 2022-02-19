@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.ui.navigation
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
@@ -28,6 +29,7 @@ import com.hua.abstractmusic.ui.splash.SplashScreen
 @ExperimentalPagerApi
 @ExperimentalFoundationApi
 @ExperimentalMaterialApi
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun AppNavigation(
     appNavController:NavHostController = LocalAppNavController.current

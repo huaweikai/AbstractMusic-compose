@@ -4,7 +4,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
-import androidx.media2.common.MediaItem
+import androidx.media3.common.MediaItem
 import androidx.navigation.NavHostController
 import com.hua.abstractmusic.ui.utils.WindowSize
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel

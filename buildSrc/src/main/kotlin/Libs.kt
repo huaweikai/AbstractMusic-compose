@@ -4,6 +4,7 @@ import Version.compose_version
 import Version.hilt_compose_version
 import Version.hilt_version
 import Version.lifecycle_version
+import Version.media2_version
 import Version.media3_version
 import Version.mmkv_version
 import Version.retrofit_version
@@ -77,13 +78,14 @@ object AndroidX {
     const val activity = "androidx.activity:activity-ktx:1.4.0"
     const val activity_ktx = "androidx.activity:activity:1.4.0"
 
-//        const val media2_session = "androidx.media2:media2-session:$media2_version"
-//        const val media2_widget = "androidx.media2:media2-widget:$media2_version"
-//        const val media2_player = "androidx.media2:media2-player:$media2_version"
+    const val media2_session = "androidx.media2:media2-session:$media2_version"
+    const val media2_widget = "androidx.media2:media2-widget:$media2_version"
+    const val media2_player = "androidx.media2:media2-player:$media2_version"
 
     const val media3_session = "androidx.media3:media3-exoplayer:$media3_version"
     const val media3_exoplayer = "androidx.media3:media3-session:$media3_version"
     const val media3_ui = "androidx.media3:media3-ui:$media3_version"
+    const val media3_common = "androidx.media3:media3-common:$media3_version"
     const val media_okhttp_datasource = "androidx.media3:media3-datasource-okhttp:$media3_version"
 
 

@@ -1,11 +1,10 @@
 package com.hua.abstractmusic.ui.viewmodels
 
+import android.annotation.SuppressLint
 import android.app.Application
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.media2.session.MediaController
-import androidx.media2.session.SessionCommandGroup
-import com.hua.abstractmusic.base.BaseBrowserViewModel
+import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.use_case.UseCase
@@ -17,6 +16,7 @@ import javax.inject.Inject
  * @Date   : 2022/01/13
  * @Desc   : viewmodel
  */
+@SuppressLint("UnsafeOptInUsageError")
 @HiltViewModel
 class AlbumDetailViewModel @Inject constructor(
     application: Application,
@@ -24,10 +24,7 @@ class AlbumDetailViewModel @Inject constructor(
     itemTree: MediaItemTree,
 ) : BaseBrowserViewModel(application, useCase, itemTree) {
     var id: String? = null
-    override fun onMediaConnected(
-        controller: MediaController,
-        allowedCommands: SessionCommandGroup
-    ) {
+    override fun onMediaConnected() {
         localListMap[id!!] = _albumDetail
         playListMap[id!!] = _albumDetail
         refresh()

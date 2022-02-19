@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.media2.common.MediaItem
+import androidx.media3.common.MediaItem
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
@@ -29,9 +29,6 @@ import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.ui.LocalPopWindow
 import com.hua.abstractmusic.ui.LocalPopWindowItem
-import com.hua.abstractmusic.utils.albumArtUri
-import com.hua.abstractmusic.utils.artist
-import com.hua.abstractmusic.utils.title
 
 
 /**
@@ -39,6 +36,7 @@ import com.hua.abstractmusic.utils.title
  * @Date   : 2022/01/11
  * @Desc   : item
  */
+@androidx.media3.common.util.UnstableApi
 @Composable
 fun MusicItem(
     data: MediaData,
@@ -64,7 +62,7 @@ fun MusicItem(
                     bottom.linkTo(parent.bottom)
                 }
                 .size(50.dp),
-            uri = data.mediaItem.metadata?.albumArtUri!!,
+            uri = data.mediaItem.mediaMetadata.artworkUri!!,
             transformation = RoundedCornersTransformation(5f),
             desc = "专辑图"
         )
@@ -79,8 +77,8 @@ fun MusicItem(
                 }
         ) {
             TitleAndArtist(
-                title = data.mediaItem.metadata?.title ?: "",
-                subTitle = data.mediaItem.metadata?.artist ?: "<unknown>",
+                title = "${data.mediaItem.mediaMetadata.title}",
+                subTitle = "${data.mediaItem.mediaMetadata.artist}",
                 color =
                 if (data.isPlaying) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.onBackground
@@ -127,6 +125,7 @@ fun ArtImage(
     )
 }
 
+@androidx.media3.common.util.UnstableApi
 @Composable
 fun PopupWindow(
     state: MutableState<Boolean> = LocalPopWindow.current,
@@ -141,7 +140,7 @@ fun PopupWindow(
                 state.value = false
             }
         ) {
-            Text(text = "${item.metadata?.title}", modifier = Modifier.clickable {
+            Text(text = "${item.mediaMetadata.title}", modifier = Modifier.clickable {
                 state.value = false
                 addMore.value = true
             })
@@ -151,7 +150,7 @@ fun PopupWindow(
         Dialog(onDismissRequest = {
             addMore.value = false
         }) {
-            Text(text = "${item.metadata?.title},小window")
+            Text(text = "${item.mediaMetadata.title},小window")
         }
     }
 }

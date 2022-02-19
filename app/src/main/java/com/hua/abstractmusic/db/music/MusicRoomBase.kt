@@ -2,7 +2,7 @@ package com.hua.abstractmusic.db.music
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.example.mediasession2demo.ui.data.SongSheet
+import com.hua.abstractmusic.bean.SongSheet
 import com.hua.abstractmusic.bean.CurrentPlayItem
 import com.hua.abstractmusic.bean.user.UserBean
 import com.hua.abstractmusic.db.user.UserDao

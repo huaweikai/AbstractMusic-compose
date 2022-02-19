@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.ui.home
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -30,6 +31,7 @@ import com.hua.abstractmusic.ui.route.Screen
  * @Date   : 2022/01/08
  * @Desc   : 主页的actionbar
  */
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun HomeTopBar(
     label: String,

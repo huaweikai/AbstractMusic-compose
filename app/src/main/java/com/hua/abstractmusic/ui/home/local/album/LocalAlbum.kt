@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.ui.home.local.album
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,12 +15,9 @@ import androidx.compose.ui.unit.dp
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.ui.LocalHomeViewModel
-import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.utils.ArtImage
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
-import com.hua.abstractmusic.utils.albumArtUri
-import com.hua.abstractmusic.utils.artist
-import com.hua.abstractmusic.utils.title
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 
 
 /**
@@ -28,6 +26,7 @@ import com.hua.abstractmusic.utils.title
  * @Desc   : localalbum
  */
 @ExperimentalFoundationApi
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun LocalAlbum(
     viewModel: HomeViewModel = LocalHomeViewModel.current,
@@ -36,6 +35,7 @@ fun LocalAlbum(
     AlbumLazyItem(viewModel.localAlbumList.value,onClick)
 }
 @ExperimentalFoundationApi
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun AlbumLazyItem(
     list: List<MediaData>,
@@ -56,14 +56,14 @@ fun AlbumLazyItem(
                         .clickable {
                             onClick(item.mediaId)
                         },
-                    uri = item.mediaItem.metadata?.albumArtUri,
+                    uri = item.mediaItem.mediaMetadata.artworkUri,
                     transformation = RoundedCornersTransformation(40f),
                     contentScale = ContentScale.Crop,
                     desc = "专辑图"
                 )
                 TitleAndArtist(
-                    title = "${item.mediaItem.metadata?.title}",
-                    subTitle = "${item.mediaItem.metadata?.artist}",
+                    title = "${item.mediaItem.mediaMetadata.title}",
+                    subTitle = "${item.mediaItem.mediaMetadata.artist}",
                     modifier = Modifier
                         .height(20.dp)
                         .fillMaxWidth(),

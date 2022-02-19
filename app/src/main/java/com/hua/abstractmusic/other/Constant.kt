@@ -1,16 +1,16 @@
 package com.hua.abstractmusic.other
 
-import androidx.media2.common.MediaItem
-import androidx.media2.common.MediaMetadata
-import com.hua.abstractmusic.utils.albumArtUri
-import com.hua.abstractmusic.utils.artist
-import com.hua.abstractmusic.utils.title
+import android.annotation.SuppressLint
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
+
 
 /**
  * @author : huaweikai
  * @Date   : 2021/11/26
  * @Desc   : 常量类
  */
+@SuppressLint("UnsafeOptInUsageError")
 object Constant {
     const val DURATION = "duration"
     const val ALBUM_ART_URI = "content://media/external/audio/albumart"
@@ -69,14 +69,8 @@ object Constant {
     const val NOTIFICATION_CHANNEL_ID = "music_notification"
     const val NOTIFICATION_ID = 1
 
-    val NULL_MEDIA_ITEM = MediaItem.Builder().setMetadata(
-        MediaMetadata.Builder()
-            .apply {
-                title = "欢迎进入音乐的世界"
-                artist = "暂无选中歌单"
-                albumArtUri = ""
-            }.build()
-    ).build()
+    val NULL_MEDIA_ITEM = MediaItem.Builder()
+        .setMediaMetadata(MediaMetadata.EMPTY).build()
     const val CLEAR_PLAY_LIST = "clear_list"
 
     const val CURRENT_PLAY_LIST = "current_play_list"

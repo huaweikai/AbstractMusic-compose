@@ -14,16 +14,13 @@ import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.utils.ArtImage
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
-import com.hua.abstractmusic.utils.albumArtUri
-import com.hua.abstractmusic.utils.displayDescription
-import com.hua.abstractmusic.utils.title
-
 
 /**
  * @author : huaweikai
  * @Date   : 2022/01/18
  * @Desc   :
  */
+@androidx.media3.common.util.UnstableApi
 @Composable
 fun LocalArtist(
     homeViewModel: HomeViewModel = LocalHomeViewModel.current,
@@ -48,7 +45,7 @@ fun LocalArtist(
                 ArtImage(
                     modifier = Modifier
                         .size(45.dp),
-                    uri = item.mediaItem.metadata?.albumArtUri!!,
+                    uri = item.mediaItem.mediaMetadata.artworkUri,
                     transformation = CircleCropTransformation(),
                     desc = "歌手图像"
                 )
@@ -57,8 +54,8 @@ fun LocalArtist(
                     modifier = Modifier.align(Alignment.CenterVertically)
                 ) {
                     TitleAndArtist(
-                        title = "${item.mediaItem.metadata?.title}",
-                        subTitle = "${item.mediaItem.metadata?.displayDescription} 首"
+                        title = "${item.mediaItem.mediaMetadata.title}",
+                        subTitle = "${item.mediaItem.mediaMetadata.subtitle} 首"
                     )
                 }
             }

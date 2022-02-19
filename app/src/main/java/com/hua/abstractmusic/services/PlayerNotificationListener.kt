@@ -3,14 +3,14 @@ package com.hua.abstractmusic.services
 import android.app.Notification
 import android.content.Intent
 import androidx.core.content.ContextCompat
-import com.google.android.exoplayer2.offline.DownloadService.startForeground
-import com.google.android.exoplayer2.ui.PlayerNotificationManager
+import androidx.media3.session.PlayerNotificationManager
 
 /**
  * @author : huaweikai
  * @Date   : 2022/01/09
  * @Desc   : notification的监听？
  */
+@androidx.media3.common.util.UnstableApi
 class PlayerNotificationListener(
     private val musicService: PlayerService
 ): PlayerNotificationManager.NotificationListener {

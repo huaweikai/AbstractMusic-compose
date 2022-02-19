@@ -1,7 +1,8 @@
 package com.hua.abstractmusic.repository
 
+import android.annotation.SuppressLint
 import android.net.Uri
-import androidx.media2.common.MediaItem
+import androidx.media3.common.MediaItem
 import com.hua.abstractmusic.net.MusicService
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ALBUM
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ALL_MUSIC
@@ -15,6 +16,7 @@ import com.hua.abstractmusic.utils.toMediaItem
  * @Date   : 2022/01/06
  * @Desc   : 在线仓库
  */
+@SuppressLint("UnsafeOptInUsageError")
 class NetRepository(
     private val service: MusicService
 ) {
