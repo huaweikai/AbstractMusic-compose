@@ -5,11 +5,12 @@ import android.app.PendingIntent
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.support.v4.media.session.MediaSessionCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
+import androidx.media3.session.MediaSession
 import androidx.media3.session.PlayerNotificationManager
-import androidx.media3.session.SessionToken
 import coil.ImageLoader
 import coil.request.ImageRequest
 import com.hua.abstractmusic.R
@@ -25,7 +26,7 @@ import com.hua.abstractmusic.other.Constant.NOTIFICATION_ID
 @SuppressLint("UnsafeOptInUsageError")
 class MusicNotificationManager(
     private val context: Context,
-    sessionToken: SessionToken,
+    mediaSession: MediaSession,
     notificationListener: PlayerNotificationManager.NotificationListener
 ) {
     private val notificationManager: PlayerNotificationManager
@@ -36,7 +37,7 @@ class MusicNotificationManager(
 
     init {
         val mediaControllerCompat =
-            MediaController.Builder(context, sessionToken).buildAsync().get()
+            MediaController.Builder(context, mediaSession.token).buildAsync().get()
         notificationManager = PlayerNotificationManager.Builder(
             context,
             NOTIFICATION_ID,
@@ -50,6 +51,7 @@ class MusicNotificationManager(
             setPreviousActionIconResourceId(R.drawable.ic_play_prev)
             setSmallIconResourceId(R.drawable.music)
         }.build().apply {
+            setMediaSessionToken(mediaSession.sessionCompatToken as MediaSessionCompat.Token)
             setUseFastForwardAction(false)
             setUseRewindAction(false)
         }

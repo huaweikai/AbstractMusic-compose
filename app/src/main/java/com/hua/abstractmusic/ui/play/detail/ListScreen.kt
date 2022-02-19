@@ -53,7 +53,7 @@ fun ListScreen(
                             shape = RoundedCornerShape(8.dp)
                         )
                         .clickable {
-                            viewModel.skipTo(index)
+                            viewModel.skipTo(index,true)
                         }
                         .height(80.dp)
                 ) {

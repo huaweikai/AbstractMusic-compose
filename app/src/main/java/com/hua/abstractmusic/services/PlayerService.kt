@@ -47,7 +47,7 @@ class PlayerService : MediaLibraryService() {
     private val mmkv = MMKV.mmkvWithID(LASTMEDIA)
 
 
-    //    private lateinit var notificationManager: MusicNotificationManager
+    private lateinit var notificationManager: MusicNotificationManager
     var isForegroundService = false
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? {
@@ -91,12 +91,12 @@ class PlayerService : MediaLibraryService() {
             .build()
 
 
-        //生成自定义的通知管理
-//        notificationManager = MusicNotificationManager(
-//            this,
-//            mediaLibrarySession.token,
-//            PlayerNotificationListener(this)
-//        )
+//        生成自定义的通知管理
+        notificationManager = MusicNotificationManager(
+            this,
+            mediaLibrarySession,
+            PlayerNotificationListener(this)
+        )
 
         serviceScope.launch(Dispatchers.IO) {
             val index = mmkv.decodeInt(LASTMEDIAINDEX, 0)
@@ -104,20 +104,18 @@ class PlayerService : MediaLibraryService() {
             if (list.isNotEmpty()) {
                 withContext(Dispatchers.Main) {
                     mediaLibrarySession.player.setMediaItems(list, index, 0)
+                    mediaLibrarySession.player.prepare()
                 }
-
             }
         }
     }
 
-//    override fun onUpdateNotification(session: MediaSession): MediaNotification? {
-//        return null
-//    }
 
     override fun onDestroy() {
         super.onDestroy()
         mediaLibrarySession.player.release()
         mediaLibrarySession.release()
+        serviceScope.cancel()
     }
 
 
@@ -131,18 +129,22 @@ class PlayerService : MediaLibraryService() {
         }
     }
 
+    override fun onUpdateNotification(session: MediaSession): MediaNotification? {
+        return null
+    }
+
     private inner class PlayerListener : Player.Listener {
-//        override fun onPlaybackStateChanged(playbackState: Int) {
-//            when (playbackState) {
-//                Player.STATE_BUFFERING,
-//                Player.STATE_READY -> {
-//                    notificationManager.showNotification(exoplayer)
-//                }
-//                else -> {
-//                    notificationManager.hideNotification()
-//                }
-//            }
-//        }
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            when (playbackState) {
+                Player.STATE_BUFFERING,
+                Player.STATE_READY -> {
+                    notificationManager.showNotification(exoplayer)
+                }
+                else -> {
+                    notificationManager.hideNotification()
+                }
+            }
+        }
 
         override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
             if (!playWhenReady) {

@@ -15,7 +15,7 @@ import com.hua.abstractmusic.repository.Repository
 class GetCurrentListCase(
     private val repository: Repository
 ) {
-    suspend operator fun invoke(): List<MediaItem> {
+     suspend operator fun invoke(): List<MediaItem> {
         val playList = arrayListOf<MediaItem>()
         val currentPlaylist = repository.getLastPlayList()
         currentPlaylist?.let {

@@ -30,21 +30,34 @@ fun LocalMusic(
 @Composable
 fun MusicLazyItems(
     list: List<MediaData>,
-    state: MutableState<Boolean> = LocalPopWindow.current,
     onclick: (Int) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxWidth()
     ) {
-        itemsIndexed(list, key = { _, item ->
-            item.mediaId
-        }) { index, item ->
-            MusicItem(
-                data = item,
-                onClick = {
-                    onclick(index)
-                }
-            )
-        }
+        items(
+            count = list.size,
+            key = {
+                list[it].mediaId
+            },
+            itemContent = { index->
+                MusicItem(
+                    data = list[index],
+                    onClick = {
+                        onclick(index)
+                    }
+                )
+            }
+        )
+//        itemsIndexed(list, key = { _, item ->
+//            item.mediaId
+//        }) { index, item ->
+//            MusicItem(
+//                data = item,
+//                onClick = {
+//                    onclick(index)
+//                }
+//            )
+//        }
     }
 }

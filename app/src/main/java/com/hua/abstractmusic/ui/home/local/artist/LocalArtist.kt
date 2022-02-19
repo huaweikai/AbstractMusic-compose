@@ -55,7 +55,7 @@ fun LocalArtist(
                 ) {
                     TitleAndArtist(
                         title = "${item.mediaItem.mediaMetadata.title}",
-                        subTitle = "${item.mediaItem.mediaMetadata.subtitle} 首"
+                        subTitle = "${item.mediaItem.mediaMetadata.trackNumber} 首"
                     )
                 }
             }

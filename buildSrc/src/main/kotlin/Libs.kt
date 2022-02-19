@@ -32,7 +32,7 @@ object Google {
 
 object Compose {
     const val compose_ui = "androidx.compose.ui:ui:${compose_version}"
-    const val compose_material = "androidx.compose.material:material:$compose_version"
+    const val compose_material = "androidx.compose.material:material:1.2.0-alpha01"
     const val compose_ui_tool_preview = "androidx.compose.ui:ui-tooling-preview:$compose_version"
     const val compose_activity =
         "androidx.activity:activity-compose:${Version.activity_compose_version}"
@@ -42,12 +42,13 @@ object Compose {
 
     const val compose_hilt_navigation =
         "androidx.hilt:hilt-navigation-compose:$hilt_compose_version"
+
     const val compose_systemuiController =
-        "com.google.accompanist:accompanist-systemuicontroller:0.22.0-rc"
+        "com.google.accompanist:accompanist-systemuicontroller:0.20.3"
     const val compose_pager = "com.google.accompanist:accompanist-pager:0.20.3"
     const val compose_pager_indicator = "com.google.accompanist:accompanist-pager-indicators:0.20.3"
-    const val compose_insets = "com.google.accompanist:accompanist-insets:0.22.0-rc"
-    const val compose_swipeRefresh = "com.google.accompanist:accompanist-swiperefresh:0.24.2-alpha"
+    const val compose_insets = "com.google.accompanist:accompanist-insets:0.20.3"
+    const val compose_swipeRefresh = "com.google.accompanist:accompanist-swiperefresh:0.20.3"
     const val compose_constraintlayout = "androidx.constraintlayout:constraintlayout-compose:1.0.0"
 
 }
@@ -81,6 +82,8 @@ object AndroidX {
     const val media2_session = "androidx.media2:media2-session:$media2_version"
     const val media2_widget = "androidx.media2:media2-widget:$media2_version"
     const val media2_player = "androidx.media2:media2-player:$media2_version"
+
+    const val media1 = "androidx.media:media:1.5.0"
 
     const val media3_session = "androidx.media3:media3-exoplayer:$media3_version"
     const val media3_exoplayer = "androidx.media3:media3-session:$media3_version"

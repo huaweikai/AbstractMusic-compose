@@ -31,16 +31,20 @@ import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.bean.ui.home.BottomBarBean
 import com.hua.abstractmusic.bean.ui.home.IconBean
+import com.hua.abstractmusic.other.Constant.LASTMEDIA
+import com.hua.abstractmusic.other.Constant.LASTMEDIAINDEX
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.play.detail.ControllerItem
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
+import com.tencent.mmkv.MMKV
 
 
 /**
@@ -80,20 +84,23 @@ fun Controller(
     val isTouch = remember{
         mutableStateOf(false)
     }
+    val mmkv = MMKV.mmkvWithID(LASTMEDIA)
+    val pagerState = rememberPagerState(mmkv.decodeInt(LASTMEDIAINDEX,0))
 
     LaunchedEffect(viewModel.currentItem.value) {
-        if(!isTouch.value){
+//        if(!isTouch.value){
             val index = viewModel.currentPlayList.value.indexOf(
                 MediaData(viewModel.currentItem.value, true)
             )
-            viewModel.currentPager.scrollToPage(if (index < 0) 0 else index)
-        }
-        isTouch.value = false
+            pagerState.scrollToPage(if (index < 0) 0 else index)
+//        }
+//        isTouch.value = false
     }
-    LaunchedEffect(viewModel.currentPager.currentPage) {
-        if(isTouch.value){
-            viewModel.skipTo(viewModel.currentPager.currentPage,true)
-        }
+    LaunchedEffect(pagerState.currentPage) {
+//        if(isTouch.value){
+            viewModel.skipTo(pagerState.currentPage,true)
+//        }
+//        isTouch.value = false
     }
 
     ConstraintLayout(
@@ -106,7 +113,7 @@ fun Controller(
         constraintSet = controllerConstrains(8.dp)
     ) {
         HorizontalPager(
-            state = viewModel.currentPager,
+            state = pagerState,
             count = viewModel.currentPlayList.value.size,
             modifier = Modifier
                 .layoutId("pager")

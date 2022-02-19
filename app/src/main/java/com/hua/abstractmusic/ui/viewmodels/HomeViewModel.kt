@@ -11,10 +11,8 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.PagerState
 import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.MediaData
-import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.other.Constant.ALBUM_ID
 import com.hua.abstractmusic.other.Constant.ALL_ID
 import com.hua.abstractmusic.other.Constant.ARTIST_ID
@@ -58,7 +56,6 @@ class HomeViewModel @Inject constructor(
     val localArtistList: State<List<MediaData>> get() = _localArtistList
 
     val mmkv = MMKV.mmkvWithID(LASTMEDIA)
-    val currentPager: PagerState
 
     init {
         localListMap[ALL_ID] = _localMusicList
@@ -67,7 +64,6 @@ class HomeViewModel @Inject constructor(
 
 //        playListMap[CURRENT_PLAY_LIST] = _currentPlayList
         playListMap[ALL_ID] = _localMusicList
-        currentPager = PagerState(mmkv.decodeInt(Constant.LASTMEDIAINDEX, 0))
     }
 
     private val _playerState = MutableStateFlow(false)

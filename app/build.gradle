@@ -43,8 +43,14 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion Version.compose_version
-        kotlinCompilerVersion Version.kotlin_version
     }
+//    buildscript{
+//
+//    }
+//    composeOptions {
+//        kotlinCompilerExtensionVersion Version.compose_version
+//        kotlinCompilerVersion Version.kotlin_version
+//    }
     packagingOptions {
         resources {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
@@ -64,10 +70,7 @@ dependencies {
     implementation AndroidX.media3_ui
     implementation AndroidX.media3_common
     implementation AndroidX.media_okhttp_datasource
-
-//    implementation AndroidX.media2_player
-//    implementation AndroidX.media2_session
-//    implementation AndroidX.media2_widget
+    implementation AndroidX.media1
 
     implementation AndroidX.room_runtime
     kapt AndroidX.room_compiler

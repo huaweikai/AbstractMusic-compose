@@ -252,7 +252,6 @@ class MediaStoreScanner(
                 val trackNum = data.size
                 val metadata = MediaMetadata.Builder()
                     .setTitle(artistName)
-                    .setSubtitle(albumNum.toString())
                     .setTrackNumber(trackNum)
                     .setDiscNumber(albumNum.toInt())
                     .setArtworkUri(albumArtUri)

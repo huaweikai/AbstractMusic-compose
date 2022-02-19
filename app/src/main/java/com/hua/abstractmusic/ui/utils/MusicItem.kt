@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.ui.utils
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -125,7 +126,7 @@ fun ArtImage(
     )
 }
 
-@androidx.media3.common.util.UnstableApi
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun PopupWindow(
     state: MutableState<Boolean> = LocalPopWindow.current,

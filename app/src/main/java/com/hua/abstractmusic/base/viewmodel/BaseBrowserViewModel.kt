@@ -85,8 +85,12 @@ abstract class BaseBrowserViewModel(
             onMediaPlayBackStateChange(playbackState)
         }
 
-        override fun onIsPlayingChanged(isPlaying: Boolean) {
-            onMediaPlayerStateChanged(isPlaying)
+//        override fun onIsPlayingChanged(isPlaying: Boolean) {
+//            onMediaPlayerStateChanged(isPlaying)
+//        }
+
+        override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+            onMediaPlayerStateChanged(playWhenReady)
         }
 
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
@@ -233,6 +237,7 @@ abstract class BaseBrowserViewModel(
         val browser = browser ?: return
         if (browser.currentMediaItemIndex != position) {
             browser.seekTo(position, 0L)
+            browser.prepare()
             if (autoPlay) browser.play()
         }
     }
