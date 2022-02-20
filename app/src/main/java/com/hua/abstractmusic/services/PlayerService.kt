@@ -8,8 +8,11 @@ import android.os.Build
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.MediaBrowser
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
+import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.MoreExecutors
 import com.hua.abstractmusic.other.Constant.LASTMEDIA
 import com.hua.abstractmusic.other.Constant.LASTMEDIAINDEX
 import com.hua.abstractmusic.services.extensions.LibrarySessionCallback
@@ -31,6 +34,10 @@ class PlayerService : MediaLibraryService() {
 
     //    private lateinit var player: SessionPlayerConnector
     private lateinit var mediaLibrarySession: MediaLibrarySession
+
+    private lateinit var browserFuture: ListenableFuture<MediaBrowser>
+    val browser: MediaBrowser?
+        get() = if (browserFuture.isDone) browserFuture.get() else null
 
     private val job = Job()
     private val serviceScope = CoroutineScope(Dispatchers.IO + job)
@@ -98,16 +105,28 @@ class PlayerService : MediaLibraryService() {
             PlayerNotificationListener(this)
         )
 
-        serviceScope.launch(Dispatchers.IO) {
-            val index = mmkv.decodeInt(LASTMEDIAINDEX, 0)
-            val list = useCase.getCurrentListCase()
-            if (list.isNotEmpty()) {
-                withContext(Dispatchers.Main) {
-                    mediaLibrarySession.player.setMediaItems(list, index, 0)
-                    mediaLibrarySession.player.prepare()
+        connectBrowser()
+    }
+
+    private fun connectBrowser(){
+        browserFuture = MediaBrowser.Builder(
+            this,
+            mediaLibrarySession.token
+        )
+            .buildAsync()
+        browserFuture.addListener({
+            serviceScope.launch(Dispatchers.IO) {
+                val index = mmkv.decodeInt(LASTMEDIAINDEX, 0)
+                val list = useCase.getCurrentListCase()
+                if (list.isNotEmpty()) {
+                    withContext(Dispatchers.Main) {
+                        browser?.setMediaItems(list, index, 0)
+                        browser?.prepare()
+                    }
                 }
             }
-        }
+
+        },MoreExecutors.directExecutor())
     }
 
 
@@ -115,6 +134,7 @@ class PlayerService : MediaLibraryService() {
         super.onDestroy()
         mediaLibrarySession.player.release()
         mediaLibrarySession.release()
+        MediaBrowser.releaseFuture(browserFuture)
         serviceScope.cancel()
     }
 
