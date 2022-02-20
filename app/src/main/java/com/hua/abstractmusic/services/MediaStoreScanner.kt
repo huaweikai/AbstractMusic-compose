@@ -137,6 +137,7 @@ class MediaStoreScanner(
                     .setTrackNumber(track)
                     .setArtworkUri(albumUri)
                     .setIsPlayable(true)
+                    .setMediaUri(musicUri)
                     .setFolderType(MediaMetadata.FOLDER_TYPE_NONE)
                     .build()
                 localMusicList.add(

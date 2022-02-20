@@ -108,7 +108,7 @@ class PlayerService : MediaLibraryService() {
         connectBrowser()
     }
 
-    private fun connectBrowser(){
+    private fun connectBrowser() {
         browserFuture = MediaBrowser.Builder(
             this,
             mediaLibrarySession.token
@@ -123,10 +123,10 @@ class PlayerService : MediaLibraryService() {
                         browser?.setMediaItems(list, index, 0)
                         browser?.prepare()
                     }
+
                 }
             }
-
-        },MoreExecutors.directExecutor())
+        }, MoreExecutors.directExecutor())
     }
 
 
@@ -145,7 +145,11 @@ class PlayerService : MediaLibraryService() {
             controller: MediaSession.ControllerInfo,
             mediaItem: MediaItem
         ): MediaItem {
-            return itemTree.getItem(mediaItem.mediaId) ?: mediaItem
+            return MediaItem.Builder()
+                .setMediaMetadata(mediaItem.mediaMetadata)
+                .setUri(mediaItem.mediaMetadata.mediaUri)
+                .setMediaId(mediaItem.mediaId)
+                .build()
         }
     }
 
