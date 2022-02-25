@@ -84,7 +84,7 @@ class PlayingViewModel @Inject constructor(
         maxValue.value = (browser?.duration)?.toFloat() ?: 0F
         if (browser?.currentPosition != null && browser?.currentPosition!! >= 0) {
             currentPosition.value = browser?.currentPosition!!
-            setLyricsList(browser?.currentPosition!!)
+            setLyricsItem(getStartIndex(browser?.currentPosition!!))
         } else {
             currentPosition.value = 0L
         }
@@ -151,32 +151,54 @@ class PlayingViewModel @Inject constructor(
         val browser = browser ?: return
         browser.seekTo(position)
         currentPosition.value = position
-        setLyricsList(position)
+        setLyricsItem(getStartIndex(position))
     }
 
-    fun setLyricsList(start:Long):Long{
-        val delayTime:Long = if(lyricList.value.isNotEmpty()){
-            val startIndex = lyricList.value.indexOf(
+    fun getStartIndex(position: Long): Int {
+        return if (lyricList.value.isNotEmpty()) {
+            lyricList.value.indexOf(
                 lyricList.value.findLast {
-                    it.time!! <= start
+                    it.time!! <= position
                 } ?: lyricList.value[0]
             )
+        }else{
+            0
+        }
+    }
+
+    fun setLyricsItem(startIndex:Int){
+        if(lyricList.value.isNotEmpty()){
             lyricList.value = lyricList.value.toMutableList().map {
                 it.copy(
                     isPlaying = it.time == lyricList.value[startIndex].time
                 )
             }
-            val nextIndex = if(startIndex == 0){
+        }
+    }
+
+    fun setLyricsList(startIndex: Int,start: Long): Long {
+        val delayTime: Long = if (lyricList.value.isNotEmpty()) {
+//            val startIndex = lyricList.value.indexOf(
+//                lyricList.value.findLast {
+//                    it.time!! <= start
+//                } ?: lyricList.value[0]
+//            )
+//            lyricList.value = lyricList.value.toMutableList().map {
+//                it.copy(
+//                    isPlaying = it.time == lyricList.value[startIndex].time
+//                )
+//            }
+            val nextIndex = if (startIndex == 0) {
                 1
-            }else{
+            } else {
                 startIndex + 1
             }
-            if(nextIndex >= lyricList.value.size){
+            if (nextIndex >= lyricList.value.size) {
                 Long.MAX_VALUE
-            }else{
+            } else {
                 lyricList.value[nextIndex].time!! - start
             }
-        }else{
+        } else {
             0L
         }
         return delayTime
@@ -184,9 +206,9 @@ class PlayingViewModel @Inject constructor(
 
     fun getMusicDuration(): Long {
         val browser = this.browser ?: return 0L
-        return if(browser.currentPosition < 0){
+        return if (browser.currentPosition < 0) {
             0L
-        }else{
+        } else {
             browser.currentPosition
         }
     }

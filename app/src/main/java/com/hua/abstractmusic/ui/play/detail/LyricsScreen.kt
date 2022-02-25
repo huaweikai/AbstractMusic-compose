@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.*
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
@@ -48,26 +49,24 @@ fun LyricsScreen(
 ) {
     val topGlide = configuration.screenHeightDp * 0.10
     val state = rememberLazyListState()
-    val playerState = viewModel.playerState.collectAsState()
-    LaunchedEffect(viewModel.lyricList.value, playerState.value) {
-        if (playerState.value && viewModel.lyricList.value.isNotEmpty()) {
-            while (true) {
-                val start = viewModel.getMusicDuration()
-                delay(viewModel.setLyricsList(start))
-            }
-        }
+    val isTouch = remember{
+        mutableStateOf(false)
     }
     val current = remember {
         mutableStateOf(26)
     }
-    // 定位中间
-    LaunchedEffect(key1 = viewModel.lyricList.value, block = {
-        val height = (configuration.screenHeightDp - current.value) / 2
-        val index =
-            viewModel.lyricList.value.indexOf(viewModel.lyricList.value.find { it.isPlaying })
-        state.animateScrollToItem((index + 1).coerceAtLeast(0), -height.toInt())
-    })
-
+    val height = (configuration.screenHeightDp - current.value) / 2
+    LaunchedEffect(viewModel.lyricList.value,isTouch.value) {
+        if (viewModel.lyricList.value.isNotEmpty() && !isTouch.value) {
+            while (true) {
+                val start = viewModel.getMusicDuration()
+                val startIndex = viewModel.getStartIndex(start)
+                state.animateScrollToItem((startIndex + 1).coerceAtLeast(0), -height.toInt())
+                viewModel.setLyricsItem(startIndex)
+                delay(viewModel.setLyricsList(startIndex, start))
+            }
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -100,6 +99,7 @@ fun LyricsScreen(
             Modifier
                 .fillMaxWidth()
                 .fillMaxHeight()
+                .moreClick(isTouch)
                 .graphicsLayer { alpha = 0.99F }
                 .drawWithContent {
                     val colors = listOf(
@@ -130,7 +130,6 @@ fun LyricsScreen(
         }
     }
 }
-
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -176,7 +175,7 @@ private fun LazyItemScope.LyricsItem(
                 modifier = Modifier
                     .alpha(textAlpha)
                     .fillMaxWidth(),
-                fontSize = if(current) mainTextSize * 1.2 else mainTextSize,
+                fontSize = mainTextSize,
                 textAlign = align
             )
         }
@@ -190,6 +189,28 @@ private val blackItem: (LazyListScope.() -> Unit) = {
             modifier = Modifier
                 .height(LocalConfiguration.current.screenHeightDp.dp / 2)
         ) {
+        }
+    }
+}
+
+private fun Modifier.moreClick(
+    isTouch: MutableState<Boolean>
+) = this.pointerInput(Unit) {
+    awaitPointerEventScope {
+        while (true) {
+            val event = awaitPointerEvent(PointerEventPass.Initial)
+            val dragEvent = event.changes.firstOrNull()
+            when {
+                dragEvent!!.positionChangeConsumed() -> {
+                    return@awaitPointerEventScope
+                }
+                dragEvent.changedToDownIgnoreConsumed() -> {
+                    isTouch.value = true
+                }
+                dragEvent.changedToUpIgnoreConsumed() -> {
+                    isTouch.value = false
+                }
+            }
         }
     }
 }

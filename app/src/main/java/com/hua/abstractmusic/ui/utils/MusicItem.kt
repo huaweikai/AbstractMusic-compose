@@ -115,7 +115,7 @@ fun ArtImage(
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
             .apply {
-                placeholder(R.drawable.ic_music_launcher)
+//                placeholder(R.drawable.ic_music_launcher)
                 data(uri)
                 error(R.drawable.music)
                 transformations(transformation)
