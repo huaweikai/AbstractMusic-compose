@@ -18,9 +18,9 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.R
-import com.hua.abstractmusic.ui.LocalHomeViewModel
+import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
-import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 
 
 /**
@@ -31,7 +31,7 @@ import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun ListScreen(
-    viewModel: HomeViewModel = LocalHomeViewModel.current
+    viewModel: PlayingViewModel = LocalPlayingViewModel.current
 ) {
     Column(
         modifier = Modifier
@@ -49,11 +49,11 @@ fun ListScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 8.dp)
                         .background(
-                            if(item.isPlaying) Color(0xfff2f2f2) else Color.Transparent,
+                            if (item.isPlaying) Color(0xfff2f2f2) else Color.Transparent,
                             shape = RoundedCornerShape(8.dp)
                         )
                         .clickable {
-                            viewModel.skipTo(index,true)
+                            viewModel.skipTo(index, true)
                         }
                         .height(80.dp)
                 ) {
@@ -61,7 +61,7 @@ fun ListScreen(
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
                             .apply {
-                                data( item.mediaItem.mediaMetadata.artworkUri)
+                                data(item.mediaItem.mediaMetadata.artworkUri)
                                 error(R.drawable.music)
                                 transformations(RoundedCornersTransformation(30f))
                             }

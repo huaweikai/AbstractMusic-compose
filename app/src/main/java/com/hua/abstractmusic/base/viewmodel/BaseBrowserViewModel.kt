@@ -223,11 +223,6 @@ abstract class BaseBrowserViewModel(
         }
     }
 
-    fun seekTo(position: Long) {
-        val browser = browser ?: return
-        browser.seekTo(position)
-    }
-
     fun removePlayItem(position: Int) {
         val browser = browser ?: return
         browser.removeMediaItem(position)

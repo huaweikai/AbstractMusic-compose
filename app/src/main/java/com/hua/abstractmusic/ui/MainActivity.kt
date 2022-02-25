@@ -20,7 +20,7 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hua.abstractmusic.ui.navigation.AppNavigation
 import com.hua.abstractmusic.ui.theme.AbstractMusicTheme
 import com.hua.abstractmusic.ui.utils.rememberWindowSizeClass
-import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 import com.hua.abstractmusic.utils.ComposeUtils
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -28,7 +28,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val localHomeViewModel by viewModels<HomeViewModel>()
+    private val localPlayingViewModel by viewModels<PlayingViewModel>()
 
     @Inject
     lateinit var composeUtils: ComposeUtils
@@ -58,7 +58,7 @@ class MainActivity : ComponentActivity() {
             AbstractMusicTheme {
                 CompositionLocalProvider(
                     // 可提前加载信息，不会造成空白
-                    LocalHomeViewModel provides localHomeViewModel,
+                    LocalPlayingViewModel provides localPlayingViewModel,
                     LocalAppNavController provides appNavHostController,
                     LocalScreenSize provides windowSize,
                     LocalComposeUtils provides composeUtils,

@@ -2,13 +2,10 @@ package com.hua.abstractmusic.ui.home.local.music
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.ui.LocalHomeViewModel
-import com.hua.abstractmusic.ui.LocalPopWindow
 import com.hua.abstractmusic.ui.utils.MusicItem
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 
@@ -37,9 +34,6 @@ fun MusicLazyItems(
     ) {
         items(
             count = list.size,
-            key = {
-                list[it].mediaId
-            },
             itemContent = { index->
                 MusicItem(
                     data = list[index],

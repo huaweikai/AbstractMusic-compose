@@ -39,11 +39,11 @@ import com.hua.abstractmusic.bean.ui.home.IconBean
 import com.hua.abstractmusic.other.Constant.LASTMEDIA
 import com.hua.abstractmusic.other.Constant.LASTMEDIAINDEX
 import com.hua.abstractmusic.ui.LocalHomeNavController
-import com.hua.abstractmusic.ui.LocalHomeViewModel
+import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.play.detail.ControllerItem
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
-import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 import com.tencent.mmkv.MMKV
 
 
@@ -77,7 +77,7 @@ fun HomeController(
 fun Controller(
     playListClick: () -> Unit,
     playScreenClick: () -> Unit,
-    viewModel: HomeViewModel = LocalHomeViewModel.current
+    viewModel: PlayingViewModel = LocalPlayingViewModel.current
 ) {
     val context = LocalContext.current
 
@@ -87,10 +87,10 @@ fun Controller(
     val mmkv = MMKV.mmkvWithID(LASTMEDIA)
     val pagerState = rememberPagerState(mmkv.decodeInt(LASTMEDIAINDEX,0))
 
-    LaunchedEffect(viewModel.currentItem.value) {
+    LaunchedEffect(viewModel.currentPlayItem.value) {
 //        if(!isTouch.value){
             val index = viewModel.currentPlayList.value.indexOf(
-                MediaData(viewModel.currentItem.value, true)
+                MediaData(viewModel.currentPlayItem.value, true)
             )
             pagerState.scrollToPage(if (index < 0) 0 else index)
 //        }

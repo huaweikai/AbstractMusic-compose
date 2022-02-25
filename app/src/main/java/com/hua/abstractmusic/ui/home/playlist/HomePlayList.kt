@@ -25,8 +25,8 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
-import com.hua.abstractmusic.ui.LocalHomeViewModel
-import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.LocalPlayingViewModel
+import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 
 
 /**
@@ -40,7 +40,7 @@ import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 @Composable
 fun HomePlayList(
     playListState: ModalBottomSheetState,
-    viewModel: HomeViewModel = LocalHomeViewModel.current,
+    viewModel: PlayingViewModel = LocalPlayingViewModel.current,
     content:@Composable ()->Unit
 ) {
     val scope = rememberCoroutineScope()

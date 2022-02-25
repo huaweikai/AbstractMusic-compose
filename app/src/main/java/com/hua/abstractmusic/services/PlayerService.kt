@@ -123,7 +123,6 @@ class PlayerService : MediaLibraryService() {
                         browser?.setMediaItems(list, index, 0)
                         browser?.prepare()
                     }
-
                 }
             }
         }, MoreExecutors.directExecutor())

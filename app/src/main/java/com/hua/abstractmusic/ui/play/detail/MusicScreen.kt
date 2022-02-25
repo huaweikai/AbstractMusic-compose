@@ -3,40 +3,31 @@ package com.hua.abstractmusic.ui.play.detail
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.annotation.DrawableRes
-import androidx.compose.animation.Animatable
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.TweenSpec
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.ImageLoader
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.ui.home.IconBean
-import com.hua.abstractmusic.ui.LocalComposeUtils
-import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.LocalMusicScreenSecondColor
+import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.LocalScreenSize
 import com.hua.abstractmusic.ui.utils.ArtImage
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.ui.utils.WindowSize
-import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
-import com.hua.abstractmusic.utils.ComposeUtils
-import com.hua.abstractmusic.utils.PaletteUtils
+import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 import com.hua.abstractmusic.utils.toTime
 
 /**
@@ -47,51 +38,26 @@ import com.hua.abstractmusic.utils.toTime
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun MusicScreen(
-    viewModel: HomeViewModel = LocalHomeViewModel.current,
-    composeUtils: ComposeUtils = LocalComposeUtils.current,
-    isDark: Boolean = isSystemInDarkTheme()
+    viewModel: PlayingViewModel = LocalPlayingViewModel.current,
 ) {
-    val imageLoader = ImageLoader(LocalContext.current)
-    val context = LocalContext.current
-    val firstColor = remember {
-        Animatable(Color.Black)
+
+    val windowSize = LocalScreenSize.current
+    if (windowSize == WindowSize.Expanded) {
+        HorizontalScreen()
+    } else if (windowSize == WindowSize.Compact) {
+        VerticalScreen()
     }
-    val secondColor = remember {
-        Animatable(Color.Black)
-    }
-    LaunchedEffect(viewModel.currentItem.value) {
-        val pair = PaletteUtils.resolveBitmap(
-            isDark,
-            composeUtils.coilToBitmap(viewModel.currentItem.value.mediaMetadata.artworkUri),
-            context.getColor(R.color.black)
-        )
-        firstColor.animateTo(
-            Color(pair.first),
-            animationSpec = TweenSpec(500, easing = LinearOutSlowInEasing)
-        )
-        secondColor.animateTo(Color(pair.second))
-    }
-    CompositionLocalProvider(
-        LocalContentColor provides firstColor.value,
-        LocalMusicScreenSecondColor provides secondColor.value
-    ) {
-        val windowSize = LocalScreenSize.current
-        if (windowSize == WindowSize.Expanded) {
-            HorizontalScreen()
-        } else if (windowSize == WindowSize.Compact) {
-            VerticalScreen()
-        }
-    }
+
 }
 
-@androidx.media3.common.util.UnstableApi
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 private fun VerticalScreen(
     configuration: Configuration = LocalConfiguration.current,
-    viewModel: HomeViewModel = LocalHomeViewModel.current
+    viewModel: PlayingViewModel = LocalPlayingViewModel.current
 ) {
     val topGlide = configuration.screenHeightDp * 0.15
-    val data = viewModel.currentItem.value.mediaMetadata
+    val data = viewModel.currentPlayItem.value.mediaMetadata
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -146,11 +112,11 @@ private fun VerticalScreen(
 @Composable
 private fun HorizontalScreen(
     configuration: Configuration = LocalConfiguration.current,
-    viewModel: HomeViewModel = LocalHomeViewModel.current
+    viewModel: PlayingViewModel = LocalPlayingViewModel.current
 ) {
     val screenHeight = configuration.screenHeightDp
     val startGlide = screenHeight * 0.1
-    val data = viewModel.currentItem.value.mediaMetadata
+    val data = viewModel.currentPlayItem.value.mediaMetadata
     Row(
         Modifier
             .fillMaxSize()
@@ -195,11 +161,11 @@ private fun HorizontalScreen(
 @Composable
 private fun MusicSlider(
     modifier: Modifier,
-    viewModel: HomeViewModel = LocalHomeViewModel.current
+    viewModel: PlayingViewModel = LocalPlayingViewModel.current
 ) {
     Slider(
-        value = viewModel.currentPosition.value.toFloat(),
-        valueRange = 0f..viewModel.maxValue.value,
+        value = if(viewModel.currentPosition.value.toFloat()<0) 0F else viewModel.currentPosition.value.toFloat(),
+        valueRange = 0f..if(viewModel.maxValue.value<0) 0F else viewModel.maxValue.value,
         onValueChange = {
             //点击准备改变时，先设置我已经对seekbar操作，让更新seekbar暂停。
             viewModel.actionSeekBar.value = true
@@ -223,7 +189,7 @@ private fun MusicSlider(
 @Composable
 private fun SecondText(
     modifier: Modifier,
-    viewModel: HomeViewModel = LocalHomeViewModel.current
+    viewModel: PlayingViewModel = LocalPlayingViewModel.current
 ) {
     Row(
         modifier = modifier,
@@ -258,7 +224,7 @@ private fun Mode(
 @Composable
 private fun PlayController(
     modifier: Modifier,
-    viewModel: HomeViewModel = LocalHomeViewModel.current
+    viewModel: PlayingViewModel = LocalPlayingViewModel.current
 ) {
     Row(
         modifier.width(IntrinsicSize.Min),

@@ -9,6 +9,7 @@ import androidx.navigation.NavHostController
 import com.hua.abstractmusic.ui.utils.WindowSize
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.viewmodels.NetViewModel
+import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 import com.hua.abstractmusic.ui.viewmodels.UserViewModel
 import com.hua.abstractmusic.utils.ComposeUtils
 
@@ -29,6 +30,9 @@ val LocalNetViewModel = staticCompositionLocalOf<NetViewModel>{
 
 val LocalUserViewModel = staticCompositionLocalOf<UserViewModel>{
     error("LocalUserViewModel is NULL")
+}
+val LocalPlayingViewModel = staticCompositionLocalOf<PlayingViewModel>{
+    error("LocalPlayingViewModel is NULL")
 }
 
 val LocalHomeNavController = staticCompositionLocalOf<NavHostController> {

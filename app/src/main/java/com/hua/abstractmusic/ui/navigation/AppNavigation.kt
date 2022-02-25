@@ -52,6 +52,7 @@ fun AppNavigation(
                 LocalHomeNavController provides rememberNavController(),
                 LocalNetViewModel provides hiltViewModel(),
                 LocalUserViewModel provides hiltViewModel(),
+                LocalHomeViewModel provides hiltViewModel(),
                 LocalPopWindowItem provides popItem
             ){
                 HomeScreen()

@@ -24,6 +24,7 @@ import com.hua.abstractmusic.use_case.sheet.GetSheetNameCase
 import com.hua.abstractmusic.use_case.sheet.InsertSheetCase
 import com.hua.abstractmusic.utils.ComposeUtils
 import com.hua.abstractmusic.utils.KEY
+import com.hua.taglib.TaglibLibrary
 import com.obs.services.ObsClient
 import dagger.Module
 import dagger.Provides
@@ -173,4 +174,8 @@ object AppModule {
         imageLoader: ImageLoader,
         @ApplicationContext context: Context
     ) = ComposeUtils(imageLoader, context)
+
+    @Provides
+    @Singleton
+    fun provideMediaTaglib() = TaglibLibrary()
 }

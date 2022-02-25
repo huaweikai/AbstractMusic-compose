@@ -22,13 +22,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.hua.abstractmusic.ui.LocalHomeNavController
-import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.home.playlist.HomePlayList
 import com.hua.abstractmusic.ui.navigation.HomeNavigationNav
 import com.hua.abstractmusic.ui.play.PlayScreen
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.PopupWindow
-import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import kotlinx.coroutines.launch
 
 /**
@@ -42,7 +40,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     homeNavController: NavHostController = LocalHomeNavController.current,
-    viewModel: HomeViewModel = LocalHomeViewModel.current
 ) {
 
     val scope = rememberCoroutineScope()
@@ -76,7 +73,7 @@ fun HomeScreen(
     }
 
     LaunchedEffect(sheetListState.currentValue, sheetPlayState.currentValue) {
-        sheetIsVisible.value = sheetListState.isVisible || sheetPlayState.isVisible
+        sheetIsVisible.value = sheetPlayState.isVisible || sheetListState.isVisible
     }
 
     val label = remember {
@@ -105,15 +102,8 @@ fun HomeScreen(
 //        animationSpec = spring(1f, 100f)
 //    )
 
-    BackHandler(
-        sheetIsVisible.value
-    ) {
-        val state = if (sheetListState.isVisible) sheetListState else sheetPlayState
-        scope.launch {
-            state.animateTo(ModalBottomSheetValue.Hidden)
-        }
-    }
-    PlayScreen(sheetPlayState) {
+
+    PlayScreen(state = sheetPlayState) {
         HomePlayList(sheetListState) {
             Scaffold(
                 topBar = {
@@ -155,8 +145,15 @@ fun HomeScreen(
                         .fillMaxSize()
                         .animateContentSize()
                         .padding(it)
-
                 )
+                BackHandler(
+                    sheetIsVisible.value
+                ) {
+                    val state = if (sheetListState.isVisible) sheetListState else sheetPlayState
+                    scope.launch {
+                        state.animateTo(ModalBottomSheetValue.Hidden)
+                    }
+                }
             }
         }
     }

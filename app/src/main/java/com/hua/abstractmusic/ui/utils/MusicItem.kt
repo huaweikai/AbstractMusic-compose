@@ -37,7 +37,8 @@ import com.hua.abstractmusic.ui.LocalPopWindowItem
  * @Date   : 2022/01/11
  * @Desc   : item
  */
-@androidx.media3.common.util.UnstableApi
+
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun MusicItem(
     data: MediaData,
