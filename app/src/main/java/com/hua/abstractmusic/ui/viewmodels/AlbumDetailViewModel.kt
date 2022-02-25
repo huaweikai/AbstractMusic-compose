@@ -2,7 +2,6 @@ package com.hua.abstractmusic.ui.viewmodels
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
@@ -28,7 +27,6 @@ class AlbumDetailViewModel @Inject constructor(
     override fun onMediaConnected() {
         localListMap[id!!] = _albumDetail
         playListMap[id!!] = _albumDetail
-        Log.d("TAG", "onMediaConnected: ${localListMap.keys}")
         refresh()
 //        listMap.keys.forEach {
 //            detailInit(it)

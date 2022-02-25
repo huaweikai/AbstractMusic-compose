@@ -1,7 +1,7 @@
 package com.hua.abstractmusic.utils
 
 import android.text.format.DateUtils
-import com.hua.abstractmusic.ui.play.detail.LyricsEntry
+import com.hua.abstractmusic.bean.LyricsEntry
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern

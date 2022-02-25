@@ -1,15 +1,13 @@
 package com.hua.abstractmusic.utils
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
-import coil.ImageLoader
-import coil.request.ImageRequest
-import com.hua.abstractmusic.R
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
 import com.hua.abstractmusic.other.Constant.LOCAL
-import javax.inject.Inject
 
 /**
  * @author : huaweikai
@@ -46,4 +44,10 @@ fun String.isUser() =
 fun String.isLocal():Boolean {
     val type = Uri.parse(this).authority
     return type?.startsWith(LOCAL) ?: true
+}
+val Int.textDp: TextUnit
+    @Composable get() =  this.textDp(density = LocalDensity.current)
+
+private fun Int.textDp(density: Density): TextUnit = with(density) {
+    this@textDp.dp.toSp()
 }

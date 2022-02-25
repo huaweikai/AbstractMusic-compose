@@ -7,6 +7,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -22,12 +23,13 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.transform.RoundedCornersTransformation
+import com.hua.abstractmusic.bean.LyricsEntry
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.utils.ArtImage
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
+import com.hua.abstractmusic.utils.textDp
 import kotlinx.coroutines.delay
 
 
@@ -37,17 +39,6 @@ import kotlinx.coroutines.delay
  * @Desc   :
  */
 
-
-/**
- * 歌词 Item
- *
- * @param lyricsEntry 歌词 [LyricsEntry]
- * @param current 是否为当前播放
- * @param textSize 字体大小
- * @param textColor 字体颜色
- * @param centerAlign 是否居中对齐
- * @param showSubText 是否显示翻译
- */
 
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
@@ -66,28 +57,18 @@ fun LyricsScreen(
             }
         }
     }
-
+    val current = remember {
+        mutableStateOf(26)
+    }
     // 定位中间
     LaunchedEffect(key1 = viewModel.lyricList.value, block = {
-        val height = (configuration.screenHeightDp - topGlide) / 2
+        val height = (configuration.screenHeightDp - current.value) / 2
         val index =
             viewModel.lyricList.value.indexOf(viewModel.lyricList.value.find { it.isPlaying })
         state.animateScrollToItem((index + 1).coerceAtLeast(0), -height.toInt())
     })
 
-    val current = remember {
-        mutableStateOf(18)
-    }
-    // 前后空白
-    val blackItem: (LazyListScope.() -> Unit) = {
-        item {
-            Box(
-                modifier = Modifier
-                    .height(18.dp / 2)
-            ) {
-            }
-        }
-    }
+
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -139,7 +120,7 @@ fun LyricsScreen(
                     current = lyrics.isPlaying,
                     lyricsEntry = lyrics,
                     currentTextElementHeightPxState = current,
-                    textSize = 14
+                    textSize = 22
                 )
                 {
                     viewModel.seekTo(lyrics.time ?: 0L)
@@ -150,6 +131,8 @@ fun LyricsScreen(
     }
 }
 
+
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LazyItemScope.LyricsItem(
@@ -158,12 +141,8 @@ private fun LazyItemScope.LyricsItem(
     currentTextElementHeightPxState: MutableState<Int>,
     textSize: Int,
     centerAlign: Boolean = false,
-//    showSubText: Boolean = true,
     onClick: () -> Unit
 ) {
-    // 当前歌词，若不显示翻译则只显示主句
-//    val mainLyrics = if (showSubText) lyricsEntry.lyrics else lyricsEntry.main ?: ""
-    // 当前正在播放的歌词高亮
     val textAlpha = animateFloatAsState(if (current) 1F else 0.32F).value
     // 歌词文本对齐方式，可选左 / 中
     val align = if (centerAlign) TextAlign.Center else TextAlign.Left
@@ -173,17 +152,15 @@ private fun LazyItemScope.LyricsItem(
             .fillMaxWidth()
             .onSizeChanged {
                 if (current) {
-                    // 告知当前高亮歌词 Item 高度
                     currentTextElementHeightPxState.value = it.height
                 }
             }
             .padding(0.dp, (textSize * 0.1F).dp),
-//        shape = SuperEllipseCornerShape(8.dp),
+        shape = RoundedCornerShape(8.dp),
         backgroundColor = Color.Transparent,
         elevation = 0.dp
     ) {
         val paddingY = (textSize * 0.3F).dp
-        // 这里使用 Column 是为了若以后拓展具体显示
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -193,24 +170,27 @@ private fun LazyItemScope.LyricsItem(
                 .padding(8.dp, paddingY),
             verticalArrangement = Arrangement.Center
         ) {
-            val mainTextSize = textSize.dp
+            val mainTextSize = textSize.textDp
             Text(
                 text = lyricsEntry.main,
                 modifier = Modifier
                     .alpha(textAlpha)
                     .fillMaxWidth(),
-                fontSize = mainTextSize.value.sp,
-//                color = if (current) LocalContentColor.current else LocalMusicScreenSecondColor.current,
+                fontSize = if(current) mainTextSize * 1.2 else mainTextSize,
                 textAlign = align
             )
         }
     }
 }
 
-data class LyricsEntry(
-    var isPlaying: Boolean = false,
-    val time: Long?,
-    val main: String,
-//    val lyrics :String
-)
+// 前后空白
+private val blackItem: (LazyListScope.() -> Unit) = {
+    item {
+        Box(
+            modifier = Modifier
+                .height(LocalConfiguration.current.screenHeightDp.dp / 2)
+        ) {
+        }
+    }
+}
 

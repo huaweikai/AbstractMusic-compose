@@ -22,6 +22,7 @@ object Constant {
     const val TYPE_LOCAL_LASTPLAY = "${LOCAL}_lastPlay"
     const val TYPE_LOCAL_ARTIST = "${LOCAL}_artist"
     const val ARTIST_TO_ALBUM = "abAlbum"
+
     const val ALL_ID = "${ROOT_SCHEME}${TYPE_LOCAL_ALL}"
     const val ALBUM_ID = "${ROOT_SCHEME}${TYPE_LOCAL_ALBUM}"
 

@@ -72,8 +72,8 @@ fun LocalScreen(
         HorizontalPager(
             state = pagerState,
             count = 3,
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.Top
+            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+            verticalAlignment = Alignment.Top,
         ) { page ->
             when (page) {
                 0 -> {

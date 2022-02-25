@@ -10,10 +10,10 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
+import com.hua.abstractmusic.bean.LyricsEntry
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.services.MediaItemTree
-import com.hua.abstractmusic.ui.play.detail.LyricsEntry
 import com.hua.abstractmusic.use_case.UseCase
 import com.hua.abstractmusic.utils.LyricsUtils
 import com.hua.taglib.TaglibLibrary

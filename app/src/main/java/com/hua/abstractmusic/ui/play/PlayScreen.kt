@@ -7,6 +7,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -93,7 +94,8 @@ fun PlayScreen(
                 }
             }
         },
-        sheetShape = RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp)
+        sheetShape = RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp),
+        sheetBackgroundColor = MaterialTheme.colorScheme.background
     ) {
         content()
     }

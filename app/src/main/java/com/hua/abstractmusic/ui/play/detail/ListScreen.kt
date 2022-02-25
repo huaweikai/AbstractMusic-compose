@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,7 +50,7 @@ fun ListScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 8.dp)
                         .background(
-                            if (item.isPlaying) Color(0xfff2f2f2) else Color.Transparent,
+                            if (item.isPlaying) MaterialTheme.colorScheme.onBackground.copy(alpha = 0.10f) else Color.Transparent,
                             shape = RoundedCornerShape(8.dp)
                         )
                         .clickable {

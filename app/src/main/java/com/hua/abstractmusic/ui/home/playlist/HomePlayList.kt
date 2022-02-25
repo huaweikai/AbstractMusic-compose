@@ -10,8 +10,8 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -43,7 +43,6 @@ fun HomePlayList(
     viewModel: PlayingViewModel = LocalPlayingViewModel.current,
     content:@Composable ()->Unit
 ) {
-    val scope = rememberCoroutineScope()
 
     ModalBottomSheetLayout(
         sheetState = playListState,
@@ -128,7 +127,8 @@ fun HomePlayList(
                     }
                 }
             }
-        }
+        },
+        sheetBackgroundColor = MaterialTheme.colorScheme.background
     ) {
         content()
     }

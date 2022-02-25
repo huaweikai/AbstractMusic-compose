@@ -111,6 +111,5 @@ class MusicNotificationManager(
             imageLoader.enqueue(request)
             return null
         }
-
     }
 }

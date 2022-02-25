@@ -43,15 +43,5 @@ fun MusicLazyItems(
                 )
             }
         )
-//        itemsIndexed(list, key = { _, item ->
-//            item.mediaId
-//        }) { index, item ->
-//            MusicItem(
-//                data = item,
-//                onClick = {
-//                    onclick(index)
-//                }
-//            )
-//        }
     }
 }
