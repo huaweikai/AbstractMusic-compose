@@ -3,7 +3,6 @@ package com.hua.abstractmusic.net
 import com.hua.abstractmusic.bean.net.*
 import retrofit2.http.GET
 import retrofit2.http.Path
-import retrofit2.http.Query
 
 /**
  * @author : huaweikai
@@ -40,5 +39,10 @@ interface MusicService {
     suspend fun getRecommendList(
         @Path("id")id:String
     ):NetData<List<NetMusic>>
+
+    @GET("music/{id}/lyrics")
+    suspend fun getMusicLyrics(
+        @Path("id") id :String
+    ):NetData<String>
 
 }

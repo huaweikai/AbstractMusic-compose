@@ -9,6 +9,7 @@ import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ALL_MUSIC
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ARTIST
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_BANNER
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_RECOMMEND
+import com.hua.abstractmusic.other.NetWork.SUCCESS
 import com.hua.abstractmusic.utils.toMediaItem
 
 /**
@@ -87,6 +88,19 @@ class NetRepository(
             result
         } catch (e: Exception) {
             emptyList()
+        }
+    }
+
+    suspend fun selectLyrics(id: String): String? {
+        return try {
+            val result = service.getMusicLyrics(id)
+            if (result.code != SUCCESS) {
+                ""
+            } else {
+                result.data
+            }
+        } catch (e: Exception) {
+            ""
         }
     }
 }

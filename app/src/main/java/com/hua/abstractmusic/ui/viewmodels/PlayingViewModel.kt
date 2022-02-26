@@ -2,7 +2,7 @@ package com.hua.abstractmusic.ui.viewmodels
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.util.Log
+import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
@@ -13,9 +13,11 @@ import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.LyricsEntry
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
+import com.hua.abstractmusic.repository.NetRepository
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.use_case.UseCase
 import com.hua.abstractmusic.utils.LyricsUtils
+import com.hua.abstractmusic.utils.isLocal
 import com.hua.taglib.TaglibLibrary
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -36,6 +38,7 @@ class PlayingViewModel @Inject constructor(
     application: Application,
     useCase: UseCase,
     itemTree: MediaItemTree,
+    private val repository: NetRepository,
     private val taglibLibrary: TaglibLibrary
 ) : BaseBrowserViewModel(application, useCase, itemTree) {
 
@@ -43,7 +46,7 @@ class PlayingViewModel @Inject constructor(
     val currentPlayItem: State<MediaItem> get() = _currentPlayItem
 
     private val _lyricsList = mutableStateOf<List<LyricsEntry>>(emptyList())
-    val lyricList /*: State<LyricsList> */ get() = _lyricsList
+    val lyricList: State<List<LyricsEntry>> get() = _lyricsList
 
 
     val lyricsCanScroll = mutableStateOf(false)
@@ -112,23 +115,41 @@ class PlayingViewModel @Inject constructor(
     private fun getLyrics(item: MediaItem?) {
         item ?: return
         viewModelScope.launch(Dispatchers.IO) {
-            if (taglibLibrary.isAvailable) {
-                try {
-                    getApplication<Application>().contentResolver.openFileDescriptor(
-                        item.mediaMetadata.mediaUri!!,
-                        "r"
-                    )?.use {
-                        val lyrics = taglibLibrary.getLyricsByTaglib(it.detachFd())
-                        val lyricResult = LyricsUtils.stringToLyrics(lyrics)
-                        lyricsCanScroll.value = lyricResult.first
-                        lyricList.value = lyricResult.second
-                    }
-                } catch (e: Exception) {
-                    Log.d("TAG", "getLyrics: 没有歌词 ")
-                }
+            val lyrics = if (item.mediaId.isLocal()) {
+                getLocalLyrics(item.mediaMetadata.mediaUri)
+            } else {
+                getNetLyrics(Uri.parse(item.mediaId).lastPathSegment ?: "")
             }
+            stringToLyrics(lyrics)
         }
+    }
 
+    private fun stringToLyrics(lyrics: String?) {
+        if (lyrics == null || lyrics.isBlank()) return
+        val lyricResult = LyricsUtils.stringToLyrics(lyrics)
+        lyricsCanScroll.value = lyricResult.first
+        _lyricsList.value = lyricResult.second
+    }
+
+    private fun getLocalLyrics(uri: Uri?): String? {
+        return if (taglibLibrary.isAvailable) {
+            try {
+                getApplication<Application>().contentResolver.openFileDescriptor(
+                    uri!!,
+                    "r"
+                )?.use {
+                    taglibLibrary.getLyricsByTaglib(it.detachFd())
+                }
+            } catch (e: Exception) {
+                ""
+            }
+        } else {
+            ""
+        }
+    }
+
+    private suspend fun getNetLyrics(id: String): String? {
+        return repository.selectLyrics(id)
     }
 
 
@@ -184,13 +205,13 @@ class PlayingViewModel @Inject constructor(
     fun setLyricsItem(startIndex: Int) {
         if (lyricList.value.isNotEmpty()) {
             if (startIndex == -1) {
-                lyricList.value = lyricList.value.toMutableList().map {
+                _lyricsList.value = lyricList.value.toMutableList().map {
                     it.copy(
                         isPlaying = it.time == lyricList.value[0].time
                     )
                 }
             } else {
-                lyricList.value = lyricList.value.toMutableList().map {
+                _lyricsList.value = lyricList.value.toMutableList().map {
                     it.copy(
                         isPlaying = it.time == lyricList.value[startIndex].time
                     )
@@ -199,10 +220,10 @@ class PlayingViewModel @Inject constructor(
         }
     }
 
-    fun getStartToNext(nextIndex: Int,start: Long):Long{
-        return  if(nextIndex >= lyricList.value.size){
+    fun getStartToNext(nextIndex: Int, start: Long): Long {
+        return if (nextIndex >= lyricList.value.size) {
             Long.MAX_VALUE
-        }else{
+        } else {
             lyricList.value[nextIndex].time!! - start
         }
 
