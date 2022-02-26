@@ -154,54 +154,58 @@ class PlayingViewModel @Inject constructor(
         setLyricsItem(getStartIndex(position))
     }
 
+    fun getNextIndex(position: Long): Int {
+        val startIndex = getStartIndex(position)
+        return when {
+            startIndex >= lyricList.value.size -> {
+                lyricList.value.size - 1
+            }
+            else -> {
+                startIndex + 1
+            }
+        }
+    }
+
     fun getStartIndex(position: Long): Int {
         return if (lyricList.value.isNotEmpty()) {
-            lyricList.value.indexOf(
-                lyricList.value.findLast {
-                    it.time!! <= position
-                } ?: lyricList.value[0]
-            )
-        }else{
+            val item = lyricList.value.findLast {
+                it.time!! <= position
+            }
+            if (item == null) {
+                -1
+            } else {
+                lyricList.value.indexOf(item)
+            }
+        } else {
             0
         }
     }
 
-    fun setLyricsItem(startIndex:Int){
-        if(lyricList.value.isNotEmpty()){
-            lyricList.value = lyricList.value.toMutableList().map {
-                it.copy(
-                    isPlaying = it.time == lyricList.value[startIndex].time
-                )
+    fun setLyricsItem(startIndex: Int) {
+        if (lyricList.value.isNotEmpty()) {
+            if (startIndex == -1) {
+                lyricList.value = lyricList.value.toMutableList().map {
+                    it.copy(
+                        isPlaying = it.time == lyricList.value[0].time
+                    )
+                }
+            } else {
+                lyricList.value = lyricList.value.toMutableList().map {
+                    it.copy(
+                        isPlaying = it.time == lyricList.value[startIndex].time
+                    )
+                }
             }
         }
     }
 
-    fun setLyricsList(startIndex: Int,start: Long): Long {
-        val delayTime: Long = if (lyricList.value.isNotEmpty()) {
-//            val startIndex = lyricList.value.indexOf(
-//                lyricList.value.findLast {
-//                    it.time!! <= start
-//                } ?: lyricList.value[0]
-//            )
-//            lyricList.value = lyricList.value.toMutableList().map {
-//                it.copy(
-//                    isPlaying = it.time == lyricList.value[startIndex].time
-//                )
-//            }
-            val nextIndex = if (startIndex == 0) {
-                1
-            } else {
-                startIndex + 1
-            }
-            if (nextIndex >= lyricList.value.size) {
-                Long.MAX_VALUE
-            } else {
-                lyricList.value[nextIndex].time!! - start
-            }
-        } else {
-            0L
+    fun getStartToNext(nextIndex: Int,start: Long):Long{
+        return  if(nextIndex >= lyricList.value.size){
+            Long.MAX_VALUE
+        }else{
+            lyricList.value[nextIndex].time!! - start
         }
-        return delayTime
+
     }
 
     fun getMusicDuration(): Long {

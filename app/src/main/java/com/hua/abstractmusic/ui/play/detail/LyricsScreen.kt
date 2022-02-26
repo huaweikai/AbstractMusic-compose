@@ -49,21 +49,22 @@ fun LyricsScreen(
 ) {
     val topGlide = configuration.screenHeightDp * 0.10
     val state = rememberLazyListState()
-    val isTouch = remember{
+    val isTouch = remember {
         mutableStateOf(false)
     }
+    val playerState = viewModel.playerState.collectAsState().value
     val current = remember {
         mutableStateOf(26)
     }
     val height = (configuration.screenHeightDp - current.value) / 2
-    LaunchedEffect(viewModel.lyricList.value,isTouch.value) {
-        if (viewModel.lyricList.value.isNotEmpty() && !isTouch.value) {
+    LaunchedEffect(viewModel.lyricList.value, playerState, isTouch.value) {
+        if (viewModel.lyricList.value.isNotEmpty() && playerState &&!isTouch.value ) {
             while (true) {
                 val start = viewModel.getMusicDuration()
-                val startIndex = viewModel.getStartIndex(start)
-                state.animateScrollToItem((startIndex + 1).coerceAtLeast(0), -height.toInt())
-                viewModel.setLyricsItem(startIndex)
-                delay(viewModel.setLyricsList(startIndex, start))
+                val nextIndex = viewModel.getNextIndex(start)
+                delay(viewModel.getStartToNext(nextIndex, start))
+                state.scrollToItem((nextIndex).coerceAtLeast(0), -height.toInt())
+                viewModel.setLyricsItem(nextIndex)
             }
         }
     }
