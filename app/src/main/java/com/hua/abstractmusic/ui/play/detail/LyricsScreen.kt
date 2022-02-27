@@ -52,24 +52,6 @@ fun LyricsScreen(
     configuration: Configuration = LocalConfiguration.current,
 ) {
     val topGlide = configuration.screenHeightDp * 0.10
-//    val state = rememberLazyListState()
-    val isTouch = remember {
-        mutableStateOf(false)
-    }
-    val playerState = viewModel.playerState.collectAsState().value
-    val current = remember {
-        mutableStateOf(26)
-    }
-    val height = (configuration.screenHeightDp - current.value) / 2
-    LaunchedEffect(viewModel.lyricList.value, playerState, isTouch.value) {
-        if (viewModel.lyricList.value.isNotEmpty() && playerState && !isTouch.value) {
-            val start = viewModel.getMusicDuration()
-            val nextIndex = viewModel.getNextIndex(start)
-            delay(viewModel.getStartToNext(nextIndex, start))
-            viewModel.lyricsState.animateScrollToItem((nextIndex).coerceAtLeast(0), -height.toInt())
-            viewModel.setLyricsItem(nextIndex)
-        }
-    }
 
     Column(
         modifier = Modifier
@@ -109,7 +91,7 @@ fun LyricsScreen(
                 LyricsError()
             }
             is LCE.Success -> {
-                LyricsSuccess(isTouch = isTouch, current = current)
+                LyricsSuccess()
             }
         }
     }
@@ -118,10 +100,34 @@ fun LyricsScreen(
 
 @Composable
 private fun LyricsSuccess(
-    isTouch: MutableState<Boolean>,
     viewModel: PlayingViewModel = LocalPlayingViewModel.current,
-    current: MutableState<Int>
+    configuration: Configuration = LocalConfiguration.current,
 ) {
+    val current = remember {
+        mutableStateOf(26)
+    }
+    val height = (configuration.screenHeightDp - current.value) / 2
+    val isTouch = remember {
+        mutableStateOf(false)
+    }
+    val playerState = viewModel.playerState.collectAsState().value
+    LaunchedEffect(
+        viewModel.lyricList.value,
+        playerState,
+        isTouch.value,
+        viewModel.lyricsCanScroll.value
+    ) {
+        if (viewModel.lyricList.value.isNotEmpty() && playerState && viewModel.lyricsCanScroll.value) {
+            val start = viewModel.getMusicDuration()
+            val nextIndex = viewModel.getNextIndex(start)
+            delay(viewModel.getStartToNext(nextIndex, start))
+            if(!isTouch.value){
+                viewModel.lyricsState.animateScrollToItem((nextIndex).coerceAtLeast(0), -height.toInt())
+            }
+            viewModel.setLyricsItem(nextIndex)
+        }
+    }
+
     LazyColumn(
         Modifier
             .fillMaxWidth()
@@ -139,7 +145,9 @@ private fun LyricsSuccess(
                 textSize = 22
             )
             {
-                viewModel.seekTo(lyrics.time ?: 0L)
+                if(viewModel.lyricsCanScroll.value){
+                    viewModel.seekTo(lyrics.time ?: 0L)
+                }
             }
         }
         blackItem()
@@ -234,7 +242,7 @@ private val blackItem: (LazyListScope.() -> Unit) = {
     item {
         Box(
             modifier = Modifier
-                .height(LocalConfiguration.current.screenHeightDp.dp / 2)
+                .height((LocalConfiguration.current.screenHeightDp * 0.2).dp)
         ) {
         }
     }

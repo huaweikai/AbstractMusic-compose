@@ -76,7 +76,9 @@ class PlayingViewModel @Inject constructor(
         _currentPlayItem.value = item ?: NULL_MEDIA_ITEM
         viewModelScope.launch {
             getLyrics(browser.currentMediaItem)
-            setLyricsItem(getStartIndex(browser.currentPosition))
+            if(lyricsCanScroll.value){
+                setLyricsItem(getStartIndex(browser.currentPosition))
+            }
         }
         currentPosition.value = browser.currentPosition.toFloat()
         updateCurrentPlayList()
@@ -87,7 +89,6 @@ class PlayingViewModel @Inject constructor(
         maxValue.value = (browser.duration).toFloat() ?: 0F
         _playerState.value = browser.isPlaying == true
         doSomething()
-//        currentPosition.value =
     }
 
     private fun doSomething() {
@@ -190,7 +191,9 @@ class PlayingViewModel @Inject constructor(
         val browser = browser ?: return
         browser.seekTo(position)
         currentPosition.value = position.toFloat()
-        setLyricsItem(getStartIndex(position))
+        if(lyricsCanScroll.value){
+            setLyricsItem(getStartIndex(position))
+        }
     }
 
     fun getNextIndex(position: Long): Int {
