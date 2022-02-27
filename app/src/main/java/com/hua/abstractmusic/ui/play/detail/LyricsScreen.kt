@@ -35,6 +35,7 @@ import com.hua.abstractmusic.ui.utils.translucent
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 import com.hua.abstractmusic.utils.textDp
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 /**
@@ -160,13 +161,18 @@ private fun LyricsLoading() {
 private fun LyricsError(
     viewModel: PlayingViewModel = LocalPlayingViewModel.current
 ) {
+    val scope = rememberCoroutineScope()
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "没有歌词")
-        Button(onClick = { viewModel.getLyrics(viewModel.currentPlayItem.value) }) {
+        Button(onClick = {
+            scope.launch {
+                viewModel.getLyrics(viewModel.currentPlayItem.value)
+            }
+        }) {
             Text(text = "点击重试")
         }
     }

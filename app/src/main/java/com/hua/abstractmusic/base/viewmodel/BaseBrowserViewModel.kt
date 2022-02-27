@@ -129,7 +129,7 @@ abstract class BaseBrowserViewModel(
 
     open fun browserConnected() {
         val browser = this.browser ?: return
-//        updateItem(browser.currentMediaItem)
+        updateItem(browser.currentMediaItem)
         browser.addListener(playCallback)
         onMediaConnected()
     }

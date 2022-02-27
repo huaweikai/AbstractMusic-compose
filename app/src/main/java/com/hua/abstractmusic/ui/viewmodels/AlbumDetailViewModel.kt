@@ -28,7 +28,6 @@ class AlbumDetailViewModel @Inject constructor(
         localListMap[id!!] = _albumDetail
         playListMap[id!!] = _albumDetail
         refresh()
-        updateItem(browser?.currentMediaItem)
 //        listMap.keys.forEach {
 //            detailInit(it)
 //        }

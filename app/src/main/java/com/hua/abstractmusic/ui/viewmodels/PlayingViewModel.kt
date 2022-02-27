@@ -23,14 +23,11 @@ import com.hua.abstractmusic.utils.LyricsUtils
 import com.hua.abstractmusic.utils.isLocal
 import com.hua.taglib.TaglibLibrary
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -74,22 +71,23 @@ class PlayingViewModel @Inject constructor(
     private var currentDuration: Job? = null
 
     override fun updateItem(item: MediaItem?) {
-        _currentPlayItem.value = item ?: NULL_MEDIA_ITEM
-        getLyrics(item)
         super.updateItem(item)
-        currentPosition.value = 0F
+        val browser = this.browser?:return
+        _currentPlayItem.value = item ?: NULL_MEDIA_ITEM
+        viewModelScope.launch {
+            getLyrics(browser.currentMediaItem)
+            setLyricsItem(getStartIndex(browser.currentPosition))
+        }
+        currentPosition.value = browser.currentPosition.toFloat()
         updateCurrentPlayList()
     }
 
     override fun onMediaConnected() {
         val browser = this.browser ?: return
-        updateCurrentPlayList()
-        _currentPlayItem.value = browser.currentMediaItem ?: NULL_MEDIA_ITEM
         maxValue.value = (browser.duration).toFloat() ?: 0F
         _playerState.value = browser.isPlaying == true
         doSomething()
-        currentPosition.value = browser.currentPosition.toFloat()
-        setLyricsItem(getStartIndex(browser.currentPosition))
+//        currentPosition.value =
     }
 
     private fun doSomething() {
@@ -125,10 +123,10 @@ class PlayingViewModel @Inject constructor(
         }
     }
 
-    fun getLyrics(item: MediaItem?) {
+    suspend fun getLyrics(item: MediaItem?) {
         item ?: return
         _lyricsLoadState.value = LCE.Loading
-        viewModelScope.launch(Dispatchers.IO) {
+        withContext(Dispatchers.IO){
             val lyrics = if (item.mediaId.isLocal()) {
                 getLocalLyrics(item.mediaMetadata.mediaUri)
             } else {
@@ -141,7 +139,6 @@ class PlayingViewModel @Inject constructor(
                 stringToLyrics(lyrics)
                 _lyricsLoadState.value = LCE.Success
             }
-
         }
     }
 

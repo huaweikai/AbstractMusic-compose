@@ -46,7 +46,6 @@ class HomeViewModel @Inject constructor(
 
     override fun onMediaConnected() {
         refresh()
-        updateItem(browser?.currentMediaItem)
     }
 
 }
