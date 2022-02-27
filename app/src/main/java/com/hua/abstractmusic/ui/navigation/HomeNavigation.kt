@@ -2,6 +2,7 @@ package com.hua.abstractmusic.ui.navigation
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -13,6 +14,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.hua.abstractmusic.other.Constant.ALL_MUSIC_TYPE
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalHomeViewModel
+import com.hua.abstractmusic.ui.LocalNetViewModel
 import com.hua.abstractmusic.ui.home.local.LocalScreen
 import com.hua.abstractmusic.ui.home.local.album.detail.LocalAlbumDetail
 import com.hua.abstractmusic.ui.home.local.artist.detail.LocalArtistDetail
@@ -23,6 +25,7 @@ import com.hua.abstractmusic.ui.home.net.NetScreen
 import com.hua.abstractmusic.ui.home.net.detail.NetDetail
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.viewmodels.NetViewModel
 import com.hua.abstractmusic.ui.viewmodels.UserViewModel
 
 /**
@@ -37,9 +40,20 @@ import com.hua.abstractmusic.ui.viewmodels.UserViewModel
 fun HomeNavigationNav(
     modifier: Modifier,
     viewModel: HomeViewModel = LocalHomeViewModel.current,
+    netViewModel:NetViewModel = LocalNetViewModel.current,
     homeNavController:NavHostController = LocalHomeNavController.current,
 ) {
     val userViewModel: UserViewModel = hiltViewModel()
+    DisposableEffect(Unit){
+        viewModel.initializeController()
+        netViewModel.initializeController()
+        viewModel.refresh()
+        netViewModel.refresh()
+        this.onDispose {
+            viewModel.releaseBrowser()
+            netViewModel.releaseBrowser()
+        }
+    }
     NavHost(
         navController = homeNavController,
         startDestination = Screen.NetScreen.route,

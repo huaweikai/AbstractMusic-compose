@@ -3,7 +3,7 @@ package com.hua.abstractmusic.ui.home
 import android.annotation.SuppressLint
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
@@ -14,7 +14,10 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -23,8 +26,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.hua.abstractmusic.bean.ui.home.TopBarIconButton
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalHomeViewModel
-import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.route.Screen
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 
 /**
  * @author : huaweikai
@@ -68,7 +71,7 @@ fun HomeTopBar(
     }
 
     LaunchedEffect(navToDetail) {
-        if (!navToDetail) {
+        if (navToDetail) {
             navigationIcon.value = {
                 NavigationIcon {
                     onPreviewClick()

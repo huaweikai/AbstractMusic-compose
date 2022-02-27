@@ -91,13 +91,13 @@ class NetRepository(
         }
     }
 
-    suspend fun selectLyrics(id: String): String? {
+    suspend fun selectLyrics(id: String): String {
         return try {
             val result = service.getMusicLyrics(id)
             if (result.code != SUCCESS) {
                 ""
             } else {
-                result.data
+                result.data ?: ""
             }
         } catch (e: Exception) {
             ""

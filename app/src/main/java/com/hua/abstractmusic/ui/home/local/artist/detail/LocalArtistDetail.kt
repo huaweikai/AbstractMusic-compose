@@ -47,6 +47,7 @@ fun LocalArtistDetail(
 ) {
 
     DisposableEffect(Unit) {
+        viewModel.initializeController()
         viewModel.artistId = item.mediaId
         this.onDispose {
             viewModel.releaseBrowser()

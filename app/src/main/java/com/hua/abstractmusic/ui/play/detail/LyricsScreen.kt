@@ -6,19 +6,20 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
 import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.*
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
@@ -28,7 +29,9 @@ import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.bean.LyricsEntry
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.utils.ArtImage
+import com.hua.abstractmusic.ui.utils.LCE
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
+import com.hua.abstractmusic.ui.utils.translucent
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 import com.hua.abstractmusic.utils.textDp
 import kotlinx.coroutines.delay
@@ -48,7 +51,7 @@ fun LyricsScreen(
     configuration: Configuration = LocalConfiguration.current,
 ) {
     val topGlide = configuration.screenHeightDp * 0.10
-    val state = rememberLazyListState()
+//    val state = rememberLazyListState()
     val isTouch = remember {
         mutableStateOf(false)
     }
@@ -58,19 +61,19 @@ fun LyricsScreen(
     }
     val height = (configuration.screenHeightDp - current.value) / 2
     LaunchedEffect(viewModel.lyricList.value, playerState, isTouch.value) {
-        if (viewModel.lyricList.value.isNotEmpty() && playerState &&!isTouch.value ) {
-            while (true) {
-                val start = viewModel.getMusicDuration()
-                val nextIndex = viewModel.getNextIndex(start)
-                delay(viewModel.getStartToNext(nextIndex, start))
-                state.scrollToItem((nextIndex).coerceAtLeast(0), -height.toInt())
-                viewModel.setLyricsItem(nextIndex)
-            }
+        if (viewModel.lyricList.value.isNotEmpty() && playerState && !isTouch.value) {
+            val start = viewModel.getMusicDuration()
+            val nextIndex = viewModel.getNextIndex(start)
+            delay(viewModel.getStartToNext(nextIndex, start))
+            viewModel.lyricsState.animateScrollToItem((nextIndex).coerceAtLeast(0), -height.toInt())
+            viewModel.setLyricsItem(nextIndex)
         }
     }
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 8.dp)
     ) {
         Spacer(modifier = Modifier.height(topGlide.dp))
         Row(
@@ -96,38 +99,75 @@ fun LyricsScreen(
                 )
             }
         }
-        LazyColumn(
-            Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .moreClick(isTouch)
-                .graphicsLayer { alpha = 0.99F }
-                .drawWithContent {
-                    val colors = listOf(
-                        Color.Transparent, Color.Black, Color.Black, Color.Black, Color.Black,
-                        Color.Black, Color.Black, Color.Black, Color.Transparent
-                    )
-                    drawContent()
-                    drawRect(
-                        brush = Brush.verticalGradient(colors),
-                        blendMode = BlendMode.DstIn
-                    )
-                },
-            state = state
-        ) {
-            blackItem()
-            items(viewModel.lyricList.value) { lyrics ->
-                LyricsItem(
-                    current = lyrics.isPlaying,
-                    lyricsEntry = lyrics,
-                    currentTextElementHeightPxState = current,
-                    textSize = 22
-                )
-                {
-                    viewModel.seekTo(lyrics.time ?: 0L)
-                }
+        val lyricsLoad = viewModel.lyricsLoadState.collectAsState()
+        when (lyricsLoad.value) {
+            is LCE.Loading -> {
+                LyricsLoading()
             }
-            blackItem()
+            is LCE.Error -> {
+                LyricsError()
+            }
+            is LCE.Success -> {
+                LyricsSuccess(isTouch = isTouch, current = current)
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun LyricsSuccess(
+    isTouch: MutableState<Boolean>,
+    viewModel: PlayingViewModel = LocalPlayingViewModel.current,
+    current: MutableState<Int>
+) {
+    LazyColumn(
+        Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .moreClick(isTouch)
+            .translucent(),
+        state = viewModel.lyricsState
+    ) {
+        blackItem()
+        items(viewModel.lyricList.value) { lyrics ->
+            LyricsItem(
+                current = lyrics.isPlaying,
+                lyricsEntry = lyrics,
+                currentTextElementHeightPxState = current,
+                textSize = 22
+            )
+            {
+                viewModel.seekTo(lyrics.time ?: 0L)
+            }
+        }
+        blackItem()
+    }
+}
+
+@Composable
+private fun LyricsLoading() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+private fun LyricsError(
+    viewModel: PlayingViewModel = LocalPlayingViewModel.current
+) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "没有歌词")
+        Button(onClick = { viewModel.getLyrics(viewModel.currentPlayItem.value) }) {
+            Text(text = "点击重试")
         }
     }
 }
@@ -156,8 +196,8 @@ private fun LazyItemScope.LyricsItem(
                 }
             }
             .padding(0.dp, (textSize * 0.1F).dp),
-        shape = RoundedCornerShape(8.dp),
-        backgroundColor = Color.Transparent,
+        shape = RoundedCornerShape(10.dp),
+        backgroundColor = if (current) Color.Transparent.copy(alpha = 0.1f) else Color.Transparent,
         elevation = 0.dp
     ) {
         val paddingY = (textSize * 0.3F).dp

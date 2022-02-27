@@ -164,16 +164,16 @@ private fun MusicSlider(
     viewModel: PlayingViewModel = LocalPlayingViewModel.current
 ) {
     Slider(
-        value = if(viewModel.currentPosition.value.toFloat()<0) 0F else viewModel.currentPosition.value.toFloat(),
-        valueRange = 0f..if(viewModel.maxValue.value<0) 0F else viewModel.maxValue.value,
+        value = viewModel.currentPosition.value.coerceAtLeast(0F),
+        valueRange = 0f..viewModel.maxValue.value.coerceAtLeast(0F),
         onValueChange = {
             //点击准备改变时，先设置我已经对seekbar操作，让更新seekbar暂停。
             viewModel.actionSeekBar.value = true
-            viewModel.currentPosition.value = it.toLong()
+            viewModel.currentPosition.value = it
         },
         onValueChangeFinished = {
             //结束后，先去seekto再去更新ui
-            viewModel.seekTo(viewModel.currentPosition.value)
+            viewModel.seekTo(viewModel.currentPosition.value.toLong())
             viewModel.actionSeekBar.value = false
         },
         colors = SliderDefaults.colors(
@@ -195,7 +195,7 @@ private fun SecondText(
         modifier = modifier,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = viewModel.currentPosition.value.toTime())
+        Text(text = viewModel.currentPosition.value.toLong().toTime())
         Text(text = viewModel.maxValue.value.toLong().toTime())
     }
 }

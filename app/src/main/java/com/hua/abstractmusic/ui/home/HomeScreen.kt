@@ -22,11 +22,15 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.hua.abstractmusic.ui.LocalHomeNavController
+import com.hua.abstractmusic.ui.LocalHomeViewModel
+import com.hua.abstractmusic.ui.LocalNetViewModel
 import com.hua.abstractmusic.ui.home.playlist.HomePlayList
 import com.hua.abstractmusic.ui.navigation.HomeNavigationNav
 import com.hua.abstractmusic.ui.play.PlayScreen
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.PopupWindow
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.viewmodels.NetViewModel
 import kotlinx.coroutines.launch
 
 /**
@@ -40,6 +44,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     homeNavController: NavHostController = LocalHomeNavController.current,
+    viewModel:HomeViewModel = LocalHomeViewModel.current,
+    netViewModel: NetViewModel = LocalNetViewModel.current
 ) {
 
     val scope = rememberCoroutineScope()
@@ -86,11 +92,11 @@ fun HomeScreen(
         homeNavController.currentDestination?.route.let {
             when (it) {
                 in routes -> {
-                    navToDetailState.value = true
+                    navToDetailState.value = false
                     label.value = "${homeNavController.currentDestination?.label}"
                 }
                 else -> {
-                    navToDetailState.value = false
+                    navToDetailState.value = true
                     label.value = ""
                 }
             }
@@ -125,7 +131,7 @@ fun HomeScreen(
                         Modifier
                             .fillMaxWidth()
                             .animateContentSize()
-                            .height(if (navToDetailState.value) 120.dp else 60.dp)
+                            .height(if (navToDetailState.value) 60.dp else 120.dp)
                             .background(MaterialTheme.colorScheme.background),
                         {
                             scope.launch {

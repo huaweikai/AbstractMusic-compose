@@ -73,5 +73,6 @@ class NetViewModel @Inject constructor(
 
     override fun onMediaConnected() {
         refresh()
+        updateItem(browser?.currentMediaItem)
     }
 }

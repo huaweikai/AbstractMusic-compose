@@ -3,6 +3,8 @@ package com.hua.abstractmusic.ui.viewmodels
 import android.annotation.SuppressLint
 import android.app.Application
 import android.net.Uri
+import android.util.Log
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
@@ -15,15 +17,19 @@ import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.repository.NetRepository
 import com.hua.abstractmusic.services.MediaItemTree
+import com.hua.abstractmusic.ui.utils.LCE
 import com.hua.abstractmusic.use_case.UseCase
 import com.hua.abstractmusic.utils.LyricsUtils
 import com.hua.abstractmusic.utils.isLocal
 import com.hua.taglib.TaglibLibrary
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -50,7 +56,9 @@ class PlayingViewModel @Inject constructor(
 
 
     val lyricsCanScroll = mutableStateOf(false)
-
+    val lyricsState = LazyListState(firstVisibleItemScrollOffset = -500)
+    private val _lyricsLoadState = MutableStateFlow<LCE>(LCE.Loading)
+    val lyricsLoadState: StateFlow<LCE> get() = _lyricsLoadState.asStateFlow()
 
     private val _currentPlayList = mutableStateOf<List<MediaData>>(emptyList())
     val currentPlayList: State<List<MediaData>> get() = _currentPlayList
@@ -59,44 +67,49 @@ class PlayingViewModel @Inject constructor(
     private val _playerState = MutableStateFlow(false)
     val playerState = _playerState.asStateFlow()
     val maxValue = mutableStateOf(0F)
-    val currentPosition = mutableStateOf(0L)
+
+    val currentPosition = mutableStateOf(0F)
 
 
-    private val currentDuration = viewModelScope.launch {
-        _playerState.collect {
-            if (it) {
-                while (true) {
-                    delay(1000L)
-                    if (!actionSeekBar.value) {
-                        currentPosition.value = browser!!.currentPosition
+    private var currentDuration: Job? = null
+
+    override fun updateItem(item: MediaItem?) {
+        _currentPlayItem.value = item ?: NULL_MEDIA_ITEM
+        getLyrics(item)
+        super.updateItem(item)
+        currentPosition.value = 0F
+        updateCurrentPlayList()
+    }
+
+    override fun onMediaConnected() {
+        val browser = this.browser ?: return
+        updateCurrentPlayList()
+        _currentPlayItem.value = browser.currentMediaItem ?: NULL_MEDIA_ITEM
+        maxValue.value = (browser.duration).toFloat() ?: 0F
+        _playerState.value = browser.isPlaying == true
+        doSomething()
+        currentPosition.value = browser.currentPosition.toFloat()
+        setLyricsItem(getStartIndex(browser.currentPosition))
+    }
+
+    private fun doSomething() {
+        currentDuration?.cancel()
+        currentDuration = viewModelScope.launch {
+            _playerState.collectLatest {
+                if (it && browser?.isConnected == true) {
+                    while (true) {
+                        delay(1000L)
+                        if (!actionSeekBar.value) {
+                            currentPosition.value = browser?.currentPosition?.toFloat() ?: 0F
+                        }
                     }
                 }
             }
         }
     }
 
-    override fun updateItem(item: MediaItem?) {
-        super.updateItem(item)
-        updateCurrentPlayList()
-        _currentPlayItem.value = item ?: NULL_MEDIA_ITEM
-        currentPosition.value = 0
-        getLyrics(item)
-    }
-
-    override fun onMediaConnected() {
-        maxValue.value = (browser?.duration)?.toFloat() ?: 0F
-        if (browser?.currentPosition != null && browser?.currentPosition!! >= 0) {
-            currentPosition.value = browser?.currentPosition!!
-            setLyricsItem(getStartIndex(browser?.currentPosition!!))
-        } else {
-            currentPosition.value = 0L
-        }
-        _playerState.value = browser?.isPlaying == true
-        currentDuration.start()
-    }
-
     override fun onMediaDisConnected(controller: MediaController) {
-        currentDuration.cancel()
+        currentDuration?.cancel()
     }
 
     override fun onMediaPlayerStateChanged(isPlaying: Boolean) {
@@ -112,15 +125,23 @@ class PlayingViewModel @Inject constructor(
         }
     }
 
-    private fun getLyrics(item: MediaItem?) {
+    fun getLyrics(item: MediaItem?) {
         item ?: return
+        _lyricsLoadState.value = LCE.Loading
         viewModelScope.launch(Dispatchers.IO) {
             val lyrics = if (item.mediaId.isLocal()) {
                 getLocalLyrics(item.mediaMetadata.mediaUri)
             } else {
                 getNetLyrics(Uri.parse(item.mediaId).lastPathSegment ?: "")
             }
-            stringToLyrics(lyrics)
+            if (lyrics.isBlank()) {
+                _lyricsList.value = emptyList()
+                _lyricsLoadState.value = LCE.Error
+            } else {
+                stringToLyrics(lyrics)
+                _lyricsLoadState.value = LCE.Success
+            }
+
         }
     }
 
@@ -131,7 +152,7 @@ class PlayingViewModel @Inject constructor(
         _lyricsList.value = lyricResult.second
     }
 
-    private fun getLocalLyrics(uri: Uri?): String? {
+    private fun getLocalLyrics(uri: Uri?): String {
         return if (taglibLibrary.isAvailable) {
             try {
                 getApplication<Application>().contentResolver.openFileDescriptor(
@@ -139,7 +160,7 @@ class PlayingViewModel @Inject constructor(
                     "r"
                 )?.use {
                     taglibLibrary.getLyricsByTaglib(it.detachFd())
-                }
+                } ?: ""
             } catch (e: Exception) {
                 ""
             }
@@ -148,7 +169,7 @@ class PlayingViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getNetLyrics(id: String): String? {
+    private suspend fun getNetLyrics(id: String): String {
         return repository.selectLyrics(id)
     }
 
@@ -171,7 +192,7 @@ class PlayingViewModel @Inject constructor(
     fun seekTo(position: Long) {
         val browser = browser ?: return
         browser.seekTo(position)
-        currentPosition.value = position
+        currentPosition.value = position.toFloat()
         setLyricsItem(getStartIndex(position))
     }
 
@@ -202,21 +223,19 @@ class PlayingViewModel @Inject constructor(
         }
     }
 
-    fun setLyricsItem(startIndex: Int) {
+    fun setLyricsItem(startIndex: Int, shouldScroll: Boolean = false) {
         if (lyricList.value.isNotEmpty()) {
-            if (startIndex == -1) {
-                _lyricsList.value = lyricList.value.toMutableList().map {
-                    it.copy(
-                        isPlaying = it.time == lyricList.value[0].time
-                    )
-                }
+            val index = if (startIndex == -1) {
+                0
             } else {
-                _lyricsList.value = lyricList.value.toMutableList().map {
-                    it.copy(
-                        isPlaying = it.time == lyricList.value[startIndex].time
-                    )
-                }
+                startIndex
             }
+            _lyricsList.value = lyricList.value.toMutableList().map {
+                it.copy(
+                    isPlaying = it.time == lyricList.value[index].time
+                )
+            }
+            Log.d("TAG", "setLyricsItem: ${_lyricsList.value[startIndex]}")
         }
     }
 
@@ -236,5 +255,11 @@ class PlayingViewModel @Inject constructor(
         } else {
             browser.currentPosition
         }
+    }
+
+    fun addQueue(item: MediaItem) {
+        val browser = this.browser ?: return
+        browser.addMediaItem(browser.currentMediaItemIndex + 1, item)
+        updateCurrentPlayList()
     }
 }

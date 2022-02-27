@@ -39,6 +39,7 @@ class ArtistDetailViewModel @Inject constructor(
         localListMap[artistAlbumId!!] = _artistAlbumDetail
         playListMap[artistId!!] = _artistDetail
         refresh()
+        updateItem(browser?.currentMediaItem)
     }
 
     private val _artistDetail = mutableStateOf<List<MediaData>>(emptyList())

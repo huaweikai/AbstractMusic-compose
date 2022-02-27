@@ -3,12 +3,14 @@ package com.hua.abstractmusic.base.viewmodel
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.ComponentName
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.session.MediaBrowser
 import androidx.media3.session.MediaController
@@ -85,6 +87,10 @@ abstract class BaseBrowserViewModel(
             onMediaPlayBackStateChange(playbackState)
         }
 
+        override fun onPlaylistMetadataChanged(mediaMetadata: MediaMetadata) {
+            Log.d("TAG", "onPlaylistMetadataChanged: $mediaMetadata")
+        }
+
 //        override fun onIsPlayingChanged(isPlaying: Boolean) {
 //            onMediaPlayerStateChanged(isPlaying)
 //        }
@@ -99,16 +105,16 @@ abstract class BaseBrowserViewModel(
 
     }
 
-    init {
-        initializeController()
-    }
+//    init {
+//        initializeController()
+//    }
 
 
     private val _screenState = mutableStateOf<LCE>(LCE.Loading)
     val screenState: State<LCE> get() = _screenState
 
 
-    private fun initializeController() {
+    fun initializeController() {
         browserFuture = MediaBrowser.Builder(
             getApplication(),
             SessionToken(
@@ -123,9 +129,9 @@ abstract class BaseBrowserViewModel(
 
     open fun browserConnected() {
         val browser = this.browser ?: return
-        onMediaConnected()
-        updateItem(browser.currentMediaItem)
+//        updateItem(browser.currentMediaItem)
         browser.addListener(playCallback)
+        onMediaConnected()
     }
 
     fun releaseBrowser() {

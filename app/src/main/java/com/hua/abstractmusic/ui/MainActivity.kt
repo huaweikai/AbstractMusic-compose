@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
                 darkIcons = MaterialTheme.colors.isLight
             )
             val windowSize = rememberWindowSizeClass()
-            val popupWindow = remember{
+            val popupWindow = remember {
                 mutableStateOf(false)
             }
             AbstractMusicTheme {
@@ -64,12 +64,22 @@ class MainActivity : ComponentActivity() {
                     LocalComposeUtils provides composeUtils,
                     LocalPopWindow provides popupWindow
                 ) {
-                   Surface{
-                       AppNavigation()
-                   }
+                    Surface {
+                        AppNavigation()
+                    }
                 }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        localPlayingViewModel.initializeController()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        localPlayingViewModel.releaseBrowser()
     }
 }
 

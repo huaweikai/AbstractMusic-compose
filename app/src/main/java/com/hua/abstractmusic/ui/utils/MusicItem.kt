@@ -1,11 +1,11 @@
 package com.hua.abstractmusic.ui.utils
 
 import android.annotation.SuppressLint
+import android.content.res.Configuration
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -13,8 +13,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -28,8 +30,10 @@ import coil.transform.RoundedCornersTransformation
 import coil.transform.Transformation
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
+import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.LocalPopWindow
 import com.hua.abstractmusic.ui.LocalPopWindowItem
+import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 
 
 /**
@@ -131,7 +135,9 @@ fun ArtImage(
 @Composable
 fun PopupWindow(
     state: MutableState<Boolean> = LocalPopWindow.current,
-    item: MediaItem = LocalPopWindowItem.current.value
+    item: MediaItem = LocalPopWindowItem.current.value,
+    config: Configuration = LocalConfiguration.current,
+    viewModel: PlayingViewModel = LocalPlayingViewModel.current
 ) {
     val addMore = remember {
         mutableStateOf(false)
@@ -142,13 +148,41 @@ fun PopupWindow(
                 state.value = false
             }
         ) {
-            Text(text = "${item.mediaMetadata.title}", modifier = Modifier.clickable {
-                state.value = false
-                addMore.value = true
-            })
+            Column(
+                modifier = Modifier
+                    .width((config.screenWidthDp * 0.75).dp)
+                    .height((config.screenHeightDp * 0.6).dp)
+                    .padding(horizontal = 8.dp)
+                    .background(MaterialTheme.colorScheme.background, RoundedCornerShape(8.dp))
+            ) {
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(70.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ArtImage(
+                        modifier = Modifier.size(50.dp),
+                        uri = item.mediaMetadata.artworkUri,
+                        desc = "",
+                        transformation = RoundedCornersTransformation(16f)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column(Modifier.fillMaxHeight(), verticalArrangement = Arrangement.Center) {
+                        TitleAndArtist(
+                            title = "${item.mediaMetadata.title}",
+                            subTitle = "${item.mediaMetadata.artist}",
+                        )
+                    }
+                }
+                Text(text = "添加到歌单")
+                Text(text = "添加到下一曲播放",modifier = Modifier.clickable {
+                    viewModel.addQueue(item)
+                })
+            }
         }
     }
-    if(addMore.value){
+    if (addMore.value) {
         Dialog(onDismissRequest = {
             addMore.value = false
         }) {

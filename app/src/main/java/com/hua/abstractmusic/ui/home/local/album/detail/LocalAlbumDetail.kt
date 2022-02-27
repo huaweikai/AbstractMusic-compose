@@ -45,7 +45,7 @@ fun LocalAlbumDetail(
 ) {
 
     DisposableEffect(Unit) {
-//        detailViewModel.initializeController()
+        detailViewModel.initializeController()
         detailViewModel.id = item.mediaId
         this.onDispose {
             detailViewModel.releaseBrowser()
