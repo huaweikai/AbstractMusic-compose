@@ -2,10 +2,10 @@ package com.hua.abstractmusic.db.music
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.hua.abstractmusic.bean.SongSheet
 import com.hua.abstractmusic.bean.CurrentPlayItem
-import com.hua.abstractmusic.bean.user.UserBean
-import com.hua.abstractmusic.db.user.UserDao
+import com.hua.abstractmusic.bean.Sheet
+import com.hua.abstractmusic.bean.SheetMusic
+import com.hua.abstractmusic.bean.SheetToMusic
 
 /**
  * @author : huaweikai
@@ -13,11 +13,10 @@ import com.hua.abstractmusic.db.user.UserDao
  * @Desc   : Roombase
  */
 @Database(
-    entities = [SongSheet::class,CurrentPlayItem::class,UserBean::class],
+    entities = [SheetMusic::class,CurrentPlayItem::class,Sheet::class,SheetToMusic::class],
     version = 1,
     exportSchema = false
 )
 abstract class MusicRoomBase :RoomDatabase(){
     abstract val dao: MusicDao
-    abstract val userDao:UserDao
 }

@@ -1,7 +1,6 @@
 package com.hua.abstractmusic.repository
 
-import com.hua.abstractmusic.bean.CurrentPlayItem
-import com.hua.abstractmusic.bean.SongSheet
+import com.hua.abstractmusic.bean.*
 import com.hua.abstractmusic.db.music.MusicDao
 
 /**
@@ -13,28 +12,40 @@ class Repository(
     private val dao: MusicDao
 ) {
 
-    suspend fun insertIntoSheet(songSheet: SongSheet){
-        dao.insertIntoSheet(songSheet)
+    suspend fun insertIntoSheet(sheetMusic: SheetMusic){
+        dao.insertIntoSheet(sheetMusic)
     }
 
-    suspend fun deleteMusicOutSheet(songSheet: SongSheet){
-        dao.deleteOutSheet(songSheet)
+    suspend fun deleteMusicOutSheet(sheetMusic: SheetMusic){
+        dao.deleteOutSheet(sheetMusic)
     }
 
-    suspend fun deleteSheet(sheetName:String){
-        dao.deleteSheet(sheetName)
+    suspend fun selectSheetName():List<String>?{
+        return dao.selectLocalSheetTitle()
     }
 
-    fun getSheet(sheetName:String):List<SongSheet>?{
-        return dao.getSheet(sheetName)
+    suspend fun insertSheet(sheet: Sheet){
+        dao.insertSheet(sheet)
     }
 
-    fun getSongIdBySheetName(sheetName: String):List<String>{
-        return dao.getSongIdBySheetName(sheetName)
+    suspend fun selectMusicIdBySheetId(sheetId:Int):List<String>?{
+        return dao.selectMusicIdBySheetId(sheetId)
     }
 
-    fun getSheetName():List<String>?{
-        return dao.getSheetName()
+    suspend fun insertMusicToSheet(sheetToMusic: SheetToMusic){
+        dao.insertSheetToMusic(sheetToMusic)
+    }
+
+    suspend fun selectMusicBySheetId(sheetId: Int):SheetListWithMusic{
+        return dao.selectMusic(sheetId)
+    }
+
+    suspend fun selectSheets(): List<Sheet>? {
+        return dao.selectLocalSheet()
+    }
+
+    suspend fun selectSheetBySheetId(id:Int):Sheet{
+        return dao.selectSheetBySheetId(id)
     }
 
     suspend fun getLastPlayList():List<CurrentPlayItem>?{

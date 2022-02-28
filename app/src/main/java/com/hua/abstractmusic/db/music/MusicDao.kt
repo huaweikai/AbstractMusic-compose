@@ -1,8 +1,8 @@
 package com.hua.abstractmusic.db.music
 
 import androidx.room.*
-import com.hua.abstractmusic.bean.SongSheet
-import com.hua.abstractmusic.bean.CurrentPlayItem
+import androidx.room.OnConflictStrategy.REPLACE
+import com.hua.abstractmusic.bean.*
 
 /**
  * @author : huaweikai
@@ -12,26 +12,36 @@ import com.hua.abstractmusic.bean.CurrentPlayItem
 @Dao
 interface MusicDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertIntoSheet(songSheet: SongSheet)
+    suspend fun insertIntoSheet(sheetMusic: SheetMusic)
 
+    //删除歌单中的歌曲
     @Delete
-    suspend fun deleteOutSheet(songSheet: SongSheet)
+    suspend fun deleteOutSheet(sheetMusic: SheetMusic)
 
-    //删除歌单
-    @Query("delete from songsheet where :sheetName=sheetName")
-    suspend fun deleteSheet(sheetName:String)
-
-    //通过歌单名搜索音乐
-    @Query("select * from songsheet where :sheetName=sheetName")
-    fun getSheet(sheetName:String):List<SongSheet>?
+    //根据歌单id检索音乐
+    @Transaction
+    @Query("select * from sheet where sheetId = :id")
+    suspend fun selectMusic(id:Int):SheetListWithMusic
 
     //查找是否有相同的id，有的话不重复添加
-    @Query("select musicId from songsheet where :sheetName=sheetName")
-    fun getSongIdBySheetName(sheetName: String):List<String>
+    @Query("select musicId from sheettomusic where sheetId = :sheetId")
+    suspend fun selectMusicIdBySheetId(sheetId: Int):List<String>
 
-    //获取歌单名
-    @Query("select sheetName from songsheet")
-    fun getSheetName():List<String>?
+    //获取所有歌单
+    @Query("select * from sheet")
+    suspend fun selectLocalSheet(): List<Sheet>?
+
+    @Query("select title from sheet")
+    suspend fun selectLocalSheetTitle():List<String>?
+
+    @Insert
+    suspend fun insertSheetToMusic(sheetToMusic: SheetToMusic)
+
+    @Insert(onConflict = REPLACE)
+    suspend fun insertSheet(sheet: Sheet)
+
+    @Query("select * from sheet where sheetId=:id")
+    suspend fun selectSheetBySheetId(id:Int):Sheet
 
     //检索上次播放音乐的歌单 仅用于启动程序时检测
     @Query("select * from currentplayitem")

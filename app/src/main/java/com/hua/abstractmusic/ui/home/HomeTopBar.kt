@@ -107,7 +107,7 @@ fun HomeTopBar(
                     tint = Color(0xff77D3D0),
                     modifier = Modifier
                         .animateContentSize()
-                        .size((if (navToDetail) 30.dp else 0.dp))
+                        .size((if (navToDetail) 0.dp else 30.dp))
                 )
             }
         },

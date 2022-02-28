@@ -25,7 +25,7 @@ object Version {
     const val media2_version = "1.2.1"
     const val kotlin_coroutines_version = "1.5.2"
     const val exoplayer_version = "2.16.1"
-    const val room_version = "2.4.0"
+    const val room_version = "2.4.2"
 
     const val android_gradle_version = "7.0.4"
 

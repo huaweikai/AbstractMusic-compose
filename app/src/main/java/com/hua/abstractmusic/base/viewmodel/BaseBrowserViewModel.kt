@@ -229,11 +229,6 @@ abstract class BaseBrowserViewModel(
         }
     }
 
-    fun removePlayItem(position: Int) {
-        val browser = browser ?: return
-        browser.removeMediaItem(position)
-    }
-
     fun skipTo(position: Int, autoPlay: Boolean = false) {
         val browser = browser ?: return
         if (browser.currentMediaItemIndex != position) {
@@ -261,5 +256,8 @@ abstract class BaseBrowserViewModel(
     open fun onMediaDisConnected(controller: MediaController) {}
     open fun onMediaPlayerStateChanged(isPlaying: Boolean) {}
 
-    open fun onMediaPlayBackStateChange(playerState:Int){}
+    open fun onMediaPlayBackStateChange(playerState: Int) {}
+
+
+
 }

@@ -4,21 +4,26 @@ import android.app.Application
 import android.content.ContentResolver
 import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.viewModelScope
 import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
+import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.bean.net.NetData
 import com.hua.abstractmusic.bean.user.UserBean
 import com.hua.abstractmusic.other.Constant.BUCKET_HEAD_IMG
+import com.hua.abstractmusic.other.Constant.SHEET_ID
 import com.hua.abstractmusic.other.NetWork.ERROR
 import com.hua.abstractmusic.other.NetWork.NO_USER
 import com.hua.abstractmusic.other.NetWork.SERVER_ERROR
 import com.hua.abstractmusic.other.NetWork.SUCCESS
+import com.hua.abstractmusic.repository.Repository
 import com.hua.abstractmusic.repository.UserRepository
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.use_case.UseCase
+import com.hua.abstractmusic.use_case.events.MusicInsertError
 import com.hua.abstractmusic.utils.toDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -31,21 +36,21 @@ import javax.inject.Inject
  * @Date   : 2022/01/25
  * @Desc   :
  */
-
 @HiltViewModel
 class UserViewModel @Inject constructor(
     application: Application,
     useCase: UseCase,
     itemTree: MediaItemTree,
-    private val repository: UserRepository
-) : BaseBrowserViewModel(application, useCase,itemTree) {
+    private val repository: Repository,
+    private val userRepository: UserRepository
+) : BaseBrowserViewModel(application, useCase, itemTree) {
 
     private val _userIsOut = mutableStateOf(true)
     val userIsOut: State<Boolean> get() = _userIsOut
 
 
-    suspend fun checkUser():NetData<Unit>{
-        val result = repository.hasUser()
+    suspend fun checkUser(): NetData<Unit> {
+        val result = userRepository.hasUser()
         val code = result.code
         _userIsOut.value = when (code) {
             SUCCESS, ERROR -> false
@@ -60,16 +65,15 @@ class UserViewModel @Inject constructor(
 
     fun selectUserInfo() {
         viewModelScope.launch {
-            repository.getInfo()?.let {
+            userRepository.getInfo()?.let {
                 user.value = it
-
             }
         }
     }
 
-    fun logoutUser(){
+    fun logoutUser() {
         viewModelScope.launch {
-            _userIsOut.value = repository.logoutUser().code == SUCCESS
+            _userIsOut.value = userRepository.logoutUser().code == SUCCESS
         }
     }
 
@@ -134,7 +138,7 @@ class UserViewModel @Inject constructor(
 
     suspend fun getLoginEmailCode(): String {
         loginEmailCodeEnable.value = false
-        val result = repository.getEmailCodeWithLogin(loginEmailText.value)
+        val result = userRepository.getEmailCodeWithLogin(loginEmailText.value)
         if (result.code == SUCCESS) {
             viewModelScope.launch {
                 loginCodeIsWait.value = true
@@ -154,7 +158,7 @@ class UserViewModel @Inject constructor(
 
     suspend fun getRegisterEmailCode(): String {
         registerCodeButtonEnabled.value = false
-        val result = repository.getEmailCode(registerEmailText.value)
+        val result = userRepository.getEmailCode(registerEmailText.value)
         if (result.code == SUCCESS) {
             viewModelScope.launch {
                 for (i in 120 downTo 0) {
@@ -171,7 +175,7 @@ class UserViewModel @Inject constructor(
     }
 
     suspend fun register(): NetData<String> {
-        return repository.register(
+        return userRepository.register(
             registerEmailText.value,
             registerNameText.value,
             registerPasswordText.value,
@@ -184,7 +188,7 @@ class UserViewModel @Inject constructor(
     }
 
     private suspend fun loginWithEmail(): NetData<String> {
-        val result = repository.loginWithEmail(
+        val result = userRepository.loginWithEmail(
             loginEmailText.value,
             loginPasswordText.value
         )
@@ -193,7 +197,7 @@ class UserViewModel @Inject constructor(
     }
 
     private suspend fun loginWithCode(): NetData<String> {
-        val result = repository.loginWithCode(
+        val result = userRepository.loginWithCode(
             loginEmailText.value,
             loginEmailCodeText.value.toInt()
         )
@@ -206,13 +210,13 @@ class UserViewModel @Inject constructor(
         contentResolver: ContentResolver
     ) {
         val uri = Uri.parse(url)
-        val byte = contentResolver.openInputStream(uri)/*?.readBytes()*/
+        val byte = contentResolver.openInputStream(uri)
         val file = DocumentFile.fromSingleUri(getApplication(), uri)
         viewModelScope.launch(Dispatchers.IO) {
             val fileName = "${BUCKET_HEAD_IMG}/${user.value.id}-head-${
                 System.currentTimeMillis().toDate()
             }.png"
-            val result = repository.putHeadPicture(
+            val result = userRepository.putHeadPicture(
                 fileName,
                 byte,
                 file,
@@ -222,7 +226,28 @@ class UserViewModel @Inject constructor(
             if (result.code == 200) {
                 selectUserInfo()
             }
-            contentResolver.delete(uri,null,null)
+            contentResolver.delete(uri, null, null)
+        }
+    }
+
+    val sheetList = mutableStateOf<List<MediaData>>(emptyList())
+
+    init {
+        localListMap[SHEET_ID] = sheetList
+    }
+
+    override fun onMediaConnected() {
+        refresh()
+    }
+
+    fun createSheet(sheetName: String) {
+        viewModelScope.launch(Dispatchers.Main) {
+            try {
+                useCase.insertSheetCase(sheetName)
+                refresh()
+            } catch (e: MusicInsertError) {
+                Toast.makeText(getApplication(), "${e.message}", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.bean
 
+import android.annotation.SuppressLint
 import androidx.media3.common.MediaMetadata
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -10,7 +11,7 @@ import androidx.room.PrimaryKey
  * @Desc   : 使用数据库来保存当前的播放列表
  *
  */
-@androidx.media3.common.util.UnstableApi
+@SuppressLint("UnsafeOptInUsageError")
 @Entity
 data class CurrentPlayItem(
     val musicId:String,

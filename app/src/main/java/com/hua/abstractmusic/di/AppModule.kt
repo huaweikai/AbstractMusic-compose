@@ -6,10 +6,12 @@ import coil.ImageLoader
 import com.hua.abstractmusic.db.music.MusicDao
 import com.hua.abstractmusic.db.music.MusicRoomBase
 import com.hua.abstractmusic.db.user.UserDao
+import com.hua.abstractmusic.db.user.UserRoomBase
 import com.hua.abstractmusic.net.MusicService
 import com.hua.abstractmusic.net.UserService
 import com.hua.abstractmusic.other.Constant.BASE_URL
 import com.hua.abstractmusic.other.Constant.MUSIC_ROOM_NAME
+import com.hua.abstractmusic.other.Constant.USER_ROOM_NAME
 import com.hua.abstractmusic.repository.NetRepository
 import com.hua.abstractmusic.repository.Repository
 import com.hua.abstractmusic.repository.UserRepository
@@ -19,8 +21,8 @@ import com.hua.abstractmusic.use_case.UseCase
 import com.hua.abstractmusic.use_case.currentlist.ClearCurrentListCase
 import com.hua.abstractmusic.use_case.currentlist.GetCurrentListCase
 import com.hua.abstractmusic.use_case.currentlist.InsertMusicToCurrentItemCase
-import com.hua.abstractmusic.use_case.sheet.GetSheetMusicListCase
-import com.hua.abstractmusic.use_case.sheet.GetSheetNameCase
+import com.hua.abstractmusic.use_case.sheet.GetSheetList
+import com.hua.abstractmusic.use_case.sheet.GetSheetMusicBySheetId
 import com.hua.abstractmusic.use_case.sheet.InsertSheetCase
 import com.hua.abstractmusic.utils.ComposeUtils
 import com.hua.abstractmusic.utils.KEY
@@ -51,7 +53,7 @@ object AppModule {
     @Singleton
     fun provideMusicRoomDatabase(
         @ApplicationContext context: Context
-    ): MusicRoomBase = Room.databaseBuilder(
+    ) = Room.databaseBuilder(
         context, MusicRoomBase::class.java, MUSIC_ROOM_NAME
     ).build()
 
@@ -61,19 +63,19 @@ object AppModule {
         roomBase: MusicRoomBase
     ): MusicDao = roomBase.dao
 
-//    @Provides
-//    @Singleton
-//    fun provideUserRoomDatabase(
-//        @ApplicationContext context: Context
-//    ): UserRoomBase = Room.databaseBuilder(
-//        context, UserRoomBase::class.java, USER_ROOM_NAME
-//    ).build()
+    @Provides
+    @Singleton
+    fun provideUserRoomDatabase(
+        @ApplicationContext context: Context
+    ) = Room.databaseBuilder(
+        context, UserRoomBase::class.java, USER_ROOM_NAME
+    ).build()
 
     @Provides
     @Singleton
     fun provideUserRoomDao(
-        musicRoomBase: MusicRoomBase
-    ): UserDao = musicRoomBase.userDao
+        userRoomBase: UserRoomBase
+    ): UserDao = userRoomBase.userDao
 
     @Provides
     @Singleton
@@ -104,8 +106,8 @@ object AppModule {
             InsertMusicToCurrentItemCase(repository),
             ClearCurrentListCase(repository),
             GetCurrentListCase(repository),
-            GetSheetNameCase(repository),
-            GetSheetMusicListCase(repository),
+            GetSheetList(repository),
+            GetSheetMusicBySheetId(repository),
             InsertSheetCase(repository)
         )
 

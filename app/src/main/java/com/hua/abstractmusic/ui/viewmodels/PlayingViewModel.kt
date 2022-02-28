@@ -3,7 +3,7 @@ package com.hua.abstractmusic.ui.viewmodels
 import android.annotation.SuppressLint
 import android.app.Application
 import android.net.Uri
-import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -14,11 +14,13 @@ import androidx.media3.session.MediaController
 import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.LyricsEntry
 import com.hua.abstractmusic.bean.MediaData
+import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.repository.NetRepository
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.ui.utils.LCE
 import com.hua.abstractmusic.use_case.UseCase
+import com.hua.abstractmusic.use_case.events.MusicInsertError
 import com.hua.abstractmusic.utils.LyricsUtils
 import com.hua.abstractmusic.utils.isLocal
 import com.hua.taglib.TaglibLibrary
@@ -51,6 +53,12 @@ class PlayingViewModel @Inject constructor(
     private val _lyricsList = mutableStateOf<List<LyricsEntry>>(emptyList())
     val lyricList: State<List<LyricsEntry>> get() = _lyricsList
 
+    val localSheetList = mutableStateOf<List<MediaData>>(emptyList())
+
+    init {
+        localListMap[Constant.SHEET_ID] = localSheetList
+    }
+
 
     val lyricsCanScroll = mutableStateOf(false)
     val lyricsState = LazyListState(firstVisibleItemScrollOffset = -500)
@@ -72,11 +80,11 @@ class PlayingViewModel @Inject constructor(
 
     override fun updateItem(item: MediaItem?) {
         super.updateItem(item)
-        val browser = this.browser?:return
+        val browser = this.browser ?: return
         _currentPlayItem.value = item ?: NULL_MEDIA_ITEM
         viewModelScope.launch {
             getLyrics(browser.currentMediaItem)
-            if(lyricsCanScroll.value){
+            if (lyricsCanScroll.value) {
                 setLyricsItem(getStartIndex(browser.currentPosition))
             }
         }
@@ -89,6 +97,7 @@ class PlayingViewModel @Inject constructor(
         maxValue.value = (browser.duration).toFloat() ?: 0F
         _playerState.value = browser.isPlaying == true
         doSomething()
+        refresh()
     }
 
     private fun doSomething() {
@@ -127,7 +136,7 @@ class PlayingViewModel @Inject constructor(
     suspend fun getLyrics(item: MediaItem?) {
         item ?: return
         _lyricsLoadState.value = LCE.Loading
-        withContext(Dispatchers.IO){
+        withContext(Dispatchers.IO) {
             val lyrics = if (item.mediaId.isLocal()) {
                 getLocalLyrics(item.mediaMetadata.mediaUri)
             } else {
@@ -180,7 +189,7 @@ class PlayingViewModel @Inject constructor(
             list.add(
                 MediaData(
                     item,
-                    browser.currentMediaItem?.mediaId == item.mediaId
+                    i == browser.currentMediaItemIndex
                 )
             )
         }
@@ -191,7 +200,7 @@ class PlayingViewModel @Inject constructor(
         val browser = browser ?: return
         browser.seekTo(position)
         currentPosition.value = position.toFloat()
-        if(lyricsCanScroll.value){
+        if (lyricsCanScroll.value) {
             setLyricsItem(getStartIndex(position))
         }
     }
@@ -235,7 +244,6 @@ class PlayingViewModel @Inject constructor(
                     isPlaying = it.time == lyricList.value[index].time
                 )
             }
-            Log.d("TAG", "setLyricsItem: ${_lyricsList.value[startIndex]}")
         }
     }
 
@@ -257,9 +265,31 @@ class PlayingViewModel @Inject constructor(
         }
     }
 
-    fun addQueue(item: MediaItem) {
+    fun addQueue(item: MediaItem, nextPlay: Boolean = false) {
         val browser = this.browser ?: return
-        browser.addMediaItem(browser.currentMediaItemIndex + 1, item)
+        if (nextPlay) {
+            browser.addMediaItem(browser.currentMediaItemIndex + 1, item)
+        } else {
+            browser.addMediaItem(item)
+        }
+        // 没有相关回调，直接手动更新
+        updateCurrentPlayList()
+    }
+
+    suspend fun insertMusicToSheet(mediaItem: MediaItem, parentId: String) {
+        val sheetId = Uri.parse(parentId).lastPathSegment!!.toInt()
+        try {
+            useCase.insertSheetCase(mediaItem, sheetId)
+        } catch (e: MusicInsertError) {
+            withContext(Dispatchers.Main) {
+                Toast.makeText(getApplication(), "${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    fun removePlayItem(position: Int) {
+        val browser = browser ?: return
+        browser.removeMediaItem(position)
         updateCurrentPlayList()
     }
 }

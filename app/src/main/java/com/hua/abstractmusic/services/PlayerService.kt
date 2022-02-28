@@ -5,7 +5,9 @@ import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Intent
 import android.os.Build
+import android.widget.Toast
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaBrowser
@@ -177,6 +179,11 @@ class PlayerService : MediaLibraryService() {
 
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             mmkv.encode(LASTMEDIAINDEX, exoplayer.currentMediaItemIndex)
+        }
+
+        override fun onPlayerError(error: PlaybackException) {
+            Toast.makeText(this@PlayerService, "当前资源丢失无法播放", Toast.LENGTH_SHORT).show()
+            exoplayer.removeMediaItem(exoplayer.currentMediaItemIndex)
         }
     }
 }

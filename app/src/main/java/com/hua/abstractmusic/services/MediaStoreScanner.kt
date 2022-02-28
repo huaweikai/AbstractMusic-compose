@@ -14,6 +14,7 @@ import com.hua.abstractmusic.other.Constant.ALBUM_ID
 import com.hua.abstractmusic.other.Constant.DURATION
 import com.hua.abstractmusic.repository.NetRepository
 import com.hua.abstractmusic.use_case.UseCase
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.TimeUnit
 
 /**
@@ -24,7 +25,7 @@ import java.util.concurrent.TimeUnit
 @SuppressLint("UnsafeOptInUsageError")
 class MediaStoreScanner(
     private val useCase: UseCase,
-    private val repository: NetRepository
+    private val netRepository: NetRepository
 ) {
 
     //获取音乐
@@ -285,15 +286,15 @@ class MediaStoreScanner(
     }
 
 
-    //处理逻辑都放在了usecase
-    private fun scanSheetListFromRoom(parentId: Uri): List<MediaItem> {
-        return useCase.getSheetNameCase(parentId)
-    }
-
-    private fun scanSheetDecs(parentId: Uri): List<MediaItem>? {
-        if (parentId.lastPathSegment.isNullOrEmpty()) return null
-        return useCase.getSheetMusicListCase(parentId.lastPathSegment!!, parentId)
-    }
+//    //处理逻辑都放在了usecase
+//    private fun scanSheetListFromRoom(parentId: Uri): List<MediaItem> {
+//        return useCase.getSheetList(parentId)
+//    }
+//
+//    private fun scanSheetDecs(parentId: Uri): List<MediaItem>? {
+//        if (parentId.lastPathSegment.isNullOrEmpty()) return null
+//        return useCase.getSheetMusicBySheetId(parentId.lastPathSegment!!, parentId)
+//    }
 
     suspend fun getCurrentPlayList(): List<MediaItem> {
         return useCase.getCurrentListCase()
@@ -333,9 +334,13 @@ class MediaStoreScanner(
             Constant.TYPE_LOCAL_SHEET -> {
                 //TODO(自定义歌单逻辑，先不动)
                 if (parentIdUri.lastPathSegment.isNullOrEmpty()) {
-                    scanSheetListFromRoom(parentIdUri)
+                    runBlocking {
+                        useCase.getSheetList(parentIdUri)
+                    }
                 } else {
-                    scanSheetDecs(parentIdUri)
+                    runBlocking {
+                        useCase.getSheetMusicBySheetId(parentIdUri)
+                    }
                 }
             }
             else -> null
@@ -343,10 +348,10 @@ class MediaStoreScanner(
     }
 
     suspend fun selectList(parentId: Uri): List<MediaItem>? {
-        return repository.selectList(parentId)
+        return netRepository.selectList(parentId)
     }
 
     suspend fun selectMusicById(parentId: Uri): List<MediaItem>? {
-        return repository.selectMusicById(parentId)
+        return netRepository.selectMusicById(parentId)
     }
 }

@@ -19,7 +19,6 @@ object Constant {
     const val TYPE_LOCAL_ALBUM = "${LOCAL}_album"
     const val TYPE_LOCAL_SHEET = "${LOCAL}_songSheet"
     const val ROOT_SCHEME = "playerDemo://"
-    const val TYPE_LOCAL_LASTPLAY = "${LOCAL}_lastPlay"
     const val TYPE_LOCAL_ARTIST = "${LOCAL}_artist"
     const val ARTIST_TO_ALBUM = "abAlbum"
 
@@ -28,7 +27,7 @@ object Constant {
 
     //个人歌单
     const val SHEET_ID = "${ROOT_SCHEME}${TYPE_LOCAL_SHEET}"
-    const val LASTPLAY_ID = "${ROOT_SCHEME}${TYPE_LOCAL_LASTPLAY}"
+
     const val ARTIST_ID = "${ROOT_SCHEME}${TYPE_LOCAL_ARTIST}"
 
     const val NETWORK = "network"
@@ -61,7 +60,7 @@ object Constant {
     const val LASTMEDIAID = "LASTMEDIAID"
     const val MUSIC_ROOM_NAME = "MUSICDB"
 
-    const val USER_ROOM_NAME = "MUSICDB"
+    const val USER_ROOM_NAME = "USERDB"
 
 
 //        const val BASE_URL = "http://119.3.175.64:8080"

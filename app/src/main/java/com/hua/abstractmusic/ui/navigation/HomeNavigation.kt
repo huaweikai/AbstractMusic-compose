@@ -21,6 +21,7 @@ import com.hua.abstractmusic.ui.home.local.artist.detail.LocalArtistDetail
 import com.hua.abstractmusic.ui.home.mine.MineScreen
 import com.hua.abstractmusic.ui.home.mine.register.LoginScreen
 import com.hua.abstractmusic.ui.home.mine.register.RegisterScreen
+import com.hua.abstractmusic.ui.home.mine.sheetdetail.SheetDetail
 import com.hua.abstractmusic.ui.home.net.NetScreen
 import com.hua.abstractmusic.ui.home.net.detail.NetDetail
 import com.hua.abstractmusic.ui.route.Screen
@@ -40,11 +41,11 @@ import com.hua.abstractmusic.ui.viewmodels.UserViewModel
 fun HomeNavigationNav(
     modifier: Modifier,
     viewModel: HomeViewModel = LocalHomeViewModel.current,
-    netViewModel:NetViewModel = LocalNetViewModel.current,
-    homeNavController:NavHostController = LocalHomeNavController.current,
+    netViewModel: NetViewModel = LocalNetViewModel.current,
+    homeNavController: NavHostController = LocalHomeNavController.current,
 ) {
     val userViewModel: UserViewModel = hiltViewModel()
-    DisposableEffect(Unit){
+    DisposableEffect(Unit) {
         viewModel.initializeController()
         netViewModel.initializeController()
         viewModel.refresh()
@@ -76,13 +77,13 @@ fun HomeNavigationNav(
             arguments = listOf(
                 navArgument(
                     name = "albumId"
-                ){
+                ) {
                     type = NavType.StringType
                     defaultValue = ""
                 }
             ),
-        ){
-            val albumId =it.arguments?.getString("albumId","")
+        ) {
+            val albumId = it.arguments?.getString("albumId", "")
             val item = viewModel.localAlbumList.value.find { it.mediaId == albumId }!!.mediaItem
             LocalAlbumDetail(
                 item = item
@@ -93,13 +94,13 @@ fun HomeNavigationNav(
             arguments = listOf(
                 navArgument(
                     name = "artistIndex"
-                ){
+                ) {
                     type = NavType.IntType
                     defaultValue = -1
                 }
             ),
-        ){
-            val index =it.arguments?.getInt("artistIndex",-1)
+        ) {
+            val index = it.arguments?.getInt("artistIndex", -1)
             val item = viewModel.localArtistList.value[index!!].mediaItem
             LocalArtistDetail(
                 item = item
@@ -108,14 +109,14 @@ fun HomeNavigationNav(
 
         composable(
             route = Screen.RegisterScreen.route
-        ){
-            RegisterScreen(userViewModel,homeNavController)
+        ) {
+            RegisterScreen(userViewModel, homeNavController)
         }
 
         composable(
             route = Screen.LoginScreen.route
-        ){
-            LoginScreen(homeNavController,userViewModel)
+        ) {
+            LoginScreen(homeNavController, userViewModel)
         }
 
         composable(
@@ -123,15 +124,30 @@ fun HomeNavigationNav(
             arguments = arrayListOf(
                 navArgument(
                     name = "type"
-                ){
+                ) {
                     type = NavType.StringType
                     defaultValue = ALL_MUSIC_TYPE
                 }
             )
-        ){
+        ) {
             val type = it.arguments?.getString("type")
             NetDetail(type!!)
         }
-    }
 
+        composable(
+            route = "${Screen.LocalSheetDetailScreen.route}?sheetIndex={sheetIndex}",
+            arguments = arrayListOf(
+                navArgument(
+                    name = "sheetIndex"
+                ) {
+                    type = NavType.IntType
+                    defaultValue = 0
+                }
+            )
+        ) {
+            val sheetIndex = it.arguments?.getInt("sheetIndex") ?: 0
+            val mediaData = userViewModel.sheetList.value[sheetIndex]
+            SheetDetail(mediaData = mediaData)
+        }
+    }
 }

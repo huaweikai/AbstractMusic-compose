@@ -25,4 +25,6 @@ sealed class Screen(val route:String){
 
     object UserNoLoginScreen:Screen("user_no_login_screen")
     object UserMineScreen:Screen("user_mine_screen")
+
+    object LocalSheetDetailScreen:Screen("local_sheet_detail_screen")
 }

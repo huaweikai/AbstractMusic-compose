@@ -1,6 +1,7 @@
 package com.hua.abstractmusic.ui.home.local.artist.detail
 
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -38,7 +39,7 @@ import kotlinx.coroutines.launch
  * @Date   : 2022/01/19
  * @Desc   : detail
  */
-@androidx.media3.common.util.UnstableApi
+@SuppressLint("UnsafeOptInUsageError")
 @ExperimentalPagerApi
 @Composable
 fun LocalArtistDetail(

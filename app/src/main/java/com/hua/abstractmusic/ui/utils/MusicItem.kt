@@ -5,14 +5,13 @@ import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -30,10 +29,12 @@ import coil.transform.RoundedCornersTransformation
 import coil.transform.Transformation
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
+import com.hua.abstractmusic.other.Constant.SHEET_ID
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.LocalPopWindow
 import com.hua.abstractmusic.ui.LocalPopWindowItem
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
+import kotlinx.coroutines.launch
 
 
 /**
@@ -142,6 +143,7 @@ fun PopupWindow(
     val addMore = remember {
         mutableStateOf(false)
     }
+    val scope = rememberCoroutineScope()
     if (state.value) {
         Dialog(
             onDismissRequest = {
@@ -175,9 +177,16 @@ fun PopupWindow(
                         )
                     }
                 }
-                Text(text = "添加到歌单")
-                Text(text = "添加到下一曲播放",modifier = Modifier.clickable {
+                Text(text = "添加到播放队列",modifier = Modifier.clickable {
                     viewModel.addQueue(item)
+                })
+                Text(text = "添加到下一曲播放", modifier = Modifier.clickable {
+                    viewModel.addQueue(item,true)
+                })
+                Text(text = "添加到歌单", modifier = Modifier.clickable {
+                    viewModel.init(SHEET_ID)
+                    state.value = false
+                    addMore.value = true
                 })
             }
         }
@@ -186,7 +195,31 @@ fun PopupWindow(
         Dialog(onDismissRequest = {
             addMore.value = false
         }) {
-            Text(text = "${item.mediaMetadata.title},小window")
+            Column(
+                modifier = Modifier
+                    .width((config.screenWidthDp * 0.75).dp)
+                    .height((config.screenHeightDp * 0.4).dp)
+                    .padding(horizontal = 8.dp)
+                    .background(MaterialTheme.colorScheme.background, RoundedCornerShape(8.dp))
+            ) {
+                Text(text = "歌单")
+                LazyColumn(Modifier.fillMaxSize()) {
+                    items(viewModel.localSheetList.value) { sheet ->
+                        Text(
+                            text = "${sheet.mediaItem.mediaMetadata.title}",
+                            modifier = Modifier.clickable {
+                                scope.launch {
+                                    viewModel.insertMusicToSheet(
+                                        mediaItem = item,
+                                        parentId = sheet.mediaId
+                                    )
+                                    addMore.value = false
+                                }
+                            }
+                        )
+                    }
+                }
+            }
         }
     }
 }
