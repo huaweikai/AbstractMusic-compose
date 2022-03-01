@@ -332,7 +332,6 @@ class MediaStoreScanner(
                 }
             }
             Constant.TYPE_LOCAL_SHEET -> {
-                //TODO(自定义歌单逻辑，先不动)
                 if (parentIdUri.lastPathSegment.isNullOrEmpty()) {
                     runBlocking {
                         useCase.getSheetList(parentIdUri)

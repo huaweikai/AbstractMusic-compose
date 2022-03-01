@@ -14,7 +14,8 @@ import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.bean.net.NetData
 import com.hua.abstractmusic.bean.user.UserBean
 import com.hua.abstractmusic.other.Constant.BUCKET_HEAD_IMG
-import com.hua.abstractmusic.other.Constant.SHEET_ID
+import com.hua.abstractmusic.other.Constant.LOCAL_SHEET_ID
+import com.hua.abstractmusic.other.Constant.NET_SHEET_ID
 import com.hua.abstractmusic.other.NetWork.ERROR
 import com.hua.abstractmusic.other.NetWork.NO_USER
 import com.hua.abstractmusic.other.NetWork.SERVER_ERROR
@@ -192,7 +193,7 @@ class UserViewModel @Inject constructor(
             loginEmailText.value,
             loginPasswordText.value
         )
-        _userIsOut.value = !(result.code == SUCCESS)
+        _userIsOut.value = result.code != SUCCESS
         return result
     }
 
@@ -201,7 +202,7 @@ class UserViewModel @Inject constructor(
             loginEmailText.value,
             loginEmailCodeText.value.toInt()
         )
-        _userIsOut.value = !(result.code == SUCCESS)
+        _userIsOut.value = result.code != SUCCESS
         return result
     }
 
@@ -231,16 +232,17 @@ class UserViewModel @Inject constructor(
     }
 
     val sheetList = mutableStateOf<List<MediaData>>(emptyList())
-
+    val netSheetList = mutableStateOf<List<MediaData>>(emptyList())
     init {
-        localListMap[SHEET_ID] = sheetList
+        localListMap[LOCAL_SHEET_ID] = sheetList
+        netListMap[NET_SHEET_ID] = netSheetList
     }
 
     override fun onMediaConnected() {
         refresh()
     }
 
-    fun createSheet(sheetName: String) {
+    fun createSheet(sheetName: String,isLocal:Boolean) {
         viewModelScope.launch(Dispatchers.Main) {
             try {
                 useCase.insertSheetCase(sheetName)

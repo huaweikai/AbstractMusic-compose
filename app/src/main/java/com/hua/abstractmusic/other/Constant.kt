@@ -25,12 +25,20 @@ object Constant {
     const val ALL_ID = "${ROOT_SCHEME}${TYPE_LOCAL_ALL}"
     const val ALBUM_ID = "${ROOT_SCHEME}${TYPE_LOCAL_ALBUM}"
 
-    //个人歌单
-    const val SHEET_ID = "${ROOT_SCHEME}${TYPE_LOCAL_SHEET}"
+    //本地个人歌单
+    const val LOCAL_SHEET_ID = "${ROOT_SCHEME}${TYPE_LOCAL_SHEET}"
+
+
+
 
     const val ARTIST_ID = "${ROOT_SCHEME}${TYPE_LOCAL_ARTIST}"
 
     const val NETWORK = "network"
+
+
+    //在线歌单
+    const val TYPE_NETWORK_SHEET = "${NETWORK}_sheet"
+    const val NET_SHEET_ID = "$ROOT_SCHEME$TYPE_NETWORK_SHEET"
 
     //在线专辑
     const val TYPE_NETWORK_ALBUM = "${NETWORK}_album"

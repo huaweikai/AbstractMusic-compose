@@ -29,7 +29,6 @@ import coil.transform.RoundedCornersTransformation
 import coil.transform.Transformation
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
-import com.hua.abstractmusic.other.Constant.SHEET_ID
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.LocalPopWindow
 import com.hua.abstractmusic.ui.LocalPopWindowItem
@@ -184,7 +183,6 @@ fun PopupWindow(
                     viewModel.addQueue(item,true)
                 })
                 Text(text = "添加到歌单", modifier = Modifier.clickable {
-                    viewModel.init(SHEET_ID)
                     state.value = false
                     addMore.value = true
                 })

@@ -15,6 +15,7 @@ import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.LyricsEntry
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant
+import com.hua.abstractmusic.other.Constant.NET_SHEET_ID
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.repository.NetRepository
 import com.hua.abstractmusic.services.MediaItemTree
@@ -54,9 +55,11 @@ class PlayingViewModel @Inject constructor(
     val lyricList: State<List<LyricsEntry>> get() = _lyricsList
 
     val localSheetList = mutableStateOf<List<MediaData>>(emptyList())
+    val netSheetList = mutableStateOf<List<MediaData>>(emptyList())
 
     init {
-        localListMap[Constant.SHEET_ID] = localSheetList
+        localListMap[Constant.LOCAL_SHEET_ID] = localSheetList
+        netListMap[NET_SHEET_ID] = netSheetList
     }
 
 

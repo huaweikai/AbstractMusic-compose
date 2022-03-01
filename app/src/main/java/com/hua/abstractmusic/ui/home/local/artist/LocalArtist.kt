@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.ui.home.local.artist
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,7 +21,7 @@ import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
  * @Date   : 2022/01/18
  * @Desc   :
  */
-@androidx.media3.common.util.UnstableApi
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun LocalArtist(
     homeViewModel: HomeViewModel = LocalHomeViewModel.current,

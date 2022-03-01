@@ -45,54 +45,56 @@ fun LocalAlbumDetail(
 ) {
 
     DisposableEffect(Unit) {
-        detailViewModel.initializeController()
         detailViewModel.id = item.mediaId
+        detailViewModel.initializeController()
         this.onDispose {
             detailViewModel.releaseBrowser()
         }
     }
-
-    LazyColumn(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        item {
-            AlbumDetailDesc(item = item)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(40.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                PlayIcon(
+    Column(Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+        ) {
+            item {
+                AlbumDetailDesc(item = item)
+                Row(
                     modifier = Modifier
-                        .weight(1f),
-                    desc = "播放全部"
+                        .fillMaxWidth()
+                        .height(40.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    detailViewModel.setPlaylist(0, detailViewModel.albumDetail.value)
+                    PlayIcon(
+                        modifier = Modifier
+                            .weight(1f),
+                        desc = "播放全部"
+                    ) {
+                        detailViewModel.setPlaylist(0, detailViewModel.albumDetail.value)
+                    }
+                    PlayIcon(
+                        modifier = Modifier
+                            .weight(1f),
+                        desc = "随机播放"
+                    ) {
+                        //todo: 随机播放
+                    }
                 }
-                PlayIcon(
-                    modifier = Modifier
-                        .weight(1f),
-                    desc = "随机播放"
-                ) {
-                    //todo: 随机播放
-                }
+                Spacer(modifier = Modifier.height(10.dp))
             }
-            Spacer(modifier = Modifier.height(10.dp))
-        }
-        itemsIndexed(detailViewModel.albumDetail.value) { index, item ->
-            MusicItem(
-                data = item,
-                onClick = {
-                    detailViewModel.setPlaylist(index, detailViewModel.albumDetail.value)
-                }
-            )
-        }
-        item {
-            AlbumDetailTail(item = item)
+            itemsIndexed(detailViewModel.albumDetail.value) { index, item ->
+                MusicItem(
+                    data = item,
+                    onClick = {
+                        detailViewModel.setPlaylist(index, detailViewModel.albumDetail.value)
+                    }
+                )
+            }
+            item {
+                AlbumDetailTail(item = item)
+            }
         }
     }
-
 }
 
 @SuppressLint("UnsafeOptInUsageError")
@@ -118,7 +120,6 @@ private fun AlbumDetailDesc(
         Column(
             modifier = Modifier
                 .padding(start = 10.dp, end = 5.dp)
-                .fillMaxHeight()
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.Center
         ) {

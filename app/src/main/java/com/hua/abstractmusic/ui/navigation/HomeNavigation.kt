@@ -4,7 +4,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -15,6 +14,7 @@ import com.hua.abstractmusic.other.Constant.ALL_MUSIC_TYPE
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.LocalNetViewModel
+import com.hua.abstractmusic.ui.LocalUserViewModel
 import com.hua.abstractmusic.ui.home.local.LocalScreen
 import com.hua.abstractmusic.ui.home.local.album.detail.LocalAlbumDetail
 import com.hua.abstractmusic.ui.home.local.artist.detail.LocalArtistDetail
@@ -43,13 +43,11 @@ fun HomeNavigationNav(
     viewModel: HomeViewModel = LocalHomeViewModel.current,
     netViewModel: NetViewModel = LocalNetViewModel.current,
     homeNavController: NavHostController = LocalHomeNavController.current,
+    userViewModel: UserViewModel = LocalUserViewModel.current
 ) {
-    val userViewModel: UserViewModel = hiltViewModel()
     DisposableEffect(Unit) {
         viewModel.initializeController()
         netViewModel.initializeController()
-        viewModel.refresh()
-        netViewModel.refresh()
         this.onDispose {
             viewModel.releaseBrowser()
             netViewModel.releaseBrowser()
@@ -135,17 +133,24 @@ fun HomeNavigationNav(
         }
 
         composable(
-            route = "${Screen.LocalSheetDetailScreen.route}?sheetIndex={sheetIndex}",
+            route = "${Screen.LocalSheetDetailScreen.route}?sheetIndex={sheetIndex}&isLocal={isLocal}",
             arguments = arrayListOf(
                 navArgument(
                     name = "sheetIndex"
                 ) {
                     type = NavType.IntType
                     defaultValue = 0
+                },
+                navArgument(
+                    name = "isLocal"
+                ){
+                    type = NavType.BoolType
+                    defaultValue = true
                 }
             )
         ) {
             val sheetIndex = it.arguments?.getInt("sheetIndex") ?: 0
+            val isLocal = it.arguments?.getBoolean("isLocal") ?: true
             val mediaData = userViewModel.sheetList.value[sheetIndex]
             SheetDetail(mediaData = mediaData)
         }

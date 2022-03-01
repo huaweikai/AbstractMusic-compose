@@ -7,6 +7,8 @@ package com.hua.abstractmusic.bean.net
  */
 data class NetSheet(
     val id: Int,
-    val sheetName: String,
-    val sheetImg: String
+    val userId: Int,
+    val title: String,
+    val artUri: String? = null,
+    val sheetDesc: String? = null
 )

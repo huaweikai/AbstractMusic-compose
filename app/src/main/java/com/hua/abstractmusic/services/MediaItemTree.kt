@@ -9,13 +9,14 @@ import com.google.common.collect.ImmutableList
 import com.hua.abstractmusic.other.Constant.ALBUM_ID
 import com.hua.abstractmusic.other.Constant.ALL_ID
 import com.hua.abstractmusic.other.Constant.ARTIST_ID
+import com.hua.abstractmusic.other.Constant.LOCAL_SHEET_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ALL_MUSIC_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ARTIST_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_BANNER_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_RECOMMEND_ID
+import com.hua.abstractmusic.other.Constant.NET_SHEET_ID
 import com.hua.abstractmusic.other.Constant.ROOT_SCHEME
-import com.hua.abstractmusic.other.Constant.SHEET_ID
 
 
 /**
@@ -38,9 +39,9 @@ class MediaItemTree(
     private fun initialize() {
         val list = listOf(
             ROOT_SCHEME, ALL_ID, ALBUM_ID,
-            ARTIST_ID, SHEET_ID, NETWORK_ALBUM_ID,
+            ARTIST_ID, LOCAL_SHEET_ID, NETWORK_ALBUM_ID,
             NETWORK_ARTIST_ID, NETWORK_BANNER_ID,
-            NETWORK_RECOMMEND_ID, NETWORK_ALL_MUSIC_ID
+            NETWORK_RECOMMEND_ID, NETWORK_ALL_MUSIC_ID, NET_SHEET_ID
         )
         list.forEach {
             treeNodes[it] = MediaItemNode(

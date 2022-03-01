@@ -100,10 +100,12 @@ fun NetSheet.toMediaItem(parentId: Uri) =
     MediaItem.Builder()
         .setMediaMetadata(
             MediaMetadata.Builder()
-                .setTitle(this@toMediaItem.sheetName)
+                .setTitle(this@toMediaItem.title)
                 .setIsPlayable(false)
                 .setFolderType(MediaMetadata.FOLDER_TYPE_PLAYLISTS)
-                .setArtworkUri(Uri.parse(this.sheetImg))
+                .setArtworkUri(
+                    if(this.artUri == null) null else Uri.parse(this.artUri)
+                )
                 .build()
         )
         .setMediaId(parentId.buildUpon().appendPath(this@toMediaItem.id.toString()).toString())

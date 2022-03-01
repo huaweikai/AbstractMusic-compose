@@ -3,12 +3,14 @@ package com.hua.abstractmusic.repository
 import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.media3.common.MediaItem
+import com.hua.abstractmusic.db.user.UserDao
 import com.hua.abstractmusic.net.MusicService
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ALBUM
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ALL_MUSIC
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ARTIST
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_BANNER
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_RECOMMEND
+import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_SHEET
 import com.hua.abstractmusic.other.NetWork.SUCCESS
 import com.hua.abstractmusic.utils.toMediaItem
 
@@ -19,7 +21,8 @@ import com.hua.abstractmusic.utils.toMediaItem
  */
 @SuppressLint("UnsafeOptInUsageError")
 class NetRepository(
-    private val service: MusicService
+    private val service: MusicService,
+    private val userDao: UserDao
 ) {
 
     suspend fun selectList(parentId: Uri): List<MediaItem>? {
@@ -51,6 +54,15 @@ class NetRepository(
                         result.add(it.toMediaItem(parentId))
                     }
                 }
+                TYPE_NETWORK_SHEET -> {
+                    if (userDao.userInRoom() == 0) {
+                        emptyList<MediaItem>()
+                    } else {
+                        service.getUserSheet(userDao.getUserInfo()!!.token).data?.forEach {
+                            result.add(it.toMediaItem(parentId))
+                        }
+                    }
+                }
                 else -> emptyList<MediaItem>()
             }
             result
@@ -77,7 +89,10 @@ class NetRepository(
                         service.getBannerById(id).data
                     }
                     TYPE_NETWORK_RECOMMEND -> {
-                        service.getRecommendList(id).data
+                        service.getMusicBySheetId(id).data
+                    }
+                    TYPE_NETWORK_SHEET -> {
+                        service.getMusicBySheetId(id).data
                     }
                     else -> emptyList()
                 }

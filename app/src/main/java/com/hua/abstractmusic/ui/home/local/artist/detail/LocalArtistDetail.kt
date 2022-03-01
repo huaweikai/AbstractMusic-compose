@@ -74,7 +74,7 @@ fun LocalArtistDetail(
             Spacer(modifier = Modifier.padding(top = 10.dp))
             Text(text = "${item.mediaMetadata.title}")
         }
-        ArtistHorizontalPager(viewModel = viewModel)
+        ArtistHorizontalPager(viewModel = viewModel, modifier = Modifier.fillMaxSize())
     }
 }
 
@@ -83,6 +83,7 @@ fun LocalArtistDetail(
 @Composable
 private fun ArtistHorizontalPager(
     viewModel: ArtistDetailViewModel,
+    modifier:Modifier,
     homeNavController: NavHostController = LocalHomeNavController.current
 ) {
     val scope = rememberCoroutineScope()
@@ -118,23 +119,22 @@ private fun ArtistHorizontalPager(
         count = 2,
         state = pagerState,
         verticalAlignment = Alignment.Top,
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier
     ) { index ->
         when (index) {
             0 -> {
-                LazyColumn(Modifier.fillMaxWidth()) {
+                LazyColumn(Modifier.fillMaxHeight().fillMaxWidth()) {
                     itemsIndexed(viewModel.artistDetail.value) { index, item ->
                         MusicItem(data = item,
                             onClick = {
                                 viewModel.setPlaylist(index, viewModel.artistDetail.value)
-
                             }
                         )
                     }
                 }
             }
             1 -> {
-                LazyColumn(Modifier.fillMaxWidth()) {
+                LazyColumn(Modifier.fillMaxHeight().fillMaxWidth()) {
                     items(viewModel.artistAlbumDetail.value) { item ->
                         AlbumItem(item = item.mediaItem, modifier = Modifier.fillMaxWidth()) {
                             homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumId=${item.mediaId}")

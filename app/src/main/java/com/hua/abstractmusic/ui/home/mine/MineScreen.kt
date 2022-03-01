@@ -92,7 +92,8 @@ fun NoLogin(
 
 @Composable
 fun Mine(
-    viewModel: UserViewModel = LocalUserViewModel.current
+    viewModel: UserViewModel = LocalUserViewModel.current,
+    navHostController: NavHostController = LocalHomeNavController.current
 ) {
     val contentResolver = LocalContext.current.contentResolver
     val cropPicture = rememberLauncherForActivityResult(CropPhotoContract()) {
@@ -127,13 +128,25 @@ fun Mine(
             Text(text = "退出登录")
         }
     }
+    LocalSheet()
+    Sheet(
+        isLocal = false,
+        onClick = { index ->
+            navHostController.navigate("${Screen.LocalSheetDetailScreen.route}?sheetIndex=$index&isLocal=false")
+        },
+        newSheet = {
+
+        }
+    )
 }
 
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
-private fun LocalSheet(
+private fun Sheet(
+    isLocal: Boolean = true,
+    onClick: (Int) -> Unit,
+    newSheet: (String) -> Unit,
     userViewModel: UserViewModel = LocalUserViewModel.current,
-    navHostController: NavHostController = LocalHomeNavController.current
 ) {
     val diaLogState = remember {
         mutableStateOf(false)
@@ -154,7 +167,7 @@ private fun LocalSheet(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "本地歌单", fontSize = 16.sp)
+            Text(text = if (isLocal) "本地歌单" else "在线歌单", fontSize = 16.sp)
             Icon(
                 imageVector = Icons.Default.Add,
                 contentDescription = "",
@@ -166,7 +179,10 @@ private fun LocalSheet(
         LazyRow(
             modifier = Modifier.padding(vertical = 8.dp)
         ) {
-            itemsIndexed(userViewModel.sheetList.value) { index, sheet ->
+            itemsIndexed(
+                if (isLocal) userViewModel.sheetList.value
+                else userViewModel.netSheetList.value
+            ) { index, sheet ->
                 Column(
                     modifier = Modifier
                         .height(100.dp)
@@ -179,7 +195,7 @@ private fun LocalSheet(
                         modifier = Modifier
                             .size(70.dp)
                             .clickable {
-                                navHostController.navigate("${Screen.LocalSheetDetailScreen.route}?sheetIndex=$index")
+                                onClick(index)
                             },
                         uri = sheet.mediaItem.mediaMetadata.artworkUri,
                         desc = "",
@@ -192,8 +208,24 @@ private fun LocalSheet(
         }
     }
     CreateNewSheet(diaLogState = diaLogState) {
-        userViewModel.createSheet(it)
+        newSheet(it)
     }
+}
+
+@SuppressLint("UnsafeOptInUsageError")
+@Composable
+private fun LocalSheet(
+    navHostController: NavHostController = LocalHomeNavController.current,
+    userViewModel: UserViewModel = LocalUserViewModel.current
+) {
+    Sheet(
+        onClick = { index ->
+            navHostController.navigate("${Screen.LocalSheetDetailScreen.route}?sheetIndex=$index&isLocal=true")
+        },
+        newSheet = {
+            userViewModel.createSheet(it)
+        }
+    )
 }
 
 @Composable
