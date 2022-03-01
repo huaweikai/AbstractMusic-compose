@@ -23,7 +23,6 @@ import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.services.PlayerService
 import com.hua.abstractmusic.ui.utils.LCE
 import com.hua.abstractmusic.use_case.UseCase
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -152,10 +151,6 @@ abstract class BaseBrowserViewModel(
         browser.prepare()
         if (autoPlay) {
             browser.play()
-        }
-        viewModelScope.launch(Dispatchers.IO) {
-            useCase.clearCurrentListCase()
-            useCase.insertMusicToCurrentItemCase(mediaItems)
         }
     }
 

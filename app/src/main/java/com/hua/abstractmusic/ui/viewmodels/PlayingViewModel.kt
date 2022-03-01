@@ -194,6 +194,10 @@ class PlayingViewModel @Inject constructor(
             )
         }
         _currentPlayList.value = list
+        viewModelScope.launch(Dispatchers.IO) {
+            useCase.clearCurrentListCase()
+            useCase.insertMusicToCurrentItemCase(list)
+        }
     }
 
     fun seekTo(position: Long) {
