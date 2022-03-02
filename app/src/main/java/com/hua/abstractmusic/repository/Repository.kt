@@ -16,10 +16,6 @@ class Repository(
         dao.insertIntoSheet(sheetMusic)
     }
 
-    suspend fun deleteMusicOutSheet(sheetMusic: SheetMusic){
-        dao.deleteOutSheet(sheetMusic)
-    }
-
     suspend fun selectSheetName():List<String>?{
         return dao.selectLocalSheetTitle()
     }
@@ -58,5 +54,13 @@ class Repository(
 
     suspend fun clearCurrentPlayItems(){
         dao.deleteAllCurrentPlayItem()
+    }
+
+    suspend fun removeSheetItem(sheetId: String,musicId:String):Int{
+        return dao.removeSheetItem(SheetToMusic(sheetId.toInt(),musicId))
+    }
+
+    suspend fun removeSheet(sheetId:String){
+        dao.deleteSheet(sheetId)
     }
 }

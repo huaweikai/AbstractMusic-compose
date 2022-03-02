@@ -1,6 +1,7 @@
 package com.hua.abstractmusic.services.extensions
 
 import android.annotation.SuppressLint
+import android.os.Bundle
 import androidx.media3.common.MediaItem
 import androidx.media3.session.LibraryResult
 import androidx.media3.session.MediaLibraryService
@@ -8,6 +9,7 @@ import androidx.media3.session.MediaSession
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
+import com.hua.abstractmusic.other.NetWork
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.utils.isLocal
 import kotlinx.coroutines.CoroutineScope
@@ -62,10 +64,25 @@ class LibrarySessionCallback(
             }
         } else {
             scope.launch {
-                if (itemTree.networkGetChildren(parentId).isNullOrEmpty()) {
-                    session.notifyChildrenChanged(parentId, 0, null)
+                val result = itemTree.networkGetChildren(parentId)
+                if (result!!.code == NetWork.SUCCESS) {
+                    session.notifyChildrenChanged(
+                        parentId, Int.MAX_VALUE,
+                        MediaLibraryService.LibraryParams.Builder()
+                            .setExtras(Bundle().apply {
+                                putInt("network", NetWork.SUCCESS)
+                            })
+                            .build()
+                    )
                 } else {
-                    session.notifyChildrenChanged(parentId, 1, null)
+                    session.notifyChildrenChanged(
+                        parentId, Int.MAX_VALUE,
+                        MediaLibraryService.LibraryParams.Builder()
+                            .setExtras(Bundle().apply {
+                                putInt("network", NetWork.ERROR)
+                            })
+                            .build()
+                    )
                 }
             }
             return Futures.immediateFuture(

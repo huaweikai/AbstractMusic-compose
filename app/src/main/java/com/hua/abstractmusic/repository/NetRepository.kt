@@ -2,7 +2,10 @@ package com.hua.abstractmusic.repository
 
 import android.annotation.SuppressLint
 import android.net.Uri
+import android.util.Log
 import androidx.media3.common.MediaItem
+import com.hua.abstractmusic.bean.net.NetData
+import com.hua.abstractmusic.bean.net.NetSheet
 import com.hua.abstractmusic.db.user.UserDao
 import com.hua.abstractmusic.net.MusicService
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ALBUM
@@ -11,7 +14,9 @@ import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ARTIST
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_BANNER
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_RECOMMEND
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_SHEET
+import com.hua.abstractmusic.other.NetWork.ERROR
 import com.hua.abstractmusic.other.NetWork.SUCCESS
+import com.hua.abstractmusic.use_case.events.MusicInsertError
 import com.hua.abstractmusic.utils.toMediaItem
 
 /**
@@ -25,84 +30,108 @@ class NetRepository(
     private val userDao: UserDao
 ) {
 
-    suspend fun selectList(parentId: Uri): List<MediaItem>? {
+    suspend fun selectList(parentId: Uri): NetData<List<MediaItem>>? {
         return try {
-            val result = mutableListOf<MediaItem>()
+            val result: NetData<List<MediaItem>>
             when (parentId.authority) {
                 TYPE_NETWORK_ALBUM -> {
-                    service.getAlbumList().data?.forEach {
-                        result.add(it.toMediaItem(parentId))
+                    val list = mutableListOf<MediaItem>()
+                    val getResult = service.getAlbumList()
+                    getResult.data?.forEach {
+                        list.add(it.toMediaItem(parentId))
                     }
+                    result = NetData(getResult.code, list, getResult.msg)
                 }
                 TYPE_NETWORK_ALL_MUSIC -> {
+                    val list = mutableListOf<MediaItem>()
+                    val getResult = service.getAlbumList()
                     service.getAllMusic().data?.forEach {
-                        result.add(it.toMediaItem(parentId))
+                        list.add(it.toMediaItem(parentId))
                     }
+                    result = NetData(getResult.code, list, getResult.msg)
                 }
                 TYPE_NETWORK_ARTIST -> {
+                    val list = mutableListOf<MediaItem>()
+                    val getResult = service.getAlbumList()
                     service.getArtistList().data?.forEach {
-                        result.add(it.toMediaItem(parentId))
+                        list.add(it.toMediaItem(parentId))
                     }
+                    result = NetData(getResult.code, list, getResult.msg)
                 }
                 TYPE_NETWORK_BANNER -> {
+                    val list = mutableListOf<MediaItem>()
+                    val getResult = service.getAlbumList()
                     service.getBanner().data?.forEach {
-                        result.add(it.toMediaItem(parentId))
+                        list.add(it.toMediaItem(parentId))
                     }
+                    result = NetData(getResult.code, list, getResult.msg)
                 }
                 TYPE_NETWORK_RECOMMEND -> {
+                    val list = mutableListOf<MediaItem>()
+                    val getResult = service.getAlbumList()
                     service.getRecommend().data?.forEach {
-                        result.add(it.toMediaItem(parentId))
+                        list.add(it.toMediaItem(parentId))
                     }
+                    result = NetData(getResult.code, list, getResult.msg)
                 }
                 TYPE_NETWORK_SHEET -> {
+                    val list = mutableListOf<MediaItem>()
+                    val getResult = service.getAlbumList()
                     if (userDao.userInRoom() == 0) {
                         emptyList<MediaItem>()
                     } else {
                         service.getUserSheet(userDao.getUserInfo()!!.token).data?.forEach {
-                            result.add(it.toMediaItem(parentId))
+                            list.add(it.toMediaItem(parentId))
                         }
                     }
+                    result = NetData(getResult.code, list, getResult.msg)
                 }
-                else -> emptyList<MediaItem>()
+                else -> result = NetData(ERROR, emptyList(), "")
             }
             result
         } catch (e: Exception) {
-            emptyList()
+            NetData(ERROR, emptyList(), "")
         }
     }
 
-    suspend fun selectMusicById(parentId: Uri): List<MediaItem>? {
+    suspend fun selectMusicById(parentId: Uri): NetData<List<MediaItem>>? {
         return try {
-            val result = mutableListOf<MediaItem>()
+            val result: NetData<List<MediaItem>>
             val id = parentId.lastPathSegment
-            val list = if (id == null) {
-                emptyList()
+            val mediaItems = mutableListOf<MediaItem>()
+            val getResult = if (id == null) {
+                NetData(ERROR, null, "id为空")
             } else {
                 when (parentId.authority) {
                     TYPE_NETWORK_ALBUM -> {
-                        service.getMusicByAlbum(id).data
+                        service.getMusicByAlbum(id)
                     }
                     TYPE_NETWORK_ARTIST -> {
-                        service.getMusicByArtist(id).data
+                        service.getMusicByArtist(id)
                     }
                     TYPE_NETWORK_BANNER -> {
-                        service.getBannerById(id).data
+                        service.getBannerById(id)
                     }
                     TYPE_NETWORK_RECOMMEND -> {
-                        service.getMusicBySheetId(id).data
+                        service.getMusicBySheetId(id)
                     }
                     TYPE_NETWORK_SHEET -> {
-                        service.getMusicBySheetId(id).data
+                        service.getMusicBySheetId(id)
                     }
-                    else -> emptyList()
+                    else -> NetData(ERROR, null, "未知错误")
                 }
             }
-            list?.forEach {
-                result.add(it.toMediaItem(parentId))
+            if (getResult.code == SUCCESS) {
+                getResult.data?.forEach {
+                    mediaItems.add(it.toMediaItem(parentId))
+                }
+                result = NetData(getResult.code, mediaItems, "")
+            } else {
+                result = NetData(ERROR, null, getResult.msg)
             }
             result
         } catch (e: Exception) {
-            emptyList()
+            NetData(ERROR, null, "网络问题")
         }
     }
 
@@ -116,6 +145,65 @@ class NetRepository(
             }
         } catch (e: Exception) {
             ""
+        }
+    }
+
+    suspend fun createNewSheet(title: String) {
+        val token = userDao.getToken()
+        val result = service.createNewSheet(title, token)
+        if (result.code != SUCCESS) throw MusicInsertError(result.msg)
+    }
+
+    suspend fun insertMusicToSheet(sheetId: String, musicId: String) {
+        val token = userDao.getToken()
+        val result = service.insertMusicToSheet(
+            sheetId, musicId, token
+        )
+        if (result.code != SUCCESS) throw MusicInsertError(result.msg)
+    }
+
+    suspend fun updateSheet(sheet: NetSheet): NetData<Unit> {
+        return try {
+            val token = userDao.getToken()
+            service.updateSheet(
+                token, sheet
+            )
+        } catch (e: Exception) {
+            NetData(ERROR, null, "")
+        }
+    }
+
+    suspend fun selectSheetById(parentId: Uri): NetSheet {
+        return try {
+            val sheetId = parentId.lastPathSegment
+            val result = service.selectSheetById(sheetId!!)
+            Log.d("TAG", "selectSheetById: $sheetId")
+            Log.d("TAG", "selectSheetById result: $result")
+            if (result.code == SUCCESS) {
+                result.data!!
+            } else {
+                NetSheet(0, 0, "网络异常")
+            }
+        } catch (e: Exception) {
+            NetSheet(0, 0, "网络异常")
+        }
+    }
+
+    suspend fun removeSheetItem(sheetId: String, musicId: String): NetData<Unit> {
+        return try {
+            val token = userDao.getToken()
+            service.deleteMusicFromSheet(sheetId, musicId, token)
+        } catch (e: Exception) {
+            NetData(ERROR, null, "")
+        }
+    }
+
+    suspend fun removeSheet(sheetId: String) {
+        try {
+            val token = userDao.getToken()
+            service.deleteSheet(sheetId, token)
+        } catch (e: Exception) {
+
         }
     }
 }

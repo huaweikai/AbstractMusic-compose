@@ -11,12 +11,8 @@ import com.hua.abstractmusic.bean.*
  */
 @Dao
 interface MusicDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = REPLACE)
     suspend fun insertIntoSheet(sheetMusic: SheetMusic)
-
-    //删除歌单中的歌曲
-    @Delete
-    suspend fun deleteOutSheet(sheetMusic: SheetMusic)
 
     //根据歌单id检索音乐
     @Transaction
@@ -54,4 +50,12 @@ interface MusicDao {
     //删除播放歌单的所有音乐信息
     @Query("delete from currentplayitem")
     suspend fun deleteAllCurrentPlayItem()
+
+    //删除歌单中的歌曲
+    @Delete
+    suspend fun removeSheetItem(sheetToMusic: SheetToMusic):Int
+
+    //删除歌单
+    @Query("delete from sheet where sheetId = :sheetId")
+    suspend fun deleteSheet(sheetId: String)
 }

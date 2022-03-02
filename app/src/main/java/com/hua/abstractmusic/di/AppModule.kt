@@ -86,8 +86,9 @@ object AppModule {
     @Provides
     @Singleton
     fun provideNetRepository(
-        service: MusicService
-    ) = NetRepository(service)
+        service: MusicService,
+        userDao: UserDao
+    ) = NetRepository(service,userDao)
 
     @Provides
     @Singleton

@@ -19,6 +19,7 @@ import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.hua.abstractmusic.bean.MediaData
+import com.hua.abstractmusic.other.NetWork
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.services.PlayerService
 import com.hua.abstractmusic.ui.utils.LCE
@@ -55,21 +56,19 @@ abstract class BaseBrowserViewModel(
             params: MediaLibraryService.LibraryParams?
         ) {
             if (parentId in netListMap.keys) {
-                when (itemCount) {
-                    1 -> {
-                        val mediaItems = itemTree.getChildItem(parentId).map {
-                            MediaData(
-                                it,
-                                it.mediaId == browser.currentMediaItem?.mediaId
-                            )
-                        }
-                        //根据parentId去拿数据
-                        netListMap[parentId]!!.value = mediaItems
-                        _screenState.value = LCE.Success
+                val network = params?.extras?.getInt("network") ?: NetWork.ERROR
+                if (network == NetWork.SUCCESS) {
+                    val mediaItems = itemTree.getChildItem(parentId).map {
+                        MediaData(
+                            it,
+                            it.mediaId == browser.currentMediaItem?.mediaId
+                        )
                     }
-                    0 -> {
-                        _screenState.value = LCE.Error
-                    }
+                    //根据parentId去拿数据
+                    netListMap[parentId]!!.value = mediaItems
+                    _screenState.value = LCE.Success
+                } else {
+                    _screenState.value = LCE.Error
                 }
             } else {
                 onMediaChildrenChanged(browser, parentId, itemCount, params)
@@ -90,10 +89,6 @@ abstract class BaseBrowserViewModel(
             Log.d("TAG", "onPlaylistMetadataChanged: $mediaMetadata")
         }
 
-//        override fun onIsPlayingChanged(isPlaying: Boolean) {
-//            onMediaPlayerStateChanged(isPlaying)
-//        }
-
         override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
             onMediaPlayerStateChanged(playWhenReady)
         }
@@ -103,10 +98,6 @@ abstract class BaseBrowserViewModel(
         }
 
     }
-
-//    init {
-//        initializeController()
-//    }
 
 
     private val _screenState = mutableStateOf<LCE>(LCE.Loading)
@@ -252,7 +243,6 @@ abstract class BaseBrowserViewModel(
     open fun onMediaPlayerStateChanged(isPlaying: Boolean) {}
 
     open fun onMediaPlayBackStateChange(playerState: Int) {}
-
 
 
 }

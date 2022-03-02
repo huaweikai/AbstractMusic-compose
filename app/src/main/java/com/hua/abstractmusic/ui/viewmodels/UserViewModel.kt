@@ -13,22 +13,22 @@ import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.bean.net.NetData
 import com.hua.abstractmusic.bean.user.UserBean
-import com.hua.abstractmusic.other.Constant.BUCKET_HEAD_IMG
-import com.hua.abstractmusic.other.Constant.LOCAL_SHEET_ID
-import com.hua.abstractmusic.other.Constant.NET_SHEET_ID
+import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.other.NetWork.ERROR
 import com.hua.abstractmusic.other.NetWork.NO_USER
 import com.hua.abstractmusic.other.NetWork.SERVER_ERROR
 import com.hua.abstractmusic.other.NetWork.SUCCESS
+import com.hua.abstractmusic.repository.NetRepository
 import com.hua.abstractmusic.repository.Repository
 import com.hua.abstractmusic.repository.UserRepository
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.use_case.UseCase
 import com.hua.abstractmusic.use_case.events.MusicInsertError
+import com.hua.abstractmusic.utils.isLocal
 import com.hua.abstractmusic.utils.toDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -42,8 +42,9 @@ class UserViewModel @Inject constructor(
     application: Application,
     useCase: UseCase,
     itemTree: MediaItemTree,
-    private val repository: Repository,
-    private val userRepository: UserRepository
+    private val netRepository: NetRepository,
+    private val userRepository: UserRepository,
+    private val repository: Repository
 ) : BaseBrowserViewModel(application, useCase, itemTree) {
 
     private val _userIsOut = mutableStateOf(true)
@@ -62,7 +63,48 @@ class UserViewModel @Inject constructor(
     }
 
 
-    val user = mutableStateOf(UserBean(0, "", "", "", "", ""))
+    val sheetList = mutableStateOf<List<MediaData>>(emptyList())
+    val netSheetList = mutableStateOf<List<MediaData>>(emptyList())
+
+    init {
+        localListMap[Constant.LOCAL_SHEET_ID] = sheetList
+        netListMap[Constant.NET_SHEET_ID] = netSheetList
+    }
+
+    val user = MutableStateFlow(UserBean(0, "", "", "", "", ""))
+
+    override fun onMediaConnected() {
+        refresh()
+    }
+
+    fun putHeadPicture(
+        url: String,
+        contentResolver: ContentResolver
+    ) {
+        val uri = Uri.parse(url)
+        val byte = contentResolver.openInputStream(uri)
+        val file = DocumentFile.fromSingleUri(getApplication(), uri)
+        viewModelScope.launch(Dispatchers.IO) {
+            val fileName = "${Constant.BUCKET_HEAD_IMG}/${user.value.id}-head-${
+                System.currentTimeMillis().toDate()
+            }.png"
+            val result = userRepository.putFile(
+                fileName,
+                byte,
+                file,
+            ) {
+                Log.d("TAG", "putHeadPicture: ${it.transferPercentage}")
+            }
+            if (result.code == 200) {
+                userRepository.updateUser(result.data!!).also {
+                    if (it.code == 200) {
+                        selectUserInfo()
+                    }
+                }
+            }
+            contentResolver.delete(uri, null, null)
+        }
+    }
 
     fun selectUserInfo() {
         viewModelScope.launch {
@@ -74,182 +116,44 @@ class UserViewModel @Inject constructor(
 
     fun logoutUser() {
         viewModelScope.launch {
-            _userIsOut.value = userRepository.logoutUser().code == SUCCESS
+            val result = userRepository.logoutUser().code
+            val isSuccess = result == SUCCESS
+            if (isSuccess) {
+                netSheetList.value = emptyList()
+            }
+            _userIsOut.value = isSuccess
         }
     }
 
-
-    private val _codeText = mutableStateOf("点击获取验证码")
-    val codeText: State<String> get() = _codeText
-
-    private val _loginCodeText = mutableStateOf("点击获取验证码")
-    val loginCodeText: State<String> get() = _loginCodeText
-
-
-    val loginEmailText = mutableStateOf("")
-    val loginPasswordText = mutableStateOf("")
-    val loginEmailCodeText = mutableStateOf("")
-    val loginCodeIsWait = mutableStateOf(false)
-    val loginEmailError = mutableStateOf(false)
-    val loginPassWordError = mutableStateOf(false)
-    val loginEmailCodeError = mutableStateOf(false)
-    val loginEmailCodeEnable = mutableStateOf(false)
-
-    fun loginClear() {
-        loginEmailText.value = ""
-        loginPasswordText.value = ""
-        loginEmailCodeText.value = ""
-        loginEmailError.value = false
-        loginPassWordError.value = false
-        loginEmailCodeEnable.value = false
-        loginEmailCodeError.value = false
-    }
-
-
-    //注册时，防止横屏数据消失
-    val registerEmailText = mutableStateOf("")
-    val registerPasswordText = mutableStateOf("")
-    val registerPasswordAgainText = mutableStateOf("")
-    val registerEmailCodeText = mutableStateOf("")
-    val registerNameText = mutableStateOf("")
-    val registerEmailError = mutableStateOf(false)
-    val registerPassWordAgainError = mutableStateOf(false)
-    val registerEmailCodeError = mutableStateOf(false)
-    val registerPassWordError = mutableStateOf(false)
-    val registerNameError = mutableStateOf(false)
-    val registerButtonEnabled = mutableStateOf(false)
-    val registerCodeButtonEnabled = mutableStateOf(false)
-
-
-    fun registerClear() {
-        //在退出注册时，将已有数据清空
-        registerEmailText.value = ""
-        registerPasswordText.value = ""
-        registerPasswordAgainText.value = ""
-        registerEmailCodeText.value = ""
-        registerEmailError.value = false
-        registerPassWordAgainError.value = false
-        registerEmailCodeError.value = false
-        registerPassWordError.value = false
-        registerButtonEnabled.value = false
-        registerCodeButtonEnabled.value = false
-        registerNameError.value = false
-        registerNameText.value = ""
-    }
-
-    suspend fun getLoginEmailCode(): String {
-        loginEmailCodeEnable.value = false
-        val result = userRepository.getEmailCodeWithLogin(loginEmailText.value)
-        if (result.code == SUCCESS) {
-            viewModelScope.launch {
-                loginCodeIsWait.value = true
-                for (i in 120 downTo 0) {
-                    _loginCodeText.value = "再获取还需${i}秒"
-                    delay(1000L)
-                }
-                _loginCodeText.value = "点击获取验证码"
-                loginCodeIsWait.value = false
-                loginEmailCodeEnable.value = true
-            }
-        } else if (result.code == SERVER_ERROR || result.code == ERROR) {
-            loginEmailCodeEnable.value = true
-        }
-        return result.msg
-    }
-
-    suspend fun getRegisterEmailCode(): String {
-        registerCodeButtonEnabled.value = false
-        val result = userRepository.getEmailCode(registerEmailText.value)
-        if (result.code == SUCCESS) {
-            viewModelScope.launch {
-                for (i in 120 downTo 0) {
-                    _codeText.value = "再获取还需${i}秒"
-                    delay(1000L)
-                }
-                _codeText.value = "点击获取验证码"
-                registerCodeButtonEnabled.value = true
-            }
-        } else if (result.code == SERVER_ERROR || result.code == ERROR) {
-            registerCodeButtonEnabled.value = true
-        }
-        return result.msg
-    }
-
-    suspend fun register(): NetData<String> {
-        return userRepository.register(
-            registerEmailText.value,
-            registerNameText.value,
-            registerPasswordText.value,
-            registerEmailCodeText.value.toInt()
-        )
-    }
-
-    suspend fun login(isPassWord: Boolean): NetData<String> {
-        return if (isPassWord) loginWithEmail() else loginWithCode()
-    }
-
-    private suspend fun loginWithEmail(): NetData<String> {
-        val result = userRepository.loginWithEmail(
-            loginEmailText.value,
-            loginPasswordText.value
-        )
-        _userIsOut.value = result.code != SUCCESS
-        return result
-    }
-
-    private suspend fun loginWithCode(): NetData<String> {
-        val result = userRepository.loginWithCode(
-            loginEmailText.value,
-            loginEmailCodeText.value.toInt()
-        )
-        _userIsOut.value = result.code != SUCCESS
-        return result
-    }
-
-    fun putHeadPicture(
-        url: String,
-        contentResolver: ContentResolver
-    ) {
-        val uri = Uri.parse(url)
-        val byte = contentResolver.openInputStream(uri)
-        val file = DocumentFile.fromSingleUri(getApplication(), uri)
-        viewModelScope.launch(Dispatchers.IO) {
-            val fileName = "${BUCKET_HEAD_IMG}/${user.value.id}-head-${
-                System.currentTimeMillis().toDate()
-            }.png"
-            val result = userRepository.putHeadPicture(
-                fileName,
-                byte,
-                file,
-            ) {
-                Log.d("TAG", "putHeadPicture: ${it.transferPercentage}")
-            }
-            if (result.code == 200) {
-                selectUserInfo()
-            }
-            contentResolver.delete(uri, null, null)
-        }
-    }
-
-    val sheetList = mutableStateOf<List<MediaData>>(emptyList())
-    val netSheetList = mutableStateOf<List<MediaData>>(emptyList())
-    init {
-        localListMap[LOCAL_SHEET_ID] = sheetList
-        netListMap[NET_SHEET_ID] = netSheetList
-    }
-
-    override fun onMediaConnected() {
-        refresh()
-    }
-
-    fun createSheet(sheetName: String,isLocal:Boolean) {
+    fun createSheet(sheetName: String, isLocal: Boolean) {
         viewModelScope.launch(Dispatchers.Main) {
             try {
-                useCase.insertSheetCase(sheetName)
+                if (isLocal) {
+                    useCase.insertSheetCase(sheetName)
+                } else {
+                    netRepository.createNewSheet(sheetName)
+                }
                 refresh()
+                Toast.makeText(getApplication(), "创建歌单成功", Toast.LENGTH_SHORT).show()
             } catch (e: MusicInsertError) {
                 Toast.makeText(getApplication(), "${e.message}", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    fun deleteSheet(sheetId: String) {
+        viewModelScope.launch {
+            val id = Uri.parse(sheetId).lastPathSegment
+            try {
+                if (sheetId.isLocal()) {
+                    repository.removeSheet(id!!)
+                } else {
+                    netRepository.removeSheet(id!!)
+                }
+                refresh()
+            } catch (e: Exception) {
+            }
+
         }
     }
 }

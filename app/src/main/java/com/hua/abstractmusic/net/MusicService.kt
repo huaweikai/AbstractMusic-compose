@@ -96,4 +96,9 @@ interface MusicService {
         @Query("token")token: String,
         @Body sheet: NetSheet
     ):NetData<Unit>
+
+    @GET("sheet/{id}/detail")
+    suspend fun selectSheetById(
+        @Path("id") id: String
+    ):NetData<NetSheet>
 }

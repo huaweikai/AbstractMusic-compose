@@ -16,7 +16,6 @@ import com.obs.services.exception.ObsException
 import com.obs.services.model.ObjectMetadata
 import com.obs.services.model.ProgressStatus
 import com.obs.services.model.PutObjectRequest
-import com.obs.services.model.PutObjectResult
 import java.io.InputStream
 
 /**
@@ -142,12 +141,12 @@ class UserRepository(
         }
     }
 
-     suspend fun putHeadPicture(
+    fun putFile(
         fileName: String,
         byte: InputStream?,
         file: DocumentFile?,
         progress: (ProgressStatus) -> Unit
-    ): NetData<Unit> {
+    ): NetData<String> {
         return try {
             val request = PutObjectRequest(BUCKET_NAME, fileName)
                 .apply {
@@ -159,16 +158,17 @@ class UserRepository(
                         progress(it)
                     }
                 }
-            return updateUser(obsClient.putObject(request))
+            return NetData(SUCCESS,obsClient.putObject(request).objectUrl,"")
+//            updateUser(obsClient.putObject(request))
         } catch (e: ObsException) {
             NetData(ERROR, null, "服务器异常")
         }
     }
 
-    private suspend fun updateUser(objectResult: PutObjectResult): NetData<Unit> {
+    suspend fun updateUser(url:String): NetData<Unit> {
         val user = dao.getUserInfo()
         val netUser =
-            NetUser(user?.id, user?.userName!!, user.email, user.password, objectResult.objectUrl)
+            NetUser(user?.id, user?.userName!!, user.email, user.password, url)
         return try {
             if (userService.setUser(user.token, netUser).code == 200) {
                 val result = userService.getUser(dao.getToken())

@@ -8,9 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,7 +16,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -33,6 +33,7 @@ import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.LocalPopWindow
 import com.hua.abstractmusic.ui.LocalPopWindowItem
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
+import com.hua.abstractmusic.utils.isLocal
 import kotlinx.coroutines.launch
 
 
@@ -49,7 +50,11 @@ fun MusicItem(
     modifier: Modifier = Modifier,
     state: MutableState<Boolean> = LocalPopWindow.current,
     nowItem: MutableState<MediaItem> = LocalPopWindowItem.current,
-    onClick: () -> Unit,
+    onMoreClick: () -> Unit = {
+        state.value = true
+        nowItem.value = data.mediaItem
+    },
+    onClick: () -> Unit
 ) {
     ConstraintLayout(
         modifier = modifier
@@ -100,8 +105,7 @@ fun MusicItem(
                     bottom.linkTo(parent.bottom, 3.dp)
                 }
                 .clickable {
-                    state.value = true
-                    nowItem.value = data.mediaItem
+                    onMoreClick()
                 }
         )
 
@@ -131,6 +135,7 @@ fun ArtImage(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun PopupWindow(
@@ -152,18 +157,19 @@ fun PopupWindow(
             Column(
                 modifier = Modifier
                     .width((config.screenWidthDp * 0.75).dp)
-                    .height((config.screenHeightDp * 0.6).dp)
+                    .heightIn(max = (config.screenHeightDp * 0.6).dp)
                     .padding(horizontal = 8.dp)
-                    .background(MaterialTheme.colorScheme.background, RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.background, RoundedCornerShape(12.dp))
             ) {
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        .height(70.dp),
+                        .height(90.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Spacer(modifier = Modifier.width(8.dp))
                     ArtImage(
-                        modifier = Modifier.size(50.dp),
+                        modifier = Modifier.size(80.dp),
                         uri = item.mediaMetadata.artworkUri,
                         desc = "",
                         transformation = RoundedCornersTransformation(16f)
@@ -173,19 +179,23 @@ fun PopupWindow(
                         TitleAndArtist(
                             title = "${item.mediaMetadata.title}",
                             subTitle = "${item.mediaMetadata.artist}",
+                            height = 4.dp
                         )
                     }
                 }
-                Text(text = "添加到播放队列",modifier = Modifier.clickable {
+                Divider()
+                Spacer(modifier = Modifier.height(8.dp))
+                PopItem(desc = "添加到播放队列") {
                     viewModel.addQueue(item)
-                })
-                Text(text = "添加到下一曲播放", modifier = Modifier.clickable {
-                    viewModel.addQueue(item,true)
-                })
-                Text(text = "添加到歌单", modifier = Modifier.clickable {
+                }
+                PopItem(desc = "添加到下一曲播放") {
+                    viewModel.addQueue(item, true)
+                }
+                PopItem(desc = "添加到歌单") {
+                    viewModel.refresh()
                     state.value = false
                     addMore.value = true
-                })
+                }
             }
         }
     }
@@ -193,31 +203,68 @@ fun PopupWindow(
         Dialog(onDismissRequest = {
             addMore.value = false
         }) {
+            val sheets = if (item.mediaId.isLocal()) {
+                viewModel.localSheetList.value
+            } else {
+                viewModel.netSheetList.value
+            }
             Column(
                 modifier = Modifier
                     .width((config.screenWidthDp * 0.75).dp)
-                    .height((config.screenHeightDp * 0.4).dp)
+                    .heightIn(max = (config.screenHeightDp * 0.4).dp)
                     .padding(horizontal = 8.dp)
                     .background(MaterialTheme.colorScheme.background, RoundedCornerShape(8.dp))
             ) {
-                Text(text = "歌单")
-                LazyColumn(Modifier.fillMaxSize()) {
-                    items(viewModel.localSheetList.value) { sheet ->
-                        Text(
-                            text = "${sheet.mediaItem.mediaMetadata.title}",
-                            modifier = Modifier.clickable {
-                                scope.launch {
-                                    viewModel.insertMusicToSheet(
-                                        mediaItem = item,
-                                        parentId = sheet.mediaId
-                                    )
-                                    addMore.value = false
-                                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "歌单", fontSize = 22.sp, modifier = Modifier.padding(start = 4.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+                Divider()
+                Spacer(modifier = Modifier.height(8.dp))
+                LazyColumn(Modifier.fillMaxWidth()) {
+                    items(sheets) { sheet ->
+                        PopItem(desc = "${sheet.mediaItem.mediaMetadata.title}") {
+                            scope.launch {
+                                viewModel.insertMusicToSheet(
+                                    mediaItem = item,
+                                    parentId = sheet.mediaId
+                                )
+                                addMore.value = false
                             }
-                        )
+                        }
                     }
                 }
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PopItem(
+    desc: String,
+    onClick: () -> Unit
+) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp)
+            .height(50.dp)
+            .background(
+                MaterialTheme.colorScheme.background,
+                RoundedCornerShape(8.dp)
+            )
+            .clickable {
+                onClick()
+            },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = desc,
+            fontSize = 16.sp,
+            maxLines = 1,
+            textAlign = TextAlign.Start,
+        )
     }
 }

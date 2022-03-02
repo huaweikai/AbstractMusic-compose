@@ -61,3 +61,7 @@ val LocalPopWindow = staticCompositionLocalOf<MutableState<Boolean>>{
 val LocalPopWindowItem = staticCompositionLocalOf<MutableState<MediaItem>>{
     error("")
 }
+
+val LocalUserNavController = staticCompositionLocalOf<NavHostController>{
+    error("")
+}

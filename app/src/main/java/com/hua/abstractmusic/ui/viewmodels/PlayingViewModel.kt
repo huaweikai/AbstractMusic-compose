@@ -284,9 +284,14 @@ class PlayingViewModel @Inject constructor(
     }
 
     suspend fun insertMusicToSheet(mediaItem: MediaItem, parentId: String) {
-        val sheetId = Uri.parse(parentId).lastPathSegment!!.toInt()
+        val sheetId = Uri.parse(parentId).lastPathSegment
         try {
-            useCase.insertSheetCase(mediaItem, sheetId)
+            if(parentId.isLocal()){
+                useCase.insertSheetCase(mediaItem, sheetId!!.toInt())
+            }else{
+                val mediaId = Uri.parse(mediaItem.mediaId).lastPathSegment
+                repository.insertMusicToSheet(sheetId!!,mediaId!!)
+            }
         } catch (e: MusicInsertError) {
             withContext(Dispatchers.Main) {
                 Toast.makeText(getApplication(), "${e.message}", Toast.LENGTH_SHORT).show()

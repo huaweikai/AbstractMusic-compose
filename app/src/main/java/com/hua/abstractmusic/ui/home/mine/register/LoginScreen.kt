@@ -17,8 +17,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.hua.abstractmusic.ui.viewmodels.UserViewModel
+import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.EmailCodeEditText
 import com.hua.abstractmusic.ui.utils.EmailEditText
@@ -35,8 +36,8 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun LoginScreen(
-    navController: NavHostController,
-    viewModel: UserViewModel
+    navController: NavHostController = LocalHomeNavController.current,
+    viewModel: LoginViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -152,7 +153,7 @@ fun LoginScreen(
 
 @Composable
 private fun LoginEd(
-    viewModel: UserViewModel,
+    viewModel: LoginViewModel,
     modifier: Modifier,
     loginMode: Boolean
 ) {

@@ -27,7 +27,6 @@ import com.hua.abstractmusic.ui.home.net.detail.NetDetail
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.viewmodels.NetViewModel
-import com.hua.abstractmusic.ui.viewmodels.UserViewModel
 
 /**
  * @author : huaweikai
@@ -43,7 +42,6 @@ fun HomeNavigationNav(
     viewModel: HomeViewModel = LocalHomeViewModel.current,
     netViewModel: NetViewModel = LocalNetViewModel.current,
     homeNavController: NavHostController = LocalHomeNavController.current,
-    userViewModel: UserViewModel = LocalUserViewModel.current
 ) {
     DisposableEffect(Unit) {
         viewModel.initializeController()
@@ -108,13 +106,13 @@ fun HomeNavigationNav(
         composable(
             route = Screen.RegisterScreen.route
         ) {
-            RegisterScreen(userViewModel, homeNavController)
+            RegisterScreen()
         }
 
         composable(
             route = Screen.LoginScreen.route
         ) {
-            LoginScreen(homeNavController, userViewModel)
+            LoginScreen()
         }
 
         composable(
@@ -149,9 +147,14 @@ fun HomeNavigationNav(
                 }
             )
         ) {
+            val userViewModel = LocalUserViewModel.current
             val sheetIndex = it.arguments?.getInt("sheetIndex") ?: 0
             val isLocal = it.arguments?.getBoolean("isLocal") ?: true
-            val mediaData = userViewModel.sheetList.value[sheetIndex]
+            val mediaData = if(isLocal){
+                userViewModel.sheetList.value[sheetIndex]
+            }else{
+                userViewModel.netSheetList.value[sheetIndex]
+            }
             SheetDetail(mediaData = mediaData)
         }
     }

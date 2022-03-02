@@ -55,6 +55,7 @@ fun AppNavigation(
                 LocalHomeViewModel provides hiltViewModel(),
                 LocalPopWindowItem provides popItem
             ){
+                LocalUserViewModel.current.initializeController()
                 HomeScreen()
             }
         }

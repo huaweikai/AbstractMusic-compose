@@ -8,6 +8,7 @@ import android.net.Uri
 import android.provider.MediaStore
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import com.hua.abstractmusic.bean.net.NetData
 import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.other.Constant.ALBUM_ART_URI
 import com.hua.abstractmusic.other.Constant.ALBUM_ID
@@ -346,11 +347,11 @@ class MediaStoreScanner(
         }
     }
 
-    suspend fun selectList(parentId: Uri): List<MediaItem>? {
+    suspend fun selectList(parentId: Uri): NetData<List<MediaItem>>? {
         return netRepository.selectList(parentId)
     }
 
-    suspend fun selectMusicById(parentId: Uri): List<MediaItem>? {
+    suspend fun selectMusicById(parentId: Uri): NetData<List<MediaItem>>? {
         return netRepository.selectMusicById(parentId)
     }
 }

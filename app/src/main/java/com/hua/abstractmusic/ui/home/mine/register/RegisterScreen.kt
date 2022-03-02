@@ -4,13 +4,17 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.hua.abstractmusic.ui.viewmodels.UserViewModel
+import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.utils.EmailCodeEditText
 import com.hua.abstractmusic.ui.utils.EmailEditText
 import com.hua.abstractmusic.ui.utils.PassWordEditText
@@ -28,8 +32,8 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun RegisterScreen(
-    viewModel: UserViewModel,
-    navHostController: NavHostController
+    viewModel: RegisterViewModel = hiltViewModel(),
+    navHostController: NavHostController = LocalHomeNavController.current
 ) {
     LaunchedEffect(viewModel.registerEmailText.value) {
         viewModel.registerCodeButtonEnabled.value = viewModel.registerEmailText.value.isEmail()

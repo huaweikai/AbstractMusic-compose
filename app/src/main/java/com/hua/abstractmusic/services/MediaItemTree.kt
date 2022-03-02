@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import com.google.common.collect.ImmutableList
+import com.hua.abstractmusic.bean.net.NetData
 import com.hua.abstractmusic.other.Constant.ALBUM_ID
 import com.hua.abstractmusic.other.Constant.ALL_ID
 import com.hua.abstractmusic.other.Constant.ARTIST_ID
@@ -17,6 +18,7 @@ import com.hua.abstractmusic.other.Constant.NETWORK_BANNER_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_RECOMMEND_ID
 import com.hua.abstractmusic.other.Constant.NET_SHEET_ID
 import com.hua.abstractmusic.other.Constant.ROOT_SCHEME
+import com.hua.abstractmusic.other.NetWork
 
 
 /**
@@ -78,7 +80,7 @@ class MediaItemTree(
         }
     }
 
-    suspend fun networkGetChildren(parentId: String): List<MediaItem>? {
+    suspend fun networkGetChildren(parentId: String): NetData<List<MediaItem>>? {
         val parentIdUri = Uri.parse(parentId)
         return if (parentIdUri.lastPathSegment.isNullOrEmpty()) {
             scanner.selectList(parentIdUri)
@@ -91,7 +93,12 @@ class MediaItemTree(
                 )
             }
             this?.let {
-                treeNodes[parentId]!!.setChild(it)
+                val list = if (it.code == NetWork.SUCCESS) {
+                    it.data!!
+                } else {
+                    emptyList()
+                }
+                treeNodes[parentId]!!.setChild(list)
             }
         }
     }
