@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.ui.home.mine.login
 
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -16,15 +17,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.transform.CircleCropTransformation
-import com.hua.abstractmusic.bean.CropParams
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalUserViewModel
 import com.hua.abstractmusic.ui.home.mine.LocalSheet
 import com.hua.abstractmusic.ui.home.mine.Sheet
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.ArtImage
+import com.hua.abstractmusic.ui.utils.UCropActivityResultContract
 import com.hua.abstractmusic.ui.viewmodels.UserViewModel
-import com.hua.abstractmusic.utils.CropPhotoContract
+import com.hua.abstractmusic.utils.getCacheDir
 
 /**
  * @author : huaweikai
@@ -42,13 +43,22 @@ fun LoggedScreen(
     }
 
     val contentResolver = LocalContext.current.contentResolver
-    val cropPicture = rememberLauncherForActivityResult(CropPhotoContract()) {
-        viewModel.putHeadPicture(it.toString(), contentResolver)
+//    val cropPicture = rememberLauncherForActivityResult(CropPhotoContract()) {
+//        viewModel.putHeadPicture(it.toString(), contentResolver)
+//    }
+    val context= LocalContext.current
+    val cropPicture = rememberLauncherForActivityResult(UCropActivityResultContract()) {
+        if(it != null){
+            viewModel.putHeadPicture(it.toString(),contentResolver)
+        }else{
+            Toast.makeText(context, "连接为空", Toast.LENGTH_SHORT).show()
+        }
     }
 
     val selectPicture = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
         it?.let {
-            cropPicture.launch(CropParams(uri = it))
+            val outputUri = getCacheDir(context,it)
+            cropPicture.launch(Pair(it,outputUri!!))
         }
     }
 

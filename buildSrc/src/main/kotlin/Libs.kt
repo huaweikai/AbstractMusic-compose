@@ -62,6 +62,7 @@ object Other {
 
     const val huawei_obs = "com.huaweicloud:esdk-obs-android:3.21.12"
     const val taglib = ":taglib"
+    const val uCrop = "com.github.yalantis:ucrop:2.2.8"
 
 }
 

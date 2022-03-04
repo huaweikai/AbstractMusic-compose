@@ -26,7 +26,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
 import coil.transform.RoundedCornersTransformation
-import com.hua.abstractmusic.bean.CropParams
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.other.NetWork
@@ -35,7 +34,7 @@ import com.hua.abstractmusic.ui.LocalPopWindow
 import com.hua.abstractmusic.ui.LocalPopWindowItem
 import com.hua.abstractmusic.ui.utils.*
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
-import com.hua.abstractmusic.utils.CropPhotoContract
+import com.hua.abstractmusic.utils.getCacheDir
 import com.hua.abstractmusic.utils.isLocal
 import kotlinx.coroutines.launch
 
@@ -61,17 +60,32 @@ fun SheetDetail(
     }
     val contentResolver = LocalContext.current.contentResolver
     val context = LocalContext.current
-    val cropPicture = rememberLauncherForActivityResult(CropPhotoContract()) {
-        try {
-            if (it == null) {
-                Toast.makeText(context, "链接为空了，报告开发者", Toast.LENGTH_SHORT).show()
-            } else {
-                sheetDetailViewModel.putSheetArt(it.toString(), contentResolver)
-            }
-        } catch (e: Exception) {
-            Toast.makeText(context, "未知错误，报告开发者", Toast.LENGTH_SHORT).show()
-        }
+//    val cropPicture = rememberLauncherForActivityResult(CropPhotoContract()) {
+//        try {
+//            if (it == null) {
+//                Toast.makeText(context, "链接为空了，报告开发者", Toast.LENGTH_SHORT).show()
+//            } else {
+//                sheetDetailViewModel.putSheetArt(it.toString(), contentResolver)
+//            }
+//        } catch (e: Exception) {
+//            Toast.makeText(context, "未知错误，报告开发者", Toast.LENGTH_SHORT).show()
+//        }
+//    }
 
+
+    val cropPicture = rememberLauncherForActivityResult(UCropActivityResultContract()) {
+        if (it != null) {
+            sheetDetailViewModel.putSheetArt(it.toString(), contentResolver)
+        } else {
+            Toast.makeText(context, "连接为空", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val selectPicture = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
+        it?.let {
+            val outputUri = getCacheDir(context, it)
+            cropPicture.launch(Pair(it, outputUri!!))
+        }
     }
 
     val popState = remember {
@@ -82,11 +96,11 @@ fun SheetDetail(
         mutableStateOf(NULL_MEDIA_ITEM)
     }
 
-    val selectPicture = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
-        it?.let {
-            cropPicture.launch(CropParams(uri = it))
-        }
-    }
+//    val selectPicture = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
+//        it?.let {
+//            cropPicture.launch(CropParams(uri = it))
+//        }
+//    }
     CompositionLocalProvider(
         LocalPopWindowItem provides item,
         LocalPopWindow provides popState

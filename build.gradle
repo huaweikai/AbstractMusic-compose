@@ -4,6 +4,8 @@ buildscript {
         compose_version = Version.compose_version
     }
     repositories {
+        jcenter()
+        maven { url 'https://jitpack.io' }
         google()
         mavenCentral()
     }
