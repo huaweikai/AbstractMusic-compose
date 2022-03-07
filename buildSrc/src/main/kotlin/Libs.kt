@@ -51,6 +51,9 @@ object Compose {
     const val compose_swipeRefresh = "com.google.accompanist:accompanist-swiperefresh:0.20.3"
     const val compose_constraintlayout = "androidx.constraintlayout:constraintlayout-compose:1.0.0"
 
+    //lottie
+    const val compose_lottie = "com.airbnb.android:lottie-compose:5.0.2"
+
 }
 
 object Other {
@@ -62,6 +65,7 @@ object Other {
 
     const val huawei_obs = "com.huaweicloud:esdk-obs-android:3.21.12"
     const val taglib = ":taglib"
+    const val blur = ":blur"
     const val uCrop = "com.github.yalantis:ucrop:2.2.8"
 
 }

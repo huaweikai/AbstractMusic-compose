@@ -11,10 +11,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +33,7 @@ import com.hua.abstractmusic.other.Constant.NET_ALBUM_TYPE
 import com.hua.abstractmusic.ui.LocalComposeUtils
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalNetViewModel
+import com.hua.abstractmusic.ui.home.HomeTopBar
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.*
 import com.hua.abstractmusic.ui.viewmodels.NetViewModel
@@ -47,32 +46,41 @@ import com.hua.abstractmusic.utils.PaletteUtils
  * @Date   : 2022/01/08
  * @Desc   : 在线音乐的screen
  */
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalPagerApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class)
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun NetScreen(
     navHostController: NavHostController = LocalHomeNavController.current,
     netViewModel: NetViewModel = LocalNetViewModel.current
 ) {
-    SwipeRefresh(
-        state = rememberSwipeRefreshState(netViewModel.screenState.value == LCE.Loading),
-        onRefresh = {
-            netViewModel.refresh()
-        }) {
-        when (netViewModel.screenState.value) {
-            LCE.Loading -> {
-                Loading()
-            }
-            LCE.Error -> {
-                Error {
-                    netViewModel.refresh()
+    Scaffold(
+        topBar = {
+            HomeTopBar(label = "在线音乐", actionOnclick = {}, imageVector = Icons.Default.Search, desc = "")
+        }
+    ) {
+        SwipeRefresh(
+            state = rememberSwipeRefreshState(netViewModel.screenState.value == LCE.Loading),
+            onRefresh = {
+                netViewModel.refresh()
+            },
+            modifier = Modifier.padding(it)
+        ) {
+            when (netViewModel.screenState.value) {
+                LCE.Loading -> {
+                    Loading()
                 }
-            }
-            LCE.Success -> {
-                SuccessContent()
+                LCE.Error -> {
+                    Error {
+                        netViewModel.refresh()
+                    }
+                }
+                LCE.Success -> {
+                    SuccessContent()
+                }
             }
         }
     }
+
 }
 
 @ExperimentalPagerApi

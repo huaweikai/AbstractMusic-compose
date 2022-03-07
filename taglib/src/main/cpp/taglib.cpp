@@ -8,20 +8,6 @@
 #include <tpropertymap.h>
 
 #define LOG_TAG "taglib_jni"
-#define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, \
-                   __VA_ARGS__))
-#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, LOG_TAG, \
-                   __VA_ARGS__))
-#define LIBRARY_FUNC(RETURN_TYPE, NAME, ...)                              \
-  extern "C" {                                                            \
-  JNIEXPORT RETURN_TYPE                                                   \
-      Java_com_ccteam_taglib_core_TaglibLibrary_##NAME( \
-          JNIEnv *env, jobject thiz, ##__VA_ARGS__);                      \
-  }                                                                       \
-  JNIEXPORT RETURN_TYPE                                                   \
-      Java_com_ccteam_taglib_core_TaglibLibrary_##NAME( \
-          JNIEnv *env, jobject thiz, ##__VA_ARGS__)
-
 /**
  * 获取音乐的Tag通用标签信息
  * @param fd 文件描述符

@@ -16,6 +16,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,6 +28,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import coil.transform.Transformation
+import com.airbnb.lottie.compose.*
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
@@ -48,6 +50,8 @@ import kotlinx.coroutines.launch
 fun MusicItem(
     data: MediaData,
     modifier: Modifier = Modifier,
+    isDetail: Boolean = false,
+    index: Int = 0,
     state: MutableState<Boolean> = LocalPopWindow.current,
     nowItem: MutableState<MediaItem> = LocalPopWindowItem.current,
     onMoreClick: () -> Unit = {
@@ -56,59 +60,91 @@ fun MusicItem(
     },
     onClick: () -> Unit
 ) {
-    ConstraintLayout(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(70.dp)
-            .clickable {
-                onClick()
-            }
-    ) {
-        val (image, title, more) = createRefs()
-        ArtImage(
-            modifier = Modifier
-                .constrainAs(image) {
-                    start.linkTo(parent.start, 10.dp)
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                }
-                .size(50.dp),
-            uri = data.mediaItem.mediaMetadata.artworkUri!!,
-            transformation = RoundedCornersTransformation(5f),
-            desc = "专辑图"
-        )
-        Column(
-            modifier = Modifier
-                .constrainAs(title) {
-                    start.linkTo(image.end, 10.dp)
-                    top.linkTo(image.top)
-                    bottom.linkTo(image.bottom)
-                    end.linkTo(more.start, 8.dp)
-                    width = Dimension.fillToConstraints
-                }
-        ) {
-            TitleAndArtist(
-                title = "${data.mediaItem.mediaMetadata.title}",
-                subTitle = "${data.mediaItem.mediaMetadata.artist}",
-                color =
-                if (data.isPlaying) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onBackground
+    val playing by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.playing)
+    )
+    val process by animateLottieCompositionAsState(
+        composition = playing,
+        iterations = LottieConstants.IterateForever
+    )
+    Row(Modifier.fillMaxWidth().height(70.dp)) {
+        if(data.isPlaying){
+            LottieAnimation(
+                composition = playing,
+                progress = process,
+                modifier = Modifier.fillMaxHeight().width(60.dp),
             )
         }
-        Icon(
-            painter = painterResource(id = R.drawable.ic_more),
-            contentDescription = "",
-            modifier = Modifier
-                .constrainAs(more) {
-                    end.linkTo(parent.end, 8.dp)
-                    top.linkTo(parent.top, 3.dp)
-                    bottom.linkTo(parent.bottom, 3.dp)
-                }
+        ConstraintLayout(
+            modifier = modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
                 .clickable {
-                    onMoreClick()
+                    onClick()
                 }
-        )
+        ) {
+            val (image, title, more) = createRefs()
+            val idEnd = createGuidelineFromStart(60.dp)
+            if (isDetail) {
+                Text(
+                    text = "$index",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Thin,
+                    modifier = Modifier.constrainAs(image) {
+                        start.linkTo(parent.start, 10.dp)
+                        end.linkTo(idEnd)
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                    }
+                )
+            } else {
+                ArtImage(
+                    modifier = Modifier
+                        .constrainAs(image) {
+                            start.linkTo(parent.start, 10.dp)
+                            end.linkTo(idEnd)
+                            top.linkTo(parent.top)
+                            bottom.linkTo(parent.bottom)
+                        }
+                        .size(50.dp),
+                    uri = data.mediaItem.mediaMetadata.artworkUri!!,
+                    transformation = RoundedCornersTransformation(5f),
+                    desc = "专辑图"
+                )
+            }
+            Column(
+                modifier = Modifier
+                    .constrainAs(title) {
+                        start.linkTo(idEnd, 10.dp)
+                        top.linkTo(image.top)
+                        bottom.linkTo(image.bottom)
+                        end.linkTo(more.start, 8.dp)
+                        width = Dimension.fillToConstraints
+                    }
+            ) {
+                TitleAndArtist(
+                    title = "${data.mediaItem.mediaMetadata.title}",
+                    subTitle = "${data.mediaItem.mediaMetadata.artist}",
+                    color =
+                    if (data.isPlaying) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onBackground
+                )
+            }
+            Icon(
+                painter = painterResource(id = R.drawable.ic_more),
+                contentDescription = "",
+                modifier = Modifier
+                    .constrainAs(more) {
+                        end.linkTo(parent.end, 8.dp)
+                        top.linkTo(parent.top, 3.dp)
+                        bottom.linkTo(parent.bottom, 3.dp)
+                    }
+                    .clickable {
+                        onMoreClick()
+                    }
+            )
 
+        }
     }
 }
 

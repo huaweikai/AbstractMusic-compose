@@ -112,20 +112,20 @@ fun HomeScreen(
     PlayScreen(state = sheetPlayState) {
         HomePlayList(sheetListState) {
             Scaffold(
-                topBar = {
-                    HomeTopBar(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 42.dp)
-                            .height(50.dp),
-                        label = label.value,
-                        navToDetail = navToDetailState.value,
-                        onPreviewClick = {
-                            homeNavController.navigateUp()
-                            navToDetailState.value = true
-                        }
-                    )
-                },
+//                topBar = {
+//                    HomeTopBar(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .padding(top = 42.dp)
+//                            .height(50.dp),
+//                        label = label.value,
+//                        navToDetail = navToDetailState.value,
+//                        onPreviewClick = {
+//                            homeNavController.navigateUp()
+//                            navToDetailState.value = true
+//                        }
+//                    )
+//                },
                 bottomBar = {
                     HomeController(
                         Modifier

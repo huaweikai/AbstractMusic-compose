@@ -1,33 +1,12 @@
 package com.hua.abstractmusic.ui.home
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.rounded.ArrowBack
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
-import com.hua.abstractmusic.bean.ui.home.TopBarIconButton
-import com.hua.abstractmusic.ui.LocalHomeNavController
-import com.hua.abstractmusic.ui.LocalHomeViewModel
-import com.hua.abstractmusic.ui.route.Screen
-import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 
 /**
  * @author : huaweikai
@@ -38,96 +17,122 @@ import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 @Composable
 fun HomeTopBar(
     label: String,
-    modifier: Modifier,
-    navToDetail: Boolean,
-    onPreviewClick: () -> Unit,
-    navHostController: NavHostController = LocalHomeNavController.current,
-    viewModel: HomeViewModel = LocalHomeViewModel.current,
+    imageVector: ImageVector,
+    desc: String,
+    actionOnclick: () -> Unit
 ) {
-
-    val iconSearch = TopBarIconButton(0, Icons.Default.Search, "搜索")
-    val iconRefresh = TopBarIconButton(1, Icons.Default.Refresh, "刷新")
-    val iconSettings = TopBarIconButton(2, Icons.Default.Settings, "设置")
-
-    val (icon, setIcon) = remember {
-        mutableStateOf(iconSearch)
-    }
-    val navigationIcon = remember {
-        mutableStateOf<@Composable (() -> Unit)?>(null)
-    }
-
-    LaunchedEffect(navHostController.currentBackStackEntryAsState().value) {
-        when (navHostController.currentDestination?.route) {
-            Screen.NetScreen.route -> {
-                setIcon(iconSearch)
-            }
-            Screen.LocalScreen.route -> {
-                setIcon(iconRefresh)
-            }
-            Screen.MineScreen.route -> {
-                setIcon(iconSettings)
-            }
-        }
-    }
-
-    LaunchedEffect(navToDetail) {
-        if (navToDetail) {
-            navigationIcon.value = {
-                NavigationIcon {
-                    onPreviewClick()
-                }
-            }
-        } else {
-            navigationIcon.value = null
-        }
-    }
-    TopAppBar(
+    SmallTopAppBar(
         title = {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.titleLarge
-            )
+            Text(text = label)
         },
-        navigationIcon = navigationIcon.value,
         actions = {
-            IconButton(
-                onClick = {
-                    when (icon.id) {
-                        0 -> {}
-                        1 -> {
-                            viewModel.refresh()
-                        }
-                        2 -> {}
-                    }
-                },
-            ) {
+            IconButton(onClick = {
+                actionOnclick()
+            }) {
                 Icon(
-                    imageVector = icon.icon,
-                    contentDescription = icon.desc,
-                    tint = Color(0xff77D3D0),
-                    modifier = Modifier
-                        .animateContentSize()
-                        .size((if (navToDetail) 0.dp else 30.dp))
+                    imageVector = imageVector,
+                    contentDescription = desc
                 )
             }
         },
-        elevation = 0.dp,
-        modifier = modifier,
-        backgroundColor = MaterialTheme.colorScheme.background
+        colors = TopAppBarDefaults.smallTopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.background
+        ),
+        modifier = Modifier.padding(top = 42.dp)
     )
 }
-
-@Composable
-private fun NavigationIcon(
-    onClick: () -> Unit
-) {
-    Icon(
-        imageVector = Icons.Rounded.ArrowBack,
-        contentDescription = "",
-        Modifier
-            .clickable {
-                onClick()
-            }
-            .size(36.dp)
-    )
-}
+//fun HomeTopBar(
+//    label: String,
+//    modifier: Modifier,
+//    navToDetail: Boolean,
+//    onPreviewClick: () -> Unit,
+//    navHostController: NavHostController = LocalHomeNavController.current,
+//    viewModel: HomeViewModel = LocalHomeViewModel.current,
+//) {
+//
+//    val iconSearch = TopBarIconButton(0, Icons.Default.Search, "搜索")
+//    val iconRefresh = TopBarIconButton(1, Icons.Default.Refresh, "刷新")
+//    val iconSettings = TopBarIconButton(2, Icons.Default.Settings, "设置")
+//
+//    val (icon, setIcon) = remember {
+//        mutableStateOf(iconSearch)
+//    }
+//    val navigationIcon = remember {
+//        mutableStateOf<@Composable (() -> Unit)?>(null)
+//    }
+//
+//    LaunchedEffect(navHostController.currentBackStackEntryAsState().value) {
+//        when (navHostController.currentDestination?.route) {
+//            Screen.NetScreen.route -> {
+//                setIcon(iconSearch)
+//            }
+//            Screen.LocalScreen.route -> {
+//                setIcon(iconRefresh)
+//            }
+//            Screen.MineScreen.route -> {
+//                setIcon(iconSettings)
+//            }
+//        }
+//    }
+//
+//    LaunchedEffect(navToDetail) {
+//        if (navToDetail) {
+//            navigationIcon.value = {
+//                NavigationIcon {
+//                    onPreviewClick()
+//                }
+//            }
+//        } else {
+//            navigationIcon.value = null
+//        }
+//    }
+//    TopAppBar(
+//        title = {
+//            Text(
+//                text = label,
+//                style = MaterialTheme.typography.titleLarge
+//            )
+//        },
+//        navigationIcon = navigationIcon.value,
+//        actions = {
+//            IconButton(
+//                onClick = {
+//                    when (icon.id) {
+//                        0 -> {}
+//                        1 -> {
+//                            viewModel.refresh()
+//                        }
+//                        2 -> {}
+//                    }
+//                },
+//            ) {
+//                Icon(
+//                    imageVector = icon.icon,
+//                    contentDescription = icon.desc,
+//                    tint = Color(0xff77D3D0),
+//                    modifier = Modifier
+//                        .animateContentSize()
+//                        .size((if (navToDetail) 0.dp else 30.dp))
+//                )
+//            }
+//        },
+//        elevation = 0.dp,
+//        modifier = modifier,
+//        backgroundColor = MaterialTheme.colorScheme.background
+//    )
+//}
+//
+//@Composable
+//private fun NavigationIcon(
+//    onClick: () -> Unit
+//) {
+//    Icon(
+//        imageVector = Icons.Rounded.ArrowBack,
+//        contentDescription = "",
+//        Modifier
+//            .clickable {
+//                onClick()
+//            }
+//            .size(36.dp)
+//    )
+//}

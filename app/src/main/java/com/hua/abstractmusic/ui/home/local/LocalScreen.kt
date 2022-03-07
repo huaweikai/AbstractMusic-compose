@@ -5,11 +5,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.TabRowDefaults
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -21,10 +26,13 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.ui.LocalHomeNavController
+import com.hua.abstractmusic.ui.LocalHomeViewModel
+import com.hua.abstractmusic.ui.home.HomeTopBar
 import com.hua.abstractmusic.ui.home.local.album.LocalAlbum
 import com.hua.abstractmusic.ui.home.local.artist.LocalArtist
 import com.hua.abstractmusic.ui.home.local.music.LocalMusic
 import com.hua.abstractmusic.ui.route.Screen
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import kotlinx.coroutines.launch
 
 
@@ -34,63 +42,77 @@ import kotlinx.coroutines.launch
  * @Desc   : 本地音乐screen
  */
 
+@OptIn(ExperimentalMaterial3Api::class)
 @ExperimentalFoundationApi
 @ExperimentalPagerApi
 @Composable
 fun LocalScreen(
-    homeNavController: NavHostController = LocalHomeNavController.current
+    homeNavController: NavHostController = LocalHomeNavController.current,
+    viewModel: HomeViewModel = LocalHomeViewModel.current
 ) {
     val pagerState = rememberPagerState()
     val tabTitles = listOf("音乐", "专辑", "歌手")
     val coroutineScope = rememberCoroutineScope()
-    Column {
-        TabRow(
-            selectedTabIndex = pagerState.currentPage,
-            indicator = {
-                TabRowDefaults.Indicator(
-                    Modifier.pagerTabIndicatorOffset(pagerState, it),
-                    color = MaterialTheme.colorScheme.primary
-                )
-            },
-            modifier = Modifier.height(50.dp)
-        ) {
-            tabTitles.forEachIndexed { index, title ->
-                Tab(
-                    selected = pagerState.currentPage == index,
-                    onClick = {
-                        coroutineScope.launch { pagerState.animateScrollToPage(index) }
-                    },
-                    modifier = Modifier.background(
-                        MaterialTheme.colorScheme.background
-                    )
-                ) {
-                    Text(
-                        text = title,
-                        color =
-                        if (pagerState.currentPage == index) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.onBackground
-                    )
-                }
+    Scaffold(
+        topBar = {
+            HomeTopBar(label = "本地音乐", imageVector = Icons.Default.Refresh, desc = "") {
+                viewModel.refresh()
             }
         }
-        HorizontalPager(
-            state = pagerState,
-            count = 3,
-            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
-            verticalAlignment = Alignment.Top,
-        ) { page ->
-            when (page) {
-                0 -> {
-                    LocalMusic()
-                }
-                1 -> {
-                    LocalAlbum{ mediaId->
-                        homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumId=${mediaId}")
+    ) {
+        Column(
+            Modifier.padding(it)
+        ){
+            TabRow(
+                selectedTabIndex = pagerState.currentPage,
+                indicator = {
+                    TabRowDefaults.Indicator(
+                        Modifier.pagerTabIndicatorOffset(pagerState, it),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                },
+                modifier = Modifier.height(50.dp)
+            ) {
+                tabTitles.forEachIndexed { index, title ->
+                    Tab(
+                        selected = pagerState.currentPage == index,
+                        onClick = {
+                            coroutineScope.launch { pagerState.animateScrollToPage(index) }
+                        },
+                        modifier = Modifier.background(
+                            MaterialTheme.colorScheme.background
+                        )
+                    ) {
+                        Text(
+                            text = title,
+                            color =
+                            if (pagerState.currentPage == index) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onBackground
+                        )
                     }
                 }
-                2 -> {
-                    LocalArtist{ index->
-                        homeNavController.navigate("${Screen.LocalArtistDetail.route}?artistIndex=${index}")
+            }
+            HorizontalPager(
+                state = pagerState,
+                count = 3,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background),
+                verticalAlignment = Alignment.Top,
+            ) { page ->
+                when (page) {
+                    0 -> {
+                        LocalMusic()
+                    }
+                    1 -> {
+                        LocalAlbum { mediaId ->
+                            homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumId=${mediaId}")
+                        }
+                    }
+                    2 -> {
+                        LocalArtist { index ->
+                            homeNavController.navigate("${Screen.LocalArtistDetail.route}?artistIndex=${index}")
+                        }
                     }
                 }
             }

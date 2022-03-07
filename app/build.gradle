@@ -104,6 +104,7 @@ dependencies {
     implementation Compose.compose_insets
     implementation Compose.compose_swipeRefresh
     implementation Compose.compose_constraintlayout
+    implementation Compose.compose_lottie
 
     implementation Other.mmkv
 
@@ -116,6 +117,7 @@ dependencies {
 
     implementation Other.huawei_obs
     implementation project(Other.taglib)
+    implementation project(Other.blur)
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

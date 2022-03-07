@@ -26,6 +26,7 @@ import com.hua.abstractmusic.use_case.sheet.GetSheetMusicBySheetId
 import com.hua.abstractmusic.use_case.sheet.InsertSheetCase
 import com.hua.abstractmusic.utils.ComposeUtils
 import com.hua.abstractmusic.utils.KEY
+import com.hua.blur.BlurLibrary
 import com.hua.taglib.TaglibLibrary
 import com.obs.services.ObsClient
 import dagger.Module
@@ -181,4 +182,9 @@ object AppModule {
     @Provides
     @Singleton
     fun provideMediaTaglib() = TaglibLibrary()
+
+
+    @Provides
+    @Singleton
+    fun provideBlurLib() = BlurLibrary()
 }

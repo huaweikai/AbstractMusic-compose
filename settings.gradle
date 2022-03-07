@@ -4,9 +4,10 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven { url "https://jitpack.io" }
-        jcenter() // Warning: this repository is going to shut down soon
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
     }
 }
 rootProject.name = "AbstractMusic"
 include ':app'
 include ':taglib'
+include ':blur'

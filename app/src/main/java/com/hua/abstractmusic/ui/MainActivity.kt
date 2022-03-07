@@ -2,9 +2,9 @@ package com.hua.abstractmusic.ui
 
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
@@ -14,7 +14,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
-import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hua.abstractmusic.ui.navigation.AppNavigation
@@ -26,7 +25,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     private val localPlayingViewModel by viewModels<PlayingViewModel>()
 
@@ -44,9 +43,6 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
         setContent {
-
-            val appNavHostController = rememberNavController()
-
             rememberSystemUiController().setStatusBarColor(
                 Color.Transparent,
                 darkIcons = MaterialTheme.colors.isLight
@@ -55,15 +51,14 @@ class MainActivity : ComponentActivity() {
             val popupWindow = remember {
                 mutableStateOf(false)
             }
-            AbstractMusicTheme {
-                CompositionLocalProvider(
-                    // 可提前加载信息，不会造成空白
-                    LocalPlayingViewModel provides localPlayingViewModel,
-                    LocalAppNavController provides appNavHostController,
-                    LocalScreenSize provides windowSize,
-                    LocalComposeUtils provides composeUtils,
-                    LocalPopWindow provides popupWindow
-                ) {
+            CompositionLocalProvider(
+                // 可提前加载信息，不会造成空白
+                LocalPlayingViewModel provides localPlayingViewModel,
+                LocalScreenSize provides windowSize,
+                LocalComposeUtils provides composeUtils,
+                LocalPopWindow provides popupWindow
+            ) {
+                AbstractMusicTheme {
                     Surface {
                         AppNavigation()
                     }

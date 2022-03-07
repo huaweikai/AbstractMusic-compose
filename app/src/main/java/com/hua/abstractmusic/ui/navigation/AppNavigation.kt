@@ -8,7 +8,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -32,33 +31,34 @@ import com.hua.abstractmusic.ui.splash.SplashScreen
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun AppNavigation(
-    appNavController:NavHostController = LocalAppNavController.current
+//    appNavController:NavHostController = LocalAppNavController.current
 ) {
-    NavHost(
-        navController = appNavController,
-        startDestination = Screen.Splash.route
-    ) {
-        composable(route = Screen.Splash.route) {
-            SplashScreen()
-        }
-        composable(route = Screen.HelloScreen.route) {
-            HelloScreen()
-        }
-        composable(route = Screen.HomeScreen.route) {
-            val popItem = remember{
-                mutableStateOf(NULL_MEDIA_ITEM)
+    CompositionLocalProvider(LocalAppNavController provides rememberNavController()) {
+        NavHost(
+            navController = LocalAppNavController.current,
+            startDestination = Screen.Splash.route
+        ) {
+            composable(route = Screen.Splash.route) {
+                SplashScreen()
             }
-            CompositionLocalProvider(
-                LocalHomeNavController provides rememberNavController(),
-                LocalNetViewModel provides hiltViewModel(),
-                LocalUserViewModel provides hiltViewModel(),
-                LocalHomeViewModel provides hiltViewModel(),
-                LocalPopWindowItem provides popItem
-            ){
-                LocalUserViewModel.current.initializeController()
-                HomeScreen()
+            composable(route = Screen.HelloScreen.route) {
+                HelloScreen()
+            }
+            composable(route = Screen.HomeScreen.route) {
+                val popItem = remember {
+                    mutableStateOf(NULL_MEDIA_ITEM)
+                }
+                CompositionLocalProvider(
+                    LocalHomeNavController provides rememberNavController(),
+                    LocalNetViewModel provides hiltViewModel(),
+                    LocalUserViewModel provides hiltViewModel(),
+                    LocalHomeViewModel provides hiltViewModel(),
+                    LocalPopWindowItem provides popItem
+                ) {
+                    LocalUserViewModel.current.initializeController()
+                    HomeScreen()
+                }
             }
         }
     }
-
 }
