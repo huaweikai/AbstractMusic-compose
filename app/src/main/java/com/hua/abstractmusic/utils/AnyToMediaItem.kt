@@ -38,17 +38,28 @@ fun String.toTime(): Long {
         0
     }
 }
+
+fun Long.toYear(): Int? {
+    val simpleDateFormat = SimpleDateFormat("yyyy", Locale.CHINESE)
+    return try {
+        simpleDateFormat.format(Date(this)).toIntOrNull()
+    } catch (e: Exception) {
+        null
+    }
+}
+
 @SuppressLint("UnsafeOptInUsageError")
 fun NetAlbum.toMediaItem(parentId: Uri): MediaItem {
     return MediaItem.Builder()
         .setMediaMetadata(
             MediaMetadata.Builder()
                 .setTitle(this@toMediaItem.name)
-                .setReleaseYear(this@toMediaItem.time.toTime().toInt())
+                .setReleaseYear(this.time.toTime().toYear())
                 .setArtist(this@toMediaItem.artistName)
                 .setDisplayTitle(this@toMediaItem.name)
                 .setArtworkUri(Uri.parse(this@toMediaItem.imgUrl))
-                .setSubtitle(this@toMediaItem.artistName)
+                .setSubtitle(this@toMediaItem.albumDesc)
+                .setTrackNumber(this.num)
                 .setFolderType(MediaMetadata.FOLDER_TYPE_ALBUMS)
                 .setIsPlayable(false)
                 .build()
@@ -56,6 +67,7 @@ fun NetAlbum.toMediaItem(parentId: Uri): MediaItem {
         .setMediaId(parentId.buildUpon().appendPath(this@toMediaItem.id.toString()).toString())
         .build()
 }
+
 @SuppressLint("UnsafeOptInUsageError")
 fun NetArtist.toMediaItem(parentId: Uri): MediaItem {
     return MediaItem.Builder()
@@ -95,6 +107,7 @@ fun NetMusic.toMediaItem(parentId: Uri): MediaItem {
         .setUri(this.musicUrl)
         .build()
 }
+
 @SuppressLint("UnsafeOptInUsageError")
 fun NetSheet.toMediaItem(parentId: Uri) =
     MediaItem.Builder()
@@ -104,7 +117,7 @@ fun NetSheet.toMediaItem(parentId: Uri) =
                 .setIsPlayable(false)
                 .setFolderType(MediaMetadata.FOLDER_TYPE_PLAYLISTS)
                 .setArtworkUri(
-                    if(this.artUri == null) null else Uri.parse(this.artUri)
+                    if (this.artUri == null) null else Uri.parse(this.artUri)
                 )
                 .build()
         )

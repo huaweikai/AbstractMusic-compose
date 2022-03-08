@@ -7,6 +7,7 @@ data class NetAlbum(
     val id: Int,
     val imgUrl: String,
     val name: String,
+    val num:Int,
     val time: String,
     val artistName: String
 )

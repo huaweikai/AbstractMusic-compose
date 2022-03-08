@@ -69,20 +69,32 @@ fun HomeNavigationNav(
             MineScreen()
         }
         composable(
-            route = "${Screen.LocalAlbumDetail.route}?albumId={albumId}",
+            route = "${Screen.LocalAlbumDetail.route}?albumId={albumId}&isLocal={isLocal}",
             arguments = listOf(
                 navArgument(
                     name = "albumId"
                 ) {
                     type = NavType.StringType
                     defaultValue = ""
+                },
+                navArgument(
+                    name = "isLocal"
+                ) {
+                    type = NavType.BoolType
+                    defaultValue = true
                 }
             ),
-        ) {
+        ) { it ->
+            val isLocal = it.arguments?.getBoolean("isLocal", true)!!
             val albumId = it.arguments?.getString("albumId", "")
-            val item = viewModel.localAlbumList.value.find { it.mediaId == albumId }!!.mediaItem
+            val item = if (isLocal) {
+                viewModel.localAlbumList.value.find { it.mediaId == albumId }!!.mediaItem
+            } else {
+                netViewModel.getItem(albumId ?: "")
+            }
             LocalAlbumDetail(
-                item = item
+                item = item,
+                isLocal = isLocal
             )
         }
         composable(
@@ -141,7 +153,7 @@ fun HomeNavigationNav(
                 },
                 navArgument(
                     name = "isLocal"
-                ){
+                ) {
                     type = NavType.BoolType
                     defaultValue = true
                 }
@@ -150,9 +162,9 @@ fun HomeNavigationNav(
             val userViewModel = LocalUserViewModel.current
             val sheetIndex = it.arguments?.getInt("sheetIndex") ?: 0
             val isLocal = it.arguments?.getBoolean("isLocal") ?: true
-            val mediaData = if(isLocal){
+            val mediaData = if (isLocal) {
                 userViewModel.sheetList.value[sheetIndex]
-            }else{
+            } else {
                 userViewModel.netSheetList.value[sheetIndex]
             }
             SheetDetail(mediaData = mediaData)

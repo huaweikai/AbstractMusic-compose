@@ -2,8 +2,10 @@ package com.hua.abstractmusic.ui.viewmodels
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.media3.common.MediaItem
 import androidx.media3.session.MediaBrowser
 import androidx.media3.session.MediaLibraryService
 import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
@@ -12,6 +14,9 @@ import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ALL_MUSIC_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_BANNER_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_RECOMMEND_ID
+import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
+import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ALBUM
+import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_BANNER
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.use_case.UseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -73,5 +78,17 @@ class NetViewModel @Inject constructor(
 
     override fun onMediaConnected() {
         refresh()
+    }
+
+    fun getItem(albumId: String):MediaItem{
+        return when(Uri.parse(albumId).authority){
+            TYPE_NETWORK_BANNER->{
+               bannerList.value.find { it.mediaId == albumId }!!.mediaItem
+            }
+            TYPE_NETWORK_ALBUM ->{
+                albumList.value.find { it.mediaId == albumId }!!.mediaItem
+            }
+            else -> NULL_MEDIA_ITEM
+        }
     }
 }

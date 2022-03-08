@@ -2,7 +2,6 @@ package com.hua.abstractmusic.repository
 
 import android.annotation.SuppressLint
 import android.net.Uri
-import android.util.Log
 import androidx.media3.common.MediaItem
 import com.hua.abstractmusic.bean.net.NetData
 import com.hua.abstractmusic.bean.net.NetSheet
@@ -110,7 +109,7 @@ class NetRepository(
                         service.getMusicByArtist(id)
                     }
                     TYPE_NETWORK_BANNER -> {
-                        service.getBannerById(id)
+                        service.getMusicByAlbum(id)
                     }
                     TYPE_NETWORK_RECOMMEND -> {
                         service.getMusicBySheetId(id)
@@ -125,11 +124,10 @@ class NetRepository(
                 getResult.data?.forEach {
                     mediaItems.add(it.toMediaItem(parentId))
                 }
-                result = NetData(getResult.code, mediaItems, "")
+                NetData(getResult.code, mediaItems, "")
             } else {
-                result = NetData(ERROR, null, getResult.msg)
+                NetData(ERROR, null, getResult.msg)
             }
-            result
         } catch (e: Exception) {
             NetData(ERROR, null, "网络问题")
         }
@@ -177,8 +175,6 @@ class NetRepository(
         return try {
             val sheetId = parentId.lastPathSegment
             val result = service.selectSheetById(sheetId!!)
-            Log.d("TAG", "selectSheetById: $sheetId")
-            Log.d("TAG", "selectSheetById result: $result")
             if (result.code == SUCCESS) {
                 result.data!!
             } else {

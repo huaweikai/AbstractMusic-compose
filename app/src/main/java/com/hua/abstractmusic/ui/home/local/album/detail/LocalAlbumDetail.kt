@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight.Companion.W400
 import androidx.compose.ui.unit.dp
@@ -30,6 +31,7 @@ import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.utils.ArtImage
+import com.hua.abstractmusic.ui.utils.LCE
 import com.hua.abstractmusic.ui.utils.MusicItem
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.ui.viewmodels.AlbumDetailViewModel
@@ -47,18 +49,19 @@ import com.hua.abstractmusic.ui.viewmodels.AlbumDetailViewModel
 @Composable
 fun LocalAlbumDetail(
     item: MediaItem,
+    isLocal: Boolean = true,
     navHostController: NavHostController = LocalHomeNavController.current,
     detailViewModel: AlbumDetailViewModel = hiltViewModel()
 ) {
 
     DisposableEffect(Unit) {
         detailViewModel.id = item.mediaId
+        detailViewModel.isLocal = isLocal
         detailViewModel.initializeController()
         this.onDispose {
             detailViewModel.releaseBrowser()
         }
     }
-//    val bitmap = detailViewModel.blurBitmap.collectAsState()
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             Modifier.fillMaxSize(),
@@ -79,22 +82,19 @@ fun LocalAlbumDetail(
                 )
             }
         ) {
-            LazyColumn(Modifier.fillMaxSize()) {
-                item {
-                    AlbumDetailDesc(item = item)
-                }
-                itemsIndexed(detailViewModel.albumDetail.value) { index, item ->
-                    MusicItem(
-                        data = item,
-                        isDetail = true,
-                        index = index,
-                        onClick = {
-                            detailViewModel.setPlaylist(index, detailViewModel.albumDetail.value)
-                        }
-                    )
-                }
-                item {
-                    AlbumDetailTail(item = item)
+            if (isLocal) {
+                Album_Success(item = item, detailViewModel = detailViewModel)
+            } else {
+                if (detailViewModel.screenState.value != LCE.Success && detailViewModel.albumDetail.value.isEmpty()) {
+                    Column(
+                        Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                } else {
+                    Album_Success(item = item, detailViewModel = detailViewModel)
                 }
             }
         }
@@ -107,11 +107,38 @@ fun LocalAlbumDetail(
             AsyncImage(
                 model = item.mediaMetadata.artworkUri,
                 contentDescription = "",
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .fillMaxHeight(0.4f)
                     .fillMaxWidth(),
             )
+        }
+    }
+}
+
+
+@Composable
+fun Album_Success(
+    item: MediaItem,
+    detailViewModel: AlbumDetailViewModel
+) {
+    LazyColumn(Modifier.fillMaxSize()) {
+        item {
+            AlbumDetailDesc(item = item)
+        }
+        itemsIndexed(detailViewModel.albumDetail.value) { index, item ->
+            MusicItem(
+                data = item,
+                isDetail = true,
+                index = index,
+                onClick = {
+                    detailViewModel.setPlaylist(index, detailViewModel.albumDetail.value)
+                }
+            )
+        }
+        item {
+            AlbumDetailTail(item = item)
         }
     }
 }
@@ -130,7 +157,7 @@ private fun AlbumDetailDesc(
     ) {
         ArtImage(
             modifier = Modifier
-                .padding(start = 10.dp)
+                .padding(start = 20.dp)
                 .size(120.dp),
             uri = item.mediaMetadata.artworkUri,
             desc = "",
@@ -154,6 +181,10 @@ private fun AlbumDetailDesc(
                 },
                 height = 5.dp
             )
+            if (item.mediaMetadata.subtitle?.isNotBlank() == true) {
+                Spacer(modifier = Modifier.height(5.dp))
+                Text(text = "${item.mediaMetadata.subtitle}", maxLines = 2)
+            }
         }
     }
     Spacer(modifier = Modifier.height(40.dp))

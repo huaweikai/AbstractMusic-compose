@@ -67,84 +67,86 @@ fun MusicItem(
         composition = playing,
         iterations = LottieConstants.IterateForever
     )
-    Row(Modifier.fillMaxWidth().height(70.dp)) {
-        if(data.isPlaying){
-            LottieAnimation(
-                composition = playing,
-                progress = process,
-                modifier = Modifier.fillMaxHeight().width(60.dp),
-            )
-        }
-        ConstraintLayout(
-            modifier = modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .clickable {
-                    onClick()
-                }
+    ConstraintLayout(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(70.dp)
+            .clickable {
+                onClick()
+            }
+    ) {
+        val (image, title, more) = createRefs()
+        val idEnd = createGuidelineFromStart(60.dp)
+        Column(
+            modifier = Modifier.constrainAs(image) {
+                start.linkTo(parent.start,10.dp)
+                end.linkTo(idEnd)
+                top.linkTo(parent.top)
+                bottom.linkTo(parent.bottom)
+                width = Dimension.fillToConstraints
+                height = Dimension.fillToConstraints
+            },
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val (image, title, more) = createRefs()
-            val idEnd = createGuidelineFromStart(60.dp)
-            if (isDetail) {
-                Text(
-                    text = "$index",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Thin,
-                    modifier = Modifier.constrainAs(image) {
-                        start.linkTo(parent.start, 10.dp)
-                        end.linkTo(idEnd)
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
-                    }
+            if (data.isPlaying) {
+                LottieAnimation(
+                    composition = playing,
+                    progress = process,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(60.dp),
                 )
             } else {
-                ArtImage(
-                    modifier = Modifier
-                        .constrainAs(image) {
-                            start.linkTo(parent.start, 10.dp)
-                            end.linkTo(idEnd)
-                            top.linkTo(parent.top)
-                            bottom.linkTo(parent.bottom)
-                        }
-                        .size(50.dp),
-                    uri = data.mediaItem.mediaMetadata.artworkUri!!,
-                    transformation = RoundedCornersTransformation(5f),
-                    desc = "专辑图"
-                )
+                if (isDetail) {
+                    Text(
+                        text = "$index",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Thin,
+                    )
+                } else {
+                    ArtImage(
+                        modifier = Modifier.size(50.dp),
+                        uri = data.mediaItem.mediaMetadata.artworkUri!!,
+                        transformation = RoundedCornersTransformation(5f),
+                        desc = "专辑图"
+                    )
+                }
             }
-            Column(
-                modifier = Modifier
-                    .constrainAs(title) {
-                        start.linkTo(idEnd, 10.dp)
-                        top.linkTo(image.top)
-                        bottom.linkTo(image.bottom)
-                        end.linkTo(more.start, 8.dp)
-                        width = Dimension.fillToConstraints
-                    }
-            ) {
-                TitleAndArtist(
-                    title = "${data.mediaItem.mediaMetadata.title}",
-                    subTitle = "${data.mediaItem.mediaMetadata.artist}",
-                    color =
-                    if (data.isPlaying) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.onBackground
-                )
-            }
-            Icon(
-                painter = painterResource(id = R.drawable.ic_more),
-                contentDescription = "",
-                modifier = Modifier
-                    .constrainAs(more) {
-                        end.linkTo(parent.end, 8.dp)
-                        top.linkTo(parent.top, 3.dp)
-                        bottom.linkTo(parent.bottom, 3.dp)
-                    }
-                    .clickable {
-                        onMoreClick()
-                    }
-            )
 
         }
+        Column(
+            modifier = Modifier
+                .constrainAs(title) {
+                    start.linkTo(idEnd, 10.dp)
+                    top.linkTo(image.top)
+                    bottom.linkTo(image.bottom)
+                    end.linkTo(more.start, 8.dp)
+                    width = Dimension.fillToConstraints
+                }
+        ) {
+            TitleAndArtist(
+                title = "${data.mediaItem.mediaMetadata.title}",
+                subTitle = "${data.mediaItem.mediaMetadata.artist}",
+                color =
+                if (data.isPlaying) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onBackground
+            )
+        }
+        Icon(
+            painter = painterResource(id = R.drawable.ic_more),
+            contentDescription = "",
+            modifier = Modifier
+                .constrainAs(more) {
+                    end.linkTo(parent.end, 8.dp)
+                    top.linkTo(parent.top, 3.dp)
+                    bottom.linkTo(parent.bottom, 3.dp)
+                }
+                .clickable {
+                    onMoreClick()
+                }
+        )
+
     }
 }
 

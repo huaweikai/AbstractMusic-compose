@@ -55,7 +55,12 @@ fun NetScreen(
 ) {
     Scaffold(
         topBar = {
-            HomeTopBar(label = "在线音乐", actionOnclick = {}, imageVector = Icons.Default.Search, desc = "")
+            HomeTopBar(
+                label = "在线音乐",
+                actionOnclick = {},
+                imageVector = Icons.Default.Search,
+                desc = ""
+            )
         }
     ) {
         SwipeRefresh(
@@ -100,7 +105,11 @@ private fun SuccessContent(
                 it.mediaItem.mediaMetadata.artworkUri
             }
         ) {
-
+            navHostController.navigate(
+                "${Screen.LocalAlbumDetail.route}?albumId=${
+                    netViewModel.bannerList.value[it].mediaId
+                }&isLocal=false"
+            )
         }
         Glide("大家都在听") {
             navHostController.navigate("${Screen.NetDetailScreen.route}?type=$ALL_MUSIC_TYPE")
@@ -130,7 +139,11 @@ private fun SuccessContent(
             navHostController.navigate("${Screen.NetDetailScreen.route}?type=$NET_ALBUM_TYPE")
         }
         NewItems(list = netViewModel.albumList.value, {
-
+            navHostController.navigate(
+                "${Screen.LocalAlbumDetail.route}?albumId=${
+                    it.mediaId
+                }&isLocal=false"
+            )
         }, {
             netViewModel.albumId = it.mediaId
             netViewModel.listInit(it.mediaId)

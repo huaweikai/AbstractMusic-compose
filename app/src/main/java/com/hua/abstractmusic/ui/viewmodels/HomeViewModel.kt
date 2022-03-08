@@ -48,4 +48,7 @@ class HomeViewModel @Inject constructor(
         refresh()
     }
 
+//    fun onGetItem(mediaId: String): MediaItem {
+//        return itemTree.getItem(mediaId) ?: NULL_MEDIA_ITEM
+//    }
 }

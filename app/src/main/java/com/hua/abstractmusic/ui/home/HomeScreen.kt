@@ -2,17 +2,13 @@ package com.hua.abstractmusic.ui.home
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.Scaffold
+import androidx.compose.material.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -60,7 +56,7 @@ fun HomeScreen(
 
     val sheetListState = rememberSaveable(
         saver = ModalBottomSheetState.Saver(
-            animationSpec = tween(1000),
+            animationSpec = SwipeableDefaults.AnimationSpec,
             skipHalfExpanded = false,
             confirmStateChange = { true }
         )
@@ -70,7 +66,7 @@ fun HomeScreen(
 
     val sheetPlayState = rememberSaveable(
         saver = ModalBottomSheetState.Saver(
-            animationSpec = tween(1000),
+            animationSpec = SwipeableDefaults.AnimationSpec,
             skipHalfExpanded = true,
             confirmStateChange = { true }
         )
@@ -112,20 +108,6 @@ fun HomeScreen(
     PlayScreen(state = sheetPlayState) {
         HomePlayList(sheetListState) {
             Scaffold(
-//                topBar = {
-//                    HomeTopBar(
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .padding(top = 42.dp)
-//                            .height(50.dp),
-//                        label = label.value,
-//                        navToDetail = navToDetailState.value,
-//                        onPreviewClick = {
-//                            homeNavController.navigateUp()
-//                            navToDetailState.value = true
-//                        }
-//                    )
-//                },
                 bottomBar = {
                     HomeController(
                         Modifier
