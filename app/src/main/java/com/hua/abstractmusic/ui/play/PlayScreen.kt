@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
@@ -109,10 +110,9 @@ private fun PlayScreenTab(
     val tabTitles = listOf("列表", "歌曲", "歌词")
     val scope = rememberCoroutineScope()
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().statusBarsPadding(),
         horizontalAlignment = CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(50.dp))
         TabRow(
             selectedTabIndex = viewPageState.currentPage,
             modifier = Modifier

@@ -28,6 +28,7 @@ import androidx.media3.common.MediaItem
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.transform.RoundedCornersTransformation
+import com.google.accompanist.insets.statusBarsPadding
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.utils.ArtImage
@@ -75,7 +76,7 @@ fun LocalAlbumDetail(
                     title = {
                         Text(text = "${item.mediaMetadata.title}")
                     },
-                    modifier = Modifier.padding(top = 42.dp),
+                    modifier = Modifier.statusBarsPadding(),
                     colors = TopAppBarDefaults.smallTopAppBarColors(
                         containerColor = Color.Transparent
                     )

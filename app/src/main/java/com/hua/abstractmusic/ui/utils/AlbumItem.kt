@@ -2,8 +2,11 @@ package com.hua.abstractmusic.ui.utils
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -27,7 +30,7 @@ import com.hua.abstractmusic.R
 fun AlbumItem(
     item: MediaItem,
     modifier: Modifier = Modifier,
-    onClick:()->Unit
+    onClick: () -> Unit
 ) {
     Row(
         modifier = modifier
@@ -36,7 +39,7 @@ fun AlbumItem(
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
-       AsyncImage(
+        AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .apply {
                     data(item.mediaMetadata.artworkUri)
@@ -54,17 +57,19 @@ fun AlbumItem(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start
         ) {
-            Text(text = "${item.mediaMetadata.title}")
-            Text(
-                text = "${item.mediaMetadata.artist}",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.W300
-            )
-            Text(
-                text = "${item.mediaMetadata.trackNumber} 首",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.W300
-            )
+            CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onBackground) {
+                Text(text = "${item.mediaMetadata.title}")
+                Text(
+                    text = "${item.mediaMetadata.artist}",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.W300
+                )
+                Text(
+                    text = "${item.mediaMetadata.trackNumber} 首",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.W300
+                )
+            }
         }
     }
 }

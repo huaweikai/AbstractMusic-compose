@@ -88,6 +88,10 @@ class NetViewModel @Inject constructor(
             TYPE_NETWORK_ALBUM ->{
                 albumList.value.find { it.mediaId == albumId }!!.mediaItem
             }
+            //todo: 在线歌手
+//            TYPE_NETWORK_ARTIST ->{
+//
+//            }
             else -> NULL_MEDIA_ITEM
         }
     }

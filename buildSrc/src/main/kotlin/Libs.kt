@@ -63,6 +63,8 @@ object Compose {
     //lottie
     const val compose_lottie = "com.airbnb.android:lottie-compose:5.0.2"
 
+    const val compose_scroll_bar = "me.onebone:toolbar-compose:2.3.2"
+
 }
 
 object Other {
@@ -76,6 +78,7 @@ object Other {
     const val taglib = ":taglib"
     const val blur = ":blur"
     const val uCrop = "com.github.yalantis:ucrop:2.2.8"
+    const val status_bar_color = "cn.chitanda:dynamicstatusbar:2.5.1"
 
 }
 

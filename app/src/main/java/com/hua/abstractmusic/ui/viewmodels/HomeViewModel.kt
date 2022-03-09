@@ -6,9 +6,9 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.MediaData
-import com.hua.abstractmusic.other.Constant.ALBUM_ID
-import com.hua.abstractmusic.other.Constant.ALL_ID
-import com.hua.abstractmusic.other.Constant.ARTIST_ID
+import com.hua.abstractmusic.other.Constant.LOCAL_ALBUM_ID
+import com.hua.abstractmusic.other.Constant.LOCAL_ALL_ID
+import com.hua.abstractmusic.other.Constant.LOCAL_ARTIST_ID
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.use_case.UseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,11 +37,11 @@ class HomeViewModel @Inject constructor(
     val localArtistList: State<List<MediaData>> get() = _localArtistList
 
     init {
-        localListMap[ALL_ID] = _localMusicList
-        localListMap[ALBUM_ID] = _localAlbumList
-        localListMap[ARTIST_ID] = _localArtistList
+        localListMap[LOCAL_ALL_ID] = _localMusicList
+        localListMap[LOCAL_ALBUM_ID] = _localAlbumList
+        localListMap[LOCAL_ARTIST_ID] = _localArtistList
 
-        playListMap[ALL_ID] = _localMusicList
+        playListMap[LOCAL_ALL_ID] = _localMusicList
     }
 
     override fun onMediaConnected() {

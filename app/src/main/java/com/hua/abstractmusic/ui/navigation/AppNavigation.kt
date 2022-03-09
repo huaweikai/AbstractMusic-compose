@@ -1,6 +1,7 @@
 package com.hua.abstractmusic.ui.navigation
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
@@ -11,6 +12,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.ui.*
@@ -25,6 +27,7 @@ import com.hua.abstractmusic.ui.splash.SplashScreen
  * @Desc   : 整个界面的navigation
  */
 
+@OptIn(ExperimentalAnimationApi::class)
 @ExperimentalPagerApi
 @ExperimentalFoundationApi
 @ExperimentalMaterialApi
@@ -49,7 +52,7 @@ fun AppNavigation(
                     mutableStateOf(NULL_MEDIA_ITEM)
                 }
                 CompositionLocalProvider(
-                    LocalHomeNavController provides rememberNavController(),
+                    LocalHomeNavController provides rememberAnimatedNavController(),
                     LocalNetViewModel provides hiltViewModel(),
                     LocalUserViewModel provides hiltViewModel(),
                     LocalHomeViewModel provides hiltViewModel(),

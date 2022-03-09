@@ -5,14 +5,15 @@ import android.content.ContentUris
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
+import android.os.Bundle
 import android.provider.MediaStore
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import com.hua.abstractmusic.bean.net.NetData
 import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.other.Constant.ALBUM_ART_URI
-import com.hua.abstractmusic.other.Constant.ALBUM_ID
 import com.hua.abstractmusic.other.Constant.DURATION
+import com.hua.abstractmusic.other.Constant.LOCAL_ALBUM_ID
 import com.hua.abstractmusic.repository.NetRepository
 import com.hua.abstractmusic.use_case.UseCase
 import kotlinx.coroutines.runBlocking
@@ -137,6 +138,12 @@ class MediaStoreScanner(
                     .setAlbumTitle(album)
                     .setDescription(album)
                     .setTrackNumber(track)
+                    .setExtras(
+                        Bundle().apply {
+                            putLong("albumId", albumId)
+                            putLong("artistId", artistId)
+                        }
+                    )
                     .setArtworkUri(albumUri)
                     .setIsPlayable(true)
                     .setMediaUri(musicUri)
@@ -177,7 +184,7 @@ class MediaStoreScanner(
 
 //                val id = parentId.buildUpon().appendPath(albumId.toString()).toString()
                 //歌手专辑和专辑适用版
-                val id = Uri.parse(ALBUM_ID).buildUpon().appendPath(albumId.toString()).toString()
+                val id = Uri.parse(LOCAL_ALBUM_ID).buildUpon().appendPath(albumId.toString()).toString()
                 //去除秒数小于8的专辑
                 if (scanAlbumMusic(context, Uri.parse(id)).isEmpty()) {
                     continue
@@ -284,21 +291,6 @@ class MediaStoreScanner(
             "${MediaStore.Audio.Media.TRACK} ASC"
         )
         return handleMediaMusicCursor(cursor, parentId)
-    }
-
-
-//    //处理逻辑都放在了usecase
-//    private fun scanSheetListFromRoom(parentId: Uri): List<MediaItem> {
-//        return useCase.getSheetList(parentId)
-//    }
-//
-//    private fun scanSheetDecs(parentId: Uri): List<MediaItem>? {
-//        if (parentId.lastPathSegment.isNullOrEmpty()) return null
-//        return useCase.getSheetMusicBySheetId(parentId.lastPathSegment!!, parentId)
-//    }
-
-    suspend fun getCurrentPlayList(): List<MediaItem> {
-        return useCase.getCurrentListCase()
     }
 
     private fun getAlbumUri(albumId: String): Uri {

@@ -10,6 +10,10 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.TabRowDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,22 +21,32 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
 import androidx.navigation.NavHostController
-import coil.transform.CircleCropTransformation
+import com.google.accompanist.insets.LocalWindowInsets
+import com.google.accompanist.insets.rememberInsetsPaddingValues
+import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.AlbumItem
-import com.hua.abstractmusic.ui.utils.ArtImage
+import com.hua.abstractmusic.ui.utils.CoilImage
 import com.hua.abstractmusic.ui.utils.MusicItem
+import com.hua.abstractmusic.ui.utils.indicatorOffset
 import com.hua.abstractmusic.ui.viewmodels.ArtistDetailViewModel
 import kotlinx.coroutines.launch
+import me.onebone.toolbar.CollapsingToolbarScaffold
+import me.onebone.toolbar.ScrollStrategy
+import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 
 /**
  * @author : huaweikai
@@ -44,6 +58,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun LocalArtistDetail(
     item: MediaItem,
+    homeNavController: NavHostController = LocalHomeNavController.current,
     viewModel: ArtistDetailViewModel = hiltViewModel()
 ) {
 
@@ -54,27 +69,76 @@ fun LocalArtistDetail(
             viewModel.releaseBrowser()
         }
     }
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        Spacer(modifier = Modifier.padding(top = 20.dp))
-        Column(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            ArtImage(
+    val state = rememberCollapsingToolbarScaffoldState()
+    CollapsingToolbarScaffold(
+        modifier = Modifier.fillMaxSize(),
+        state = state,
+        scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
+        toolbar = {
+            val textSize = (18 + (30 - 18) * state.toolbarState.progress).sp
+            val titlePadding = (50 * (1 - state.toolbarState.progress)).dp
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(400.dp)
+                    .blur(if (state.toolbarState.progress == 0f) 70.dp else 0.dp)
+            ) {
+                CoilImage(
+                    url = item.mediaMetadata.artworkUri,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(400.dp),
+                    contentScale = ContentScale.Crop,
+                    onLoading = {},
+                    onSuccess = {}
+                )
+            }
+            Column(
                 modifier = Modifier
-                    .size(100.dp),
-                uri = item.mediaMetadata.artworkUri,
-                desc = "",
-                transformation = CircleCropTransformation()
+                    .statusBarsPadding()
+                    .padding(bottom = 8.dp)
+                    .height(38.dp)
+                    .width(38.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                IconButton(
+                    onClick = {
+                        homeNavController.navigateUp()
+                    },
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "",
+                        tint = Color.White
+                    )
+                }
+            }
+            Text(
+                text = "${item.mediaMetadata.title}",
+                color = Color.White,
+                modifier = Modifier
+                    .padding(
+                        start = titlePadding,
+                        top = 8.dp + rememberInsetsPaddingValues(insets = LocalWindowInsets.current.statusBars).calculateTopPadding(),
+                        bottom = 16.dp,
+                        end = 16.dp
+                    )
+                    .road(Alignment.CenterStart, Alignment.BottomEnd),
+                fontSize = textSize,
+                textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.padding(top = 10.dp))
-            Text(text = "${item.mediaMetadata.title}")
         }
-        ArtistHorizontalPager(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+    ) {
+        Column {
+            ArtistHorizontalPager(
+                viewModel = viewModel,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+            )
+        }
     }
 }
 
@@ -83,7 +147,7 @@ fun LocalArtistDetail(
 @Composable
 private fun ArtistHorizontalPager(
     viewModel: ArtistDetailViewModel,
-    modifier:Modifier,
+    modifier: Modifier,
     homeNavController: NavHostController = LocalHomeNavController.current
 ) {
     val scope = rememberCoroutineScope()
@@ -92,7 +156,7 @@ private fun ArtistHorizontalPager(
         selectedTabIndex = pagerState.currentPage,
         indicator = {
             TabRowDefaults.Indicator(
-                Modifier.pagerTabIndicatorOffset(pagerState, it),
+                modifier = Modifier.indicatorOffset(pagerState, it, 50.dp),
                 color = MaterialTheme.colorScheme.primary
             )
         },
@@ -107,11 +171,12 @@ private fun ArtistHorizontalPager(
                         pagerState.animateScrollToPage(index)
                     }
                 },
-                modifier = Modifier.background(
-                    MaterialTheme.colorScheme.background
-                ),
+                modifier = Modifier
+                    .background(
+                        MaterialTheme.colorScheme.background
+                    ),
             ) {
-                Text(text = tabTitles[index])
+                Text(text = tabTitles[index], color = MaterialTheme.colorScheme.onBackground)
             }
         }
     }
@@ -123,9 +188,15 @@ private fun ArtistHorizontalPager(
     ) { index ->
         when (index) {
             0 -> {
-                LazyColumn(Modifier.fillMaxHeight().fillMaxWidth()) {
+                LazyColumn(
+                    Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth()
+                ) {
                     itemsIndexed(viewModel.artistDetail.value) { index, item ->
                         MusicItem(data = item,
+                            isDetail = true,
+                            index = index,
                             onClick = {
                                 viewModel.setPlaylist(index, viewModel.artistDetail.value)
                             }
@@ -134,11 +205,22 @@ private fun ArtistHorizontalPager(
                 }
             }
             1 -> {
-                LazyColumn(Modifier.fillMaxHeight().fillMaxWidth()) {
+                LazyColumn(
+                    Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth()
+                ) {
                     items(viewModel.artistAlbumDetail.value) { item ->
-                        AlbumItem(item = item.mediaItem, modifier = Modifier.fillMaxWidth()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        AlbumItem(
+                            item = item.mediaItem,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 8.dp)
+                        ) {
                             homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumId=${item.mediaId}")
                         }
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
             }

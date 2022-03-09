@@ -1,12 +1,11 @@
 package com.hua.abstractmusic.ui.home
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.dp
+import com.google.accompanist.insets.statusBarsPadding
 
 /**
  * @author : huaweikai
@@ -38,7 +37,7 @@ fun HomeTopBar(
         colors = TopAppBarDefaults.smallTopAppBarColors(
             containerColor = MaterialTheme.colorScheme.background
         ),
-        modifier = Modifier.padding(top = 42.dp)
+        modifier = Modifier.statusBarsPadding()
     )
 }
 //fun HomeTopBar(

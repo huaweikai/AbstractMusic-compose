@@ -7,9 +7,9 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import com.google.common.collect.ImmutableList
 import com.hua.abstractmusic.bean.net.NetData
-import com.hua.abstractmusic.other.Constant.ALBUM_ID
-import com.hua.abstractmusic.other.Constant.ALL_ID
-import com.hua.abstractmusic.other.Constant.ARTIST_ID
+import com.hua.abstractmusic.other.Constant.LOCAL_ALBUM_ID
+import com.hua.abstractmusic.other.Constant.LOCAL_ALL_ID
+import com.hua.abstractmusic.other.Constant.LOCAL_ARTIST_ID
 import com.hua.abstractmusic.other.Constant.LOCAL_SHEET_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ALL_MUSIC_ID
@@ -40,8 +40,8 @@ class MediaItemTree(
 
     private fun initialize() {
         val list = listOf(
-            ROOT_SCHEME, ALL_ID, ALBUM_ID,
-            ARTIST_ID, LOCAL_SHEET_ID, NETWORK_ALBUM_ID,
+            ROOT_SCHEME, LOCAL_ALL_ID, LOCAL_ALBUM_ID,
+            LOCAL_ARTIST_ID, LOCAL_SHEET_ID, NETWORK_ALBUM_ID,
             NETWORK_ARTIST_ID, NETWORK_BANNER_ID,
             NETWORK_RECOMMEND_ID, NETWORK_ALL_MUSIC_ID, NET_SHEET_ID
         )

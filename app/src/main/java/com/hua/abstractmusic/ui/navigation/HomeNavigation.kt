@@ -1,5 +1,7 @@
 package com.hua.abstractmusic.ui.navigation
 
+import android.util.Log
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -34,6 +36,7 @@ import com.hua.abstractmusic.ui.viewmodels.NetViewModel
  * @Desc   : 主页的小navigation，用于跳转在线音乐，本地音乐和我的界面
  */
 
+@OptIn(ExperimentalAnimationApi::class)
 @ExperimentalPagerApi
 @ExperimentalFoundationApi
 @Composable
@@ -88,6 +91,7 @@ fun HomeNavigationNav(
             val isLocal = it.arguments?.getBoolean("isLocal", true)!!
             val albumId = it.arguments?.getString("albumId", "")
             val item = if (isLocal) {
+                Log.d("TAG", "HomeNavigationNav: $albumId")
                 viewModel.localAlbumList.value.find { it.mediaId == albumId }!!.mediaItem
             } else {
                 netViewModel.getItem(albumId ?: "")
@@ -98,18 +102,29 @@ fun HomeNavigationNav(
             )
         }
         composable(
-            route = "${Screen.LocalArtistDetail.route}?artistIndex={artistIndex}",
+            route = "${Screen.LocalArtistDetail.route}?artistId={artistId}&isLocal={isLocal}",
             arguments = listOf(
                 navArgument(
-                    name = "artistIndex"
+                    name = "artistId"
                 ) {
-                    type = NavType.IntType
-                    defaultValue = -1
+                    type = NavType.StringType
+                    defaultValue = ""
+                },
+                navArgument(
+                    name = "isLocal"
+                ) {
+                    type = NavType.BoolType
+                    defaultValue = true
                 }
             ),
         ) {
-            val index = it.arguments?.getInt("artistIndex", -1)
-            val item = viewModel.localArtistList.value[index!!].mediaItem
+            val artistId = it.arguments?.getString("artistId", "")
+            val isLocal = it.arguments?.getBoolean("isLocal", true)!!
+            val item = if (isLocal) {
+                viewModel.localArtistList.value.find { it.mediaId == artistId }!!.mediaItem
+            } else {
+                netViewModel.getItem(artistId ?: "")
+            }
             LocalArtistDetail(
                 item = item
             )

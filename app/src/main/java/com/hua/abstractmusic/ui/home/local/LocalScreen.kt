@@ -58,11 +58,12 @@ fun LocalScreen(
             HomeTopBar(label = "本地音乐", imageVector = Icons.Default.Refresh, desc = "") {
                 viewModel.refresh()
             }
-        }
+        },
+        modifier = Modifier.background(MaterialTheme.colorScheme.background)
     ) {
         Column(
             Modifier.padding(it)
-        ){
+        ) {
             TabRow(
                 selectedTabIndex = pagerState.currentPage,
                 indicator = {
@@ -110,8 +111,8 @@ fun LocalScreen(
                         }
                     }
                     2 -> {
-                        LocalArtist { index ->
-                            homeNavController.navigate("${Screen.LocalArtistDetail.route}?artistIndex=${index}")
+                        LocalArtist { artistId ->
+                            homeNavController.navigate("${Screen.LocalArtistDetail.route}?artistId=${artistId}")
                         }
                     }
                 }

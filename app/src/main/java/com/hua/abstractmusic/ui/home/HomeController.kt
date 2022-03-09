@@ -81,26 +81,20 @@ fun Controller(
 ) {
     val context = LocalContext.current
 
-    val isTouch = remember{
+    val isTouch = remember {
         mutableStateOf(false)
     }
     val mmkv = MMKV.mmkvWithID(LASTMEDIA)
-    val pagerState = rememberPagerState(mmkv.decodeInt(LASTMEDIAINDEX,0))
+    val pagerState = rememberPagerState(mmkv.decodeInt(LASTMEDIAINDEX, 0))
 
     LaunchedEffect(viewModel.currentPlayItem.value) {
-//        if(!isTouch.value){
-            val index = viewModel.currentPlayList.value.indexOf(
-                MediaData(viewModel.currentPlayItem.value, true)
-            )
-            pagerState.scrollToPage(if (index < 0) 0 else index)
-//        }
-//        isTouch.value = false
+        val index = viewModel.currentPlayList.value.indexOf(
+            MediaData(viewModel.currentPlayItem.value, true)
+        )
+        pagerState.scrollToPage(if (index < 0) 0 else index)
     }
     LaunchedEffect(pagerState.currentPage) {
-//        if(isTouch.value){
-            viewModel.skipTo(pagerState.currentPage,true)
-//        }
-//        isTouch.value = false
+        viewModel.skipTo(pagerState.currentPage, true)
     }
 
     ConstraintLayout(

@@ -19,6 +19,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.transform.RoundedCornersTransformation
+import com.google.accompanist.insets.LocalWindowInsets
+import com.google.accompanist.insets.rememberInsetsPaddingValues
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.ui.home.IconBean
 import com.hua.abstractmusic.ui.LocalMusicScreenSecondColor
@@ -60,9 +62,13 @@ private fun VerticalScreen(
     val data = viewModel.currentPlayItem.value.mediaMetadata
     Column(
         modifier = Modifier
+            .padding(
+                top = 48.dp + rememberInsetsPaddingValues(
+                    insets = LocalWindowInsets.current.statusBars
+                ).calculateTopPadding()
+            )
             .fillMaxSize()
     ) {
-        Spacer(modifier = Modifier.height(topGlide.dp))
         ArtImage(
             modifier = Modifier
                 .fillMaxWidth(0.8f)
@@ -280,16 +286,17 @@ fun ControllerItem(
 ) {
     Spacer(modifier = Modifier.width(width))
     IconButton(
-        onClick = { onClick() }
+        onClick = { onClick() },
+        modifier = Modifier
+            .size(size)
+            .clip(CircleShape),
     ) {
         Icon(
             painter = painterResource(
                 resId
             ),
+            modifier = Modifier.size(size),
             contentDescription = desc,
-            modifier = Modifier
-                .clip(CircleShape)
-                .size(size)
         )
     }
     Spacer(modifier = Modifier.width(width))

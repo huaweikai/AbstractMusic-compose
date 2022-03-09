@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,22 +25,22 @@ import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 @Composable
 fun LocalArtist(
     homeViewModel: HomeViewModel = LocalHomeViewModel.current,
-    onClick: (Int) -> Unit
+    onClick: (String) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
     ) {
-        itemsIndexed(
+        items(
             homeViewModel.localArtistList.value,
-            key = { _, item -> item.mediaId }
-        ) { index: Int, item: MediaData ->
+            key = { item -> item.mediaId }
+        ) { item: MediaData ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 20.dp, bottom = 20.dp)
                     .clickable {
-                        onClick(index)
+                        onClick(item.mediaId)
                     }
             ) {
                 ArtImage(

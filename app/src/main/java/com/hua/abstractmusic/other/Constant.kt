@@ -22,8 +22,8 @@ object Constant {
     const val TYPE_LOCAL_ARTIST = "${LOCAL}_artist"
     const val ARTIST_TO_ALBUM = "abAlbum"
 
-    const val ALL_ID = "${ROOT_SCHEME}${TYPE_LOCAL_ALL}"
-    const val ALBUM_ID = "${ROOT_SCHEME}${TYPE_LOCAL_ALBUM}"
+    const val LOCAL_ALL_ID = "${ROOT_SCHEME}${TYPE_LOCAL_ALL}"
+    const val LOCAL_ALBUM_ID = "${ROOT_SCHEME}${TYPE_LOCAL_ALBUM}"
 
     //本地个人歌单
     const val LOCAL_SHEET_ID = "${ROOT_SCHEME}${TYPE_LOCAL_SHEET}"
@@ -31,7 +31,7 @@ object Constant {
 
 
 
-    const val ARTIST_ID = "${ROOT_SCHEME}${TYPE_LOCAL_ARTIST}"
+    const val LOCAL_ARTIST_ID = "${ROOT_SCHEME}${TYPE_LOCAL_ARTIST}"
 
     const val NETWORK = "network"
 

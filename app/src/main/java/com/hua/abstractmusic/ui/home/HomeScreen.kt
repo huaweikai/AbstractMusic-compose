@@ -1,7 +1,8 @@
 package com.hua.abstractmusic.ui.home
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.TweenSpec
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,7 +41,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     homeNavController: NavHostController = LocalHomeNavController.current,
-    viewModel:HomeViewModel = LocalHomeViewModel.current,
+    viewModel: HomeViewModel = LocalHomeViewModel.current,
     netViewModel: NetViewModel = LocalNetViewModel.current
 ) {
 
@@ -99,11 +100,10 @@ fun HomeScreen(
         }
     }
 
-//    val translationBottom by animateDpAsState(
-//        if (navToDetailState.value) 120.dp else 60.dp,
-//        animationSpec = spring(1f, 100f)
-//    )
-
+    val translationBottom by animateDpAsState(
+        if (navToDetailState.value) 60.dp else 120.dp,
+        animationSpec = TweenSpec(500)
+    )
 
     PlayScreen(state = sheetPlayState) {
         HomePlayList(sheetListState) {
@@ -112,8 +112,7 @@ fun HomeScreen(
                     HomeController(
                         Modifier
                             .fillMaxWidth()
-                            .animateContentSize()
-                            .height(if (navToDetailState.value) 60.dp else 120.dp)
+                            .height(translationBottom)
                             .background(MaterialTheme.colorScheme.background),
                         {
                             scope.launch {
@@ -125,13 +124,13 @@ fun HomeScreen(
                             }
                         }
                     )
-                }
+                },
+                modifier = Modifier.background(MaterialTheme.colorScheme.background)
             )
             {
                 HomeNavigationNav(
                     modifier = Modifier
                         .fillMaxSize()
-                        .animateContentSize()
                         .padding(it)
                 )
                 BackHandler(

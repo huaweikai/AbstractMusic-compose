@@ -3,6 +3,7 @@ package com.hua.abstractmusic.utils
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
+import android.os.Bundle
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -97,6 +98,12 @@ fun NetMusic.toMediaItem(parentId: Uri): MediaItem {
                 .setArtist(this@toMediaItem.artist)
                 .setArtworkUri(Uri.parse(this@toMediaItem.imgUrl))
                 .setMediaUri(this.musicUrl.toUri())
+                .setExtras(
+                    Bundle().apply {
+                        putLong("albumId", albumId.toLong())
+//                        putLong("artistId", artistId)
+                    }
+                )
                 .setIsPlayable(true)
                 .setAlbumTitle(this@toMediaItem.albumName)
                 .setAlbumArtist(this@toMediaItem.artist)
