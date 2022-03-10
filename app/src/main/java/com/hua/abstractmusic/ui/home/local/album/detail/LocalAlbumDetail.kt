@@ -1,6 +1,7 @@
 package com.hua.abstractmusic.ui.home.local.album.detail
 
 import android.annotation.SuppressLint
+import android.graphics.BitmapFactory
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -10,15 +11,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight.Companion.W400
 import androidx.compose.ui.unit.dp
@@ -30,12 +33,14 @@ import coil.compose.AsyncImage
 import coil.transform.RoundedCornersTransformation
 import com.google.accompanist.insets.statusBarsPadding
 import com.hua.abstractmusic.R
+import com.hua.abstractmusic.ui.LocalComposeUtils
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.utils.ArtImage
 import com.hua.abstractmusic.ui.utils.LCE
 import com.hua.abstractmusic.ui.utils.MusicItem
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.ui.viewmodels.AlbumDetailViewModel
+import com.hua.blur.blur
 
 
 /**
@@ -54,6 +59,14 @@ fun LocalAlbumDetail(
     navHostController: NavHostController = LocalHomeNavController.current,
     detailViewModel: AlbumDetailViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
+    val bitmap = remember {
+        mutableStateOf(BitmapFactory.decodeResource(context.resources, R.drawable.music).blur(50))
+    }
+    val composeUtils = LocalComposeUtils.current
+    LaunchedEffect(Unit) {
+        bitmap.value = composeUtils.coilToBitmap(item.mediaMetadata.artworkUri).blur(50)
+    }
 
     DisposableEffect(Unit) {
         detailViewModel.id = item.mediaId
@@ -101,18 +114,31 @@ fun LocalAlbumDetail(
         }
         Box(
             Modifier
-                .fillMaxSize()
-                .alpha(0.3f)
-                .blur(35.dp, BlurredEdgeTreatment.Unbounded),
+                .fillMaxSize(),
         ) {
             AsyncImage(
-                model = item.mediaMetadata.artworkUri,
+                model = bitmap.value,
                 contentDescription = "",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .fillMaxHeight(0.4f)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .alpha(0.2f)
+                    .graphicsLayer { alpha = 0.99F }
+                    .drawWithContent {
+                        val colors = listOf(
+                            Color.Black,
+                            Color.Black,
+                            Color.Black,
+                            Color.Transparent
+                        )
+                        drawContent()
+                        drawRect(
+                            brush = Brush.verticalGradient(colors),
+                            blendMode = BlendMode.DstIn
+                        )
+                    }
             )
         }
     }
@@ -124,7 +150,10 @@ fun Album_Success(
     item: MediaItem,
     detailViewModel: AlbumDetailViewModel
 ) {
-    LazyColumn(Modifier.fillMaxSize()) {
+    LazyColumn(
+        Modifier
+            .fillMaxSize()
+            .background(Color.Transparent)) {
         item {
             AlbumDetailDesc(item = item)
         }

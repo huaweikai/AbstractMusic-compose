@@ -1,13 +1,13 @@
 package com.hua.abstractmusic.ui.home
 
 import android.annotation.SuppressLint
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
@@ -16,6 +16,7 @@ import androidx.compose.ui.input.pointer.*
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -53,6 +54,51 @@ import com.tencent.mmkv.MMKV
  * @Desc   : 主页的控制界面
  */
 
+
+val pages = listOf(MainPageItem.Net, MainPageItem.Local, MainPageItem.Mine)
+
+@Composable
+fun HomeBottomBar(
+    navController: NavHostController = LocalHomeNavController.current
+) {
+    val back = navController.currentBackStackEntryAsState()
+    NavigationBar {
+        pages.forEach { item ->
+            NavigationBarItem(selected =
+            item.route == back.value?.destination?.route, onClick = {
+                navController.navigate(item.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }, icon = {
+                Icon(
+                    painter = painterResource(id = item.icon),
+                    contentDescription = null
+                )
+            }, label = {
+                Text(text = stringResource(id = item.label))
+            }, alwaysShowLabel = true
+            )
+        }
+    }
+}
+
+sealed class MainPageItem(
+    val route: String,
+    @StringRes val label: Int,
+    @DrawableRes val icon: Int
+) {
+    object Net : MainPageItem(Screen.NetScreen.route, R.string.label_net, R.drawable.ic_line)
+    object Mine :
+        MainPageItem(Screen.MineScreen.route, R.string.label_mine, R.drawable.ic_person_icon)
+
+    object Local :
+        MainPageItem(Screen.LocalScreen.route, R.string.label_local, R.drawable.ic_music_icon)
+}
+
 @ExperimentalPagerApi
 @Composable
 fun HomeController(
@@ -63,11 +109,11 @@ fun HomeController(
     Column(
         modifier = modifier
     ) {
-        Controller(
-            playListClick,
-            playScreenClick
-        )
-        HomeNavigation(modifier)
+//        Controller(
+//            playListClick,
+//            playScreenClick
+//        )
+//        HomeNavigation(modifier)
     }
 }
 

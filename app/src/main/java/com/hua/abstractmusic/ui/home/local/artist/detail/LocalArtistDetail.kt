@@ -21,25 +21,26 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
 import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
+import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.AlbumItem
-import com.hua.abstractmusic.ui.utils.CoilImage
 import com.hua.abstractmusic.ui.utils.MusicItem
 import com.hua.abstractmusic.ui.utils.indicatorOffset
 import com.hua.abstractmusic.ui.viewmodels.ArtistDetailViewModel
@@ -61,7 +62,7 @@ fun LocalArtistDetail(
     homeNavController: NavHostController = LocalHomeNavController.current,
     viewModel: ArtistDetailViewModel = hiltViewModel()
 ) {
-
+    val state = rememberCollapsingToolbarScaffoldState()
     DisposableEffect(Unit) {
         viewModel.initializeController()
         viewModel.artistId = item.mediaId
@@ -69,7 +70,6 @@ fun LocalArtistDetail(
             viewModel.releaseBrowser()
         }
     }
-    val state = rememberCollapsingToolbarScaffoldState()
     CollapsingToolbarScaffold(
         modifier = Modifier.fillMaxSize(),
         state = state,
@@ -81,16 +81,13 @@ fun LocalArtistDetail(
                 Modifier
                     .fillMaxWidth()
                     .height(400.dp)
-                    .blur(if (state.toolbarState.progress == 0f) 70.dp else 0.dp)
             ) {
-                CoilImage(
-                    url = item.mediaMetadata.artworkUri,
+                AsyncImage(
+                    model = item.mediaMetadata.artworkUri,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(400.dp),
+                        .fillMaxSize(),
                     contentScale = ContentScale.Crop,
-                    onLoading = {},
-                    onSuccess = {}
+                    contentDescription = ""
                 )
             }
             Column(
@@ -148,6 +145,7 @@ fun LocalArtistDetail(
 private fun ArtistHorizontalPager(
     viewModel: ArtistDetailViewModel,
     modifier: Modifier,
+    bottomBarHeight: Dp = LocalBottomControllerHeight.current,
     homeNavController: NavHostController = LocalHomeNavController.current
 ) {
     val scope = rememberCoroutineScope()
@@ -191,7 +189,8 @@ private fun ArtistHorizontalPager(
                 LazyColumn(
                     Modifier
                         .fillMaxHeight()
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    contentPadding = PaddingValues(bottom = bottomBarHeight)
                 ) {
                     itemsIndexed(viewModel.artistDetail.value) { index, item ->
                         MusicItem(data = item,
@@ -208,7 +207,8 @@ private fun ArtistHorizontalPager(
                 LazyColumn(
                     Modifier
                         .fillMaxHeight()
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    contentPadding = PaddingValues(bottom = bottomBarHeight)
                 ) {
                     items(viewModel.artistAlbumDetail.value) { item ->
                         Spacer(modifier = Modifier.height(8.dp))

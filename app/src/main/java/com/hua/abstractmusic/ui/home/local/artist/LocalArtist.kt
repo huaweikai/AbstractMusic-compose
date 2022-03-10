@@ -8,9 +8,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.transform.CircleCropTransformation
 import com.hua.abstractmusic.bean.MediaData
+import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.utils.ArtImage
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
@@ -25,11 +27,13 @@ import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 @Composable
 fun LocalArtist(
     homeViewModel: HomeViewModel = LocalHomeViewModel.current,
+    bottomControllerHeight: Dp = LocalBottomControllerHeight.current,
     onClick: (String) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxWidth(),
+        contentPadding = PaddingValues(bottom = bottomControllerHeight)
     ) {
         items(
             homeViewModel.localArtistList.value,

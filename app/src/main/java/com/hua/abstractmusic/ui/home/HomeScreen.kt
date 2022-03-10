@@ -1,33 +1,38 @@
 package com.hua.abstractmusic.ui.home
 
+import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.TweenSpec
+import androidx.compose.animation.*
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.pager.ExperimentalPagerApi
+import com.hua.abstractmusic.other.Constant
+import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalHomeNavController
-import com.hua.abstractmusic.ui.LocalHomeViewModel
-import com.hua.abstractmusic.ui.LocalNetViewModel
+import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.home.playlist.HomePlayList
 import com.hua.abstractmusic.ui.navigation.HomeNavigationNav
 import com.hua.abstractmusic.ui.play.PlayScreen
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.PopupWindow
-import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
-import com.hua.abstractmusic.ui.viewmodels.NetViewModel
+import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 import kotlinx.coroutines.launch
 
 /**
@@ -35,16 +40,19 @@ import kotlinx.coroutines.launch
  * @Date   : 2022/01/07
  * @Desc   : 主界面，可以看作是activity
  */
+@SuppressLint("UnsafeOptInUsageError")
 @ExperimentalFoundationApi
 @ExperimentalPagerApi
 @ExperimentalMaterialApi
 @Composable
 fun HomeScreen(
     homeNavController: NavHostController = LocalHomeNavController.current,
-    viewModel: HomeViewModel = LocalHomeViewModel.current,
-    netViewModel: NetViewModel = LocalNetViewModel.current
+    playingViewModel: PlayingViewModel = LocalPlayingViewModel.current
 ) {
-
+    var bottomControllerHeight by remember {
+        mutableStateOf(0.dp)
+    }
+    val density = LocalDensity.current
     val scope = rememberCoroutineScope()
 
     val navToDetailState = rememberSaveable {
@@ -84,61 +92,70 @@ fun HomeScreen(
     }
 
     val routes = listOf(Screen.LocalScreen.route, Screen.NetScreen.route, Screen.MineScreen.route)
+    val backState = homeNavController.currentBackStackEntryAsState()
 
-    LaunchedEffect(homeNavController.currentBackStackEntryAsState().value) {
-        homeNavController.currentDestination?.route.let {
-            when (it) {
-                in routes -> {
-                    navToDetailState.value = false
-                    label.value = "${homeNavController.currentDestination?.label}"
-                }
-                else -> {
-                    navToDetailState.value = true
-                    label.value = ""
-                }
-            }
-        }
-    }
-
-    val translationBottom by animateDpAsState(
-        if (navToDetailState.value) 60.dp else 120.dp,
-        animationSpec = TweenSpec(500)
-    )
+//    val translationBottom by animateDpAsState(
+//        if (navToDetailState.value) 60.dp else 120.dp
+//    )
 
     PlayScreen(state = sheetPlayState) {
         HomePlayList(sheetListState) {
             Scaffold(
                 bottomBar = {
-                    HomeController(
-                        Modifier
-                            .fillMaxWidth()
-                            .height(translationBottom)
-                            .background(MaterialTheme.colorScheme.background),
-                        {
-                            scope.launch {
-                                sheetListState.animateTo(ModalBottomSheetValue.Expanded)
-                            }
-                        }, {
-                            scope.launch {
-                                sheetPlayState.animateTo(ModalBottomSheetValue.Expanded)
-                            }
-                        }
-                    )
+                    AnimatedVisibility(
+                        visible = backState.value?.destination?.route in routes,
+                        enter = slideInVertically() + fadeIn(),
+                        exit = slideOutVertically() + fadeOut()
+                    ) {
+                        HomeBottomBar()
+                    }
                 },
                 modifier = Modifier.background(MaterialTheme.colorScheme.background)
             )
             {
-                HomeNavigationNav(
+                val bottomPadding = animateDpAsState(
+                    it.calculateBottomPadding()
+                )
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(it)
-                )
-                BackHandler(
-                    sheetIsVisible.value
+                        .padding(bottom = bottomPadding.value)
                 ) {
-                    val state = if (sheetListState.isVisible) sheetListState else sheetPlayState
-                    scope.launch {
-                        state.animateTo(ModalBottomSheetValue.Hidden)
+                    CompositionLocalProvider(LocalBottomControllerHeight provides bottomControllerHeight) {
+                        HomeNavigationNav(Modifier)
+                    }
+                    BackHandler(
+                        sheetIsVisible.value
+                    ) {
+                        val state = if (sheetListState.isVisible) sheetListState else sheetPlayState
+                        scope.launch {
+                            state.animateTo(ModalBottomSheetValue.Hidden)
+                        }
+                    }
+                    AnimatedVisibility(
+                        visible = playingViewModel.currentPlayItem.value != Constant.NULL_MEDIA_ITEM,
+                        modifier = Modifier.align(Alignment.BottomCenter)
+                    ) {
+                        Surface(
+                            modifier = Modifier
+                                .onSizeChanged {
+                                    bottomControllerHeight = with(density) { it.height.toDp() }
+                                }
+                                .padding(vertical = 8.dp, horizontal = 6.dp),
+                            shape = RoundedCornerShape(8.dp),
+                            tonalElevation = 3.dp
+                        ) {
+                            Controller(
+                                playListClick = {
+                                    scope.launch { sheetListState.animateTo(ModalBottomSheetValue.Expanded) }
+                                },
+                                playScreenClick = {
+                                    scope.launch {
+                                        sheetPlayState.animateTo(ModalBottomSheetValue.Expanded)
+                                    }
+                                })
+                        }
+
                     }
                 }
             }

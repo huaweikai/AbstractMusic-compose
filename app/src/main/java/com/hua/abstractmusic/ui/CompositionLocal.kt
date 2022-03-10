@@ -4,6 +4,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.media3.common.MediaItem
 import androidx.navigation.NavHostController
 import com.hua.abstractmusic.ui.utils.WindowSize
@@ -62,6 +63,6 @@ val LocalPopWindowItem = staticCompositionLocalOf<MutableState<MediaItem>>{
     error("")
 }
 
-val LocalUserNavController = staticCompositionLocalOf<NavHostController>{
+val LocalBottomControllerHeight = staticCompositionLocalOf<Dp>{
     error("")
 }

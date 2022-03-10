@@ -2,12 +2,15 @@ package com.hua.abstractmusic.ui.viewmodels
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.media3.common.MediaItem
 import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.use_case.UseCase
+import com.hua.blur.BlurLibrary
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -22,9 +25,11 @@ class AlbumDetailViewModel @Inject constructor(
     application: Application,
     useCase: UseCase,
     itemTree: MediaItemTree,
+    private val blurLibrary: BlurLibrary
 ) : BaseBrowserViewModel(application, useCase, itemTree) {
     var id: String? = null
     var isLocal: Boolean = true
+    var item:MediaItem? = null
     override fun onMediaConnected() {
         if (isLocal) {
             localListMap[id!!] = _albumDetail
@@ -33,11 +38,12 @@ class AlbumDetailViewModel @Inject constructor(
         }
         playListMap[id!!] = _albumDetail
         refresh()
+        Log.d("TAG", "onMediaConnected: ${blurLibrary.isAvailable}")
     }
 
 
     private val _albumDetail = mutableStateOf<List<MediaData>>(emptyList())
     val albumDetail: State<List<MediaData>> get() = _albumDetail
 
-
+//    suspend fun getB
 }

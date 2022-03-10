@@ -12,4 +12,7 @@
     <string name="hello_permission_request_bt">To apply for permission</string>
     <string name="notification_channel_name">Music Notification</string>
     <string name="notification_channel_description">Used to control the playback of music</string>
+    <string name="label_net">Network music</string>
+    <string name="label_local">Local Music</string>
+    <string name="label_mine">Mine</string>
 </resources>

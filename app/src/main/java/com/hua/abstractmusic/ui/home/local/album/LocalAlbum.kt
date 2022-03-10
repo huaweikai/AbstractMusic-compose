@@ -11,9 +11,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.bean.MediaData
+import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.utils.ArtImage
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
@@ -32,18 +34,24 @@ fun LocalAlbum(
     viewModel: HomeViewModel = LocalHomeViewModel.current,
     onClick:(String)->Unit
 ) {
-    AlbumLazyItem(viewModel.localAlbumList.value,onClick)
+    AlbumLazyItem(viewModel.localAlbumList.value, onClick = onClick)
 }
 @ExperimentalFoundationApi
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun AlbumLazyItem(
     list: List<MediaData>,
-    onClick: (String) -> Unit
+    bottomControllerHeight: Dp = LocalBottomControllerHeight.current,
+    onClick: (String) -> Unit,
 ){
     LazyVerticalGrid(
         cells = GridCells.Fixed(2),
-        contentPadding = PaddingValues(16.dp)
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            bottom = bottomControllerHeight,
+            top = 16.dp
+        ),
     ) {
         items(list) {item ->
             Column(

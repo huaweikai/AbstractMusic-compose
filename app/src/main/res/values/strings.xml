@@ -13,4 +13,7 @@
     <string name="hello_permission_request_bt">申请权限</string>
     <string name="notification_channel_name">音乐通知栏</string>
     <string name="notification_channel_description">用于控制当前播放的音乐</string>
+    <string name="label_net">在线音乐</string>
+    <string name="label_local">本地音乐</string>
+    <string name="label_mine">我的</string>
 </resources>
