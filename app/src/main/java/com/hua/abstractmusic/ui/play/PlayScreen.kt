@@ -6,8 +6,13 @@ import androidx.compose.animation.Animatable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -84,6 +89,7 @@ fun PlayScreen(
         sheetContent = {
             CompositionLocalProvider(
                 LocalContentColor provides firstColor.value,
+                androidx.compose.material.LocalContentColor provides firstColor.value,
                 LocalMusicScreenSecondColor provides secondColor.value
             ) {
                 Box(
@@ -96,7 +102,7 @@ fun PlayScreen(
             }
         },
         sheetShape = RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp),
-        sheetBackgroundColor = MaterialTheme.colorScheme.background
+        sheetBackgroundColor = if(isDark) Color.Black else Color.White
     ) {
         content()
     }
@@ -110,7 +116,9 @@ private fun PlayScreenTab(
     val tabTitles = listOf("列表", "歌曲", "歌词")
     val scope = rememberCoroutineScope()
     Column(
-        modifier = Modifier.fillMaxWidth().statusBarsPadding(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .statusBarsPadding(),
         horizontalAlignment = CenterHorizontally
     ) {
         TabRow(
@@ -119,7 +127,8 @@ private fun PlayScreenTab(
                 .height(40.dp)
                 .fillMaxWidth(0.4f)
                 .align(CenterHorizontally),
-            backgroundColor = Color.Transparent,
+            containerColor = Color.Transparent,
+//            backgroundColor = Color.Transparent,
             divider = {}
         ) {
             tabTitles.forEachIndexed { index, title ->

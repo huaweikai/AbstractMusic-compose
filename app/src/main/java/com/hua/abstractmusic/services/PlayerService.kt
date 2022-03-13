@@ -15,12 +15,10 @@ import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
-import com.hua.abstractmusic.other.Constant.LASTMEDIA
-import com.hua.abstractmusic.other.Constant.LASTMEDIAINDEX
+import com.hua.abstractmusic.preference.PreferenceManager
 import com.hua.abstractmusic.services.extensions.LibrarySessionCallback
 import com.hua.abstractmusic.ui.MainActivity
 import com.hua.abstractmusic.use_case.UseCase
-import com.tencent.mmkv.MMKV
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import javax.inject.Inject
@@ -53,7 +51,8 @@ class PlayerService : MediaLibraryService() {
     @Inject
     lateinit var useCase: UseCase
 
-    private val mmkv = MMKV.mmkvWithID(LASTMEDIA)
+    @Inject
+    lateinit var preferenceManager:PreferenceManager
 
 
     private lateinit var notificationManager: MusicNotificationManager
@@ -118,7 +117,7 @@ class PlayerService : MediaLibraryService() {
             .buildAsync()
         browserFuture.addListener({
             serviceScope.launch(Dispatchers.IO) {
-                val index = mmkv.decodeInt(LASTMEDIAINDEX, 0)
+                val index = preferenceManager.lastMediaIndex
                 val list = useCase.getCurrentListCase()
                 if (list.isNotEmpty()) {
                     withContext(Dispatchers.Main) {
@@ -178,7 +177,7 @@ class PlayerService : MediaLibraryService() {
         }
 
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-            mmkv.encode(LASTMEDIAINDEX, exoplayer.currentMediaItemIndex)
+            preferenceManager.lastMediaIndex = exoplayer.currentMediaItemIndex
         }
 
         override fun onPlayerError(error: PlaybackException) {

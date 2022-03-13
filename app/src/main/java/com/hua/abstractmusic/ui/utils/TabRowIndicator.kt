@@ -57,5 +57,43 @@ fun Modifier.indicatorOffset(
         .width(width)
 }
 
+@ExperimentalPagerApi
+fun Modifier.indicatorOffset3(
+    pagerState: PagerState,
+    tabPositions: List<androidx.compose.material3.TabPosition>,
+    width: Dp
+): Modifier = composed {
+    // If there are no pages, nothing to show
+    if (pagerState.pageCount == 0) return@composed this
+
+    val targetIndicatorOffset: Dp
+    val indicatorWidth: Dp
+
+    val currentTab = tabPositions[minOf(tabPositions.lastIndex, pagerState.currentPage)]
+    val targetPage = pagerState.targetPage
+    val targetTab = tabPositions.getOrNull(targetPage)
+
+    if (targetTab != null) {
+        // The distance between the target and current page. If the pager is animating over many
+        // items this could be > 1
+        val targetDistance = (targetPage - pagerState.currentPage).absoluteValue
+        // Our normalized fraction over the target distance
+        val fraction = (pagerState.currentPageOffset / max(targetDistance, 1)).absoluteValue
+
+        targetIndicatorOffset = lerp(currentTab.left, targetTab.left, fraction)
+        indicatorWidth = lerp(currentTab.width, targetTab.width, fraction).absoluteValue
+    } else {
+        // Otherwise we just use the current tab/page
+        targetIndicatorOffset = currentTab.left
+        indicatorWidth = currentTab.width
+    }
+
+    fillMaxWidth()
+        .wrapContentSize(Alignment.BottomStart)
+        .offset(x = targetIndicatorOffset)
+        .padding(horizontal = (indicatorWidth - width) / 2)
+        .width(width)
+}
+
 private inline val Dp.absoluteValue: Dp
     get() = value.absoluteValue.dp

@@ -58,7 +58,6 @@ private fun VerticalScreen(
     configuration: Configuration = LocalConfiguration.current,
     viewModel: PlayingViewModel = LocalPlayingViewModel.current
 ) {
-    val topGlide = configuration.screenHeightDp * 0.15
     val data = viewModel.currentPlayItem.value.mediaMetadata
     Column(
         modifier = Modifier

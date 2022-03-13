@@ -1,6 +1,7 @@
 package com.hua.abstractmusic.ui.home.net
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,11 +18,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.transform.RoundedCornersTransformation
+import com.google.accompanist.insets.LocalWindowInsets
+import com.google.accompanist.insets.rememberInsetsPaddingValues
+import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -33,7 +38,6 @@ import com.hua.abstractmusic.other.Constant.NET_ALBUM_TYPE
 import com.hua.abstractmusic.ui.LocalComposeUtils
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalNetViewModel
-import com.hua.abstractmusic.ui.home.HomeTopBar
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.*
 import com.hua.abstractmusic.ui.viewmodels.NetViewModel
@@ -50,16 +54,37 @@ import com.hua.abstractmusic.utils.PaletteUtils
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun NetScreen(
-    navHostController: NavHostController = LocalHomeNavController.current,
     netViewModel: NetViewModel = LocalNetViewModel.current
 ) {
+    val appBarColors = TopAppBarDefaults.smallTopAppBarColors(
+        containerColor = MaterialTheme.colorScheme.surface
+    )
+    val statusBarPadding =
+        rememberInsetsPaddingValues(insets = LocalWindowInsets.current.statusBars, applyTop = true)
+    val decayAnimationSpec = rememberSplineBasedDecay<Float>()
+    val scrollBehavior = remember(decayAnimationSpec) {
+        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(decayAnimationSpec)
+    }
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            HomeTopBar(
-                label = "在线音乐",
-                actionOnclick = {},
-                imageVector = Icons.Default.Search,
-                desc = ""
+            SmallTopAppBar(
+                title = {
+                    Text(text ="在线音乐")
+                },
+                modifier = Modifier.statusBarsPadding(),
+                colors = appBarColors,
+                actions = {
+                    IconButton(onClick = {
+
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = ""
+                        )
+                    }
+                },
+                scrollBehavior = scrollBehavior
             )
         }
     ) {

@@ -11,7 +11,7 @@ object Version {
     const val kotlin_version = "1.6.10"
     const val compose_version = "1.1.1"
     const val activity_compose_version = "1.4.0"
-    const val compose_md3_version = "1.0.0-alpha05"
+    const val compose_md3_version = "1.0.0-alpha07"
     const val navigation_version = "2.4.0-rc01"
     const val compose_accompanist = "0.23.1"
     const val retrofit_version = "2.9.0"

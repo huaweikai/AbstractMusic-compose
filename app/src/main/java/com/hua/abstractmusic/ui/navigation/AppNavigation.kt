@@ -4,10 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -20,6 +17,7 @@ import com.hua.abstractmusic.ui.hello.HelloScreen
 import com.hua.abstractmusic.ui.home.HomeScreen
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.splash.SplashScreen
+import com.hua.abstractmusic.ui.viewmodels.ThemeViewModel
 
 /**
  * @author : huaweikai
@@ -34,6 +32,7 @@ import com.hua.abstractmusic.ui.splash.SplashScreen
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun AppNavigation(
+    themeViewModel:ThemeViewModel = LocalThemeViewModel.current
 //    appNavController:NavHostController = LocalAppNavController.current
 ) {
     CompositionLocalProvider(LocalAppNavController provides rememberNavController()) {
@@ -63,5 +62,8 @@ fun AppNavigation(
                 }
             }
         }
+    }
+    LaunchedEffect(key1 = themeViewModel.isReady) {
+        if (!themeViewModel.isReady.value) themeViewModel.init()
     }
 }

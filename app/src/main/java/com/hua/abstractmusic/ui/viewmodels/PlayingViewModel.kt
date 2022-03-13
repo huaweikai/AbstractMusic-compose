@@ -17,6 +17,7 @@ import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.other.Constant.NET_SHEET_ID
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
+import com.hua.abstractmusic.preference.PreferenceManager
 import com.hua.abstractmusic.repository.NetRepository
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.ui.utils.LCE
@@ -45,7 +46,8 @@ class PlayingViewModel @Inject constructor(
     useCase: UseCase,
     itemTree: MediaItemTree,
     private val repository: NetRepository,
-    private val taglibLibrary: TaglibLibrary
+    private val taglibLibrary: TaglibLibrary,
+    private val preferenceManager: PreferenceManager
 ) : BaseBrowserViewModel(application, useCase, itemTree) {
 
     private val _currentPlayItem = mutableStateOf(NULL_MEDIA_ITEM)
@@ -303,5 +305,9 @@ class PlayingViewModel @Inject constructor(
         val browser = browser ?: return
         browser.removeMediaItem(position)
         updateCurrentPlayList()
+    }
+
+    fun getLastMediaIndex():Int{
+        return preferenceManager.lastMediaIndex
     }
 }

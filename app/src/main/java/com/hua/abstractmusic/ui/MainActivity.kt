@@ -20,6 +20,7 @@ import com.hua.abstractmusic.ui.navigation.AppNavigation
 import com.hua.abstractmusic.ui.theme.AbstractMusicTheme
 import com.hua.abstractmusic.ui.utils.rememberWindowSizeClass
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
+import com.hua.abstractmusic.ui.viewmodels.ThemeViewModel
 import com.hua.abstractmusic.utils.ComposeUtils
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -28,6 +29,7 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity() {
 
     private val localPlayingViewModel by viewModels<PlayingViewModel>()
+    private val themeViewModel by viewModels<ThemeViewModel>()
 
     @Inject
     lateinit var composeUtils: ComposeUtils
@@ -54,11 +56,14 @@ class MainActivity : AppCompatActivity() {
             CompositionLocalProvider(
                 // 可提前加载信息，不会造成空白
                 LocalPlayingViewModel provides localPlayingViewModel,
+                LocalThemeViewModel provides themeViewModel,
                 LocalScreenSize provides windowSize,
                 LocalComposeUtils provides composeUtils,
                 LocalPopWindow provides popupWindow
             ) {
-                AbstractMusicTheme {
+                AbstractMusicTheme(
+                    themeViewModel.monetColor.value
+                ){
                     ProvideWindowInsets {
                         AppNavigation()
                     }

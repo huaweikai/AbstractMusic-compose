@@ -18,8 +18,8 @@ import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.LocalNetViewModel
 import com.hua.abstractmusic.ui.LocalUserViewModel
 import com.hua.abstractmusic.ui.home.local.LocalScreen
-import com.hua.abstractmusic.ui.home.local.album.detail.LocalAlbumDetail
-import com.hua.abstractmusic.ui.home.local.artist.detail.LocalArtistDetail
+import com.hua.abstractmusic.ui.home.detail.LocalAlbumDetail
+import com.hua.abstractmusic.ui.home.detail.LocalArtistDetail
 import com.hua.abstractmusic.ui.home.mine.MineScreen
 import com.hua.abstractmusic.ui.home.mine.register.LoginScreen
 import com.hua.abstractmusic.ui.home.mine.register.RegisterScreen

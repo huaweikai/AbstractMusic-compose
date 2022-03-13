@@ -1,20 +1,16 @@
 package com.hua.abstractmusic.ui.home.mine
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -59,69 +55,70 @@ fun Sheet(
     val item = remember {
         mutableStateOf(NULL_MEDIA_ITEM)
     }
-    Column(
-        Modifier
+    Surface(
+        modifier = Modifier
             .height(140.dp)
-            .fillMaxWidth(0.9f)
-            .background(
-                MaterialTheme.colorScheme.background.copy(0.2f),
-                RoundedCornerShape(12.dp)
-            ),
+            .fillMaxWidth(0.9f),
+        shape = RoundedCornerShape(8.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant
     ) {
-        Row(
-            modifier = Modifier
-                .height(25.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = if (isLocal) "本地歌单" else "在线歌单", fontSize = 16.sp)
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "",
-                modifier = Modifier.clickable {
-                    diaLogState.value = true
-                }
-            )
-        }
-        LazyRow(
-            modifier = Modifier.padding(vertical = 8.dp)
-        ) {
-            itemsIndexed(
-                sheetList.value
-            ) { index, sheet ->
-                Column(
-                    modifier = Modifier
-                        .height(100.dp)
-                        .padding(horizontal = 8.dp)
-                        .width(70.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    ArtImage(
+        Column {
+            Row(
+                modifier = Modifier
+                    .height(25.dp)
+                    .padding(horizontal = 8.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = if (isLocal) "本地歌单" else "在线歌单", fontSize = 16.sp)
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "",
+                    modifier = Modifier.clickable {
+                        diaLogState.value = true
+                    }
+                )
+            }
+            LazyRow(
+                modifier = Modifier.padding(vertical = 8.dp)
+            ) {
+                itemsIndexed(
+                    sheetList.value
+                ) { index, sheet ->
+                    Column(
                         modifier = Modifier
-                            .size(70.dp)
-                            .pointerInput(Unit) {
-                                this.detectTapGestures(
-                                    onLongPress = {
-                                        deleteSheetState.value = true
-                                        item.value = sheet.mediaItem
-                                    },
-                                    onTap = {
-                                        onClick(index)
-                                    }
-                                )
-                            },
-                        uri = sheet.mediaItem.mediaMetadata.artworkUri,
-                        desc = "",
-                        transformation = RoundedCornersTransformation(15f)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = "${sheet.mediaItem.mediaMetadata.title}")
+                            .height(100.dp)
+                            .padding(horizontal = 8.dp)
+                            .width(70.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        ArtImage(
+                            modifier = Modifier
+                                .size(70.dp)
+                                .pointerInput(Unit) {
+                                    this.detectTapGestures(
+                                        onLongPress = {
+                                            deleteSheetState.value = true
+                                            item.value = sheet.mediaItem
+                                        },
+                                        onTap = {
+                                            onClick(index)
+                                        }
+                                    )
+                                },
+                            uri = sheet.mediaItem.mediaMetadata.artworkUri,
+                            desc = "",
+                            transformation = RoundedCornersTransformation(15f)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(text = "${sheet.mediaItem.mediaMetadata.title}")
+                    }
                 }
             }
         }
-    }
+}
     CreateNewSheet(diaLogState = diaLogState) {
         newSheet(it)
     }

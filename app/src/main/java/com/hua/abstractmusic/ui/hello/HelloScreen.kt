@@ -3,13 +3,10 @@ package com.hua.abstractmusic.ui.hello
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,7 +22,6 @@ import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.ui.hello.PermissionBean
 import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.route.Screen
-import com.hua.abstractmusic.ui.theme.Purple200
 
 
 /**
@@ -56,52 +52,53 @@ fun HelloScreen(
             }
         }
     )
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        Spacer(modifier = Modifier.padding(top = 30.dp))
-        Text(
-            modifier = Modifier.padding(start = 20.dp),
-            text = stringResource(id = R.string.hello_permission_title),
-            fontWeight = FontWeight.W400,
-            fontSize = 35.sp
-        )
-
-        Text(
-            text = stringResource(id = R.string.hello_text),
-            modifier = Modifier.padding(top = 20.dp, start = 20.dp, end = 13.dp),
-            fontSize = 18.sp,
-            lineHeight = 25.sp
-        )
-        HelloColumns()
+    Surface {
         Column(
-            Modifier.fillMaxHeight(),
-            verticalArrangement = Arrangement.Bottom,
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxSize()
         ) {
-            Button(
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = Purple200
-                ),
-                onClick = {
-                    permissionGet.launch(
-                        arrayOf(
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            Manifest.permission.READ_EXTERNAL_STORAGE
-                        )
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 35.dp, end = 35.dp, bottom = 40.dp)
-                    .align(Alignment.CenterHorizontally),
+            Spacer(modifier = Modifier.padding(top = 30.dp))
+            Text(
+                modifier = Modifier.padding(start = 20.dp),
+                text = stringResource(id = R.string.hello_permission_title),
+                fontWeight = FontWeight.W400,
+                fontSize = 35.sp
+            )
 
-                ) {
-                Text(
-                    text = stringResource(id = R.string.hello_permission_request_bt),
-                    color = Color.White
-                )
+            Text(
+                text = stringResource(id = R.string.hello_text),
+                modifier = Modifier.padding(top = 20.dp, start = 20.dp, end = 13.dp),
+                fontSize = 18.sp,
+                lineHeight = 25.sp
+            )
+            HelloColumns()
+            Column(
+                Modifier.fillMaxHeight(),
+                verticalArrangement = Arrangement.Bottom,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                    ),
+                    onClick = {
+                        permissionGet.launch(
+                            arrayOf(
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                Manifest.permission.READ_EXTERNAL_STORAGE
+                            )
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 35.dp, end = 35.dp, bottom = 40.dp)
+                        .align(Alignment.CenterHorizontally),
+
+                    ) {
+                    Text(
+                        text = stringResource(id = R.string.hello_permission_request_bt),
+                        color = Color.White
+                    )
+                }
             }
         }
     }
@@ -141,22 +138,22 @@ fun HelloColumns() {
 fun HelloPermissionItem(
     permissionBean: PermissionBean
 ) {
-    Column(Modifier.padding(top = 10.dp, bottom = 10.dp)) {
-        Row {
-            Image(
-                painter = painterResource(id = permissionBean.img),
-                contentDescription = permissionBean.title,
-                modifier = Modifier.padding(end = 10.dp)
-            )
+        Column(Modifier.padding(top = 10.dp, bottom = 10.dp)) {
+            Row {
+                Icon(
+                    painter = painterResource(id = permissionBean.img),
+                    contentDescription = permissionBean.title,
+                    modifier = Modifier.padding(end = 10.dp)
+                )
+                Text(
+                    text = permissionBean.title,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.W500
+                )
+            }
             Text(
-                text = permissionBean.title,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.W500
+                text = permissionBean.subtitle,
+                modifier = Modifier.padding(top = 5.dp, start = 34.dp)
             )
         }
-        Text(
-            text = permissionBean.subtitle,
-            modifier = Modifier.padding(top = 5.dp, start = 34.dp)
-        )
-    }
 }

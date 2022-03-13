@@ -63,8 +63,10 @@ object Constant {
 
     const val TOALBUMDESC = "TOALBUMDESC"
 
-    const val LASTMEDIA = "LASTMEDIA"
-    const val LASTMEDIAINDEX = "LASTMEDIAINDEX"
+    const val LAST_MEDIA = "LASTMEDIA"
+    const val LAST_MEDIA_INDEX = "LASTMEDIAINDEX"
+
+    const val THEME_COLOR = "THEMECOLOR"
     const val LASTMEDIAID = "LASTMEDIAID"
     const val MUSIC_ROOM_NAME = "MUSICDB"
 

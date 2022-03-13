@@ -53,7 +53,6 @@ fun LyricsScreen(
     viewModel: PlayingViewModel = LocalPlayingViewModel.current,
     configuration: Configuration = LocalConfiguration.current,
 ) {
-    val topGlide = configuration.screenHeightDp * 0.10
 
     Column(
         modifier = Modifier

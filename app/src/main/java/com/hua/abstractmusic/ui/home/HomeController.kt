@@ -1,13 +1,13 @@
 package com.hua.abstractmusic.ui.home
 
 import android.annotation.SuppressLint
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
@@ -16,7 +16,6 @@ import androidx.compose.ui.input.pointer.*
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -37,15 +36,12 @@ import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.bean.ui.home.BottomBarBean
 import com.hua.abstractmusic.bean.ui.home.IconBean
-import com.hua.abstractmusic.other.Constant.LASTMEDIA
-import com.hua.abstractmusic.other.Constant.LASTMEDIAINDEX
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.play.detail.ControllerItem
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
-import com.tencent.mmkv.MMKV
 
 
 /**
@@ -53,51 +49,6 @@ import com.tencent.mmkv.MMKV
  * @Date   : 2022/01/08
  * @Desc   : 主页的控制界面
  */
-
-
-val pages = listOf(MainPageItem.Net, MainPageItem.Local, MainPageItem.Mine)
-
-@Composable
-fun HomeBottomBar(
-    navController: NavHostController = LocalHomeNavController.current
-) {
-    val back = navController.currentBackStackEntryAsState()
-    NavigationBar {
-        pages.forEach { item ->
-            NavigationBarItem(selected =
-            item.route == back.value?.destination?.route, onClick = {
-                navController.navigate(item.route) {
-                    popUpTo(navController.graph.findStartDestination().id) {
-                        saveState = true
-                    }
-                    launchSingleTop = true
-                    restoreState = true
-                }
-            }, icon = {
-                Icon(
-                    painter = painterResource(id = item.icon),
-                    contentDescription = null
-                )
-            }, label = {
-                Text(text = stringResource(id = item.label))
-            }, alwaysShowLabel = true
-            )
-        }
-    }
-}
-
-sealed class MainPageItem(
-    val route: String,
-    @StringRes val label: Int,
-    @DrawableRes val icon: Int
-) {
-    object Net : MainPageItem(Screen.NetScreen.route, R.string.label_net, R.drawable.ic_line)
-    object Mine :
-        MainPageItem(Screen.MineScreen.route, R.string.label_mine, R.drawable.ic_person_icon)
-
-    object Local :
-        MainPageItem(Screen.LocalScreen.route, R.string.label_local, R.drawable.ic_music_icon)
-}
 
 @ExperimentalPagerApi
 @Composable
@@ -125,13 +76,11 @@ fun Controller(
     playScreenClick: () -> Unit,
     viewModel: PlayingViewModel = LocalPlayingViewModel.current
 ) {
-    val context = LocalContext.current
 
     val isTouch = remember {
         mutableStateOf(false)
     }
-    val mmkv = MMKV.mmkvWithID(LASTMEDIA)
-    val pagerState = rememberPagerState(mmkv.decodeInt(LASTMEDIAINDEX, 0))
+    val pagerState = rememberPagerState(viewModel.getLastMediaIndex())
 
     LaunchedEffect(viewModel.currentPlayItem.value) {
         val index = viewModel.currentPlayList.value.indexOf(
@@ -213,7 +162,7 @@ fun Controller(
                     resId = it.resId,
                     desc = it.desc,
                     size = it.size,
-                    width = it.width,
+                    width = 8.dp,
                     onClick = it.onClick
                 )
             }

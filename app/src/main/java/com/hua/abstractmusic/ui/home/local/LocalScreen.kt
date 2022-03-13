@@ -1,38 +1,27 @@
 package com.hua.abstractmusic.ui.home.local
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Tab
-import androidx.compose.material.TabRow
-import androidx.compose.material.TabRowDefaults
-import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.ui.LocalHomeNavController
-import com.hua.abstractmusic.ui.LocalHomeViewModel
-import com.hua.abstractmusic.ui.home.HomeTopBar
 import com.hua.abstractmusic.ui.home.local.album.LocalAlbum
 import com.hua.abstractmusic.ui.home.local.artist.LocalArtist
 import com.hua.abstractmusic.ui.home.local.music.LocalMusic
 import com.hua.abstractmusic.ui.route.Screen
-import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
+import com.hua.abstractmusic.ui.utils.indicatorOffset3
 import kotlinx.coroutines.launch
 
 
@@ -48,18 +37,19 @@ import kotlinx.coroutines.launch
 @Composable
 fun LocalScreen(
     homeNavController: NavHostController = LocalHomeNavController.current,
-    viewModel: HomeViewModel = LocalHomeViewModel.current
 ) {
+
     val pagerState = rememberPagerState()
     val tabTitles = listOf("音乐", "专辑", "歌手")
     val coroutineScope = rememberCoroutineScope()
     Scaffold(
         topBar = {
-            HomeTopBar(label = "本地音乐", imageVector = Icons.Default.Refresh, desc = "") {
-                viewModel.refresh()
-            }
+                SmallTopAppBar(
+                    modifier = Modifier
+                        .statusBarsPadding(),
+                    title = { Text("本地音乐") },
+                )
         },
-        modifier = Modifier.background(MaterialTheme.colorScheme.background)
     ) {
         Column(
             Modifier.padding(it)
@@ -68,8 +58,7 @@ fun LocalScreen(
                 selectedTabIndex = pagerState.currentPage,
                 indicator = {
                     TabRowDefaults.Indicator(
-                        Modifier.pagerTabIndicatorOffset(pagerState, it),
-                        color = MaterialTheme.colorScheme.primary
+                        Modifier.indicatorOffset3(pagerState,it,20.dp),
                     )
                 },
                 modifier = Modifier.height(50.dp)
@@ -80,15 +69,9 @@ fun LocalScreen(
                         onClick = {
                             coroutineScope.launch { pagerState.animateScrollToPage(index) }
                         },
-                        modifier = Modifier.background(
-                            MaterialTheme.colorScheme.background
-                        )
                     ) {
                         Text(
                             text = title,
-                            color =
-                            if (pagerState.currentPage == index) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.onBackground
                         )
                     }
                 }
@@ -97,8 +80,7 @@ fun LocalScreen(
                 state = pagerState,
                 count = 3,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background),
+                    .fillMaxSize(),
                 verticalAlignment = Alignment.Top,
             ) { page ->
                 when (page) {
