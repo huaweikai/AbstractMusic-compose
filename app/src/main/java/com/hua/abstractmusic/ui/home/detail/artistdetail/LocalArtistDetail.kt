@@ -1,4 +1,4 @@
-package com.hua.abstractmusic.ui.home.local.artist.detail
+package com.hua.abstractmusic.ui.home.detail
 
 
 import android.annotation.SuppressLint
@@ -39,11 +39,11 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalHomeNavController
+import com.hua.abstractmusic.ui.home.detail.artistdetail.ArtistDetailViewModel
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.AlbumItem
 import com.hua.abstractmusic.ui.utils.MusicItem
 import com.hua.abstractmusic.ui.utils.indicatorOffset
-import com.hua.abstractmusic.ui.viewmodels.ArtistDetailViewModel
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ScrollStrategy
