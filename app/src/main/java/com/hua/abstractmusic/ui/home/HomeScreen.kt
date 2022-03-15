@@ -107,7 +107,8 @@ fun HomeScreen(
     val backState = homeNavController.currentBackStackEntryAsState()
 
     val translationBottom by animateDpAsState(
-        if (backState.value?.destination?.route in pages.map { it.route }) 80.dp else 0.dp
+        if (backState.value?.destination?.route in pages.map { it.route }) 80.dp else 0.dp,
+//        animationSpec = tween(300)
     )
 
     PlayScreen(state = sheetPlayState) {
@@ -121,13 +122,14 @@ fun HomeScreen(
                 },
             )
             {
-                val bottomPadding = animateDpAsState(
-                    it.calculateBottomPadding()
-                )
+//                val bottomPadding = animateDpAsState(
+//                    it.calculateBottomPadding(),
+//                    animationSpec = tween(200)
+//                )
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(bottom = bottomPadding.value)
+                        .padding(it)
                 ) {
                     CompositionLocalProvider(LocalBottomControllerHeight provides bottomControllerHeight) {
                         HomeNavigationNav(Modifier)

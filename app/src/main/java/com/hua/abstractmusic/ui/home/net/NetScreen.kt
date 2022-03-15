@@ -5,11 +5,10 @@ import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
@@ -35,6 +34,7 @@ import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant.ALL_MUSIC_TYPE
 import com.hua.abstractmusic.other.Constant.NET_ALBUM_TYPE
+import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalComposeUtils
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalNetViewModel
@@ -70,7 +70,7 @@ fun NetScreen(
         topBar = {
             SmallTopAppBar(
                 title = {
-                    Text(text ="在线音乐")
+                    Text(text = "在线音乐")
                 },
                 modifier = Modifier.statusBarsPadding(),
                 colors = appBarColors,
@@ -120,59 +120,69 @@ private fun SuccessContent(
     navHostController: NavHostController = LocalHomeNavController.current,
     netViewModel: NetViewModel = LocalNetViewModel.current
 ) {
-    Column(
+    LazyColumn(
         modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
+            .fillMaxSize(),
+        contentPadding = PaddingValues(
+            bottom = LocalBottomControllerHeight.current
+        )
     ) {
-        HorizontalBanner(
-            netViewModel.bannerList.value.map {
-                it.mediaItem.mediaMetadata.artworkUri
-            }
-        ) {
-            navHostController.navigate(
-                "${Screen.LocalAlbumDetail.route}?albumId=${
-                    netViewModel.bannerList.value[it].mediaId
-                }&isLocal=false"
-            )
-        }
-        Glide("大家都在听") {
-            navHostController.navigate("${Screen.NetDetailScreen.route}?type=$ALL_MUSIC_TYPE")
-        }
-        HorizontalPager(
-            count = 2,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 20.dp),
-            contentPadding = PaddingValues(end = 32.dp)
-        ) { page ->
-            if (netViewModel.musicList.value.isNotEmpty()) {
-                RecommendItem(
-                    netViewModel.musicList.value,
-                    page
+        item {
+            HorizontalBanner(
+                netViewModel.bannerList.value.map {
+                    it.mediaItem.mediaMetadata.artworkUri
+                }
+            ) {
+                navHostController.navigate(
+                    "${Screen.LocalAlbumDetail.route}?albumId=${
+                        netViewModel.bannerList.value[it].mediaId
+                    }&isLocal=false"
                 )
             }
         }
-        Glide("推荐歌单", {})
-        NewItems(list = netViewModel.recommendList.value, {
-
-        }, {
-            netViewModel.recommendId = it.mediaId
-            netViewModel.listInit(it.mediaId)
-        })
-        Glide("最新专辑") {
-            navHostController.navigate("${Screen.NetDetailScreen.route}?type=$NET_ALBUM_TYPE")
+        item {
+            Glide("大家都在听") {
+                navHostController.navigate("${Screen.NetDetailScreen.route}?type=$ALL_MUSIC_TYPE")
+            }
+            HorizontalPager(
+                count = 2,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp),
+                contentPadding = PaddingValues(end = 32.dp)
+            ) { page ->
+                if (netViewModel.musicList.value.isNotEmpty()) {
+                    RecommendItem(
+                        netViewModel.musicList.value,
+                        page
+                    )
+                }
+            }
         }
-        NewItems(list = netViewModel.albumList.value, {
-            navHostController.navigate(
-                "${Screen.LocalAlbumDetail.route}?albumId=${
-                    it.mediaId
-                }&isLocal=false"
-            )
-        }, {
-            netViewModel.albumId = it.mediaId
-            netViewModel.listInit(it.mediaId)
-        })
+        item {
+            Glide("推荐歌单", {})
+            NewItems(list = netViewModel.recommendList.value, {
+
+            }, {
+                netViewModel.recommendId = it.mediaId
+                netViewModel.listInit(it.mediaId)
+            })
+        }
+        item {
+            Glide("最新专辑") {
+                navHostController.navigate("${Screen.NetDetailScreen.route}?type=$NET_ALBUM_TYPE")
+            }
+            NewItems(list = netViewModel.albumList.value, {
+                navHostController.navigate(
+                    "${Screen.LocalAlbumDetail.route}?albumId=${
+                        it.mediaId
+                    }&isLocal=false"
+                )
+            }, {
+                netViewModel.albumId = it.mediaId
+                netViewModel.listInit(it.mediaId)
+            })
+        }
     }
 }
 

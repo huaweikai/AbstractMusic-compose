@@ -10,7 +10,9 @@ import androidx.compose.material.Colors
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import com.hua.abstractmusic.ui.monet.Monet
 import com.hua.abstractmusic.ui.monet.theme.MonetColor
 
 private val DarkColorPalette = darkColorScheme()
@@ -18,6 +20,7 @@ private val DarkColorPalette = darkColorScheme()
 
 private val LightColorPalette = lightColorScheme()
 
+private val defaultColor = Color(0xff33b5e5)
 
 @SuppressLint("NewApi")
 @Composable
@@ -32,8 +35,8 @@ fun AbstractMusicTheme(
         dynamicColor && !darkTheme && customColor == null -> dynamicLightColorScheme(LocalContext.current)
         customColor != null && darkTheme -> customColor.darkMonetColorScheme()
         customColor != null && !darkTheme -> customColor.lightMonetColorScheme()
-        darkTheme -> DarkColorPalette
-        else -> LightColorPalette
+        darkTheme -> Monet.getMonetColor(defaultColor.toArgb()).darkMonetColorScheme()
+        else -> Monet.getMonetColor(defaultColor.toArgb()).lightMonetColorScheme()
     }
 
     MaterialTheme(

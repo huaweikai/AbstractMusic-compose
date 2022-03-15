@@ -1,4 +1,4 @@
-package com.hua.abstractmusic.ui.home.detail
+package com.hua.abstractmusic.ui.home.detail.albumdetail
 
 import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
@@ -6,6 +6,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -35,12 +36,12 @@ import com.google.accompanist.insets.statusBarsPadding
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.ui.LocalComposeUtils
 import com.hua.abstractmusic.ui.LocalHomeNavController
-import com.hua.abstractmusic.ui.home.detail.albumdetail.AlbumDetailViewModel
 import com.hua.abstractmusic.ui.utils.ArtImage
 import com.hua.abstractmusic.ui.utils.LCE
 import com.hua.abstractmusic.ui.utils.MusicItem
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.blur.blur
+import kotlinx.coroutines.cancel
 
 
 /**
@@ -68,11 +69,14 @@ fun LocalAlbumDetail(
         bitmap.value = composeUtils.coilToBitmap(item.mediaMetadata.artworkUri).blur(50)
     }
 
+    val scope = rememberCoroutineScope()
+
     DisposableEffect(Unit) {
         detailViewModel.id = item.mediaId
         detailViewModel.isLocal = isLocal
         detailViewModel.initializeController()
         this.onDispose {
+            scope.cancel()
             detailViewModel.releaseBrowser()
         }
     }
@@ -96,21 +100,7 @@ fun LocalAlbumDetail(
                 )
             }
         ) {
-            if (isLocal) {
-                Album_Success(item = item, detailViewModel = detailViewModel)
-            } else {
-                if (detailViewModel.screenState.value != LCE.Success && detailViewModel.albumDetail.value.isEmpty()) {
-                    Column(
-                        Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                } else {
-                    Album_Success(item = item, detailViewModel = detailViewModel)
-                }
-            }
+            Album_Success(item = item, detailViewModel = detailViewModel, isLocal = isLocal)
         }
         Box(
             Modifier
@@ -122,7 +112,7 @@ fun LocalAlbumDetail(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .fillMaxHeight(0.4f)
+                    .height(300.dp)
                     .fillMaxWidth()
                     .alpha(0.2f)
                     .graphicsLayer { alpha = 0.99F }
@@ -148,28 +138,52 @@ fun LocalAlbumDetail(
 @Composable
 fun Album_Success(
     item: MediaItem,
-    detailViewModel: AlbumDetailViewModel
+    detailViewModel: AlbumDetailViewModel,
+    isLocal: Boolean = true
 ) {
     LazyColumn(
         Modifier
             .fillMaxSize()
-            .background(Color.Transparent)) {
+            .background(Color.Transparent)
+    ) {
         item {
             AlbumDetailDesc(item = item)
         }
-        itemsIndexed(detailViewModel.albumDetail.value) { index, item ->
-            MusicItem(
-                data = item,
-                isDetail = true,
-                index = index,
-                onClick = {
-                    detailViewModel.setPlaylist(index, detailViewModel.albumDetail.value)
+        if(isLocal){
+            albumItems(detailViewModel)
+        }else{
+            if(detailViewModel.screenState.value != LCE.Success && detailViewModel.albumDetail.value.isEmpty()){
+                item{
+                    Column(
+                        Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 }
-            )
+            }else{
+                albumItems(detailViewModel)
+            }
         }
         item {
             AlbumDetailTail(item = item)
         }
+    }
+}
+
+private fun LazyListScope.albumItems(
+    detailViewModel: AlbumDetailViewModel
+){
+    itemsIndexed(detailViewModel.albumDetail.value, key = {_, item ->  item.mediaId}) { index, item ->
+        MusicItem(
+            data = item,
+            isDetail = true,
+            index = index,
+            onClick = {
+                detailViewModel.setPlaylist(index, detailViewModel.albumDetail.value)
+            }
+        )
     }
 }
 

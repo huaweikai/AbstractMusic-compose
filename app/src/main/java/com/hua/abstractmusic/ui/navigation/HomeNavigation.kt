@@ -1,6 +1,5 @@
 package com.hua.abstractmusic.ui.navigation
 
-import android.util.Log
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.Composable
@@ -17,9 +16,9 @@ import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.LocalNetViewModel
 import com.hua.abstractmusic.ui.LocalUserViewModel
+import com.hua.abstractmusic.ui.home.detail.artistdetail.LocalArtistDetail
+import com.hua.abstractmusic.ui.home.detail.albumdetail.LocalAlbumDetail
 import com.hua.abstractmusic.ui.home.local.LocalScreen
-import com.hua.abstractmusic.ui.home.detail.LocalAlbumDetail
-import com.hua.abstractmusic.ui.home.detail.LocalArtistDetail
 import com.hua.abstractmusic.ui.home.mine.MineScreen
 import com.hua.abstractmusic.ui.home.mine.register.LoginScreen
 import com.hua.abstractmusic.ui.home.mine.register.RegisterScreen
@@ -91,7 +90,6 @@ fun HomeNavigationNav(
             val isLocal = it.arguments?.getBoolean("isLocal", true)!!
             val albumId = it.arguments?.getString("albumId", "")
             val item = if (isLocal) {
-                Log.d("TAG", "HomeNavigationNav: $albumId")
                 viewModel.localAlbumList.value.find { it.mediaId == albumId }!!.mediaItem
             } else {
                 netViewModel.getItem(albumId ?: "")

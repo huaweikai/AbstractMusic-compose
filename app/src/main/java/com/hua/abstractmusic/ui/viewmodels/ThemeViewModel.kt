@@ -33,8 +33,8 @@ class ThemeViewModel @Inject constructor(
         if (preferenceManager.themeColor != Int.MIN_VALUE) {
             getMonetColor(Color(preferenceManager.themeColor))
         } else {
-            getMonetColor(Color(0xff33b5e5))
-//            _isReady.value = true
+//            getMonetColor(Color(0xff33b5e5))
+            _isReady.value = true
         }
     }
 

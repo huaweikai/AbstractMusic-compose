@@ -1,4 +1,4 @@
-package com.hua.abstractmusic.ui.home.detail
+package com.hua.abstractmusic.ui.home.detail.artistdetail
 
 
 import android.annotation.SuppressLint
@@ -39,7 +39,6 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalHomeNavController
-import com.hua.abstractmusic.ui.home.detail.artistdetail.ArtistDetailViewModel
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.AlbumItem
 import com.hua.abstractmusic.ui.utils.MusicItem
@@ -64,8 +63,8 @@ fun LocalArtistDetail(
 ) {
     val state = rememberCollapsingToolbarScaffoldState()
     DisposableEffect(Unit) {
-        viewModel.initializeController()
         viewModel.artistId = item.mediaId
+        viewModel.initializeController()
         this.onDispose {
             viewModel.releaseBrowser()
         }
@@ -192,7 +191,7 @@ private fun ArtistHorizontalPager(
                         .fillMaxWidth(),
                     contentPadding = PaddingValues(bottom = bottomBarHeight)
                 ) {
-                    itemsIndexed(viewModel.artistDetail.value) { index, item ->
+                    itemsIndexed(viewModel.artistDetail.value, key = {_, item -> item.mediaId }) { index, item ->
                         MusicItem(data = item,
                             isDetail = true,
                             index = index,
@@ -210,7 +209,7 @@ private fun ArtistHorizontalPager(
                         .fillMaxWidth(),
                     contentPadding = PaddingValues(bottom = bottomBarHeight)
                 ) {
-                    items(viewModel.artistAlbumDetail.value) { item ->
+                    items(viewModel.artistAlbumDetail.value,key = {item -> item.mediaId }) { item ->
                         Spacer(modifier = Modifier.height(8.dp))
                         AlbumItem(
                             item = item.mediaItem,
