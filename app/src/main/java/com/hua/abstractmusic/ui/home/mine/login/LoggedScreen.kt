@@ -84,8 +84,8 @@ fun LoggedScreen(
         LocalSheet()
         Sheet(
             isLocal = false,
-            onClick = { index ->
-                navHostController.navigate("${Screen.LocalSheetDetailScreen.route}?sheetIndex=$index&isLocal=false")
+            onClick = { sheetId ->
+                navHostController.navigate("${Screen.LocalSheetDetailScreen.route}?sheetId=$sheetId&isLocal=false")
             },
             newSheet = {
                 viewModel.createSheet(it, false)

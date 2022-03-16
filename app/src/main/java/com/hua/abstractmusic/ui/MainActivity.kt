@@ -13,13 +13,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
+import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hua.abstractmusic.ui.navigation.AppNavigation
 import com.hua.abstractmusic.ui.theme.AbstractMusicTheme
 import com.hua.abstractmusic.ui.utils.rememberWindowSizeClass
-import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
-import com.hua.abstractmusic.ui.viewmodels.ThemeViewModel
+import com.hua.abstractmusic.ui.viewmodels.*
 import com.hua.abstractmusic.utils.ComposeUtils
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -27,8 +27,11 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    private val localPlayingViewModel by viewModels<PlayingViewModel>()
+    private val playingViewModel by viewModels<PlayingViewModel>()
     private val themeViewModel by viewModels<ThemeViewModel>()
+    private val netViewModel by viewModels<NetViewModel>()
+    private val userViewModel by viewModels<UserViewModel>()
+    private val localViewModel by viewModels<HomeViewModel>()
 
     @Inject
     lateinit var composeUtils: ComposeUtils
@@ -53,18 +56,22 @@ class MainActivity : AppCompatActivity() {
                 mutableStateOf(false)
             }
             CompositionLocalProvider(
-                // 可提前加载信息，不会造成空白
-                LocalPlayingViewModel provides localPlayingViewModel,
+                LocalPlayingViewModel provides playingViewModel,
                 LocalThemeViewModel provides themeViewModel,
                 LocalScreenSize provides windowSize,
                 LocalComposeUtils provides composeUtils,
-                LocalPopWindow provides popupWindow
+                LocalPopWindow provides popupWindow,
+                LocalNetViewModel provides netViewModel,
+                LocalUserViewModel provides userViewModel,
+                LocalHomeViewModel provides localViewModel,
+                LocalAppNavController provides rememberNavController(),
+                LocalHomeNavController provides rememberNavController(),
             ) {
                 AbstractMusicTheme(
                     themeViewModel.monetColor.value
-                ){
+                ) {
 //                    ProvideWindowInsets {
-                        AppNavigation()
+                    AppNavigation()
 //                    }
                 }
             }
@@ -73,13 +80,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        localPlayingViewModel.initializeController()
+        playingViewModel.initializeController()
     }
 
-    override fun onStop() {
-        super.onStop()
-        localPlayingViewModel.releaseBrowser()
-    }
+//    override fun onStop() {
+//        super.onStop()
+//        localPlayingViewModel.releaseBrowser()
+//    }
 }
 
 

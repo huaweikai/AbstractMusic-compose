@@ -42,7 +42,7 @@ import com.hua.abstractmusic.ui.viewmodels.UserViewModel
 @Composable
 fun Sheet(
     isLocal: Boolean = true,
-    onClick: (Int) -> Unit,
+    onClick: (String) -> Unit,
     newSheet: (String) -> Unit,
     sheetList: MutableState<List<MediaData>>
 ) {
@@ -104,7 +104,7 @@ fun Sheet(
                                             item.value = sheet.mediaItem
                                         },
                                         onTap = {
-                                            onClick(index)
+                                            onClick(sheet.mediaId)
                                         }
                                     )
                                 },
@@ -132,8 +132,8 @@ fun LocalSheet(
     userViewModel: UserViewModel = LocalUserViewModel.current
 ) {
     Sheet(
-        onClick = { index ->
-            navHostController.navigate("${Screen.LocalSheetDetailScreen.route}?sheetIndex=$index&isLocal=true")
+        onClick = { sheetId ->
+            navHostController.navigate("${Screen.LocalSheetDetailScreen.route}?sheetId=$sheetId")
         },
         newSheet = {
             userViewModel.createSheet(it, true)

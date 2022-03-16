@@ -15,9 +15,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.SwipeableDefaults
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -79,33 +78,32 @@ fun HomeScreen(
         mutableStateOf(false)
     }
 
-    val sheetListState = rememberSaveable(
-        saver = ModalBottomSheetState.Saver(
-            animationSpec = SwipeableDefaults.AnimationSpec,
-            skipHalfExpanded = false,
-            confirmStateChange = { true }
-        )
-    ) {
-        ModalBottomSheetState(ModalBottomSheetValue.Hidden)
-    }
+    val sheetListState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val sheetPlayState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
 
-    val sheetPlayState = rememberSaveable(
-        saver = ModalBottomSheetState.Saver(
-            animationSpec = SwipeableDefaults.AnimationSpec,
-            skipHalfExpanded = true,
-            confirmStateChange = { true }
-        )
-    ) {
-        ModalBottomSheetState(ModalBottomSheetValue.Hidden, isSkipHalfExpanded = true)
-    }
+//    val sheetListState = rememberSaveable(
+//        saver = ModalBottomSheetState.Saver(
+//            animationSpec = androidx.compose.material.SwipeableDefaults.AnimationSpec,
+//            skipHalfExpanded = false,
+//            confirmStateChange = { true }
+//        )
+//    ) {
+//        ModalBottomSheetState(ModalBottomSheetValue.Hidden)
+//    }
+//
+//    val sheetPlayState = rememberSaveable(
+//        saver = ModalBottomSheetState.Saver(
+//            animationSpec = androidx.compose.material.SwipeableDefaults.AnimationSpec,
+//            skipHalfExpanded = true,
+//            confirmStateChange = { true }
+//        )
+//    ) {
+//        ModalBottomSheetState(ModalBottomSheetValue.Hidden, isSkipHalfExpanded = true)
+//    }
 
-    LaunchedEffect(sheetListState.currentValue, sheetPlayState.currentValue) {
-        sheetIsVisible.value = sheetPlayState.isVisible || sheetListState.isVisible
-    }
-
-    val label = remember {
-        mutableStateOf("")
-    }
+//    LaunchedEffect(sheetListState.currentValue, sheetPlayState.currentValue) {
+//        sheetIsVisible.value = sheetPlayState.isVisible || sheetListState.isVisible
+//    }
     val backState = homeNavController.currentBackStackEntryAsState()
 
     val translationBottom by animateDpAsState(
@@ -114,7 +112,7 @@ fun HomeScreen(
     )
 
     PlayScreen(state = sheetPlayState) {
-        HomePlayList(sheetListState) {
+        HomePlayList(playListState = sheetListState) {
             Scaffold(
                 bottomBar = {
                     AnimatedVisibility(

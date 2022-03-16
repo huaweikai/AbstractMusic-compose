@@ -12,9 +12,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Text
-import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,10 +25,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
+import androidx.navigation.NavHostController
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.other.NetWork
+import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.LocalPopWindow
 import com.hua.abstractmusic.ui.LocalPopWindowItem
@@ -44,10 +46,12 @@ import kotlinx.coroutines.launch
  * @Date   : 2022/02/28
  * @Desc   :
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun SheetDetail(
     mediaData: MediaData,
+    navController: NavHostController = LocalHomeNavController.current,
     sheetDetailViewModel: SheetDetailViewModel = hiltViewModel(),
 ) {
     DisposableEffect(Unit) {
@@ -105,39 +109,58 @@ fun SheetDetail(
         LocalPopWindowItem provides item,
         LocalPopWindow provides popState
     ) {
-        Column(
-            Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (!mediaData.mediaId.isLocal()) {
-                when (sheetDetailViewModel.screenState.value) {
-                    is LCE.Success -> {
-                        Detail_Net_Success(
-                            sheetDetailViewModel
-                        ) {
-                            selectPicture.launch("image/*")
+        Scaffold(
+            topBar = {
+                SmallTopAppBar(
+                    title = { Text(text = "歌单") },
+                    navigationIcon = {
+                        IconButton(onClick = { navController.navigateUp() }) {
+                            Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "")
                         }
-                    }
-                    is LCE.Error -> {
-                        Column(
-                            Modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Text(text = "请刷新重试")
-                        }
-                    }
-                    is LCE.Loading -> {
-                        CircularProgressIndicator()
-                    }
-                }
-            } else {
-                Detail_Success(mediaData = mediaData, sheetDetailViewModel = sheetDetailViewModel)
+                    },
+                    modifier = Modifier.statusBarsPadding()
+                )
             }
+        ) {
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .padding(it),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (!mediaData.mediaId.isLocal()) {
+                    when (sheetDetailViewModel.screenState.value) {
+                        is LCE.Success -> {
+                            Detail_Net_Success(
+                                sheetDetailViewModel
+                            ) {
+                                selectPicture.launch("image/*")
+                            }
+                        }
+                        is LCE.Error -> {
+                            Column(
+                                Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(text = "请刷新重试")
+                            }
+                        }
+                        is LCE.Loading -> {
+                            CircularProgressIndicator()
+                        }
+                    }
+                } else {
+                    Detail_Success(
+                        mediaData = mediaData,
+                        sheetDetailViewModel = sheetDetailViewModel
+                    )
+                }
+            }
+            SheetPopWindow(
+                sheetDetailViewModel = sheetDetailViewModel
+            )
         }
-        SheetPopWindow(
-            sheetDetailViewModel = sheetDetailViewModel
-        )
     }
 }
 

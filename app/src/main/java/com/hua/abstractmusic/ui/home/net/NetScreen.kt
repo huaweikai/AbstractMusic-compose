@@ -51,7 +51,8 @@ import com.hua.abstractmusic.utils.PaletteUtils
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun NetScreen(
-    netViewModel: NetViewModel = LocalNetViewModel.current
+    netViewModel: NetViewModel = LocalNetViewModel.current,
+    navHostController: NavHostController = LocalHomeNavController.current
 ) {
     val appBarColors = TopAppBarDefaults.smallTopAppBarColors(
         containerColor = MaterialTheme.colorScheme.surface
@@ -71,7 +72,7 @@ fun NetScreen(
                 colors = appBarColors,
                 actions = {
                     IconButton(onClick = {
-
+                        navHostController.navigate(Screen.NetSearchScreen.route)
                     }) {
                         Icon(
                             imageVector = Icons.Default.Search,
@@ -157,7 +158,7 @@ private fun SuccessContent(
         item {
             Glide("推荐歌单", {})
             NewItems(list = netViewModel.recommendList.value, {
-
+                navHostController.navigate("${Screen.LocalSheetDetailScreen.route}?sheetId=${it.mediaId}&isLocal=false&isUser=false")
             }, {
                 netViewModel.recommendId = it.mediaId
                 netViewModel.listInit(it.mediaId)

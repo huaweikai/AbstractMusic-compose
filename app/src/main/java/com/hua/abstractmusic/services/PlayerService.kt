@@ -73,6 +73,12 @@ class PlayerService : MediaLibraryService() {
             this, MainActivity::class.java
         )
         val intent = Intent(this, PlayerService::class.java)
+        val sessionPendingIntent =
+            packageManager?.getLaunchIntentForPackage(packageName)?.let { intent ->
+                PendingIntent.getActivity(
+                    this, 0, intent, PendingIntent.FLAG_IMMUTABLE
+                )
+            }
 
         val pendingIntent = TaskStackBuilder.create(this).run {
             addNextIntent(parentScreenIntent)
@@ -95,7 +101,7 @@ class PlayerService : MediaLibraryService() {
             LibrarySessionCallback(itemTree, serviceScope)
         )
             .setMediaItemFiller(CustomMediaItemFiller())
-            .setSessionActivity(pendingIntent)
+            .setSessionActivity(sessionPendingIntent?:pendingIntent)
             .build()
 
 
