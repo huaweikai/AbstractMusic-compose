@@ -2,8 +2,8 @@ package com.hua.abstractmusic.bean.net
 
 
 data class NetArtist(
-    val artistDesc: String,
-    val id: Int,
-    val imgUrl: String,
-    val name: String
+    var id: Int,
+    var name: String,
+    var imgUrl: String,
+    var artistDesc: String
 )

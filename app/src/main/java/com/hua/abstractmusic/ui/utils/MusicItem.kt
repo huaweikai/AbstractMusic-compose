@@ -34,9 +34,7 @@ import com.airbnb.lottie.compose.*
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant.LOCAL_ALBUM_ID
-import com.hua.abstractmusic.other.Constant.LOCAL_ARTIST_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
-import com.hua.abstractmusic.other.Constant.NETWORK_ARTIST_ID
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.LocalPopWindow
@@ -199,7 +197,10 @@ fun PopupWindow(
     viewModel: PlayingViewModel = LocalPlayingViewModel.current,
     homeNavController: NavHostController = LocalHomeNavController.current
 ) {
-    val addMore = remember {
+    val sheetPop = remember {
+        mutableStateOf(false)
+    }
+    val artistPop = remember {
         mutableStateOf(false)
     }
     val scope = rememberCoroutineScope()
@@ -249,67 +250,97 @@ fun PopupWindow(
                 PopItem(desc = "添加到歌单") {
                     viewModel.refresh()
                     state.value = false
-                    addMore.value = true
+                    sheetPop.value = true
                 }
                 PopItem(desc = "歌手:${item.mediaMetadata.artist}") {
-                    val artistId: Long = item.mediaMetadata.extras?.getLong("artistId") ?: 0L
-                    val parentId = if (item.mediaId.isLocal()) {
-                        Uri.parse(LOCAL_ARTIST_ID).buildUpon().appendPath(artistId.toString())
-                    } else {
-                        Uri.parse(NETWORK_ARTIST_ID).buildUpon().appendPath(artistId.toString())
-                    }
-                    homeNavController.navigate("${Screen.LocalArtistDetail.route}?artistId=${parentId}")
+                    viewModel.selectArtistByMusicId(item)
                     state.value = false
+                    artistPop.value = true
                 }
                 PopItem(desc = "专辑:${item.mediaMetadata.albumTitle}") {
                     val albumId = item.mediaMetadata.extras?.getLong("albumId") ?: 0L
-                    val parentId = if (item.mediaId.isLocal()) {
+                    val isLocal = item.mediaId.isLocal()
+                    val parentId = if (isLocal) {
                         Uri.parse(LOCAL_ALBUM_ID).buildUpon().appendPath(albumId.toString())
                     } else {
                         Uri.parse(NETWORK_ALBUM_ID).buildUpon().appendPath(albumId.toString())
                     }
-                    homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumId=${parentId}")
+                    homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumId=${parentId}&isLocal=$isLocal")
                     state.value = false
                 }
             }
         }
     }
-    if (addMore.value) {
+    if (sheetPop.value) {
         Dialog(onDismissRequest = {
-            addMore.value = false
+            sheetPop.value = false
         }) {
             val sheets = if (item.mediaId.isLocal()) {
                 viewModel.localSheetList.value
             } else {
                 viewModel.netSheetList.value
-            }
-            Column(
-                modifier = Modifier
-                    .width((config.screenWidthDp * 0.75).dp)
+            }.map { it.mediaItem }
+            PopMoreLayout(list = sheets, title = "歌单", onClick = {
+                scope.launch {
+                    viewModel.insertMusicToSheet(
+                        mediaItem = item,
+                        parentId = it
+                    )
+                    sheetPop.value = false
+                }
+                sheetPop.value = false
+            })
+        }
+    }
+
+    if (artistPop.value && viewModel.moreArtistList.value.isNotEmpty()) {
+        Dialog(onDismissRequest = {
+            artistPop.value = false
+            viewModel.clearArtist()
+        }) {
+            PopMoreLayout(list = viewModel.moreArtistList.value, title = "歌手", onClick = {
+                val isLocal = item.mediaId.isLocal()
+                val parentId = it
+                artistPop.value = false
+                homeNavController.navigate("${Screen.LocalArtistDetail.route}?artistId=${parentId}&isLocal=$isLocal")
+                viewModel.clearArtist()
+            })
+        }
+    }
+}
+
+@SuppressLint("UnsafeOptInUsageError")
+@Composable
+fun PopMoreLayout(
+    config: Configuration = LocalConfiguration.current,
+    list: List<MediaItem>,
+    title: String,
+    onClick: (String) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .width((config.screenWidthDp * 0.75).dp)
+            .padding(horizontal = 8.dp)
+            .background(MaterialTheme.colorScheme.background, RoundedCornerShape(8.dp))
+    ) {
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(text = title, fontSize = 22.sp, modifier = Modifier.padding(start = 16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+        if (list.isNotEmpty()) {
+            Divider()
+            Spacer(modifier = Modifier.height(8.dp))
+            LazyColumn(
+                Modifier
+                    .fillMaxWidth()
                     .heightIn(max = (config.screenHeightDp * 0.4).dp)
-                    .padding(horizontal = 8.dp)
-                    .background(MaterialTheme.colorScheme.background, RoundedCornerShape(8.dp))
             ) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "歌单", fontSize = 22.sp, modifier = Modifier.padding(start = 4.dp))
-                Spacer(modifier = Modifier.height(16.dp))
-                Divider()
-                Spacer(modifier = Modifier.height(8.dp))
-                LazyColumn(Modifier.fillMaxWidth()) {
-                    items(sheets) { sheet ->
-                        PopItem(desc = "${sheet.mediaItem.mediaMetadata.title}") {
-                            scope.launch {
-                                viewModel.insertMusicToSheet(
-                                    mediaItem = item,
-                                    parentId = sheet.mediaId
-                                )
-                                addMore.value = false
-                            }
-                        }
+                items(list) { item ->
+                    PopItem(desc = "${item.mediaMetadata.title}") {
+                        onClick(item.mediaId)
                     }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
             }
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }

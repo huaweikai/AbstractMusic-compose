@@ -12,10 +12,7 @@ import androidx.compose.material.TabRow
 import androidx.compose.material.TabRowDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -31,9 +28,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-import com.google.accompanist.insets.LocalWindowInsets
-import com.google.accompanist.insets.rememberInsetsPaddingValues
-import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
@@ -41,6 +35,7 @@ import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.AlbumItem
+import com.hua.abstractmusic.ui.utils.LCE
 import com.hua.abstractmusic.ui.utils.MusicItem
 import com.hua.abstractmusic.ui.utils.indicatorOffset
 import kotlinx.coroutines.launch
@@ -58,11 +53,13 @@ import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 @Composable
 fun LocalArtistDetail(
     item: MediaItem,
+    isLocal:Boolean,
     homeNavController: NavHostController = LocalHomeNavController.current,
     viewModel: ArtistDetailViewModel = hiltViewModel()
 ) {
     val state = rememberCollapsingToolbarScaffoldState()
     DisposableEffect(Unit) {
+        viewModel.isLocal = isLocal
         viewModel.artistId = item.mediaId
         viewModel.initializeController()
         this.onDispose {
@@ -117,7 +114,7 @@ fun LocalArtistDetail(
                 modifier = Modifier
                     .padding(
                         start = titlePadding,
-                        top = 8.dp + rememberInsetsPaddingValues(insets = LocalWindowInsets.current.statusBars).calculateTopPadding(),
+                        top = 8.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
                         bottom = 16.dp,
                         end = 16.dp
                     )
@@ -128,12 +125,32 @@ fun LocalArtistDetail(
         }
     ) {
         Column {
-            ArtistHorizontalPager(
-                viewModel = viewModel,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-            )
+            if(isLocal){
+                ArtistHorizontalPager(
+                    viewModel = viewModel,
+                    modifier = Modifier
+                        .fillMaxSize()
+//                        .background(MaterialTheme.colorScheme.background)
+                )
+            }else{
+                when(viewModel.screenState.value){
+                    is LCE.Loading->{
+                        CircularProgressIndicator()
+                    }
+                    is LCE.Error->{
+
+                    }
+                    is LCE.Success->{
+                        ArtistHorizontalPager(
+                            viewModel = viewModel,
+                            modifier = Modifier
+                                .fillMaxSize()
+//                                .background(MaterialTheme.colorScheme.background)
+                        )
+                    }
+                }
+            }
+
         }
     }
 }
@@ -217,7 +234,7 @@ private fun ArtistHorizontalPager(
                                 .fillMaxWidth()
                                 .padding(start = 8.dp)
                         ) {
-                            homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumId=${item.mediaId}")
+                            homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumId=${item.mediaId}&isLocal=${viewModel.isLocal}")
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                     }

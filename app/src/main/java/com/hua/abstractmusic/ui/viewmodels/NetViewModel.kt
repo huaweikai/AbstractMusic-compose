@@ -12,10 +12,12 @@ import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ALL_MUSIC_ID
+import com.hua.abstractmusic.other.Constant.NETWORK_ARTIST_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_BANNER_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_RECOMMEND_ID
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ALBUM
+import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ARTIST
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_BANNER
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.use_case.UseCase
@@ -47,11 +49,15 @@ class NetViewModel @Inject constructor(
     private val _musicList = mutableStateOf<List<MediaData>>(emptyList())
     val musicList: State<List<MediaData>> get() = _musicList
 
+    private val _artistList = mutableStateOf<List<MediaData>>(emptyList())
+    val artistList: State<List<MediaData>> get() = _artistList
+
     init {
         netListMap[NETWORK_BANNER_ID] = _bannerList
         netListMap[NETWORK_ALBUM_ID] = _albumList
         netListMap[NETWORK_RECOMMEND_ID] = _recommendList
         netListMap[NETWORK_ALL_MUSIC_ID] = _musicList
+        netListMap[NETWORK_ARTIST_ID] = _artistList
     }
 
     var recommendId: String? = null
@@ -80,19 +86,19 @@ class NetViewModel @Inject constructor(
         refresh()
     }
 
-    fun getItem(albumId: String):MediaItem{
-        return when(Uri.parse(albumId).authority){
+    fun getItem(parentId: String):MediaItem{
+        return when(Uri.parse(parentId).authority){
             TYPE_NETWORK_BANNER->{
-               bannerList.value.find { it.mediaId == albumId }!!.mediaItem
+               bannerList.value.find { it.mediaId == parentId }!!.mediaItem
             }
             TYPE_NETWORK_ALBUM ->{
-                albumList.value.find { it.mediaId == albumId }!!.mediaItem
+                albumList.value.find { it.mediaId == parentId }!!.mediaItem
             }
-            //todo: 在线歌手
-//            TYPE_NETWORK_ARTIST ->{
-//
-//            }
+            TYPE_NETWORK_ARTIST ->{
+                artistList.value.find { it.mediaId == parentId }!!.mediaItem
+            }
             else -> NULL_MEDIA_ITEM
         }
     }
+    
 }

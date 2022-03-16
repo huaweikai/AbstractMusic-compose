@@ -5,13 +5,19 @@ import android.app.Application
 import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.viewModelScope
 import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant.ARTIST_TO_ALBUM
 import com.hua.abstractmusic.other.Constant.LOCAL_ARTIST_ID
+import com.hua.abstractmusic.other.Constant.NETWORK_ARTIST_ID
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.use_case.UseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -27,18 +33,33 @@ class ArtistDetailViewModel @Inject constructor(
     itemTree: MediaItemTree
 ) : BaseBrowserViewModel(application, useCase, itemTree) {
     private var artistAlbumId: String? = null
+    var isLocal: Boolean = true
     var artistId: String? = null
         set(value) {
             field = value
             val id = Uri.parse(value).lastPathSegment
-            artistAlbumId = "$LOCAL_ARTIST_ID/${ARTIST_TO_ALBUM}/$id"
+            artistAlbumId = if(isLocal){
+                "$LOCAL_ARTIST_ID/${ARTIST_TO_ALBUM}/$id"
+            }else{
+                "$NETWORK_ARTIST_ID/$ARTIST_TO_ALBUM/$id"
+            }
         }
 
     override fun onMediaConnected() {
-        localListMap[artistId!!] = _artistDetail
-        localListMap[artistAlbumId!!] = _artistAlbumDetail
+        if (isLocal) {
+            localListMap[artistId!!] = _artistDetail
+            localListMap[artistAlbumId!!] = _artistAlbumDetail
+        } else {
+            netListMap[artistId!!] = _artistDetail
+            netListMap[artistAlbumId!!] = _artistAlbumDetail
+        }
         playListMap[artistId!!] = _artistDetail
-        refresh()
+        viewModelScope.launch {
+            delay(100)
+            withContext(Dispatchers.Main){
+                refresh()
+            }
+        }
     }
 
     private val _artistDetail = mutableStateOf<List<MediaData>>(emptyList())

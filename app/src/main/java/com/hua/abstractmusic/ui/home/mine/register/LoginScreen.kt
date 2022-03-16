@@ -3,20 +3,18 @@ package com.hua.abstractmusic.ui.home.mine.register
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.Button
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.hua.abstractmusic.ui.LocalHomeNavController
@@ -34,6 +32,7 @@ import kotlinx.coroutines.launch
  * @Date   : 2022/01/26
  * @Desc   :
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     navController: NavHostController = LocalHomeNavController.current,
@@ -73,81 +72,84 @@ fun LoginScreen(
             viewModel.loginEmailCodeEnable.value = viewModel.loginEmailText.value.isEmail()
         }
     }
-    ConstraintLayout(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        val topPercent = createGuidelineFromTop(0.1f)
-        val centerPercent = createGuidelineFromStart(0.5f)
-        val (title, loginEd, loginButton) = createRefs()
-        val (register, codeLogin) = createRefs()
-        Text(
-            text = "欢迎来到抽象音乐", modifier = Modifier
-                .constrainAs(title) {
-                    top.linkTo(topPercent)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.fillToConstraints
-                },
-            textAlign = TextAlign.Center,
-            fontSize = 20.sp
-        )
-        LoginEd(
-            viewModel = viewModel,
-            modifier = Modifier
-                .constrainAs(loginEd) {
-                    start.linkTo(parent.start, 20.dp)
-                    end.linkTo(parent.end, 20.dp)
-                    top.linkTo(title.bottom, 5.dp)
-                    width = Dimension.fillToConstraints
-                },
-            loginMode
-        )
-        Button(
-            onClick = {
-                scope.launch {
-                    val result = viewModel.login(loginMode)
-                    if (result.code == 200) {
-                        navController.navigateUp()
-                    } else {
-                        Toast.makeText(context, result.msg, Toast.LENGTH_SHORT).show()
+
+    val config = LocalConfiguration.current
+
+    Scaffold(
+        topBar = {
+            SmallTopAppBar(
+                title = { Text(text = "登录", fontSize = 18.sp)},
+                navigationIcon = {
+                    IconButton(onClick = { navController.navigateUp() }) {
+                        Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "")
                     }
-                }
-            },
-            modifier = Modifier
-                .constrainAs(loginButton) {
-                    start.linkTo(loginEd.start)
-                    end.linkTo(loginEd.end)
-                    top.linkTo(loginEd.bottom, 5.dp)
-                    width = Dimension.fillToConstraints
                 },
-            enabled = loginButtonEnabled
-        ) {
-            Text(text = "登录")
+                modifier = Modifier.statusBarsPadding()
+            )
         }
-        Text(
-            text = "注册账号",
-            modifier = Modifier
-                .constrainAs(register) {
-                    top.linkTo(loginButton.bottom, 10.dp)
-                    end.linkTo(loginButton.end)
-                }
-                .clickable {
-                    navController.navigate(Screen.RegisterScreen.route)
-                }
-        )
-        Text(
-            text = if (loginMode) "验证码登录" else "密码登录",
-            modifier = Modifier
-                .constrainAs(codeLogin) {
-                    start.linkTo(centerPercent)
-                    end.linkTo(centerPercent)
-                    top.linkTo(register.top)
-                    bottom.linkTo(register.bottom)
-                }
-                .clickable {
-                    loginMode = !loginMode
-                }
-        )
+    ) {
+        Column(
+            Modifier.padding(
+                start = 20.dp,
+                end = 20.dp,
+                top = it.calculateTopPadding(),
+                bottom = it.calculateBottomPadding()
+            )
+        ){
+            Text(
+                text = "欢迎来到抽象音乐",
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                fontSize = 20.sp
+            )
+            Spacer(modifier = Modifier.height(5.dp))
+            LoginEd(
+                viewModel = viewModel,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                loginMode
+            )
+            Spacer(modifier = Modifier.height(5.dp))
+            Button(
+                onClick = {
+                    scope.launch {
+                        val result = viewModel.login(loginMode)
+                        if (result.code == 200) {
+                            navController.navigateUp()
+                        } else {
+                            Toast.makeText(context, result.msg, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth(),
+                enabled = loginButtonEnabled
+            ) {
+                Text(text = "登录")
+            }
+            Spacer(modifier = Modifier
+                .height(10.dp)
+                .fillMaxWidth())
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = if (loginMode) "验证码登录" else "密码登录",
+                    modifier = Modifier
+                        .clickable {
+                            loginMode = !loginMode
+                        }
+                )
+                Text(
+                    text = "注册账号",
+                    modifier = Modifier
+                        .clickable {
+                            navController.navigate(Screen.RegisterScreen.route)
+                        }
+                )
+            }
+        }
     }
 }
 

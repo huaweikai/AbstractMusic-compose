@@ -23,9 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.transform.RoundedCornersTransformation
-import com.google.accompanist.insets.LocalWindowInsets
-import com.google.accompanist.insets.rememberInsetsPaddingValues
-import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -59,8 +56,6 @@ fun NetScreen(
     val appBarColors = TopAppBarDefaults.smallTopAppBarColors(
         containerColor = MaterialTheme.colorScheme.surface
     )
-    val statusBarPadding =
-        rememberInsetsPaddingValues(insets = LocalWindowInsets.current.statusBars, applyTop = true)
     val decayAnimationSpec = rememberSplineBasedDecay<Float>()
     val scrollBehavior = remember(decayAnimationSpec) {
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(decayAnimationSpec)
@@ -212,7 +207,7 @@ private fun RecommendItem(list: List<MediaData>, page: Int) {
                     Modifier.fillMaxHeight(),
                     verticalArrangement = Arrangement.Center
                 ) {
-                    TitleAndArtist(title = "${data?.title}", subTitle = "${data?.artist}")
+                    TitleAndArtist(title = "${data.title}", subTitle = "${data.artist}")
                 }
             }
         }

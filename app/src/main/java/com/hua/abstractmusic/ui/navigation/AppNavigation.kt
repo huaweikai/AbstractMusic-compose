@@ -9,7 +9,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.ui.*
@@ -33,7 +32,6 @@ import com.hua.abstractmusic.ui.viewmodels.ThemeViewModel
 @Composable
 fun AppNavigation(
     themeViewModel:ThemeViewModel = LocalThemeViewModel.current
-//    appNavController:NavHostController = LocalAppNavController.current
 ) {
     CompositionLocalProvider(LocalAppNavController provides rememberNavController()) {
         NavHost(
@@ -51,13 +49,12 @@ fun AppNavigation(
                     mutableStateOf(NULL_MEDIA_ITEM)
                 }
                 CompositionLocalProvider(
-                    LocalHomeNavController provides rememberAnimatedNavController(),
+                    LocalHomeNavController provides rememberNavController(),
                     LocalNetViewModel provides hiltViewModel(),
                     LocalUserViewModel provides hiltViewModel(),
                     LocalHomeViewModel provides hiltViewModel(),
                     LocalPopWindowItem provides popItem
                 ) {
-                    LocalUserViewModel.current.initializeController()
                     HomeScreen()
                 }
             }

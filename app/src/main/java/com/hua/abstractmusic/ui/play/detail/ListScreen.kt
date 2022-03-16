@@ -18,8 +18,6 @@ import androidx.constraintlayout.compose.Dimension
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
-import com.google.accompanist.insets.LocalWindowInsets
-import com.google.accompanist.insets.rememberInsetsPaddingValues
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
@@ -39,9 +37,7 @@ fun ListScreen(
     Column(
         modifier = Modifier
             .padding(
-                top = 48.dp + rememberInsetsPaddingValues(
-                    insets = LocalWindowInsets.current.statusBars
-                ).calculateTopPadding()
+                top = 48.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
             )
             .fillMaxSize(),
         verticalArrangement = Arrangement.Top

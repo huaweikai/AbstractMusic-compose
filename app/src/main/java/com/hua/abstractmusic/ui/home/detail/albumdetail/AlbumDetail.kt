@@ -32,8 +32,8 @@ import androidx.media3.common.MediaItem
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.transform.RoundedCornersTransformation
-import com.google.accompanist.insets.statusBarsPadding
 import com.hua.abstractmusic.R
+import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalComposeUtils
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.utils.ArtImage
@@ -100,7 +100,7 @@ fun LocalAlbumDetail(
                 )
             }
         ) {
-            Album_Success(item = item, detailViewModel = detailViewModel, isLocal = isLocal)
+            AlbumShow(item = item, detailViewModel = detailViewModel, isLocal = isLocal)
         }
         Box(
             Modifier
@@ -136,34 +136,42 @@ fun LocalAlbumDetail(
 
 
 @Composable
-fun Album_Success(
+fun AlbumShow(
     item: MediaItem,
     detailViewModel: AlbumDetailViewModel,
     isLocal: Boolean = true
 ) {
+    val bottomBarHeight = LocalBottomControllerHeight.current
     LazyColumn(
         Modifier
             .fillMaxSize()
-            .background(Color.Transparent)
+            .background(Color.Transparent),
+        contentPadding = PaddingValues(bottom = bottomBarHeight)
     ) {
         item {
             AlbumDetailDesc(item = item)
         }
-        if(isLocal){
+        if (isLocal) {
             albumItems(detailViewModel)
-        }else{
-            if(detailViewModel.screenState.value != LCE.Success && detailViewModel.albumDetail.value.isEmpty()){
-                item{
-                    Column(
-                        Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        CircularProgressIndicator()
+        } else {
+            when (detailViewModel.screenState.value) {
+                is LCE.Loading -> {
+                    item {
+                        Column(
+                            Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            CircularProgressIndicator()
+                        }
                     }
                 }
-            }else{
-                albumItems(detailViewModel)
+                is LCE.Error -> {
+
+                }
+                is LCE.Success -> {
+                    albumItems(detailViewModel)
+                }
             }
         }
         item {
@@ -174,8 +182,10 @@ fun Album_Success(
 
 private fun LazyListScope.albumItems(
     detailViewModel: AlbumDetailViewModel
-){
-    itemsIndexed(detailViewModel.albumDetail.value, key = {_, item ->  item.mediaId}) { index, item ->
+) {
+    itemsIndexed(
+        detailViewModel.albumDetail.value,
+        key = { _, item -> item.mediaId }) { index, item ->
         MusicItem(
             data = item,
             isDetail = true,

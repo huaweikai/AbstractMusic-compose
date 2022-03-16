@@ -42,7 +42,7 @@ class AlbumDetailViewModel @Inject constructor(
         }
         playListMap[id!!] = _albumDetail
         viewModelScope.launch {
-            delay(200)
+            delay(100)
             withContext(Dispatchers.Main){
                 refresh()
             }

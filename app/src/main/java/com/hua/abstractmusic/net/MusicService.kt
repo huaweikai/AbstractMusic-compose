@@ -18,6 +18,10 @@ interface MusicService {
     @GET("artist/list")
     suspend fun getArtistList(): NetData<List<NetArtist>>
 
+    //某音乐的歌手列表
+    @GET("artist/{musicId}/list")
+    suspend fun getArtistByMusicId(@Path("musicId")musicId: String): NetData<List<NetArtist>>
+
     //专辑的音乐
     @GET("album/{id}/music")
     suspend fun getMusicByAlbum(@Path("id") id: String): NetData<List<NetMusic>>
@@ -25,6 +29,10 @@ interface MusicService {
     //歌手的音乐
     @GET("artist/{id}/music")
     suspend fun getMusicByArtist(@Path("id") id: String): NetData<List<NetMusic>>
+
+    //歌手的音乐
+    @GET("artist/{id}/album")
+    suspend fun getAlbumByArtist(@Path("id") id: String): NetData<List<NetAlbum>>
 
     //主页banner
     @GET("sheet/banner")

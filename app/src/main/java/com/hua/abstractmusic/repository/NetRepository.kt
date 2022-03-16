@@ -7,6 +7,8 @@ import com.hua.abstractmusic.bean.net.NetData
 import com.hua.abstractmusic.bean.net.NetSheet
 import com.hua.abstractmusic.db.user.UserDao
 import com.hua.abstractmusic.net.MusicService
+import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
+import com.hua.abstractmusic.other.Constant.NETWORK_ARTIST_ID
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ALBUM
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ALL_MUSIC
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ARTIST
@@ -200,6 +202,34 @@ class NetRepository(
             service.deleteSheet(sheetId, token)
         } catch (e: Exception) {
 
+        }
+    }
+
+    suspend fun selectArtistByMusicId(parentId: Uri): NetData<List<MediaItem>> {
+        return try {
+            val musicId = parentId.lastPathSegment ?: throw Exception("musicId为空")
+            val result = service.getArtistByMusicId(musicId)
+            val uri = Uri.parse(NETWORK_ARTIST_ID)
+            val list = result.data?.map {
+                it.toMediaItem(uri)
+            }
+            NetData(result.code, list, result.msg)
+        } catch (e: Exception) {
+            NetData(ERROR, emptyList(), e.message ?: "")
+        }
+    }
+
+    suspend fun selectAlbumByArtist(parentId: Uri): NetData<List<MediaItem>>? {
+        return try {
+            val artistId = parentId.lastPathSegment ?: throw Exception("artistId为空")
+            val result = service.getAlbumByArtist(artistId)
+            val uri = Uri.parse(NETWORK_ALBUM_ID)
+            val list = result.data?.map {
+                it.toMediaItem(uri)
+            }
+            NetData(result.code, list, result.msg)
+        } catch (e: Exception) {
+            NetData(ERROR, emptyList(), e.message ?: "")
         }
     }
 }

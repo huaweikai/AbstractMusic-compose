@@ -346,4 +346,8 @@ class MediaStoreScanner(
     suspend fun selectMusicById(parentId: Uri): NetData<List<MediaItem>>? {
         return netRepository.selectMusicById(parentId)
     }
+
+    suspend fun selectAlbumByArtist(parentId: Uri):NetData<List<MediaItem>>?{
+        return netRepository.selectAlbumByArtist(parentId)
+    }
 }

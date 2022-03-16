@@ -15,6 +15,7 @@ import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.LyricsEntry
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant
+import com.hua.abstractmusic.other.Constant.LOCAL_ARTIST_ID
 import com.hua.abstractmusic.other.Constant.NET_SHEET_ID
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.preference.PreferenceManager
@@ -47,7 +48,8 @@ class PlayingViewModel @Inject constructor(
     itemTree: MediaItemTree,
     private val repository: NetRepository,
     private val taglibLibrary: TaglibLibrary,
-    private val preferenceManager: PreferenceManager
+    private val preferenceManager: PreferenceManager,
+    private val netRepository: NetRepository
 ) : BaseBrowserViewModel(application, useCase, itemTree) {
 
     private val _currentPlayItem = mutableStateOf(NULL_MEDIA_ITEM)
@@ -58,10 +60,12 @@ class PlayingViewModel @Inject constructor(
 
     val localSheetList = mutableStateOf<List<MediaData>>(emptyList())
     val netSheetList = mutableStateOf<List<MediaData>>(emptyList())
+    val localArtistList = mutableStateOf<List<MediaData>>(emptyList())
 
     init {
         localListMap[Constant.LOCAL_SHEET_ID] = localSheetList
         netListMap[NET_SHEET_ID] = netSheetList
+        localListMap[LOCAL_ARTIST_ID] = localArtistList
     }
 
 
@@ -288,11 +292,11 @@ class PlayingViewModel @Inject constructor(
     suspend fun insertMusicToSheet(mediaItem: MediaItem, parentId: String) {
         val sheetId = Uri.parse(parentId).lastPathSegment
         try {
-            if(parentId.isLocal()){
+            if (parentId.isLocal()) {
                 useCase.insertSheetCase(mediaItem, sheetId!!.toInt())
-            }else{
+            } else {
                 val mediaId = Uri.parse(mediaItem.mediaId).lastPathSegment
-                repository.insertMusicToSheet(sheetId!!,mediaId!!)
+                repository.insertMusicToSheet(sheetId!!, mediaId!!)
             }
         } catch (e: MusicInsertError) {
             withContext(Dispatchers.Main) {
@@ -307,7 +311,27 @@ class PlayingViewModel @Inject constructor(
         updateCurrentPlayList()
     }
 
-    fun getLastMediaIndex():Int{
+    fun getLastMediaIndex(): Int {
         return preferenceManager.lastMediaIndex
+    }
+
+    val moreArtistList = mutableStateOf(emptyList<MediaItem>())
+
+    fun selectArtistByMusicId(item: MediaItem) {
+        if (item.mediaId.isLocal()) {
+            val artistId: Long = item.mediaMetadata.extras?.getLong("artistId") ?: 0L
+            val parentId = "${LOCAL_ARTIST_ID}/$artistId"
+            moreArtistList.value =
+                listOf(localArtistList.value.find { it.mediaId == parentId }!!.mediaItem)
+        } else {
+            viewModelScope.launch {
+                moreArtistList.value =
+                    netRepository.selectArtistByMusicId(Uri.parse(item.mediaId)).data ?: emptyList()
+            }
+        }
+    }
+
+    fun clearArtist() {
+        moreArtistList.value = emptyList()
     }
 }

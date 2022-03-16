@@ -6,6 +6,8 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -115,21 +117,25 @@ fun HomeScreen(
         HomePlayList(sheetListState) {
             Scaffold(
                 bottomBar = {
-                    HomeBottomBar(
-                        modifier = Modifier
-                            .height(translationBottom)
-                    )
+                    AnimatedVisibility(
+                        visible = backState.value?.destination?.route in pages.map { it.route },
+                        enter = slideInVertically { fullHeight -> fullHeight },
+                        exit = slideOutVertically { fullHeight -> fullHeight },
+                        modifier = Modifier.height(80.dp)
+                    ) {
+                        HomeBottomBar()
+                    }
+
                 },
             )
             {
-//                val bottomPadding = animateDpAsState(
-//                    it.calculateBottomPadding(),
-//                    animationSpec = tween(200)
-//                )
+                val bottomPadding by animateDpAsState(
+                    if (backState.value?.destination?.route in pages.map { it.route }) 80.dp else 0.dp,
+                )
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(it)
+                        .padding(bottom = bottomPadding)
                 ) {
                     CompositionLocalProvider(LocalBottomControllerHeight provides bottomControllerHeight) {
                         HomeNavigationNav(Modifier)

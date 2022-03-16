@@ -3,6 +3,7 @@ package com.hua.abstractmusic.ui.play
 import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
 import androidx.compose.animation.Animatable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,7 +21,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
@@ -53,6 +53,28 @@ fun PlayScreen(
     isDark: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
+    ModalBottomSheetLayout(
+        sheetState = state,
+        modifier = Modifier
+            .fillMaxSize(),
+        sheetContent = {
+            PlayScreen()
+        },
+        sheetShape = RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp),
+        sheetBackgroundColor = if (isDark) Color.Black else Color.White
+    ) {
+        content()
+    }
+}
+
+@SuppressLint("UnsafeOptInUsageError")
+@OptIn(ExperimentalPagerApi::class, androidx.compose.material.ExperimentalMaterialApi::class)
+@Composable
+fun PlayScreen(
+    viewModel: PlayingViewModel = LocalPlayingViewModel.current,
+    isDark: Boolean = isSystemInDarkTheme(),
+    composeUtils: ComposeUtils = LocalComposeUtils.current,
+) {
     val viewPageState = rememberPagerState(1)
     val context = LocalContext.current
     val firstColor = remember {
@@ -70,7 +92,6 @@ fun PlayScreen(
         )
     }
     LaunchedEffect(viewModel.currentPlayItem.value) {
-
         val pair = PaletteUtils.resolveBitmap(
             isDark,
             composeUtils.coilToBitmap(viewModel.currentPlayItem.value.mediaMetadata.artworkUri),
@@ -81,30 +102,18 @@ fun PlayScreen(
         )
         secondColor.animateTo(Color(pair.second))
     }
-
-    ModalBottomSheetLayout(
-        sheetState = state,
-        modifier = Modifier
-            .fillMaxSize(),
-        sheetContent = {
-            CompositionLocalProvider(
-                LocalContentColor provides firstColor.value,
-                androidx.compose.material.LocalContentColor provides firstColor.value,
-                LocalMusicScreenSecondColor provides secondColor.value
-            ) {
-                Box(
-                    Modifier
-                        .fillMaxSize(),
-                ) {
-                    PlayScreenContent(viewPageState)
-                    PlayScreenTab(viewPageState)
-                }
-            }
-        },
-        sheetShape = RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp),
-        sheetBackgroundColor = if(isDark) Color.Black else Color.White
+    CompositionLocalProvider(
+        LocalContentColor provides firstColor.value,
+        androidx.compose.material.LocalContentColor provides firstColor.value,
+        LocalMusicScreenSecondColor provides secondColor.value
     ) {
-        content()
+        Box(
+            Modifier
+                .fillMaxSize(),
+        ) {
+            PlayScreenContent(viewPageState)
+            PlayScreenTab(viewPageState)
+        }
     }
 }
 
@@ -162,6 +171,7 @@ private fun PlayScreenContent(
         reverseLayout = false,
         modifier = Modifier
             .clip(RoundedCornerShape(topEnd = 30.dp, topStart = 30.dp))
+            .background(if (isSystemInDarkTheme()) Color.Black else Color.White)
             .fillMaxSize(),
     ) { page ->
         when (page) {

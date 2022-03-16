@@ -16,8 +16,8 @@ import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.LocalNetViewModel
 import com.hua.abstractmusic.ui.LocalUserViewModel
-import com.hua.abstractmusic.ui.home.detail.artistdetail.LocalArtistDetail
 import com.hua.abstractmusic.ui.home.detail.albumdetail.LocalAlbumDetail
+import com.hua.abstractmusic.ui.home.detail.artistdetail.LocalArtistDetail
 import com.hua.abstractmusic.ui.home.local.LocalScreen
 import com.hua.abstractmusic.ui.home.mine.MineScreen
 import com.hua.abstractmusic.ui.home.mine.register.LoginScreen
@@ -124,7 +124,8 @@ fun HomeNavigationNav(
                 netViewModel.getItem(artistId ?: "")
             }
             LocalArtistDetail(
-                item = item
+                item = item,
+                isLocal = isLocal
             )
         }
 

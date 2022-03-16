@@ -7,6 +7,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import com.google.common.collect.ImmutableList
 import com.hua.abstractmusic.bean.net.NetData
+import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.other.Constant.LOCAL_ALBUM_ID
 import com.hua.abstractmusic.other.Constant.LOCAL_ALL_ID
 import com.hua.abstractmusic.other.Constant.LOCAL_ARTIST_ID
@@ -85,7 +86,12 @@ class MediaItemTree(
         return if (parentIdUri.lastPathSegment.isNullOrEmpty()) {
             scanner.selectList(parentIdUri)
         } else {
-            scanner.selectMusicById(parentIdUri)
+            if (parentId.contains(Constant.ARTIST_TO_ALBUM)) {
+                scanner.selectAlbumByArtist(parentIdUri)
+            } else {
+                scanner.selectMusicById(parentIdUri)
+            }
+
         }.apply {
             if (treeNodes[parentId] == null) {
                 treeNodes[parentId] = MediaItemNode(

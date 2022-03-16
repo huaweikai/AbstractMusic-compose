@@ -26,8 +26,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.transform.RoundedCornersTransformation
-import com.google.accompanist.insets.LocalWindowInsets
-import com.google.accompanist.insets.rememberInsetsPaddingValues
 import com.hua.abstractmusic.bean.LyricsEntry
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.utils.ArtImage
@@ -63,9 +61,7 @@ fun LyricsScreen(
             Modifier
                 .fillMaxWidth()
                 .padding(
-                    top = 48.dp + rememberInsetsPaddingValues(
-                        insets = LocalWindowInsets.current.statusBars
-                    ).calculateTopPadding()
+                    top = 48.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
                 )
                 .height(70.dp),
             verticalAlignment = Alignment.CenterVertically
