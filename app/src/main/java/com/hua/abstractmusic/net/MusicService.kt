@@ -105,8 +105,19 @@ interface MusicService {
         @Body sheet: NetSheet
     ):NetData<Unit>
 
-    @GET("sheet/{id}/detail")
+    @GET("sheet/{id}")
     suspend fun selectSheetById(
         @Path("id") id: String
     ):NetData<NetSheet>
+
+    @GET("album/{id}")
+    suspend fun selectAlbumById(
+        @Path("id") id: String
+    ):NetData<NetAlbum>
+
+    @GET("artist/{id}")
+    suspend fun selectArtistById(
+        @Path("id") id: String
+    ):NetData<NetArtist>
+
 }

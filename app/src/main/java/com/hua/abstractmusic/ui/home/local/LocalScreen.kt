@@ -85,11 +85,13 @@ fun LocalScreen(
                     }
                     1 -> {
                         LocalAlbum { mediaId ->
+//                            homeNavController.navigate("${Screen.NetSearchScreen.route}")
                             homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumId=${mediaId}")
                         }
                     }
                     2 -> {
                         LocalArtist { artistId ->
+//                            homeNavController.navigate("${Screen.NetSearchScreen.route}")
                             homeNavController.navigate("${Screen.LocalArtistDetail.route}?artistId=${artistId}")
                         }
                     }

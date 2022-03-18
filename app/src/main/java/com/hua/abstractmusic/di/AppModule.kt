@@ -8,6 +8,7 @@ import com.hua.abstractmusic.db.music.MusicRoomBase
 import com.hua.abstractmusic.db.user.UserDao
 import com.hua.abstractmusic.db.user.UserRoomBase
 import com.hua.abstractmusic.net.MusicService
+import com.hua.abstractmusic.net.SearchService
 import com.hua.abstractmusic.net.UserService
 import com.hua.abstractmusic.other.Constant.BASE_URL
 import com.hua.abstractmusic.other.Constant.MUSIC_ROOM_NAME
@@ -88,8 +89,9 @@ object AppModule {
     @Singleton
     fun provideNetRepository(
         service: MusicService,
-        userDao: UserDao
-    ) = NetRepository(service,userDao)
+        userDao: UserDao,
+        searchService: SearchService
+    ) = NetRepository(service,userDao,searchService)
 
     @Provides
     @Singleton
@@ -157,6 +159,12 @@ object AppModule {
     fun provideUserService(
         retrofit: Retrofit
     ) = retrofit.create<UserService>()
+
+    @Provides
+    @Singleton
+    fun provideSearchService(
+        retrofit: Retrofit
+    ) = retrofit.create<SearchService>()
 
     @Provides
     @Singleton

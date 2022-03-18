@@ -49,7 +49,7 @@ class SheetDetailViewModel @Inject constructor(
     val sheetDetailList = mutableStateOf<List<MediaData>>(emptyList())
     var mediaData: MediaData? = null
 
-    val sheetDetail = MutableStateFlow(NetSheet(0, 0, ""))
+    val sheetDetail = MutableStateFlow(NetSheet(0, 0, "",num = 0,author = ""))
 
     override fun onMediaConnected() {
         if (isLocal) {

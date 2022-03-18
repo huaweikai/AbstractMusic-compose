@@ -67,7 +67,7 @@ fun MusicItem(
     onClick: () -> Unit
 ) {
     val playing by rememberLottieComposition(
-        LottieCompositionSpec.RawRes(R.raw.playing)
+        LottieCompositionSpec.RawRes(R.raw.playing2)
     )
     val process by animateLottieCompositionAsState(
         composition = playing,
@@ -105,6 +105,7 @@ fun MusicItem(
                         progress = process,
                         modifier = Modifier
                             .fillMaxHeight()
+                            .padding(8.dp)
                             .width(60.dp),
                     )
                 } else {

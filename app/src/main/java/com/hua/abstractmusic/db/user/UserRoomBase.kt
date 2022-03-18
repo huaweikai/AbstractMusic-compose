@@ -2,6 +2,7 @@ package com.hua.abstractmusic.db.user
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import com.hua.abstractmusic.bean.user.SearchHistory
 import com.hua.abstractmusic.bean.user.UserBean
 
 /**
@@ -10,7 +11,7 @@ import com.hua.abstractmusic.bean.user.UserBean
  * @Desc   :
  */
 @Database(
-    entities = [UserBean::class],
+    entities = [UserBean::class,SearchHistory::class],
     version = 1,
     exportSchema = false
 )

@@ -36,7 +36,7 @@ import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
-import com.hua.abstractmusic.ui.home.playlist.HomePlayList
+import com.hua.abstractmusic.ui.play.HomePlayList
 import com.hua.abstractmusic.ui.navigation.HomeNavigationNav
 import com.hua.abstractmusic.ui.play.PlayScreen
 import com.hua.abstractmusic.ui.route.Screen

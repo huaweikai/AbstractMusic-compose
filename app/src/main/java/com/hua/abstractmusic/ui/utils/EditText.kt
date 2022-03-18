@@ -2,14 +2,16 @@ package com.hua.abstractmusic.ui.utils
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Text
@@ -18,13 +20,16 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusState
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.Dimension
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.utils.isEmail
 import com.hua.abstractmusic.utils.isUser
@@ -44,6 +49,8 @@ fun EditText(
     label: String,
     modifier: Modifier,
     rightIcon: @Composable () -> Unit,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None
 ) {
     OutlinedTextField(
@@ -61,7 +68,9 @@ fun EditText(
         },
         visualTransformation = visualTransformation,
         modifier = modifier,
-        trailingIcon = rightIcon
+        trailingIcon = rightIcon,
+        keyboardActions = keyboardActions,
+        keyboardOptions = keyboardOptions
     )
 }
 
@@ -94,7 +103,10 @@ fun EmailEditText(
                     tint = Color.Red
                 )
             }
-        }
+        },
+        keyboardOptions = KeyboardOptions.Default.copy(
+            keyboardType = KeyboardType.Number
+        )
     )
 }
 
@@ -134,7 +146,10 @@ fun PassWordEditText(
                     }
                     .size(24.dp)
             )
-        }
+        },
+        keyboardOptions = KeyboardOptions.Default.copy(
+            keyboardType = KeyboardType.Password
+        )
     )
 }
 
@@ -168,4 +183,40 @@ fun UserEditText(
             }
         }
     )
+}
+
+
+@Composable
+fun TransparentHintTextField(
+    text: String,
+    hint: String,
+    modifier: Modifier = Modifier,
+    isHintVisible: Boolean = true,
+    onValueChange: (String) -> Unit,
+    textStyle: TextStyle = TextStyle(),
+    singleLine: Boolean = false,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    onFocusChange: (FocusState) -> Unit
+) {
+    Box(
+        modifier = modifier
+    ) {
+        BasicTextField(
+            value = text,
+            onValueChange = onValueChange,
+            singleLine = singleLine,
+            textStyle = textStyle,
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged {
+                    onFocusChange(it)
+                },
+            keyboardActions = keyboardActions,
+            keyboardOptions = keyboardOptions
+        )
+        if (isHintVisible) {
+            Text(text = hint, style = textStyle, color = Color.DarkGray)
+        }
+    }
 }

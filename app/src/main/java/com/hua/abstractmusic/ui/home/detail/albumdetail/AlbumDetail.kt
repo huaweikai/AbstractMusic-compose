@@ -1,7 +1,7 @@
 package com.hua.abstractmusic.ui.home.detail.albumdetail
 
 import android.annotation.SuppressLint
-import android.graphics.BitmapFactory
+import android.graphics.Bitmap
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -41,7 +41,6 @@ import com.hua.abstractmusic.ui.utils.LCE
 import com.hua.abstractmusic.ui.utils.MusicItem
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.blur.blur
-import kotlinx.coroutines.cancel
 
 
 /**
@@ -62,21 +61,18 @@ fun LocalAlbumDetail(
 ) {
     val context = LocalContext.current
     val bitmap = remember {
-        mutableStateOf(BitmapFactory.decodeResource(context.resources, R.drawable.music).blur(50))
+        mutableStateOf(Bitmap.createBitmap(60,60,Bitmap.Config.ARGB_8888))
     }
     val composeUtils = LocalComposeUtils.current
     LaunchedEffect(Unit) {
         bitmap.value = composeUtils.coilToBitmap(item.mediaMetadata.artworkUri).blur(50)
-    }
-
-    val scope = rememberCoroutineScope()
-
-    DisposableEffect(Unit) {
         detailViewModel.id = item.mediaId
         detailViewModel.isLocal = isLocal
         detailViewModel.initializeController()
+    }
+
+    DisposableEffect(Unit) {
         this.onDispose {
-            scope.cancel()
             detailViewModel.releaseBrowser()
         }
     }
@@ -151,14 +147,14 @@ fun AlbumShow(
         item {
             AlbumDetailDesc(item = item)
         }
-        if (isLocal) {
-            albumItems(detailViewModel)
-        } else {
+//        if (isLocal) {
+//            albumItems(detailViewModel)
+//        } else {
             when (detailViewModel.screenState.value) {
                 is LCE.Loading -> {
                     item {
                         Column(
-                            Modifier.fillMaxSize(),
+                            Modifier.fillMaxWidth(),
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
@@ -173,7 +169,7 @@ fun AlbumShow(
                     albumItems(detailViewModel)
                 }
             }
-        }
+//        }
         item {
             AlbumDetailTail(item = item)
         }

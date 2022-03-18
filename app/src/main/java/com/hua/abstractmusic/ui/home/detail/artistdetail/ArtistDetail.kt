@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,10 +59,12 @@ fun LocalArtistDetail(
     viewModel: ArtistDetailViewModel = hiltViewModel()
 ) {
     val state = rememberCollapsingToolbarScaffoldState()
-    DisposableEffect(Unit) {
+    LaunchedEffect(Unit){
         viewModel.isLocal = isLocal
         viewModel.artistId = item.mediaId
         viewModel.initializeController()
+    }
+    DisposableEffect(Unit) {
         this.onDispose {
             viewModel.releaseBrowser()
         }
@@ -114,7 +117,9 @@ fun LocalArtistDetail(
                 modifier = Modifier
                     .padding(
                         start = titlePadding,
-                        top = 8.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding(),
+                        top = 8.dp + WindowInsets.statusBars
+                            .asPaddingValues()
+                            .calculateTopPadding(),
                         bottom = 16.dp,
                         end = 16.dp
                     )
@@ -125,17 +130,19 @@ fun LocalArtistDetail(
         }
     ) {
         Column {
-            if(isLocal){
-                ArtistHorizontalPager(
-                    viewModel = viewModel,
-                    modifier = Modifier
-                        .fillMaxSize()
-//                        .background(MaterialTheme.colorScheme.background)
-                )
-            }else{
+//            if(isLocal){
+//                ArtistHorizontalPager(
+//                    viewModel = viewModel,
+//                    modifier = Modifier
+//                        .fillMaxSize()
+////                        .background(MaterialTheme.colorScheme.background)
+//                )
+//            }else{
                 when(viewModel.screenState.value){
                     is LCE.Loading->{
-                        CircularProgressIndicator()
+                        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                            CircularProgressIndicator()
+                        }
                     }
                     is LCE.Error->{
 
@@ -151,7 +158,7 @@ fun LocalArtistDetail(
                 }
             }
 
-        }
+//        }
     }
 }
 

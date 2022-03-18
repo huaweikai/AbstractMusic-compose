@@ -10,8 +10,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.MediaItem
 import coil.transform.CircleCropTransformation
-import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.utils.ArtImage
@@ -23,7 +23,6 @@ import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
  * @Date   : 2022/01/18
  * @Desc   :
  */
-@SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun LocalArtist(
     homeViewModel: HomeViewModel = LocalHomeViewModel.current,
@@ -35,35 +34,43 @@ fun LocalArtist(
             .fillMaxWidth(),
         contentPadding = PaddingValues(bottom = bottomControllerHeight)
     ) {
-        items(
-            homeViewModel.localArtistList.value,
+        items(homeViewModel.localArtistList.value,
             key = { item -> item.mediaId }
-        ) { item: MediaData ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 20.dp, bottom = 20.dp)
-                    .clickable {
-                        onClick(item.mediaId)
-                    }
-            ) {
-                ArtImage(
-                    modifier = Modifier
-                        .size(45.dp),
-                    uri = item.mediaItem.mediaMetadata.artworkUri,
-                    transformation = CircleCropTransformation(),
-                    desc = "歌手图像"
-                )
-                Spacer(modifier = Modifier.padding(horizontal = 5.dp))
-                Column(
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                ) {
-                    TitleAndArtist(
-                        title = "${item.mediaItem.mediaMetadata.title}",
-                        subTitle = "${item.mediaItem.mediaMetadata.trackNumber} 首"
-                    )
-                }
+        ) { mediaData->
+            ArtistLazyItem(item = mediaData.mediaItem, onClick = onClick)
+        }
+    }
+}
+
+@SuppressLint("UnsafeOptInUsageError")
+@Composable
+fun ArtistLazyItem(
+    item: MediaItem,
+    onClick: (String) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 20.dp, bottom = 20.dp)
+            .clickable {
+                onClick(item.mediaId)
             }
+    ) {
+        ArtImage(
+            modifier = Modifier
+                .size(45.dp),
+            uri = item.mediaMetadata.artworkUri,
+            transformation = CircleCropTransformation(),
+            desc = "歌手图像"
+        )
+        Spacer(modifier = Modifier.padding(horizontal = 5.dp))
+        Column(
+            modifier = Modifier.align(Alignment.CenterVertically)
+        ) {
+            TitleAndArtist(
+                title = "${item.mediaMetadata.title}",
+                subTitle = "${item.mediaMetadata.trackNumber} 首"
+            )
         }
     }
 }

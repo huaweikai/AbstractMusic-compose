@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.ui.utils
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.LocalContentColor
@@ -25,7 +26,8 @@ import com.hua.abstractmusic.R
  * @Date   : 2022/01/19
  * @Desc   :
  */
-@androidx.media3.common.util.UnstableApi
+
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun AlbumItem(
     item: MediaItem,
@@ -34,10 +36,13 @@ fun AlbumItem(
 ) {
     Row(
         modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 8.dp)
             .clickable {
                 onClick()
             },
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
     ) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)

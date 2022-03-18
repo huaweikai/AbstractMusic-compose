@@ -137,8 +137,8 @@ private fun PlayScreenTab(
                 .fillMaxWidth(0.4f)
                 .align(CenterHorizontally),
             containerColor = Color.Transparent,
-//            backgroundColor = Color.Transparent,
-            divider = {}
+            divider = {},
+            indicator = {}
         ) {
             tabTitles.forEachIndexed { index, title ->
                 Tab(

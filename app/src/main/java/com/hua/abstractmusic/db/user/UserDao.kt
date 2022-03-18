@@ -1,7 +1,12 @@
 package com.hua.abstractmusic.db.user
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import com.hua.abstractmusic.bean.user.SearchHistory
 import com.hua.abstractmusic.bean.user.UserBean
+import kotlinx.coroutines.flow.Flow
 
 /**
  * @author : huaweikai
@@ -25,4 +30,10 @@ interface UserDao {
 
     @Query("select * from userbean")
     suspend fun getUserInfo():UserBean?
+
+    @Insert
+    suspend fun insertHistory(history: SearchHistory)
+
+    @Query("select * from searchhistory")
+    fun selectHistory(): Flow<List<SearchHistory>>
 }

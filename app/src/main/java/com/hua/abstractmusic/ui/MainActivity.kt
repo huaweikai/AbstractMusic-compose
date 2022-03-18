@@ -9,17 +9,15 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
-import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hua.abstractmusic.ui.navigation.AppNavigation
 import com.hua.abstractmusic.ui.theme.AbstractMusicTheme
 import com.hua.abstractmusic.ui.utils.rememberWindowSizeClass
-import com.hua.abstractmusic.ui.viewmodels.*
+import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
+import com.hua.abstractmusic.ui.viewmodels.ThemeViewModel
 import com.hua.abstractmusic.utils.ComposeUtils
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -29,9 +27,10 @@ class MainActivity : AppCompatActivity() {
 
     private val playingViewModel by viewModels<PlayingViewModel>()
     private val themeViewModel by viewModels<ThemeViewModel>()
-    private val netViewModel by viewModels<NetViewModel>()
-    private val userViewModel by viewModels<UserViewModel>()
-    private val localViewModel by viewModels<HomeViewModel>()
+//    private val netViewModel by viewModels<NetViewModel>()
+//    private val userViewModel by viewModels<UserViewModel>()
+//    private val localViewModel by viewModels<HomeViewModel>()
+//    private val searchViewModel by viewModels<SearchViewModel>()
 
     @Inject
     lateinit var composeUtils: ComposeUtils
@@ -52,20 +51,11 @@ class MainActivity : AppCompatActivity() {
                 darkIcons = MaterialTheme.colors.isLight
             )
             val windowSize = rememberWindowSizeClass()
-            val popupWindow = remember {
-                mutableStateOf(false)
-            }
             CompositionLocalProvider(
                 LocalPlayingViewModel provides playingViewModel,
                 LocalThemeViewModel provides themeViewModel,
                 LocalScreenSize provides windowSize,
                 LocalComposeUtils provides composeUtils,
-                LocalPopWindow provides popupWindow,
-                LocalNetViewModel provides netViewModel,
-                LocalUserViewModel provides userViewModel,
-                LocalHomeViewModel provides localViewModel,
-                LocalAppNavController provides rememberNavController(),
-                LocalHomeNavController provides rememberNavController(),
             ) {
                 AbstractMusicTheme(
                     themeViewModel.monetColor.value

@@ -13,6 +13,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.MediaItem
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
@@ -34,12 +35,12 @@ fun LocalAlbum(
     viewModel: HomeViewModel = LocalHomeViewModel.current,
     onClick:(String)->Unit
 ) {
-    AlbumLazyItem(viewModel.localAlbumList.value, onClick = onClick)
+    AlbumLazyGrid(viewModel.localAlbumList.value, onClick = onClick)
 }
-@ExperimentalFoundationApi
+
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
-fun AlbumLazyItem(
+fun AlbumLazyGrid(
     list: List<MediaData>,
     bottomControllerHeight: Dp = LocalBottomControllerHeight.current,
     onClick: (String) -> Unit,
@@ -53,36 +54,46 @@ fun AlbumLazyItem(
             top = 16.dp
         ),
     ) {
-        items(list) {item ->
-            Column(
-                modifier = Modifier
-                    .padding(10.dp),
-            ) {
-                ArtImage(
-                    modifier = Modifier
-                        .size(190.dp)
-                        .clickable {
-                            onClick(item.mediaId)
-                        },
-                    uri = item.mediaItem.mediaMetadata.artworkUri,
-                    transformation = RoundedCornersTransformation(40f),
-                    contentScale = ContentScale.Crop,
-                    desc = "专辑图"
-                )
-                TitleAndArtist(
-                    title = "${item.mediaItem.mediaMetadata.title}",
-                    subTitle = "${item.mediaItem.mediaMetadata.artist}",
-                    modifier = Modifier
-                        .height(20.dp)
-                        .fillMaxWidth(),
-                    titleStyle = {
-                        this.copy(textAlign = TextAlign.Center)
-                    },
-                    subTitleStyle = {
-                        this.copy(textAlign = TextAlign.Center)
-                    }
-                )
-            }
+        items(list) { item ->
+            AlbumItem(item = item.mediaItem, onClick = onClick)
         }
+    }
+}
+
+
+@SuppressLint("UnsafeOptInUsageError")
+@Composable
+fun AlbumItem(
+    item: MediaItem,
+    onClick: (String) -> Unit
+){
+    Column(
+        modifier = Modifier
+            .padding(10.dp),
+    ) {
+        ArtImage(
+            modifier = Modifier
+                .size(190.dp)
+                .clickable {
+                    onClick(item.mediaId)
+                },
+            uri = item.mediaMetadata.artworkUri,
+            transformation = RoundedCornersTransformation(40f),
+            contentScale = ContentScale.Crop,
+            desc = "专辑图"
+        )
+        TitleAndArtist(
+            title = "${item.mediaMetadata.title}",
+            subTitle = "${item.mediaMetadata.artist}",
+            modifier = Modifier
+                .height(20.dp)
+                .fillMaxWidth(),
+            titleStyle = {
+                this.copy(textAlign = TextAlign.Center)
+            },
+            subTitleStyle = {
+                this.copy(textAlign = TextAlign.Center)
+            }
+        )
     }
 }

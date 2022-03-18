@@ -12,8 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,7 +25,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
 import androidx.navigation.NavHostController
 import coil.transform.RoundedCornersTransformation
-import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.other.NetWork
 import com.hua.abstractmusic.ui.LocalHomeNavController
@@ -50,13 +47,13 @@ import kotlinx.coroutines.launch
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun SheetDetail(
-    mediaData: MediaData,
+    mediaItem: MediaItem,
     navController: NavHostController = LocalHomeNavController.current,
     sheetDetailViewModel: SheetDetailViewModel = hiltViewModel(),
 ) {
     DisposableEffect(Unit) {
-        sheetDetailViewModel.isLocal = mediaData.mediaId.isLocal()
-        sheetDetailViewModel.sheetId = mediaData.mediaId
+        sheetDetailViewModel.isLocal = mediaItem.mediaId.isLocal()
+        sheetDetailViewModel.sheetId = mediaItem.mediaId
         sheetDetailViewModel.initializeController()
         this.onDispose {
             sheetDetailViewModel.releaseBrowser()
@@ -114,8 +111,8 @@ fun SheetDetail(
                 SmallTopAppBar(
                     title = { Text(text = "歌单") },
                     navigationIcon = {
-                        IconButton(onClick = { navController.navigateUp() }) {
-                            Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "")
+                        NavigationBack {
+                            navController.navigateUp()
                         }
                     },
                     modifier = Modifier.statusBarsPadding()
@@ -128,7 +125,7 @@ fun SheetDetail(
                     .padding(it),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (!mediaData.mediaId.isLocal()) {
+                if (!mediaItem.mediaId.isLocal()) {
                     when (sheetDetailViewModel.screenState.value) {
                         is LCE.Success -> {
                             Detail_Net_Success(
@@ -152,7 +149,7 @@ fun SheetDetail(
                     }
                 } else {
                     Detail_Success(
-                        mediaData = mediaData,
+                        mediaItem = mediaItem,
                         sheetDetailViewModel = sheetDetailViewModel
                     )
                 }
@@ -167,12 +164,12 @@ fun SheetDetail(
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun Detail_Success(
-    mediaData: MediaData,
+    mediaItem: MediaItem,
     sheetDetailViewModel: SheetDetailViewModel,
     popWindowState: MutableState<Boolean> = LocalPopWindow.current,
     popWindowItem: MutableState<MediaItem> = LocalPopWindowItem.current
 ) {
-    val item = mediaData.mediaItem.mediaMetadata
+    val item = mediaItem.mediaMetadata
     Column(
         Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally

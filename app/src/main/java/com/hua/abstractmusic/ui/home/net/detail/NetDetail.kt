@@ -8,7 +8,7 @@ import com.hua.abstractmusic.other.Constant.ALL_MUSIC_TYPE
 import com.hua.abstractmusic.other.Constant.NET_ALBUM_TYPE
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalNetViewModel
-import com.hua.abstractmusic.ui.home.local.album.AlbumLazyItem
+import com.hua.abstractmusic.ui.home.local.album.AlbumLazyGrid
 import com.hua.abstractmusic.ui.home.local.music.MusicLazyItems
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.viewmodels.NetViewModel
@@ -35,10 +35,10 @@ fun NetDetail(
             }
         }
         NET_ALBUM_TYPE -> {
-            AlbumLazyItem(
+            AlbumLazyGrid(
                 list = netViewModel.albumList.value
             ) {
-               navHostController.navigate("${Screen.LocalAlbumDetail.route}?albumId=$it&isLocal=false")
+               navHostController.navigate("${Screen.LocalAlbumDetail.route}?albumId=$it")
             }
         }
     }

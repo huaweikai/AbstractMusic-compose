@@ -147,6 +147,7 @@ abstract class BaseBrowserViewModel(
 
     //加载音乐列表，根据父ID来进行加载
     open fun init(parentId: String) {
+        _screenState.value = LCE.Loading
         val browser = browser ?: return
         val childrenFeature = browser.getChildren(
             parentId, 0, Int.MAX_VALUE, null
@@ -160,6 +161,7 @@ abstract class BaseBrowserViewModel(
             }.apply {
                 localListMap[parentId]!!.value = this ?: emptyList()
             }
+            _screenState.value = LCE.Success
         }, MoreExecutors.directExecutor())
     }
 

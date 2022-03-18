@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.ui.utils
 
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -16,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.hua.abstractmusic.R
 
 
 /**
@@ -28,6 +30,7 @@ fun CoilImage(
     url: Any?,
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
+    @DrawableRes error: Int = R.drawable.music,
     alignment: Alignment = Alignment.Center,
     contentScale: ContentScale = ContentScale.Crop,
     alpha: Float = DefaultAlpha,
@@ -43,8 +46,8 @@ fun CoilImage(
 ) {
     val context = LocalContext.current
     val painter = rememberAsyncImagePainter(
-        model =
-        ImageRequest.Builder(context)
+        model = ImageRequest.Builder(context)
+            .error(error)
             .data(url)
             .apply {
                 builder()

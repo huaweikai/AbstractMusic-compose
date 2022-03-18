@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.ui.navigation
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.Composable
@@ -13,10 +14,7 @@ import androidx.navigation.navArgument
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.hua.abstractmusic.other.Constant.ALL_MUSIC_TYPE
 import com.hua.abstractmusic.preference.getValue
-import com.hua.abstractmusic.ui.LocalHomeNavController
-import com.hua.abstractmusic.ui.LocalHomeViewModel
-import com.hua.abstractmusic.ui.LocalNetViewModel
-import com.hua.abstractmusic.ui.LocalUserViewModel
+import com.hua.abstractmusic.ui.*
 import com.hua.abstractmusic.ui.home.detail.albumdetail.LocalAlbumDetail
 import com.hua.abstractmusic.ui.home.detail.artistdetail.LocalArtistDetail
 import com.hua.abstractmusic.ui.home.local.LocalScreen
@@ -31,6 +29,7 @@ import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.viewmodels.NetViewModel
 import com.hua.abstractmusic.ui.viewmodels.UserViewModel
+import com.hua.abstractmusic.utils.isLocal
 
 /**
  * @author : huaweikai
@@ -38,17 +37,19 @@ import com.hua.abstractmusic.ui.viewmodels.UserViewModel
  * @Desc   : 主页的小navigation，用于跳转在线音乐，本地音乐和我的界面
  */
 
+@SuppressLint("UnsafeOptInUsageError")
 @OptIn(ExperimentalAnimationApi::class)
 @ExperimentalPagerApi
 @ExperimentalFoundationApi
 @Composable
 fun HomeNavigationNav(
     modifier: Modifier,
-    homeViewModel: HomeViewModel = LocalHomeViewModel.current,
-    netViewModel: NetViewModel = LocalNetViewModel.current,
-    userViewModel: UserViewModel = LocalUserViewModel.current,
-    homeNavController: NavHostController = LocalHomeNavController.current,
 ) {
+    val homeViewModel: HomeViewModel = LocalHomeViewModel.current
+    val netViewModel: NetViewModel = LocalNetViewModel.current
+    val userViewModel: UserViewModel = LocalUserViewModel.current
+    val homeNavController: NavHostController = LocalHomeNavController.current
+    val searchViewModel = LocalSearchViewModel.current
     DisposableEffect(Unit) {
         homeViewModel.initializeController()
         netViewModel.initializeController()
@@ -77,7 +78,7 @@ fun HomeNavigationNav(
             MineScreen()
         }
         composable(
-            route = "${Screen.LocalAlbumDetail.route}?albumId={albumId}&isLocal={isLocal}",
+            route = "${Screen.LocalAlbumDetail.route}?albumId={albumId}&isSearch={isSearch}",
             arguments = listOf(
                 navArgument(
                     name = "albumId"
@@ -86,19 +87,25 @@ fun HomeNavigationNav(
                     defaultValue = ""
                 },
                 navArgument(
-                    name = "isLocal"
+                    name = "isSearch"
                 ) {
                     type = NavType.BoolType
-                    defaultValue = true
+                    defaultValue = false
                 }
             ),
         ) {
-            val isLocal = it.getValue("isLocal",true)
             val albumId = it.getValue("albumId","")
+            val isSearch = it.getValue("isSearch",false)
+            val isLocal = albumId.isLocal()
             val item = if (isLocal) {
                 homeViewModel.localAlbumList.value.find { it.mediaId == albumId }!!.mediaItem
             } else {
-                netViewModel.getItem(albumId)
+                if(isSearch){
+                     searchViewModel.searchAlbum.value.data!!.find { it.mediaId == albumId }!!
+                }else{
+                    netViewModel.getItem(albumId)
+                }
+
             }
             LocalAlbumDetail(
                 item = item,
@@ -106,7 +113,7 @@ fun HomeNavigationNav(
             )
         }
         composable(
-            route = "${Screen.LocalArtistDetail.route}?artistId={artistId}&isLocal={isLocal}",
+            route = "${Screen.LocalArtistDetail.route}?artistId={artistId}&isSearch={isSearch}",
             arguments = listOf(
                 navArgument(
                     name = "artistId"
@@ -115,19 +122,24 @@ fun HomeNavigationNav(
                     defaultValue = ""
                 },
                 navArgument(
-                    name = "isLocal"
+                    name = "isSearch"
                 ) {
                     type = NavType.BoolType
-                    defaultValue = true
+                    defaultValue = false
                 }
             ),
         ) {
             val artistId = it.getValue("artistId","")
-            val isLocal = it.getValue("isLocal",true)
+            val isSearch = it.getValue("isSearch",false)
+            val isLocal = artistId.isLocal()
             val item = if (isLocal) {
                 homeViewModel.localArtistList.value.find { it.mediaId == artistId }!!.mediaItem
             } else {
-                netViewModel.getItem(artistId)
+                if(isSearch){
+                    searchViewModel.searchArtist.value.data!!.find { it.mediaId == artistId }!!
+                }else{
+                    netViewModel.getItem(artistId)
+                }
             }
             LocalArtistDetail(
                 item = item,
@@ -163,7 +175,7 @@ fun HomeNavigationNav(
         }
 
         composable(
-            route = "${Screen.LocalSheetDetailScreen.route}?sheetId={sheetId}&isLocal={isLocal}&isUser={isUser}",
+            route = "${Screen.LocalSheetDetailScreen.route}?sheetId={sheetId}&isUser={isUser}&isSearch={isSearch}",
             arguments = arrayListOf(
                 navArgument(
                     name = "sheetId"
@@ -172,32 +184,37 @@ fun HomeNavigationNav(
                     defaultValue = ""
                 },
                 navArgument(
-                    name = "isLocal"
+                    name = "isUser"
                 ) {
                     type = NavType.BoolType
                     defaultValue = true
                 },
                 navArgument(
-                    name = "isUser"
+                    name = "isSearch"
                 ) {
                     type = NavType.BoolType
-                    defaultValue = true
+                    defaultValue = false
                 }
             )
         ) {
             val sheetId = it.getValue("sheetId","")
-            val isLocal = it.getValue("isLocal",true)
+            val isLocal = sheetId.isLocal()
             val isUser = it.getValue("isUser",true)
-            val mediaData = if (isLocal) {
-                userViewModel.sheetList.value.find { it.mediaId == sheetId }!!
+            val isSearch = it.getValue("isSearch",false)
+            val mediaItem = if (isLocal) {
+                userViewModel.sheetList.value.find { it.mediaId == sheetId }!!.mediaItem
             } else {
-                if(isUser){
-                    userViewModel.netSheetList.value.find { it.mediaId == sheetId }!!
-                }else{
-                    netViewModel.recommendList.value.find { it.mediaId == sheetId }!!
+                if(isSearch){
+                    searchViewModel.searchSheet.value.data!!.find { it.mediaId == sheetId }!!
+                }else {
+                    if(isUser){
+                        userViewModel.netSheetList.value.find { it.mediaId == sheetId }!!.mediaItem
+                    }else{
+                        netViewModel.recommendList.value.find { it.mediaId == sheetId }!!.mediaItem
+                    }
                 }
             }
-            SheetDetail(mediaData = mediaData)
+            SheetDetail(mediaItem = mediaItem)
         }
 
         composable(Screen.NetSearchScreen.route){

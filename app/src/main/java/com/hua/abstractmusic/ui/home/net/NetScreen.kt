@@ -132,7 +132,7 @@ private fun SuccessContent(
                 navHostController.navigate(
                     "${Screen.LocalAlbumDetail.route}?albumId=${
                         netViewModel.bannerList.value[it].mediaId
-                    }&isLocal=false"
+                    }"
                 )
             }
         }
@@ -158,7 +158,7 @@ private fun SuccessContent(
         item {
             Glide("推荐歌单", {})
             NewItems(list = netViewModel.recommendList.value, {
-                navHostController.navigate("${Screen.LocalSheetDetailScreen.route}?sheetId=${it.mediaId}&isLocal=false&isUser=false")
+                navHostController.navigate("${Screen.LocalSheetDetailScreen.route}?sheetId=${it.mediaId}&isUser=false")
             }, {
                 netViewModel.recommendId = it.mediaId
                 netViewModel.listInit(it.mediaId)
@@ -172,7 +172,7 @@ private fun SuccessContent(
                 navHostController.navigate(
                     "${Screen.LocalAlbumDetail.route}?albumId=${
                         it.mediaId
-                    }&isLocal=false"
+                    }"
                 )
             }, {
                 netViewModel.albumId = it.mediaId

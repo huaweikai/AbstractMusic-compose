@@ -23,7 +23,7 @@ class ComposeUtils(
     ): Bitmap {
         val request = ImageRequest.Builder(context)
             .data(uri)
-            .error(R.drawable.ic_music_launcher)
+            .error(R.drawable.music)
             .allowHardware(false)
             .build()
         val result = imageLoader.execute(request)

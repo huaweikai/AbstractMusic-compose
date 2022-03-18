@@ -78,6 +78,7 @@ fun NetArtist.toMediaItem(parentId: Uri): MediaItem {
                 .setArtist(this@toMediaItem.name)
                 .setDisplayTitle(this@toMediaItem.name)
                 .setArtworkUri(Uri.parse(this@toMediaItem.imgUrl))
+                .setTrackNumber(num)
                 .setSubtitle(this@toMediaItem.artistDesc)
                 .setIsPlayable(false)
                 .setFolderType(MediaMetadata.FOLDER_TYPE_ARTISTS)
@@ -123,6 +124,8 @@ fun NetSheet.toMediaItem(parentId: Uri) =
                 .setTitle(this@toMediaItem.title)
                 .setIsPlayable(false)
                 .setFolderType(MediaMetadata.FOLDER_TYPE_PLAYLISTS)
+                .setArtist(author)
+                .setTrackNumber(num)
                 .setArtworkUri(
                     if (this.artUri == null) null else Uri.parse(this.artUri)
                 )

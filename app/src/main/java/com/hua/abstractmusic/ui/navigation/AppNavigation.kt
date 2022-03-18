@@ -5,13 +5,13 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.*
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
-import com.hua.abstractmusic.ui.LocalAppNavController
-import com.hua.abstractmusic.ui.LocalPopWindowItem
-import com.hua.abstractmusic.ui.LocalThemeViewModel
+import com.hua.abstractmusic.ui.*
 import com.hua.abstractmusic.ui.hello.HelloScreen
 import com.hua.abstractmusic.ui.home.HomeScreen
 import com.hua.abstractmusic.ui.route.Screen
@@ -33,6 +33,10 @@ import com.hua.abstractmusic.ui.viewmodels.ThemeViewModel
 fun AppNavigation(
     themeViewModel:ThemeViewModel = LocalThemeViewModel.current
 ) {
+    CompositionLocalProvider(
+        LocalAppNavController provides rememberNavController(),
+        LocalHomeNavController provides rememberNavController(),
+    ) {
         NavHost(
             navController = LocalAppNavController.current,
             startDestination = Screen.Splash.route
@@ -44,17 +48,26 @@ fun AppNavigation(
                 HelloScreen()
             }
             composable(route = Screen.HomeScreen.route) {
+                val popupWindow = remember {
+                    mutableStateOf(false)
+                }
                 val popItem = remember {
                     mutableStateOf(NULL_MEDIA_ITEM)
                 }
                 CompositionLocalProvider(
-                    LocalPopWindowItem provides popItem
+                    LocalPopWindowItem provides popItem,
+                    LocalPopWindow provides popupWindow,
+                    LocalNetViewModel provides hiltViewModel(),
+                    LocalUserViewModel provides hiltViewModel(),
+                    LocalHomeViewModel provides hiltViewModel(),
+                    LocalSearchViewModel provides hiltViewModel()
                 ) {
                     HomeScreen()
                 }
             }
-    }
-    LaunchedEffect(key1 = themeViewModel.isReady) {
-        if (!themeViewModel.isReady.value) themeViewModel.init()
+        }
+        LaunchedEffect(key1 = themeViewModel.isReady) {
+            if (!themeViewModel.isReady.value) themeViewModel.init()
+        }
     }
 }

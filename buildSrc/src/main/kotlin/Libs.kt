@@ -65,6 +65,9 @@ object Compose {
 
     const val compose_scroll_bar = "me.onebone:toolbar-compose:2.3.2"
 
+    const val lifecycle_viewModel_compose =
+        "androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha07"
+
 }
 
 object Other {
@@ -112,9 +115,6 @@ object AndroidX {
     const val room_runtime = "androidx.room:room-runtime:$room_version"
     const val room_compiler = "androidx.room:room-compiler:${room_version}"
     const val room_ktx = "androidx.room:room-ktx:$room_version"
-
-    const val lifecycle_viewModel_compose =
-        "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version"
     const val lifecycle_viewModel_ktx =
         "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     const val lifecycle_runtime_ktx = "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"

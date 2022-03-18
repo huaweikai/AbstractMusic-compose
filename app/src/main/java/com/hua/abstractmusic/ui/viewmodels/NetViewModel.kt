@@ -19,6 +19,7 @@ import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ALBUM
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ARTIST
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_BANNER
+import com.hua.abstractmusic.repository.NetRepository
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.use_case.UseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,7 +35,8 @@ import javax.inject.Inject
 class NetViewModel @Inject constructor(
     application: Application,
     useCase: UseCase,
-    itemTree: MediaItemTree
+    itemTree: MediaItemTree,
+    private val netRepository: NetRepository
 ) : BaseBrowserViewModel(application, useCase, itemTree) {
 
     private val _bannerList = mutableStateOf<List<MediaData>>(emptyList())
@@ -64,7 +66,6 @@ class NetViewModel @Inject constructor(
     var albumId: String? = null
 
 
-
     override fun onMediaChildrenChanged(
         browser: MediaBrowser,
         parentId: String,
@@ -86,19 +87,20 @@ class NetViewModel @Inject constructor(
         refresh()
     }
 
-    fun getItem(parentId: String):MediaItem{
-        return when(Uri.parse(parentId).authority){
-            TYPE_NETWORK_BANNER->{
-               bannerList.value.find { it.mediaId == parentId }!!.mediaItem
+    fun getItem(parentId: String): MediaItem {
+//        return netRepository.selectItem(parentId)
+        return when (Uri.parse(parentId).authority) {
+            TYPE_NETWORK_BANNER -> {
+                bannerList.value.find { it.mediaId == parentId }!!.mediaItem
             }
-            TYPE_NETWORK_ALBUM ->{
+            TYPE_NETWORK_ALBUM -> {
                 albumList.value.find { it.mediaId == parentId }!!.mediaItem
             }
-            TYPE_NETWORK_ARTIST ->{
+            TYPE_NETWORK_ARTIST -> {
                 artistList.value.find { it.mediaId == parentId }!!.mediaItem
             }
             else -> NULL_MEDIA_ITEM
         }
     }
-    
+
 }
