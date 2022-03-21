@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,9 +44,6 @@ fun LoggedScreen(
     }
 
     val contentResolver = LocalContext.current.contentResolver
-//    val cropPicture = rememberLauncherForActivityResult(CropPhotoContract()) {
-//        viewModel.putHeadPicture(it.toString(), contentResolver)
-//    }
     val context= LocalContext.current
     val cropPicture = rememberLauncherForActivityResult(UCropActivityResultContract()) {
         if(it != null){
@@ -60,6 +58,11 @@ fun LoggedScreen(
             val outputUri = getCacheDir(context,it)
             cropPicture.launch(Pair(it,outputUri!!))
         }
+    }
+    LazyColumn(
+        modifier = Modifier.fillMaxSize()
+    ){
+        
     }
 
     Column(Modifier.fillMaxSize()) {

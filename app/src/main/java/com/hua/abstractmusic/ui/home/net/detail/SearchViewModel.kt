@@ -55,7 +55,8 @@ class SearchViewModel @Inject constructor(
         when (event) {
             is TextEvent.TextValueChange -> {
                 _searchText.value = searchText.value.copy(
-                    text = event.value
+                    text = event.value,
+                    isHintVisible = event.value.isBlank()
                 )
                 if (event.value.isBlank()) {
                     clear()
@@ -83,6 +84,10 @@ class SearchViewModel @Inject constructor(
                 searchMaps[it]!!.value = netRepository.search(it)
             }
             searchState.value = if (searchMusic.value.code != ERROR) LCE.Success else LCE.Error
+            val c = userDao.selectHistoryList().find { it.history == search }
+            if(c != null){
+                userDao.deleteHistory(c.id)
+            }
             userDao.insertHistory(SearchHistory(history = search))
         }
     }
@@ -92,6 +97,7 @@ class SearchViewModel @Inject constructor(
             it.value.value = nullNetData
         }
         searchMaps.clear()
+        _searchText.value = searchText.value.copy(text = "")
     }
 }
 

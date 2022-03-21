@@ -44,7 +44,7 @@ class NetRepository(
             when (parentId.authority) {
                 TYPE_NETWORK_ALBUM -> {
                     val list = mutableListOf<MediaItem>()
-                    val getResult = service.getAlbumList()
+                    val getResult = service.getRecommendAlbumList()
                     getResult.data?.forEach {
                         list.add(it.toMediaItem(parentId))
                     }

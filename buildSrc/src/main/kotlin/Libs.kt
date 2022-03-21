@@ -49,6 +49,7 @@ object Compose {
     const val compose_pager_indicator = "com.google.accompanist:accompanist-pager-indicators:0.20.3"
     const val compose_insets =
         "com.google.accompanist:accompanist-insets:${Version.compose_accompanist}"
+    const val compose_flow_layout = "com.google.accompanist:accompanist-flowlayout:${Version.compose_accompanist}"
     const val compose_swipeRefresh =
         "com.google.accompanist:accompanist-swiperefresh:${Version.compose_accompanist}"
     const val compose_constraintlayout = "androidx.constraintlayout:constraintlayout-compose:1.0.0"

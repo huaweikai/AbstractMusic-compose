@@ -1,14 +1,12 @@
 package com.hua.abstractmusic.ui.home.mine.nologin
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.home.mine.LocalSheet
@@ -27,7 +25,11 @@ fun NoLoginScreen(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .statusBarsPadding(),
+            .padding(
+                top = WindowInsets.statusBars
+                    .asPaddingValues()
+                    .calculateTopPadding() + 32.dp
+            ),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -37,6 +39,7 @@ fun NoLoginScreen(
             Text(text = "登录抽象音乐账号")
         }
         Text(text = "畅享海量歌曲")
+        Spacer(modifier = Modifier.height(16.dp))
         LocalSheet()
     }
 }

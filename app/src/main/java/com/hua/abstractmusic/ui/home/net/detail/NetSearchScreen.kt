@@ -1,10 +1,12 @@
 package com.hua.abstractmusic.ui.home.net.detail
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -19,6 +21,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
@@ -44,9 +47,9 @@ fun NetSearchScreen(
     navController: NavHostController = LocalHomeNavController.current
 ) {
     val searchText = searchViewModel.searchText.value
-    DisposableEffect(Unit){
+    DisposableEffect(Unit) {
         this.onDispose {
-            searchViewModel.clear()
+//            searchViewModel.clear()
         }
     }
     Scaffold(
@@ -78,6 +81,7 @@ fun NetSearchScreen(
                 navigationIcon = {
                     NavigationBack {
                         navController.navigateUp()
+                        searchViewModel.clear()
                     }
                 },
                 modifier = Modifier.statusBarsPadding()
@@ -86,19 +90,54 @@ fun NetSearchScreen(
     ) {
         val history = searchViewModel.searchHistory.collectAsState(emptyList())
         Column(
-            modifier = Modifier.padding(it)
+            modifier = Modifier
+                .padding(it)
+                .padding(horizontal = 8.dp)
         ) {
             if (searchViewModel.detailVis.value) {
                 SearchSuccess(searchViewModel = searchViewModel)
             } else {
-                Text(text = "最近搜索")
-                LazyColumn{
-                    items(history.value){
-                        Text(text = "${it.history}")
+                Text(
+                    text = "最近搜索",
+                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                FlowRow {
+                    repeat(history.value.size) {
+                        val title = history.value[it].history
+                        Surface(
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .clickable {
+                                    searchViewModel.addEvent(TextEvent.TextValueChange(title))
+                                    searchViewModel.search()
+                                },
+                            shape = RoundedCornerShape(16.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant
+                        ) {
+                            Row {
+                                Spacer(
+                                    modifier = Modifier
+                                        .width(8.dp)
+                                        .height(4.dp)
+                                )
+                                Text(text = title, style = MaterialTheme.typography.bodyLarge)
+                                Spacer(
+                                    modifier = Modifier
+                                        .width(8.dp)
+                                        .height(4.dp)
+                                )
+                            }
+                        }
+
                     }
                 }
             }
         }
+    }
+    BackHandler(true) {
+        navController.navigateUp()
+        searchViewModel.clear()
     }
 }
 
@@ -167,12 +206,15 @@ private fun SearchItem(
 
         }
     } else {
-        LazyColumn(Modifier.fillMaxWidth()){
-            itemsIndexed(data?.data ?: emptyList()) { index,it->
+        LazyColumn(Modifier.fillMaxWidth()) {
+            itemsIndexed(data?.data ?: emptyList()) { index, it ->
                 when (searchObject) {
                     is SearchObject.Music -> {
                         MusicItem(data = MediaData(it)) {
-                            searchViewModel.setPlayList(index,searchViewModel.searchMusic.value.data!!)
+                            searchViewModel.setPlayList(
+                                index,
+                                searchViewModel.searchMusic.value.data!!
+                            )
                         }
                     }
                     is SearchObject.Album -> {
@@ -186,7 +228,7 @@ private fun SearchItem(
                         })
                     }
                     is SearchObject.Sheet -> {
-                        SheetItem(item = it){
+                        SheetItem(item = it) {
                             hostController.navigate("${Screen.LocalSheetDetailScreen.route}?sheetId=$it&isSearch=true")
                         }
                     }

@@ -1,35 +1,40 @@
 package com.hua.abstractmusic.ui.home.mine
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.common.MediaItem
 import androidx.navigation.NavHostController
 import coil.transform.RoundedCornersTransformation
+import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
+import com.hua.abstractmusic.ui.LocalComposeUtils
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalUserViewModel
+import com.hua.abstractmusic.ui.home.net.ItemPlayButton
 import com.hua.abstractmusic.ui.route.Screen
-import com.hua.abstractmusic.ui.utils.ArtImage
+import com.hua.abstractmusic.ui.utils.CoilImage
 import com.hua.abstractmusic.ui.viewmodels.UserViewModel
+import com.hua.abstractmusic.utils.PaletteUtils
 
 
 /**
@@ -56,17 +61,16 @@ fun Sheet(
         mutableStateOf(NULL_MEDIA_ITEM)
     }
     Surface(
-        modifier = Modifier
-            .height(140.dp)
-            .fillMaxWidth(0.9f),
-        shape = RoundedCornerShape(8.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Column {
             Row(
                 modifier = Modifier
-                    .height(25.dp)
-                    .padding(horizontal = 8.dp)
+                    .padding(
+                        vertical = 8.dp, horizontal = 12.dp
+                    )
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -81,44 +85,24 @@ fun Sheet(
                 )
             }
             LazyRow(
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier.padding(vertical = 8.dp),
+                contentPadding = PaddingValues(horizontal = 8.dp)
             ) {
-                itemsIndexed(
+                items(
                     sheetList.value
-                ) { index, sheet ->
-                    Column(
-                        modifier = Modifier
-                            .height(100.dp)
-                            .padding(horizontal = 8.dp)
-                            .width(70.dp),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        ArtImage(
-                            modifier = Modifier
-                                .size(70.dp)
-                                .pointerInput(Unit) {
-                                    this.detectTapGestures(
-                                        onLongPress = {
-                                            deleteSheetState.value = true
-                                            item.value = sheet.mediaItem
-                                        },
-                                        onTap = {
-                                            onClick(sheet.mediaId)
-                                        }
-                                    )
-                                },
-                            uri = sheet.mediaItem.mediaMetadata.artworkUri,
-                            desc = "",
-                            transformation = RoundedCornersTransformation(15f)
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(text = "${sheet.mediaItem.mediaMetadata.title}")
+                ) { sheet ->
+                    RecommendItem(item = sheet, onclick = {
+                        onClick(it.mediaId)
+                    }, onPlay = {
+                        //todo
+                    }) {
+                        deleteSheetState.value = true
+                        item.value = sheet.mediaItem
                     }
                 }
             }
         }
-}
+    }
     CreateNewSheet(diaLogState = diaLogState) {
         newSheet(it)
     }
@@ -216,6 +200,86 @@ fun CreateNewSheet(
                     maxLines = 1
                 )
             }
+        )
+    }
+}
+
+@SuppressLint("UnsafeOptInUsageError")
+@Composable
+private fun RecommendItem(
+    item: MediaData,
+    onclick: (MediaData) -> Unit,
+    onPlay: (MediaData) -> Unit,
+    onLongClick: () -> Unit,
+) {
+    val composeUtils = LocalComposeUtils.current
+    val context = LocalContext.current
+    val background = remember(item.mediaItem) {
+        mutableStateOf(Color.Gray)
+    }
+    LaunchedEffect(Unit) {
+        val bitmap =
+            composeUtils.coilToBitmap(item.mediaItem.mediaMetadata.artworkUri)
+        val pair =
+            PaletteUtils.resolveBitmap(
+                false,
+                bitmap,
+                context.getColor(R.color.black)
+            )
+        background.value = Color(pair.first)
+    }
+    Column(
+        Modifier
+            .width(106.dp)
+            .padding(horizontal = 8.dp)
+            .height(150.dp)
+            .clickable {
+                onclick(item)
+            },
+        verticalArrangement = Arrangement.Top
+    ) {
+        Box(
+            modifier = Modifier
+                .height(100.dp),
+        ) {
+            CoilImage(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .pointerInput(Unit) {
+                        this.detectTapGestures(
+                            onLongPress = {
+                                onLongClick()
+                            },
+                            onTap = {
+                                onclick(item)
+//                                onClick(sheet.mediaId)
+                            }
+                        )
+                    },
+                url = item.mediaItem.mediaMetadata.artworkUri,
+                contentDescription = "",
+                builder = { transformations(RoundedCornersTransformation(10f)) }
+            )
+            ItemPlayButton(
+                modifier = Modifier
+                    .fillMaxWidth(0.7f)
+                    .align(
+                        Alignment.BottomStart
+                    )
+                    .background(
+                        background.value, RoundedCornerShape(50f)
+                    )
+            ) {
+                onPlay(item)
+            }
+        }
+        Spacer(modifier = Modifier.height(3.dp))
+        Text(
+            text = "${item.mediaItem.mediaMetadata.title}",
+            maxLines = 2,
+            fontSize = 14.sp,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }

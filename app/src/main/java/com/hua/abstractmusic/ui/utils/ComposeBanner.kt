@@ -126,7 +126,7 @@ private fun <T> Banner(
             inactiveColor = Color.Gray,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 15.dp)
+                .padding(bottom = 12.dp)
         )
     }
 }

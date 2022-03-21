@@ -14,6 +14,10 @@ interface MusicService {
     @GET("album/list")
     suspend fun getAlbumList(): NetData<List<NetAlbum>>
 
+    //专辑列表
+    @GET("album/recommend/list")
+    suspend fun getRecommendAlbumList(): NetData<List<NetAlbum>>
+
     //歌手列表
     @GET("artist/list")
     suspend fun getArtistList(): NetData<List<NetArtist>>

@@ -107,6 +107,7 @@ dependencies {
     implementation Compose.compose_navigation_animate
     implementation Compose.compose_scroll_bar
     implementation Compose.lifecycle_viewModel_compose
+    implementation Compose.compose_flow_layout
 
     //StatusBarColor
     implementation Other.status_bar_color

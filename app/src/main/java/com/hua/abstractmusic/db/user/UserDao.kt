@@ -34,6 +34,12 @@ interface UserDao {
     @Insert
     suspend fun insertHistory(history: SearchHistory)
 
-    @Query("select * from searchhistory")
+    @Query("delete from searchhistory where :id=id")
+    suspend fun deleteHistory(id:Int)
+
+    @Query("select * from searchhistory order by id desc")
     fun selectHistory(): Flow<List<SearchHistory>>
+
+    @Query("select * from searchhistory")
+    suspend fun selectHistoryList():List<SearchHistory>
 }

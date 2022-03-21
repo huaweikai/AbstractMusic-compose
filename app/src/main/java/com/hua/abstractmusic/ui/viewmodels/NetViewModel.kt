@@ -62,8 +62,8 @@ class NetViewModel @Inject constructor(
         netListMap[NETWORK_ARTIST_ID] = _artistList
     }
 
-    var recommendId: String? = null
-    var albumId: String? = null
+//    var recommendId: String? = null
+//    var albumId: String? = null
 
 
     override fun onMediaChildrenChanged(

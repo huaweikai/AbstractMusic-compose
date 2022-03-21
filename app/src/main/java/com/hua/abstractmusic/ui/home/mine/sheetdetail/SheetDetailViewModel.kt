@@ -80,7 +80,7 @@ class SheetDetailViewModel @Inject constructor(
         val byte = contentResolver.openInputStream(uri)
         val file = DocumentFile.fromSingleUri(getApplication(), uri)
         viewModelScope.launch(Dispatchers.IO) {
-            val fileName = "${Constant.BUCKET_SHEET_IMG}/${sheetId}-sheet-${
+            val fileName = "${Constant.BUCKET_SHEET_IMG}/${Uri.parse(sheetId).lastPathSegment}-sheet-${
                 System.currentTimeMillis().toDate()
             }.png"
             val result = userRepository.putFile(

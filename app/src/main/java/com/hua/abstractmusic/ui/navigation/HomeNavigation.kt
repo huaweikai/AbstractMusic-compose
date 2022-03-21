@@ -94,18 +94,17 @@ fun HomeNavigationNav(
                 }
             ),
         ) {
-            val albumId = it.getValue("albumId","")
-            val isSearch = it.getValue("isSearch",false)
+            val albumId = it.getValue("albumId", "")
+            val isSearch = it.getValue("isSearch", false)
             val isLocal = albumId.isLocal()
             val item = if (isLocal) {
                 homeViewModel.localAlbumList.value.find { it.mediaId == albumId }!!.mediaItem
             } else {
-                if(isSearch){
-                     searchViewModel.searchAlbum.value.data!!.find { it.mediaId == albumId }!!
-                }else{
+                if (isSearch) {
+                    searchViewModel.searchAlbum.value.data!!.find { it.mediaId == albumId }!!
+                } else {
                     netViewModel.getItem(albumId)
                 }
-
             }
             LocalAlbumDetail(
                 item = item,
@@ -129,15 +128,15 @@ fun HomeNavigationNav(
                 }
             ),
         ) {
-            val artistId = it.getValue("artistId","")
-            val isSearch = it.getValue("isSearch",false)
+            val artistId = it.getValue("artistId", "")
+            val isSearch = it.getValue("isSearch", false)
             val isLocal = artistId.isLocal()
             val item = if (isLocal) {
                 homeViewModel.localArtistList.value.find { it.mediaId == artistId }!!.mediaItem
             } else {
-                if(isSearch){
+                if (isSearch) {
                     searchViewModel.searchArtist.value.data!!.find { it.mediaId == artistId }!!
-                }else{
+                } else {
                     netViewModel.getItem(artistId)
                 }
             }
@@ -170,7 +169,7 @@ fun HomeNavigationNav(
                 }
             )
         ) {
-            val type = it.getValue("type",ALL_MUSIC_TYPE)
+            val type = it.getValue("type", ALL_MUSIC_TYPE)
             NetDetail(type)
         }
 
@@ -197,19 +196,19 @@ fun HomeNavigationNav(
                 }
             )
         ) {
-            val sheetId = it.getValue("sheetId","")
+            val sheetId = it.getValue("sheetId", "")
             val isLocal = sheetId.isLocal()
-            val isUser = it.getValue("isUser",true)
-            val isSearch = it.getValue("isSearch",false)
+            val isUser = it.getValue("isUser", true)
+            val isSearch = it.getValue("isSearch", false)
             val mediaItem = if (isLocal) {
                 userViewModel.sheetList.value.find { it.mediaId == sheetId }!!.mediaItem
             } else {
-                if(isSearch){
+                if (isSearch) {
                     searchViewModel.searchSheet.value.data!!.find { it.mediaId == sheetId }!!
-                }else {
-                    if(isUser){
+                } else {
+                    if (isUser) {
                         userViewModel.netSheetList.value.find { it.mediaId == sheetId }!!.mediaItem
-                    }else{
+                    } else {
                         netViewModel.recommendList.value.find { it.mediaId == sheetId }!!.mediaItem
                     }
                 }
@@ -217,7 +216,7 @@ fun HomeNavigationNav(
             SheetDetail(mediaItem = mediaItem)
         }
 
-        composable(Screen.NetSearchScreen.route){
+        composable(Screen.NetSearchScreen.route) {
             NetSearchScreen()
         }
     }
