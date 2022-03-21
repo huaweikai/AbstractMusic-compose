@@ -120,6 +120,7 @@ dependencies {
     implementation Other.retrofit2_gson
 
     implementation Other.uCrop
+    implementation Other.monet
 
     implementation Other.huawei_obs
     implementation project(Other.taglib)

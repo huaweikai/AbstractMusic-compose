@@ -9,9 +9,9 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hua.abstractmusic.preference.PreferenceManager
-import com.hua.abstractmusic.ui.monet.Monet
-import com.hua.abstractmusic.ui.monet.theme.MonetColor
+import com.hua.abstractmusic.ui.utils.Monet
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.kdrag0n.monet.theme.ColorScheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -27,13 +27,12 @@ class ThemeViewModel @Inject constructor(
 ) : ViewModel() {
     private val _isReady = mutableStateOf(Build.VERSION.SDK_INT < Build.VERSION_CODES.S && preferenceManager.themeColor == Int.MIN_VALUE)
     val isReady: State<Boolean> get() = _isReady
-    private val _color = mutableStateOf<MonetColor?>(null)
-    val monetColor: State<MonetColor?> get() = _color
+    private val _color = mutableStateOf<ColorScheme?>(null)
+    val monetColor: State<ColorScheme?> get() = _color
     fun init() {
         if (preferenceManager.themeColor != Int.MIN_VALUE) {
             getMonetColor(Color(preferenceManager.themeColor))
         } else {
-//            getMonetColor(Color(0xff33b5e5))
             _isReady.value = true
         }
     }

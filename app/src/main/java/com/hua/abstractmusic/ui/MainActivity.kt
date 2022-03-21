@@ -4,13 +4,13 @@ package com.hua.abstractmusic.ui
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hua.abstractmusic.ui.navigation.AppNavigation
@@ -23,7 +23,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : MonetActivity() {
 
     private val playingViewModel by viewModels<PlayingViewModel>()
     private val themeViewModel by viewModels<ThemeViewModel>()
@@ -45,24 +45,26 @@ class MainActivity : AppCompatActivity() {
         //不会在系统视图下面绘制
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
-        setContent {
-            rememberSystemUiController().setStatusBarColor(
-                Color.Transparent,
-                darkIcons = MaterialTheme.colors.isLight
-            )
-            val windowSize = rememberWindowSizeClass()
-            CompositionLocalProvider(
-                LocalPlayingViewModel provides playingViewModel,
-                LocalThemeViewModel provides themeViewModel,
-                LocalScreenSize provides windowSize,
-                LocalComposeUtils provides composeUtils,
-            ) {
-                AbstractMusicTheme(
-                    themeViewModel.monetColor.value
+        lifecycleScope.launchWhenCreated {
+            monet.awaitMonetReady()
+            setContent {
+                rememberSystemUiController().setStatusBarColor(
+                    Color.Transparent,
+                    darkIcons = MaterialTheme.colors.isLight
+                )
+                val windowSize = rememberWindowSizeClass()
+                CompositionLocalProvider(
+                    LocalPlayingViewModel provides playingViewModel,
+                    LocalThemeViewModel provides themeViewModel,
+                    LocalScreenSize provides windowSize,
+                    LocalComposeUtils provides composeUtils,
                 ) {
-//                    ProvideWindowInsets {
-                    AppNavigation()
-//                    }
+                    AbstractMusicTheme(
+                        monet,
+                        themeViewModel.monetColor.value
+                    ) {
+                        AppNavigation()
+                    }
                 }
             }
         }
@@ -73,10 +75,8 @@ class MainActivity : AppCompatActivity() {
         playingViewModel.initializeController()
     }
 
-//    override fun onStop() {
-//        super.onStop()
-//        localPlayingViewModel.releaseBrowser()
-//    }
+    override fun onStop() {
+        super.onStop()
+        playingViewModel.releaseBrowser()
+    }
 }
-
-

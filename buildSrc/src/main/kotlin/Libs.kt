@@ -17,7 +17,7 @@ import Version.room_version
  */
 
 object Google {
-    const val material = "com.google.android.material:material:1.4.0"
+    const val material = "com.google.android.material:material:1.5.0"
 
     const val hilt_android = "com.google.dagger:hilt-android:$hilt_version"
     const val hilt_compiler = "com.google.dagger:hilt-compiler:$hilt_version"
@@ -83,6 +83,8 @@ object Other {
     const val blur = ":blur"
     const val uCrop = "com.github.yalantis:ucrop:2.2.8"
     const val status_bar_color = "cn.chitanda:dynamicstatusbar:2.5.1"
+
+    const val monet = "com.github.KieronQuinn:MonetCompat:0.4.1"
 
 }
 
