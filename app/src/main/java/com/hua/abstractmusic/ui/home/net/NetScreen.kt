@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.transform.RoundedCornersTransformation
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -28,6 +29,7 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
+import com.hua.abstractmusic.bean.toNavType
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalComposeUtils
 import com.hua.abstractmusic.ui.LocalHomeNavController
@@ -98,7 +100,7 @@ fun NetScreen(
                     }
                 }
                 LCE.Success -> {
-                    SuccessContent()
+                    SuccessContent(netViewModel)
                 }
             }
         }
@@ -110,8 +112,8 @@ fun NetScreen(
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 private fun SuccessContent(
+    netViewModel: NetViewModel,
     navHostController: NavHostController = LocalHomeNavController.current,
-    netViewModel: NetViewModel = LocalNetViewModel.current
 ) {
     LazyColumn(
         modifier = Modifier
@@ -128,8 +130,8 @@ private fun SuccessContent(
                 }
             ) {
                 navHostController.navigate(
-                    "${Screen.LocalAlbumDetail.route}?albumId=${
-                        netViewModel.bannerList.value[it].mediaId
+                    "${Screen.LocalAlbumDetail.route}?mediaItem=${
+                        netViewModel.bannerList.value[it].mediaItem.toNavType()
                     }"
                 )
             }
@@ -202,14 +204,14 @@ private fun RecommendSheetList(
 ) {
     RecommendTitle(recommendTitle = "最新歌单请查收~") {
         LazyRow(contentPadding = PaddingValues(horizontal = 16.dp)){
-            if (netViewModel.recommendList.value.isNotEmpty()) {
+            if (netViewModel.recommendList.value.isNotEmpty() && netViewModel.recommendList.value.size == 12) {
                 items(6) { index ->
                     Column(Modifier.padding(end = 16.dp)){
                         repeat(2) {
                             val i = if (it == 0) index else index + 6
                             val item = netViewModel.recommendList.value[i]
                             RecommendItem(item = item, onclick = {
-                                navHostController.navigate("${Screen.LocalSheetDetailScreen.route}?sheetId=${it.mediaId}&isUser=false")
+                                navHostController.navigate("${Screen.LocalSheetDetailScreen.route}?mediaItem=${it.mediaItem.toNavType()}&isUser=false")
                             }) {
 //                                netViewModel.recommendId = it.mediaId
                                 netViewModel.listInit(it.mediaId)
@@ -233,8 +235,8 @@ private fun RecommendAlbum(
                 Column(modifier = Modifier.padding(end = 16.dp)) {
                     RecommendItem(item = it, onclick = {
                         navHostController.navigate(
-                            "${Screen.LocalAlbumDetail.route}?albumId=${
-                                it.mediaId
+                            "${Screen.LocalAlbumDetail.route}?mediaItem=${
+                                it.mediaItem.toNavType()
                             }"
                         )
                     }, onPlay = {
@@ -326,7 +328,8 @@ private fun RecommendTitle(
     ) {
         Row(
             Modifier
-                .height(IntrinsicSize.Min).padding(start = 16.dp),
+                .height(IntrinsicSize.Min)
+                .padding(start = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(

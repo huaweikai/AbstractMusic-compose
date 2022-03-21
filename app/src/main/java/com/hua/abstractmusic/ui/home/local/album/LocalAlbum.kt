@@ -17,7 +17,6 @@ import androidx.media3.common.MediaItem
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
-import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.utils.ArtImage
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
@@ -32,8 +31,8 @@ import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun LocalAlbum(
-    viewModel: HomeViewModel = LocalHomeViewModel.current,
-    onClick:(String)->Unit
+    viewModel: HomeViewModel,
+    onClick:(MediaItem)->Unit
 ) {
     AlbumLazyGrid(viewModel.localAlbumList.value, onClick = onClick)
 }
@@ -43,7 +42,7 @@ fun LocalAlbum(
 fun AlbumLazyGrid(
     list: List<MediaData>,
     bottomControllerHeight: Dp = LocalBottomControllerHeight.current,
-    onClick: (String) -> Unit,
+    onClick: (MediaItem) -> Unit,
 ){
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -65,7 +64,7 @@ fun AlbumLazyGrid(
 @Composable
 fun AlbumItem(
     item: MediaItem,
-    onClick: (String) -> Unit
+    onClick: (MediaItem) -> Unit
 ){
     Column(
         modifier = Modifier
@@ -75,7 +74,7 @@ fun AlbumItem(
             modifier = Modifier
                 .size(190.dp)
                 .clickable {
-                    onClick(item.mediaId)
+                    onClick(item)
                 },
             uri = item.mediaMetadata.artworkUri,
             transformation = RoundedCornersTransformation(40f),

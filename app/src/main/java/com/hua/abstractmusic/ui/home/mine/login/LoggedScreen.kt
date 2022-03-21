@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.transform.CircleCropTransformation
+import com.hua.abstractmusic.bean.toNavType
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalUserViewModel
 import com.hua.abstractmusic.ui.home.mine.LocalSheet
@@ -87,8 +88,8 @@ fun LoggedScreen(
         LocalSheet()
         Sheet(
             isLocal = false,
-            onClick = { sheetId ->
-                navHostController.navigate("${Screen.LocalSheetDetailScreen.route}?sheetId=$sheetId")
+            onClick = { mediaItem ->
+                navHostController.navigate("${Screen.LocalSheetDetailScreen.route}?mediaItem=${mediaItem.toNavType()}")
             },
             newSheet = {
                 viewModel.createSheet(it, false)

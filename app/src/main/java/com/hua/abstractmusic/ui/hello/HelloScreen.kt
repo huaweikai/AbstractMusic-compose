@@ -21,7 +21,9 @@ import androidx.navigation.NavOptions
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.ui.hello.PermissionBean
 import com.hua.abstractmusic.ui.LocalAppNavController
+import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.route.Screen
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 
 
 /**
@@ -31,6 +33,7 @@ import com.hua.abstractmusic.ui.route.Screen
  */
 @Composable
 fun HelloScreen(
+    localViewModel:HomeViewModel = LocalHomeViewModel.current,
     appNavController: NavHostController = LocalAppNavController.current
 ) {
     var isGet by remember {
@@ -47,6 +50,7 @@ fun HelloScreen(
             if (isGet) {
                 val navOptions =
                     NavOptions.Builder().setPopUpTo(Screen.HelloScreen.route, true).build()
+                localViewModel.initializeController()
 //                viewModel.refresh()
                 appNavController.navigate(Screen.HomeScreen.route, navOptions)
             }

@@ -13,7 +13,6 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
 import coil.transform.CircleCropTransformation
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
-import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.utils.ArtImage
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
@@ -25,9 +24,9 @@ import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
  */
 @Composable
 fun LocalArtist(
-    homeViewModel: HomeViewModel = LocalHomeViewModel.current,
+    homeViewModel: HomeViewModel,
     bottomControllerHeight: Dp = LocalBottomControllerHeight.current,
-    onClick: (String) -> Unit
+    onClick: (MediaItem) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
@@ -46,14 +45,14 @@ fun LocalArtist(
 @Composable
 fun ArtistLazyItem(
     item: MediaItem,
-    onClick: (String) -> Unit,
+    onClick: (MediaItem) -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 20.dp, bottom = 20.dp)
             .clickable {
-                onClick(item.mediaId)
+                onClick(item)
             }
     ) {
         ArtImage(

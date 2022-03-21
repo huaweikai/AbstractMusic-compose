@@ -1,6 +1,7 @@
 package com.hua.abstractmusic.preference
 
 import androidx.navigation.NavBackStackEntry
+import com.hua.abstractmusic.bean.ParcelizeMediaItem
 
 
 /**
@@ -21,6 +22,7 @@ fun <T> NavBackStackEntry.getValue(
         is Float -> arguments.getFloat(key, defaultValue) as T
         is Byte -> arguments.getByte(key, defaultValue) as T
         is Int -> arguments.getInt(key, defaultValue) as T
+        is ParcelizeMediaItem -> arguments.getParcelable<ParcelizeMediaItem>(key) as T
         else -> throw IllegalArgumentException("Type Error, cannot get value!")
     }
     return value

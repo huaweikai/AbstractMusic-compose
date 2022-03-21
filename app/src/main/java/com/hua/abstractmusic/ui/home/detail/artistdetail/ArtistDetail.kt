@@ -26,12 +26,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.media3.common.MediaItem
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
+import com.hua.abstractmusic.bean.ParcelizeMediaItem
+import com.hua.abstractmusic.bean.toNavType
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.route.Screen
@@ -39,6 +40,7 @@ import com.hua.abstractmusic.ui.utils.AlbumItem
 import com.hua.abstractmusic.ui.utils.LCE
 import com.hua.abstractmusic.ui.utils.MusicItem
 import com.hua.abstractmusic.ui.utils.indicatorOffset
+import com.hua.abstractmusic.utils.isLocal
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ScrollStrategy
@@ -53,14 +55,13 @@ import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 @ExperimentalPagerApi
 @Composable
 fun LocalArtistDetail(
-    item: MediaItem,
-    isLocal:Boolean,
+    item: ParcelizeMediaItem,
     homeNavController: NavHostController = LocalHomeNavController.current,
     viewModel: ArtistDetailViewModel = hiltViewModel()
 ) {
     val state = rememberCollapsingToolbarScaffoldState()
     LaunchedEffect(Unit){
-        viewModel.isLocal = isLocal
+        viewModel.isLocal = item.mediaId.isLocal()
         viewModel.artistId = item.mediaId
         viewModel.initializeController()
     }
@@ -82,7 +83,7 @@ fun LocalArtistDetail(
                     .height(400.dp)
             ) {
                 AsyncImage(
-                    model = item.mediaMetadata.artworkUri,
+                    model = item.artUri,
                     modifier = Modifier
                         .fillMaxSize(),
                     contentScale = ContentScale.Crop,
@@ -112,7 +113,7 @@ fun LocalArtistDetail(
                 }
             }
             Text(
-                text = "${item.mediaMetadata.title}",
+                text = "${item.title}",
                 color = Color.White,
                 modifier = Modifier
                     .padding(
@@ -241,7 +242,7 @@ private fun ArtistHorizontalPager(
                                 .fillMaxWidth()
                                 .padding(start = 8.dp)
                         ) {
-                            homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumId=${item.mediaId}&isLocal=${viewModel.isLocal}")
+                            homeNavController.navigate("${Screen.LocalAlbumDetail.route}?mediaItem=${item.mediaItem.toNavType()}")
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                     }

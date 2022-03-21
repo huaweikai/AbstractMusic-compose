@@ -26,6 +26,7 @@ import androidx.navigation.NavHostController
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
+import com.hua.abstractmusic.bean.toNavType
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.ui.LocalComposeUtils
 import com.hua.abstractmusic.ui.LocalHomeNavController
@@ -47,7 +48,7 @@ import com.hua.abstractmusic.utils.PaletteUtils
 @Composable
 fun Sheet(
     isLocal: Boolean = true,
-    onClick: (String) -> Unit,
+    onClick: (MediaItem) -> Unit,
     newSheet: (String) -> Unit,
     sheetList: MutableState<List<MediaData>>
 ) {
@@ -92,7 +93,7 @@ fun Sheet(
                     sheetList.value
                 ) { sheet ->
                     RecommendItem(item = sheet, onclick = {
-                        onClick(it.mediaId)
+                        onClick(it.mediaItem)
                     }, onPlay = {
                         //todo
                     }) {
@@ -116,8 +117,8 @@ fun LocalSheet(
     userViewModel: UserViewModel = LocalUserViewModel.current
 ) {
     Sheet(
-        onClick = { sheetId ->
-            navHostController.navigate("${Screen.LocalSheetDetailScreen.route}?sheetId=$sheetId")
+        onClick = { mediaItem ->
+            navHostController.navigate("${Screen.LocalSheetDetailScreen.route}?mediaItem=${mediaItem.toNavType()}")
         },
         newSheet = {
             userViewModel.createSheet(it, true)

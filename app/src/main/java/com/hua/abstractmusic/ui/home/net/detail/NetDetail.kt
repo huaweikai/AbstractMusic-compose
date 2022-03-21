@@ -7,7 +7,6 @@ import androidx.navigation.NavHostController
 import com.hua.abstractmusic.other.Constant.ALL_MUSIC_TYPE
 import com.hua.abstractmusic.other.Constant.NET_ALBUM_TYPE
 import com.hua.abstractmusic.ui.LocalHomeNavController
-import com.hua.abstractmusic.ui.LocalNetViewModel
 import com.hua.abstractmusic.ui.home.local.album.AlbumLazyGrid
 import com.hua.abstractmusic.ui.home.local.music.MusicLazyItems
 import com.hua.abstractmusic.ui.route.Screen
@@ -23,7 +22,7 @@ import com.hua.abstractmusic.ui.viewmodels.NetViewModel
 @Composable
 fun NetDetail(
     type: String,
-    netViewModel: NetViewModel = LocalNetViewModel.current,
+    netViewModel: NetViewModel,
     navHostController: NavHostController = LocalHomeNavController.current
 ) {
     when (type) {

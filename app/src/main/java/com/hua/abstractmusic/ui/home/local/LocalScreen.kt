@@ -12,12 +12,15 @@ import androidx.navigation.NavHostController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
+import com.hua.abstractmusic.bean.toNavType
 import com.hua.abstractmusic.ui.LocalHomeNavController
+import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.home.local.album.LocalAlbum
 import com.hua.abstractmusic.ui.home.local.artist.LocalArtist
 import com.hua.abstractmusic.ui.home.local.music.LocalMusic
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.indicatorOffset3
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import kotlinx.coroutines.launch
 
 
@@ -33,8 +36,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun LocalScreen(
     homeNavController: NavHostController = LocalHomeNavController.current,
+    localViewModel: HomeViewModel = LocalHomeViewModel.current
 ) {
-
     val pagerState = rememberPagerState()
     val tabTitles = listOf("音乐", "专辑", "歌手")
     val coroutineScope = rememberCoroutineScope()
@@ -81,18 +84,18 @@ fun LocalScreen(
             ) { page ->
                 when (page) {
                     0 -> {
-                        LocalMusic()
+                        LocalMusic(localViewModel)
                     }
                     1 -> {
-                        LocalAlbum { mediaId ->
+                        LocalAlbum(localViewModel){ mediaItem ->
 //                            homeNavController.navigate("${Screen.NetSearchScreen.route}")
-                            homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumId=${mediaId}")
+                            homeNavController.navigate("${Screen.LocalAlbumDetail.route}?mediaItem=${mediaItem.toNavType()}")
                         }
                     }
                     2 -> {
-                        LocalArtist { artistId ->
+                        LocalArtist (localViewModel){ mediaItem ->
 //                            homeNavController.navigate("${Screen.NetSearchScreen.route}")
-                            homeNavController.navigate("${Screen.LocalArtistDetail.route}?artistId=${artistId}")
+                            homeNavController.navigate("${Screen.LocalArtistDetail.route}?mediaItem=${mediaItem.toNavType()}")
                         }
                     }
                 }

@@ -8,7 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
-import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.utils.MusicItem
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 
@@ -20,7 +19,7 @@ import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
  */
 @Composable
 fun LocalMusic(
-    viewModel: HomeViewModel = LocalHomeViewModel.current
+    viewModel: HomeViewModel
 ) {
     MusicLazyItems(list = viewModel.localMusicList.value) {
         viewModel.setPlaylist(it, viewModel.localMusicList.value)

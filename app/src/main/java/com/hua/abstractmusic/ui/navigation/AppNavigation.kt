@@ -5,7 +5,6 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.*
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -57,10 +56,10 @@ fun AppNavigation(
                 CompositionLocalProvider(
                     LocalPopWindowItem provides popItem,
                     LocalPopWindow provides popupWindow,
-                    LocalNetViewModel provides hiltViewModel(),
-                    LocalUserViewModel provides hiltViewModel(),
-                    LocalHomeViewModel provides hiltViewModel(),
-                    LocalSearchViewModel provides hiltViewModel()
+//                    LocalNetViewModel provides hiltViewModel(),
+//                    LocalUserViewModel provides hiltViewModel(),
+//                    LocalHomeViewModel provides hiltViewModel(),
+//                    LocalSearchViewModel provides hiltViewModel()
                 ) {
                     HomeScreen()
                 }

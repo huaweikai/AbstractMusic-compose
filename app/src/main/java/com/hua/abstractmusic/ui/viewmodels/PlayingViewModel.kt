@@ -7,10 +7,12 @@ import android.widget.Toast
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
+import com.hua.abstractmusic.R
 import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.LyricsEntry
 import com.hua.abstractmusic.bean.MediaData
@@ -24,7 +26,9 @@ import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.ui.utils.LCE
 import com.hua.abstractmusic.use_case.UseCase
 import com.hua.abstractmusic.use_case.events.MusicInsertError
+import com.hua.abstractmusic.utils.ComposeUtils
 import com.hua.abstractmusic.utils.LyricsUtils
+import com.hua.abstractmusic.utils.PaletteUtils
 import com.hua.abstractmusic.utils.isLocal
 import com.hua.taglib.TaglibLibrary
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -49,7 +53,8 @@ class PlayingViewModel @Inject constructor(
     private val repository: NetRepository,
     private val taglibLibrary: TaglibLibrary,
     private val preferenceManager: PreferenceManager,
-    private val netRepository: NetRepository
+    private val netRepository: NetRepository,
+    private val composeUtils: ComposeUtils
 ) : BaseBrowserViewModel(application, useCase, itemTree) {
 
     private val _currentPlayItem = mutableStateOf(NULL_MEDIA_ITEM)
@@ -97,6 +102,7 @@ class PlayingViewModel @Inject constructor(
                 setLyricsItem(getStartIndex(browser.currentPosition))
             }
         }
+        transformColor(item)
         currentPosition.value = browser.currentPosition.toFloat()
         updateCurrentPlayList()
     }
@@ -333,5 +339,26 @@ class PlayingViewModel @Inject constructor(
 
     fun clearArtist() {
         moreArtistList.value = emptyList()
+    }
+
+    val itemColor = MutableStateFlow(Pair(Color.Black,Color.Black))
+
+    val dark = MutableStateFlow(false)
+
+    fun putTransDark(isDark: Boolean){
+        dark.value = isDark
+        transformColor(browser?.currentMediaItem)
+    }
+
+    fun transformColor(item: MediaItem?,isDark:Boolean = dark.value){
+        item?:return
+        viewModelScope.launch(Dispatchers.IO){
+            val result = PaletteUtils.resolveBitmap(
+                isDark,
+                composeUtils.coilToBitmap(item.mediaMetadata.artworkUri),
+                getApplication<Application>().getColor(R.color.black)
+            )
+            itemColor.value = Pair(Color(result.first),Color(result.second))
+        }
     }
 }

@@ -9,10 +9,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
@@ -29,7 +26,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.navigation.material.BottomSheetNavigator
+import com.google.accompanist.navigation.material.ModalBottomSheetLayout
+import com.google.accompanist.navigation.material.bottomSheet
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.other.Constant
@@ -37,7 +40,7 @@ import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.navigation.HomeNavigationNav
-import com.hua.abstractmusic.ui.play.HomePlayList
+import com.hua.abstractmusic.ui.play.PlayListScreen
 import com.hua.abstractmusic.ui.play.PlayScreen
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.PopupWindow
@@ -51,7 +54,10 @@ import kotlinx.coroutines.launch
  */
 val pages = listOf(MainPageItem.Net, MainPageItem.Local, MainPageItem.Mine)
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi::class
+)
 @SuppressLint("UnsafeOptInUsageError")
 @ExperimentalFoundationApi
 @ExperimentalPagerApi
@@ -79,27 +85,9 @@ fun HomeScreen(
     }
 
     val sheetListState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-    val sheetPlayState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
+    val sheetPlayState =
+        rememberModalBottomSheetState(ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
 
-//    val sheetListState = rememberSaveable(
-//        saver = ModalBottomSheetState.Saver(
-//            animationSpec = androidx.compose.material.SwipeableDefaults.AnimationSpec,
-//            skipHalfExpanded = false,
-//            confirmStateChange = { true }
-//        )
-//    ) {
-//        ModalBottomSheetState(ModalBottomSheetValue.Hidden)
-//    }
-//
-//    val sheetPlayState = rememberSaveable(
-//        saver = ModalBottomSheetState.Saver(
-//            animationSpec = androidx.compose.material.SwipeableDefaults.AnimationSpec,
-//            skipHalfExpanded = true,
-//            confirmStateChange = { true }
-//        )
-//    ) {
-//        ModalBottomSheetState(ModalBottomSheetValue.Hidden, isSkipHalfExpanded = true)
-//    }
 
     LaunchedEffect(sheetListState.currentValue, sheetPlayState.currentValue) {
         sheetIsVisible.value = sheetPlayState.isVisible || sheetListState.isVisible
@@ -111,71 +99,100 @@ fun HomeScreen(
 //        animationSpec = tween(300)
     )
 
-    PlayScreen(state = sheetPlayState) {
-        HomePlayList(playListState = sheetListState) {
-            Scaffold(
-                bottomBar = {
-                    AnimatedVisibility(
-                        visible = backState.value?.destination?.route in pages.map { it.route },
-                        enter = slideInVertically { fullHeight -> fullHeight },
-                        exit = slideOutVertically { fullHeight -> fullHeight },
-                        modifier = Modifier.height(80.dp)
-                    ) {
-                        HomeBottomBar()
-                    }
+    val bottomSheetNavigator = remember {
+        BottomSheetNavigator(sheetPlayState)
+    }
 
-                },
-            )
-            {
-                val bottomPadding by animateDpAsState(
-                    if (backState.value?.destination?.route in pages.map { it.route }) 80.dp else 0.dp,
-                )
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = bottomPadding)
-                ) {
-                    CompositionLocalProvider(LocalBottomControllerHeight provides bottomControllerHeight) {
-                        HomeNavigationNav(Modifier)
-                    }
-                    BackHandler(
-                        sheetIsVisible.value
-                    ) {
-                        val state = if (sheetListState.isVisible) sheetListState else sheetPlayState
-                        scope.launch {
-                            state.animateTo(ModalBottomSheetValue.Hidden)
-                        }
-                    }
-                    AnimatedVisibility(
-                        visible = playingViewModel.currentPlayItem.value != Constant.NULL_MEDIA_ITEM,
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .onSizeChanged {
-                                bottomControllerHeight = with(density) { it.height.toDp() }
-                            }
-                    ) {
-                        Surface(
-                            modifier = Modifier
-                                .padding(vertical = 8.dp, horizontal = 6.dp),
-                            shape = RoundedCornerShape(8.dp),
-                            tonalElevation = 3.dp,
+    val controller = rememberNavController(bottomSheetNavigator)
+
+    ModalBottomSheetLayout(
+        bottomSheetNavigator = bottomSheetNavigator,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        NavHost(navController = controller, startDestination = "home") {
+            composable("home") {
+                Scaffold(
+                    bottomBar = {
+                        AnimatedVisibility(
+                            visible = backState.value?.destination?.route in pages.map { it.route },
+                            enter = slideInVertically { fullHeight -> fullHeight },
+                            exit = slideOutVertically { fullHeight -> fullHeight },
+                            modifier = Modifier.height(80.dp)
                         ) {
-                            Controller(
-                                playListClick = {
-                                    scope.launch { sheetListState.animateTo(ModalBottomSheetValue.Expanded) }
-                                },
-                                playScreenClick = {
-                                    scope.launch {
-                                        sheetPlayState.animateTo(ModalBottomSheetValue.Expanded)
-                                    }
-                                })
+                            HomeBottomBar()
                         }
 
+                    },
+                )
+                {
+                    val bottomPadding by animateDpAsState(
+                        if (backState.value?.destination?.route in pages.map { it.route }) 80.dp else 0.dp,
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(bottom = bottomPadding)
+                    ) {
+                        CompositionLocalProvider(LocalBottomControllerHeight provides bottomControllerHeight) {
+                            HomeNavigationNav(Modifier)
+                        }
+                        BackHandler(
+                            sheetIsVisible.value
+                        ) {
+                            val state =
+                                if (sheetListState.isVisible) sheetListState else sheetPlayState
+                            scope.launch {
+                                state.animateTo(ModalBottomSheetValue.Hidden)
+                            }
+                        }
+                        AnimatedVisibility(
+                            visible = playingViewModel.currentPlayItem.value != Constant.NULL_MEDIA_ITEM,
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .onSizeChanged {
+                                    bottomControllerHeight = with(density) { it.height.toDp() }
+                                }
+                        ) {
+                            Surface(
+                                modifier = Modifier
+                                    .padding(vertical = 8.dp, horizontal = 6.dp),
+                                shape = RoundedCornerShape(8.dp),
+                                tonalElevation = 3.dp,
+                            ) {
+                                Controller(
+                                    playListClick = {
+                                        controller.navigate("playList")
+                                    },
+                                    playScreenClick = {
+                                        scope.launch {
+                                            controller.navigate("playScreen")
+                                        }
+                                    })
+                            }
+
+                        }
                     }
+                }
+            }
+            bottomSheet("playList") {
+                Column(modifier = Modifier.fillMaxHeight(0.5f)) {
+                    PlayListScreen()
+                }
+            }
+            bottomSheet("playScreen") {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    PlayScreen()
                 }
             }
         }
     }
+
+
+//    PlayScreen(state = sheetPlayState) {
+//        HomePlayList(playListState = sheetListState) {
+//
+//        }
+//    }
     PopupWindow()
 }
 

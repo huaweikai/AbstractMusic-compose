@@ -20,16 +20,17 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.bean.MediaData
+import com.hua.abstractmusic.bean.toNavType
 import com.hua.abstractmusic.other.NetWork.SERVER_ERROR
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalHomeNavController
-import com.hua.abstractmusic.ui.LocalSearchViewModel
 import com.hua.abstractmusic.ui.home.local.artist.ArtistLazyItem
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.*
@@ -43,13 +44,14 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NetSearchScreen(
-    searchViewModel: SearchViewModel = LocalSearchViewModel.current,
+    searchViewModel: SearchViewModel = hiltViewModel(),
     navController: NavHostController = LocalHomeNavController.current
 ) {
     val searchText = searchViewModel.searchText.value
     DisposableEffect(Unit) {
+        searchViewModel.initializeController()
         this.onDispose {
-//            searchViewModel.clear()
+            searchViewModel.releaseBrowser()
         }
     }
     Scaffold(
@@ -59,7 +61,7 @@ fun NetSearchScreen(
                     TransparentHintTextField(
                         text = searchText.text,
                         hint = searchText.hint,
-                        onValueChange = { searchViewModel.addEvent(TextEvent.TextValueChange(it)) },
+                        onValueChange = { searchViewModel.addEvent(TextEvent.TextValueChange(it))},
                         onFocusChange = {
                             searchViewModel.addEvent(
                                 TextEvent.TextFocusChange(it)
@@ -219,12 +221,12 @@ private fun SearchItem(
                     }
                     is SearchObject.Album -> {
                         AlbumItem(item = it) {
-                            hostController.navigate("${Screen.LocalAlbumDetail.route}?albumId=${it.mediaId}&isSearch=true")
+                            hostController.navigate("${Screen.LocalAlbumDetail.route}?mediaItem=${it.toNavType()}")
                         }
                     }
                     is SearchObject.Artist -> {
                         ArtistLazyItem(item = it, onClick = {
-                            hostController.navigate("${Screen.LocalArtistDetail.route}?artistId=$it&isSearch=true")
+                            hostController.navigate("${Screen.LocalArtistDetail.route}?mediaItem=${it.toNavType()}")
                         })
                     }
                     is SearchObject.Sheet -> {

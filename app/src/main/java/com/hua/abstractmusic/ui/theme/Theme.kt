@@ -1,6 +1,5 @@
 package com.hua.abstractmusic.ui.theme
 
-import android.annotation.SuppressLint
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Colors
@@ -10,6 +9,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.animateColor
 import com.hua.abstractmusic.ui.darkMonetCompatScheme
 import com.hua.abstractmusic.ui.lightMonetCompatScheme
@@ -23,7 +23,7 @@ private val LightColorPalette = lightColorScheme()
 
 private val defaultColor = Color(0xff33b5e5)
 
-@SuppressLint("NewApi")
+//@SuppressLint("NewApi")
 @Composable
 fun AbstractMusicTheme(
     monet:MonetCompat,
@@ -43,7 +43,7 @@ fun AbstractMusicTheme(
         darkTheme -> Monet.getMonetColor(defaultColor.toArgb()).darkMonetCompatScheme()
         else -> Monet.getMonetColor(defaultColor.toArgb()).lightMonetCompatScheme()
     }
-
+    LocalPlayingViewModel.current.putTransDark(darkTheme)
     MaterialTheme(
         colorScheme = colors.animateColor(),
         typography = Typography,

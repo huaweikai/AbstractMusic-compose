@@ -28,11 +28,11 @@ import androidx.compose.ui.text.font.FontWeight.Companion.W400
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.media3.common.MediaItem
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.R
+import com.hua.abstractmusic.bean.ParcelizeMediaItem
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalComposeUtils
 import com.hua.abstractmusic.ui.LocalHomeNavController
@@ -40,6 +40,7 @@ import com.hua.abstractmusic.ui.utils.ArtImage
 import com.hua.abstractmusic.ui.utils.LCE
 import com.hua.abstractmusic.ui.utils.MusicItem
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
+import com.hua.abstractmusic.utils.isLocal
 import com.hua.blur.blur
 
 
@@ -54,18 +55,18 @@ import com.hua.blur.blur
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun LocalAlbumDetail(
-    item: MediaItem,
-    isLocal: Boolean = true,
+    item: ParcelizeMediaItem,
     navHostController: NavHostController = LocalHomeNavController.current,
     detailViewModel: AlbumDetailViewModel = hiltViewModel()
 ) {
+    val isLocal = item.mediaId.isLocal()
     val context = LocalContext.current
     val bitmap = remember {
         mutableStateOf(Bitmap.createBitmap(60,60,Bitmap.Config.ARGB_8888))
     }
     val composeUtils = LocalComposeUtils.current
     LaunchedEffect(Unit) {
-        bitmap.value = composeUtils.coilToBitmap(item.mediaMetadata.artworkUri).blur(50)
+        bitmap.value = composeUtils.coilToBitmap(item.artUri).blur(50)
         detailViewModel.id = item.mediaId
         detailViewModel.isLocal = isLocal
         detailViewModel.initializeController()
@@ -87,7 +88,7 @@ fun LocalAlbumDetail(
                         }
                     },
                     title = {
-                        Text(text = "${item.mediaMetadata.title}")
+                        Text(text = "${item.title}")
                     },
                     modifier = Modifier.statusBarsPadding(),
                     colors = TopAppBarDefaults.smallTopAppBarColors(
@@ -133,7 +134,7 @@ fun LocalAlbumDetail(
 
 @Composable
 fun AlbumShow(
-    item: MediaItem,
+    item: ParcelizeMediaItem,
     detailViewModel: AlbumDetailViewModel,
     isLocal: Boolean = true
 ) {
@@ -196,7 +197,7 @@ private fun LazyListScope.albumItems(
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 private fun AlbumDetailDesc(
-    item: MediaItem
+    item: ParcelizeMediaItem
 ) {
     Spacer(modifier = Modifier.height(20.dp))
     Row(
@@ -209,7 +210,7 @@ private fun AlbumDetailDesc(
             modifier = Modifier
                 .padding(start = 20.dp)
                 .size(120.dp),
-            uri = item.mediaMetadata.artworkUri,
+            uri = item.artUri,
             desc = "",
             transformation = RoundedCornersTransformation(10f)
         )
@@ -221,8 +222,8 @@ private fun AlbumDetailDesc(
             verticalArrangement = Arrangement.Center
         ) {
             TitleAndArtist(
-                title = "${item.mediaMetadata.title}",
-                subTitle = "${item.mediaMetadata.artist}",
+                title = "${item.title}",
+                subTitle = "${item.artist}",
                 titleStyle = {
                     this.copy(fontSize = 22.sp)
                 },
@@ -231,9 +232,9 @@ private fun AlbumDetailDesc(
                 },
                 height = 5.dp
             )
-            if (item.mediaMetadata.subtitle?.isNotBlank() == true) {
+            if (item.desc?.isNotBlank() == true) {
                 Spacer(modifier = Modifier.height(5.dp))
-                Text(text = "${item.mediaMetadata.subtitle}", maxLines = 2)
+                Text(text = "${item.desc}", maxLines = 2)
             }
         }
     }
@@ -277,12 +278,12 @@ fun PlayIcon(
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 private fun AlbumDetailTail(
-    item: MediaItem
+    item: ParcelizeMediaItem
 ) {
     Column(
         modifier = Modifier.padding(start = 10.dp)
     ) {
-        val year = item.mediaMetadata.releaseYear
+        val year = item.year
         val yearText = if (year != null && year > 0L) {
             "$year"
         } else {
@@ -290,7 +291,7 @@ private fun AlbumDetailTail(
         }
         TitleAndArtist(
             title = "发行年份: $yearText",
-            subTitle = "歌曲数量: ${item.mediaMetadata.trackNumber}",
+            subTitle = "歌曲数量: ${item.trackNumber}",
             subTitleStyle = {
                 this.copy(fontWeight = W400, fontSize = 14.sp)
             },

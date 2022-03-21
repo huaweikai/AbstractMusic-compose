@@ -25,6 +25,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
 import androidx.navigation.NavHostController
 import coil.transform.RoundedCornersTransformation
+import com.hua.abstractmusic.bean.ParcelizeMediaItem
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.other.NetWork
 import com.hua.abstractmusic.ui.LocalHomeNavController
@@ -47,7 +48,7 @@ import kotlinx.coroutines.launch
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun SheetDetail(
-    mediaItem: MediaItem,
+    mediaItem: ParcelizeMediaItem,
     navController: NavHostController = LocalHomeNavController.current,
     sheetDetailViewModel: SheetDetailViewModel = hiltViewModel(),
 ) {
@@ -149,7 +150,7 @@ fun SheetDetail(
                     }
                 } else {
                     Detail_Success(
-                        mediaItem = mediaItem,
+                        item = mediaItem,
                         sheetDetailViewModel = sheetDetailViewModel
                     )
                 }
@@ -164,12 +165,11 @@ fun SheetDetail(
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun Detail_Success(
-    mediaItem: MediaItem,
+    item: ParcelizeMediaItem,
     sheetDetailViewModel: SheetDetailViewModel,
     popWindowState: MutableState<Boolean> = LocalPopWindow.current,
     popWindowItem: MutableState<MediaItem> = LocalPopWindowItem.current
 ) {
-    val item = mediaItem.mediaMetadata
     Column(
         Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -177,13 +177,13 @@ fun Detail_Success(
         ArtImage(
             modifier = Modifier
                 .size(150.dp),
-            uri = item.artworkUri,
+            uri = item.artUri,
             desc = "",
             transformation = RoundedCornersTransformation(20f)
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(text = "${item.title}", fontSize = 22.sp)
-        Text(text = "${item.subtitle ?: "暂无介绍"}")
+        Text(text = "${item.desc ?: "暂无介绍"}")
     }
     LazyColumn(
         modifier = Modifier

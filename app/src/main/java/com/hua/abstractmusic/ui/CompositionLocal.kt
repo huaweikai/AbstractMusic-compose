@@ -7,7 +7,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.media3.common.MediaItem
 import androidx.navigation.NavHostController
-import com.hua.abstractmusic.ui.home.net.detail.SearchViewModel
 import com.hua.abstractmusic.ui.utils.WindowSize
 import com.hua.abstractmusic.ui.viewmodels.*
 import com.hua.abstractmusic.utils.ComposeUtils
@@ -33,12 +32,8 @@ val LocalUserViewModel = staticCompositionLocalOf<UserViewModel>{
 val LocalPlayingViewModel = staticCompositionLocalOf<PlayingViewModel>{
     error("LocalPlayingViewModel is NULL")
 }
-
 val LocalThemeViewModel =
     staticCompositionLocalOf<ThemeViewModel> { error("Can't get theme view model") }
-
-val LocalSearchViewModel =
-    staticCompositionLocalOf<SearchViewModel> { error("Can't get search view model") }
 
 val LocalHomeNavController = staticCompositionLocalOf<NavHostController> {
     error("LocalHomeNavController is NULL")

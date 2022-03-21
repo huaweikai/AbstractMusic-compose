@@ -1,8 +1,8 @@
 package com.hua.abstractmusic.ui.play
 
 import android.annotation.SuppressLint
-import android.graphics.BitmapFactory
-import androidx.compose.animation.Animatable
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -14,7 +14,10 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,7 +28,6 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
-import com.hua.abstractmusic.R
 import com.hua.abstractmusic.ui.LocalComposeUtils
 import com.hua.abstractmusic.ui.LocalMusicScreenSecondColor
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
@@ -34,7 +36,6 @@ import com.hua.abstractmusic.ui.play.detail.LyricsScreen
 import com.hua.abstractmusic.ui.play.detail.MusicScreen
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 import com.hua.abstractmusic.utils.ComposeUtils
-import com.hua.abstractmusic.utils.PaletteUtils
 import kotlinx.coroutines.launch
 
 /**
@@ -72,40 +73,24 @@ fun PlayScreen(
 @Composable
 fun PlayScreen(
     viewModel: PlayingViewModel = LocalPlayingViewModel.current,
-    isDark: Boolean = isSystemInDarkTheme(),
-    composeUtils: ComposeUtils = LocalComposeUtils.current,
 ) {
     val viewPageState = rememberPagerState(1)
     val context = LocalContext.current
-    val firstColor = remember {
-        Animatable(Color.Black)
-    }
-    val secondColor = remember {
-        Animatable(Color.Black)
-    }
-    val bitmap = remember {
-        mutableStateOf(
-            BitmapFactory.decodeResource(
-                context.resources,
-                R.drawable.music
-            )
-        )
-    }
-    LaunchedEffect(viewModel.currentPlayItem.value) {
-        val pair = PaletteUtils.resolveBitmap(
-            isDark,
-            composeUtils.coilToBitmap(viewModel.currentPlayItem.value.mediaMetadata.artworkUri),
-            context.getColor(R.color.black)
-        )
-        firstColor.animateTo(
-            Color(pair.first)
-        )
-        secondColor.animateTo(Color(pair.second))
-    }
+    val itemColor = viewModel.itemColor.collectAsState().value
+
     CompositionLocalProvider(
-        LocalContentColor provides firstColor.value,
-        androidx.compose.material.LocalContentColor provides firstColor.value,
-        LocalMusicScreenSecondColor provides secondColor.value
+        LocalContentColor provides animateColorAsState(
+            targetValue = itemColor.first,
+            tween(600)
+        ).value,
+        androidx.compose.material.LocalContentColor provides animateColorAsState(
+            targetValue = itemColor.first,
+            tween(600)
+        ).value,
+        LocalMusicScreenSecondColor provides animateColorAsState(
+            targetValue = itemColor.second,
+            tween(600)
+        ).value
     ) {
         Box(
             Modifier
