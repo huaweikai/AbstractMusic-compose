@@ -216,7 +216,7 @@ fun ColorScheme.darkMonetCompatScheme(
     onSurfaceVariant: Color = getMonetNeutralColor(2, 200),
     inverseSurface: Color = getMonetNeutralColor(1, 100),
     inverseOnSurface: Color = getMonetNeutralColor(1, 800),
-    outline: Color = getMonetNeutralColor(2, 500),
+    outline: Color = getMonetNeutralColor(2, 500)
 ): androidx.compose.material3.ColorScheme =
     darkColorScheme(
         primary = primary,
@@ -284,4 +284,5 @@ fun androidx.compose.material3.ColorScheme.animateColor() = androidx.compose.mat
     errorContainer = animateColorAsState(targetValue = this.errorContainer, tween(600)).value,
     onErrorContainer = animateColorAsState(targetValue = this.onErrorContainer, tween(600)).value,
     outline = animateColorAsState(targetValue = this.outline, tween(600)).value,
+    surfaceTint = animateColorAsState(targetValue = this.surfaceTint, tween(600)).value
 )

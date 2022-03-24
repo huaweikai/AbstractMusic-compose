@@ -25,7 +25,7 @@ import javax.inject.Inject
 class ThemeViewModel @Inject constructor(
     private val preferenceManager: PreferenceManager
 ) : ViewModel() {
-    private val _isReady = mutableStateOf(Build.VERSION.SDK_INT < Build.VERSION_CODES.S && preferenceManager.themeColor == Int.MIN_VALUE)
+    private val _isReady = mutableStateOf(Build.VERSION.SDK_INT < Build.VERSION_CODES.O && preferenceManager.themeColor == Int.MIN_VALUE)
     val isReady: State<Boolean> get() = _isReady
     private val _color = mutableStateOf<ColorScheme?>(null)
     val monetColor: State<ColorScheme?> get() = _color

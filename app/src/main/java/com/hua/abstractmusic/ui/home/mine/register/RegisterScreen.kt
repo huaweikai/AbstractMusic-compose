@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.hua.abstractmusic.ui.LocalHomeNavController
+import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.utils.EmailCodeEditText
 import com.hua.abstractmusic.ui.utils.EmailEditText
 import com.hua.abstractmusic.ui.utils.PassWordEditText
@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun RegisterScreen(
     viewModel: RegisterViewModel = hiltViewModel(),
-    navHostController: NavHostController = LocalHomeNavController.current
+    navHostController: NavHostController = LocalAppNavController.current
 ) {
     LaunchedEffect(viewModel.registerEmailText.value) {
         viewModel.registerCodeButtonEnabled.value = viewModel.registerEmailText.value.isEmail()

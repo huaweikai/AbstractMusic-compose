@@ -29,8 +29,8 @@ import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.bean.toNavType
 import com.hua.abstractmusic.other.NetWork.SERVER_ERROR
+import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
-import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.home.local.artist.ArtistLazyItem
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.*
@@ -45,7 +45,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun NetSearchScreen(
     searchViewModel: SearchViewModel = hiltViewModel(),
-    navController: NavHostController = LocalHomeNavController.current
+    navController: NavHostController = LocalAppNavController.current
 ) {
     val searchText = searchViewModel.searchText.value
     DisposableEffect(Unit) {
@@ -200,7 +200,7 @@ fun SearchSuccess(
 private fun SearchItem(
     searchObject: SearchObject,
     searchViewModel: SearchViewModel,
-    hostController: NavHostController = LocalHomeNavController.current
+    hostController: NavHostController = LocalAppNavController.current
 ) {
     val data = searchViewModel.searchMaps[searchObject]?.value
     if (data?.code == SERVER_ERROR) {
@@ -221,17 +221,17 @@ private fun SearchItem(
                     }
                     is SearchObject.Album -> {
                         AlbumItem(item = it) {
-                            hostController.navigate("${Screen.LocalAlbumDetail.route}?mediaItem=${it.toNavType()}")
+                            hostController.navigate("${Screen.AlbumDetailScreen.route}?mediaItem=${it.toNavType()}")
                         }
                     }
                     is SearchObject.Artist -> {
                         ArtistLazyItem(item = it, onClick = {
-                            hostController.navigate("${Screen.LocalArtistDetail.route}?mediaItem=${it.toNavType()}")
+                            hostController.navigate("${Screen.ArtistDetailScreen.route}?mediaItem=${it.toNavType()}")
                         })
                     }
                     is SearchObject.Sheet -> {
                         SheetItem(item = it) {
-                            hostController.navigate("${Screen.LocalSheetDetailScreen.route}?sheetId=$it&isSearch=true")
+                            hostController.navigate("${Screen.SheetDetailScreen.route}?sheetId=$it&isSearch=true")
                         }
                     }
                 }

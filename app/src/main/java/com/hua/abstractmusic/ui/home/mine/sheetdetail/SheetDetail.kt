@@ -28,7 +28,7 @@ import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.bean.ParcelizeMediaItem
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.other.NetWork
-import com.hua.abstractmusic.ui.LocalHomeNavController
+import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.LocalPopWindow
 import com.hua.abstractmusic.ui.LocalPopWindowItem
@@ -49,7 +49,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SheetDetail(
     mediaItem: ParcelizeMediaItem,
-    navController: NavHostController = LocalHomeNavController.current,
+    navController: NavHostController = LocalAppNavController.current,
     sheetDetailViewModel: SheetDetailViewModel = hiltViewModel(),
 ) {
     DisposableEffect(Unit) {
@@ -182,8 +182,8 @@ fun Detail_Success(
             transformation = RoundedCornersTransformation(20f)
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "${item.title}", fontSize = 22.sp)
-        Text(text = "${item.desc ?: "暂无介绍"}")
+        Text(text = item.title, fontSize = 22.sp)
+        Text(text = if(item.desc.isNullOrBlank())"暂无介绍" else item.desc)
     }
     LazyColumn(
         modifier = Modifier

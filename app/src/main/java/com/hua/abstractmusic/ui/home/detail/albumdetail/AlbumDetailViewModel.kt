@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Application
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.MediaData
@@ -12,10 +11,6 @@ import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.use_case.UseCase
 import com.hua.blur.BlurLibrary
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -41,12 +36,13 @@ class AlbumDetailViewModel @Inject constructor(
             netListMap[id!!] = _albumDetail
         }
         playListMap[id!!] = _albumDetail
-        viewModelScope.launch(Dispatchers.IO){
-            delay(200)
-            withContext(Dispatchers.Main){
-                refresh()
-            }
-        }
+        refresh()
+//        viewModelScope.launch(Dispatchers.IO){
+//            delay(200)
+//            withContext(Dispatchers.Main){
+//
+//            }
+//        }
     }
 
 

@@ -10,14 +10,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.hua.abstractmusic.ui.LocalHomeNavController
+import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.EmailCodeEditText
 import com.hua.abstractmusic.ui.utils.EmailEditText
@@ -35,7 +34,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    navController: NavHostController = LocalHomeNavController.current,
+    navController: NavHostController = LocalAppNavController.current,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -73,7 +72,6 @@ fun LoginScreen(
         }
     }
 
-    val config = LocalConfiguration.current
 
     Scaffold(
         topBar = {

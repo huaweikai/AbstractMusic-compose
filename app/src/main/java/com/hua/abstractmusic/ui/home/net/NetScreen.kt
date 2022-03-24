@@ -20,7 +20,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.transform.RoundedCornersTransformation
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -30,9 +29,9 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.bean.toNavType
+import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalComposeUtils
-import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalNetViewModel
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.*
@@ -50,17 +49,13 @@ import com.hua.abstractmusic.utils.PaletteUtils
 @Composable
 fun NetScreen(
     netViewModel: NetViewModel = LocalNetViewModel.current,
-    navHostController: NavHostController = LocalHomeNavController.current
+    navHostController: NavHostController = LocalAppNavController.current
 ) {
+
     val appBarColors = TopAppBarDefaults.smallTopAppBarColors(
         containerColor = MaterialTheme.colorScheme.surface
     )
-//    val decayAnimationSpec = rememberSplineBasedDecay<Float>()
-//    val scrollBehavior = remember(decayAnimationSpec) {
-//        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(decayAnimationSpec)
-//    }
     Scaffold(
-//        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             SmallTopAppBar(
                 title = {
@@ -78,7 +73,6 @@ fun NetScreen(
                         )
                     }
                 },
-//                scrollBehavior = scrollBehavior
             )
         },
     ) {
@@ -113,8 +107,9 @@ fun NetScreen(
 @Composable
 private fun SuccessContent(
     netViewModel: NetViewModel,
-    navHostController: NavHostController = LocalHomeNavController.current,
+    navHostController: NavHostController = LocalAppNavController.current,
 ) {
+    val height = LocalBottomControllerHeight.current
     LazyColumn(
         modifier = Modifier
             .fillMaxSize(),
@@ -130,7 +125,7 @@ private fun SuccessContent(
                 }
             ) {
                 navHostController.navigate(
-                    "${Screen.LocalAlbumDetail.route}?mediaItem=${
+                    "${Screen.AlbumDetailScreen.route}?mediaItem=${
                         netViewModel.bannerList.value[it].mediaItem.toNavType()
                     }"
                 )
@@ -211,7 +206,7 @@ private fun RecommendSheetList(
                             val i = if (it == 0) index else index + 6
                             val item = netViewModel.recommendList.value[i]
                             RecommendItem(item = item, onclick = {
-                                navHostController.navigate("${Screen.LocalSheetDetailScreen.route}?mediaItem=${it.mediaItem.toNavType()}&isUser=false")
+                                navHostController.navigate("${Screen.SheetDetailScreen.route}?mediaItem=${it.mediaItem.toNavType()}&isUser=false")
                             }) {
 //                                netViewModel.recommendId = it.mediaId
                                 netViewModel.listInit(it.mediaId)
@@ -235,7 +230,7 @@ private fun RecommendAlbum(
                 Column(modifier = Modifier.padding(end = 16.dp)) {
                     RecommendItem(item = it, onclick = {
                         navHostController.navigate(
-                            "${Screen.LocalAlbumDetail.route}?mediaItem=${
+                            "${Screen.AlbumDetailScreen.route}?mediaItem=${
                                 it.mediaItem.toNavType()
                             }"
                         )

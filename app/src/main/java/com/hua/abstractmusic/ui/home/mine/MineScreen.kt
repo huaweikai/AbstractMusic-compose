@@ -5,6 +5,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import com.hua.abstractmusic.other.NetWork
 import com.hua.abstractmusic.ui.LocalUserViewModel
@@ -36,8 +37,9 @@ fun MineScreen(
         this.onDispose {
         }
     }
+    val userInfo = viewModel.userInfo.collectAsState()
 
-    if (viewModel.userIsOut.value) {
+    if (!userInfo.value.isLogin) {
         NoLoginScreen()
     } else {
         LoggedScreen()

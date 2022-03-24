@@ -3,6 +3,7 @@ package com.hua.abstractmusic.di
 import com.hua.abstractmusic.preference.MediaIndexPreference
 import com.hua.abstractmusic.preference.PreferenceManager
 import com.hua.abstractmusic.preference.ThemeColorPreference
+import com.hua.abstractmusic.preference.UserTokenPreference
 import com.tencent.mmkv.MMKV
 import dagger.Module
 import dagger.Provides
@@ -28,6 +29,7 @@ object PreferenceModule {
         mmkv: MMKV
     ) = PreferenceManager(
         MediaIndexPreference(mmkv),
-        ThemeColorPreference(mmkv)
+        ThemeColorPreference(mmkv),
+        UserTokenPreference(mmkv)
     )
 }

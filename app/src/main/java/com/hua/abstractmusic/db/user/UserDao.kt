@@ -22,8 +22,8 @@ interface UserDao {
     @Query("delete from userBean")
     suspend fun deleteUser()
 
-    @Query("select token from userBean")
-    suspend fun getToken():String
+//    @Query("select token from userBean")
+//    suspend fun getToken():String
 
     @Query("select count(*) from userBean")
     suspend fun userInRoom():Int
@@ -42,4 +42,7 @@ interface UserDao {
 
     @Query("select * from searchhistory")
     suspend fun selectHistoryList():List<SearchHistory>
+
+    @Query("select * from userbean")
+    fun selectUser():Flow<UserBean>
 }

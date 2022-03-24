@@ -73,17 +73,23 @@ class MainActivity : MonetActivity() {
 
     override fun onStart() {
         super.onStart()
-        playingViewModel.initializeController()
-        localViewModel.initializeController()
-        netViewModel.initializeController()
-        userViewModel.initializeController()
+//        playingViewModel.initializeController()
+//        localViewModel.initializeController()
+//        netViewModel.initializeController()
+//        userViewModel.initializeController()
     }
 
-    override fun onStop() {
-        super.onStop()
-        playingViewModel.releaseBrowser()
-        localViewModel.releaseBrowser()
-        netViewModel.releaseBrowser()
-        userViewModel.releaseBrowser()
-    }
+//    override fun onStop() {
+//        playingViewModel.releaseBrowser()
+//        localViewModel.releaseBrowser()
+//        netViewModel.releaseBrowser()
+//        userViewModel.releaseBrowser()
+//        Log.d("TAG", "onStop: ")
+//        super.onStop()
+//    }
+//
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        Log.d("TAG", "onDestroy: ")
+//    }
 }

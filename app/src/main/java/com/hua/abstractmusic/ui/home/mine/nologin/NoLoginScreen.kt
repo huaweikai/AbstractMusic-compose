@@ -8,7 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.hua.abstractmusic.ui.LocalHomeNavController
+import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.home.mine.LocalSheet
 import com.hua.abstractmusic.ui.route.Screen
 
@@ -20,7 +20,7 @@ import com.hua.abstractmusic.ui.route.Screen
  */
 @Composable
 fun NoLoginScreen(
-    navHostController: NavHostController = LocalHomeNavController.current
+    navHostController: NavHostController = LocalAppNavController.current
 ) {
     Column(
         modifier = Modifier

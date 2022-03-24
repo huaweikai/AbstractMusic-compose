@@ -1,6 +1,7 @@
 package com.hua.abstractmusic.ui.play
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -28,14 +29,12 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
-import com.hua.abstractmusic.ui.LocalComposeUtils
 import com.hua.abstractmusic.ui.LocalMusicScreenSecondColor
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.play.detail.ListScreen
 import com.hua.abstractmusic.ui.play.detail.LyricsScreen
 import com.hua.abstractmusic.ui.play.detail.MusicScreen
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
-import com.hua.abstractmusic.utils.ComposeUtils
 import kotlinx.coroutines.launch
 
 /**
@@ -49,8 +48,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun PlayScreen(
     state: ModalBottomSheetState,
-    viewModel: PlayingViewModel = LocalPlayingViewModel.current,
-    composeUtils: ComposeUtils = LocalComposeUtils.current,
     isDark: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
@@ -59,7 +56,13 @@ fun PlayScreen(
         modifier = Modifier
             .fillMaxSize(),
         sheetContent = {
+            val scope = rememberCoroutineScope()
             PlayScreen()
+            BackHandler(true) {
+                scope.launch {
+                    state.hide()
+                }
+            }
         },
         sheetShape = RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp),
         sheetBackgroundColor = if (isDark) Color.Black else Color.White

@@ -42,6 +42,7 @@ class HomeViewModel @Inject constructor(
         localListMap[LOCAL_ARTIST_ID] = _localArtistList
 
         playListMap[LOCAL_ALL_ID] = _localMusicList
+        initializeController()
     }
 
     override fun onMediaConnected() {

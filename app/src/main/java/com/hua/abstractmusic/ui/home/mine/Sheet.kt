@@ -28,8 +28,8 @@ import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.bean.toNavType
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
+import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalComposeUtils
-import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalUserViewModel
 import com.hua.abstractmusic.ui.home.net.ItemPlayButton
 import com.hua.abstractmusic.ui.route.Screen
@@ -62,11 +62,11 @@ fun Sheet(
         mutableStateOf(NULL_MEDIA_ITEM)
     }
     Surface(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        modifier = Modifier.fillMaxWidth().height(200.dp).padding(horizontal = 16.dp),
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
-        Column {
+        Column{
             Row(
                 modifier = Modifier
                     .padding(
@@ -113,12 +113,12 @@ fun Sheet(
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun LocalSheet(
-    navHostController: NavHostController = LocalHomeNavController.current,
+    navHostController: NavHostController = LocalAppNavController.current,
     userViewModel: UserViewModel = LocalUserViewModel.current
 ) {
     Sheet(
         onClick = { mediaItem ->
-            navHostController.navigate("${Screen.LocalSheetDetailScreen.route}?mediaItem=${mediaItem.toNavType()}")
+            navHostController.navigate("${Screen.SheetDetailScreen.route}?mediaItem=${mediaItem.toNavType()}")
         },
         newSheet = {
             userViewModel.createSheet(it, true)

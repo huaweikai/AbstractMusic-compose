@@ -60,6 +60,7 @@ class NetViewModel @Inject constructor(
         netListMap[NETWORK_RECOMMEND_ID] = _recommendList
         netListMap[NETWORK_ALL_MUSIC_ID] = _musicList
         netListMap[NETWORK_ARTIST_ID] = _artistList
+        initializeController()
     }
 
 //    var recommendId: String? = null

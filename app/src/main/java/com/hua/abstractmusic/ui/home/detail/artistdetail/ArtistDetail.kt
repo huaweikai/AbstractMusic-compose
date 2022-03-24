@@ -33,8 +33,8 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.bean.ParcelizeMediaItem
 import com.hua.abstractmusic.bean.toNavType
+import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
-import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.AlbumItem
 import com.hua.abstractmusic.ui.utils.LCE
@@ -56,7 +56,7 @@ import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 @Composable
 fun LocalArtistDetail(
     item: ParcelizeMediaItem,
-    homeNavController: NavHostController = LocalHomeNavController.current,
+    homeNavController: NavHostController = LocalAppNavController.current,
     viewModel: ArtistDetailViewModel = hiltViewModel()
 ) {
     val state = rememberCollapsingToolbarScaffoldState()
@@ -70,67 +70,68 @@ fun LocalArtistDetail(
             viewModel.releaseBrowser()
         }
     }
-    CollapsingToolbarScaffold(
-        modifier = Modifier.fillMaxSize(),
-        state = state,
-        scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
-        toolbar = {
-            val textSize = (18 + (30 - 18) * state.toolbarState.progress).sp
-            val titlePadding = (50 * (1 - state.toolbarState.progress)).dp
-            Box(
-                Modifier
-                    .fillMaxWidth()
-                    .height(400.dp)
-            ) {
-                AsyncImage(
-                    model = item.artUri,
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentScale = ContentScale.Crop,
-                    contentDescription = ""
-                )
-            }
-            Column(
-                modifier = Modifier
-                    .statusBarsPadding()
-                    .padding(bottom = 8.dp)
-                    .height(38.dp)
-                    .width(38.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                IconButton(
-                    onClick = {
-                        homeNavController.navigateUp()
-                    },
-                    modifier = Modifier.fillMaxSize()
+    Surface{
+        CollapsingToolbarScaffold(
+            modifier = Modifier.fillMaxSize(),
+            state = state,
+            scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
+            toolbar = {
+                val textSize = (18 + (30 - 18) * state.toolbarState.progress).sp
+                val titlePadding = (50 * (1 - state.toolbarState.progress)).dp
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(400.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "",
-                        tint = Color.White
+                    AsyncImage(
+                        model = item.artUri,
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                        contentDescription = ""
                     )
                 }
+                Column(
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .padding(bottom = 8.dp)
+                        .height(38.dp)
+                        .width(38.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    IconButton(
+                        onClick = {
+                            homeNavController.navigateUp()
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "",
+                            tint = Color.White
+                        )
+                    }
+                }
+                Text(
+                    text = "${item.title}",
+                    color = Color.White,
+                    modifier = Modifier
+                        .padding(
+                            start = titlePadding,
+                            top = 8.dp + WindowInsets.statusBars
+                                .asPaddingValues()
+                                .calculateTopPadding(),
+                            bottom = 16.dp,
+                            end = 16.dp
+                        )
+                        .road(Alignment.CenterStart, Alignment.BottomEnd),
+                    fontSize = textSize,
+                    textAlign = TextAlign.Center
+                )
             }
-            Text(
-                text = "${item.title}",
-                color = Color.White,
-                modifier = Modifier
-                    .padding(
-                        start = titlePadding,
-                        top = 8.dp + WindowInsets.statusBars
-                            .asPaddingValues()
-                            .calculateTopPadding(),
-                        bottom = 16.dp,
-                        end = 16.dp
-                    )
-                    .road(Alignment.CenterStart, Alignment.BottomEnd),
-                fontSize = textSize,
-                textAlign = TextAlign.Center
-            )
-        }
-    ) {
-        Column {
+        ) {
+            Column {
 //            if(isLocal){
 //                ArtistHorizontalPager(
 //                    viewModel = viewModel,
@@ -139,16 +140,20 @@ fun LocalArtistDetail(
 ////                        .background(MaterialTheme.colorScheme.background)
 //                )
 //            }else{
-                when(viewModel.screenState.value){
-                    is LCE.Loading->{
-                        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                when (viewModel.screenState.value) {
+                    is LCE.Loading -> {
+                        Column(
+                            Modifier.fillMaxSize().padding(top = 16.dp),
+                            verticalArrangement = Arrangement.Top,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
                             CircularProgressIndicator()
                         }
                     }
-                    is LCE.Error->{
+                    is LCE.Error -> {
 
                     }
-                    is LCE.Success->{
+                    is LCE.Success -> {
                         ArtistHorizontalPager(
                             viewModel = viewModel,
                             modifier = Modifier
@@ -160,6 +165,7 @@ fun LocalArtistDetail(
             }
 
 //        }
+        }
     }
 }
 
@@ -170,7 +176,7 @@ private fun ArtistHorizontalPager(
     viewModel: ArtistDetailViewModel,
     modifier: Modifier,
     bottomBarHeight: Dp = LocalBottomControllerHeight.current,
-    homeNavController: NavHostController = LocalHomeNavController.current
+    homeNavController: NavHostController = LocalAppNavController.current
 ) {
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState()
@@ -211,9 +217,7 @@ private fun ArtistHorizontalPager(
         when (index) {
             0 -> {
                 LazyColumn(
-                    Modifier
-                        .fillMaxHeight()
-                        .fillMaxWidth(),
+                    Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = bottomBarHeight)
                 ) {
                     itemsIndexed(viewModel.artistDetail.value, key = {_, item -> item.mediaId }) { index, item ->
@@ -242,7 +246,7 @@ private fun ArtistHorizontalPager(
                                 .fillMaxWidth()
                                 .padding(start = 8.dp)
                         ) {
-                            homeNavController.navigate("${Screen.LocalAlbumDetail.route}?mediaItem=${item.mediaItem.toNavType()}")
+                            homeNavController.navigate("${Screen.AlbumDetailScreen.route}?mediaItem=${item.mediaItem.toNavType()}")
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                     }

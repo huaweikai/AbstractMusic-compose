@@ -7,8 +7,10 @@ package com.hua.abstractmusic.preference
  */
 class PreferenceManager(
     lastMediaIndex: MediaIndexPreference,
-    themeColorPreference: ThemeColorPreference
+    themeColorPreference: ThemeColorPreference,
+    userTokenPreference:UserTokenPreference
 ) {
     var lastMediaIndex by lastMediaIndex
     var themeColor by themeColorPreference
+    var userToken by userTokenPreference
 }

@@ -26,7 +26,7 @@ class InsertSheetCase(
         list?.let {
             if (sheetTitle in list) throw MusicInsertError("歌单已存在，无法新建")
         }
-        repository.insertSheet(Sheet(title = sheetTitle))
+        repository.insertSheet(Sheet(sheetId = 0, title = sheetTitle))
     }
 
     suspend operator fun invoke(mediaItem: MediaItem, sheetId: Int) = withContext(

@@ -13,6 +13,7 @@ import com.hua.abstractmusic.net.UserService
 import com.hua.abstractmusic.other.Constant.BASE_URL
 import com.hua.abstractmusic.other.Constant.MUSIC_ROOM_NAME
 import com.hua.abstractmusic.other.Constant.USER_ROOM_NAME
+import com.hua.abstractmusic.preference.UserInfoData
 import com.hua.abstractmusic.repository.NetRepository
 import com.hua.abstractmusic.repository.Repository
 import com.hua.abstractmusic.repository.UserRepository
@@ -89,17 +90,18 @@ object AppModule {
     @Singleton
     fun provideNetRepository(
         service: MusicService,
-        userDao: UserDao,
-        searchService: SearchService
-    ) = NetRepository(service,userDao,searchService)
+        searchService: SearchService,
+        userInfoData: UserInfoData
+    ) = NetRepository(service,searchService,userInfoData)
 
     @Provides
     @Singleton
     fun provideUserRepository(
         service: UserService,
         dao: UserDao,
-        obsClient: ObsClient
-    ) = UserRepository(service,dao,obsClient)
+        obsClient: ObsClient,
+        userInfoData: UserInfoData
+    ) = UserRepository(service,dao,obsClient,userInfoData)
 
     @Provides
     @Singleton

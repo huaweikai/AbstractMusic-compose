@@ -80,6 +80,7 @@ object Constant {
     const val NOTIFICATION_ID = 1
 
     val NULL_MEDIA_ITEM = MediaItem.Builder()
+        .setMediaId("0")
         .setMediaMetadata(MediaMetadata.EMPTY).build()
     const val CLEAR_PLAY_LIST = "clear_list"
 

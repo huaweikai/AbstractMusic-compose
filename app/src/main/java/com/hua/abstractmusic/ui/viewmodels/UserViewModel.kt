@@ -5,19 +5,15 @@ import android.content.ContentResolver
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.viewModelScope
 import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.bean.net.NetData
-import com.hua.abstractmusic.bean.user.UserBean
 import com.hua.abstractmusic.other.Constant
-import com.hua.abstractmusic.other.NetWork.ERROR
-import com.hua.abstractmusic.other.NetWork.NO_USER
-import com.hua.abstractmusic.other.NetWork.SERVER_ERROR
 import com.hua.abstractmusic.other.NetWork.SUCCESS
+import com.hua.abstractmusic.preference.UserInfoData
 import com.hua.abstractmusic.repository.NetRepository
 import com.hua.abstractmusic.repository.Repository
 import com.hua.abstractmusic.repository.UserRepository
@@ -28,7 +24,6 @@ import com.hua.abstractmusic.utils.isLocal
 import com.hua.abstractmusic.utils.toDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -44,22 +39,18 @@ class UserViewModel @Inject constructor(
     itemTree: MediaItemTree,
     private val netRepository: NetRepository,
     private val userRepository: UserRepository,
-    private val repository: Repository
+    private val repository: Repository,
+    userInfoData: UserInfoData
 ) : BaseBrowserViewModel(application, useCase, itemTree) {
 
-    private val _userIsOut = mutableStateOf(true)
-    val userIsOut: State<Boolean> get() = _userIsOut
+    val userInfo = userInfoData.userInfo
+
+//    private val _userIsOut = mutableStateOf(true)
+//    val userIsOut: State<Boolean> get() = _userIsOut
 
 
     suspend fun checkUser(): NetData<Unit> {
-        val result = userRepository.hasUser()
-        val code = result.code
-        _userIsOut.value = when (code) {
-            SUCCESS, ERROR -> false
-            SERVER_ERROR, NO_USER -> true
-            else -> false
-        }
-        return result
+        return userRepository.hasUser()
     }
 
 
@@ -69,9 +60,8 @@ class UserViewModel @Inject constructor(
     init {
         localListMap[Constant.LOCAL_SHEET_ID] = sheetList
         netListMap[Constant.NET_SHEET_ID] = netSheetList
+        initializeController()
     }
-
-    val user = MutableStateFlow(UserBean(0, "", "", "", "", ""))
 
     override fun onMediaConnected() {
         refresh()
@@ -85,7 +75,7 @@ class UserViewModel @Inject constructor(
         val byte = contentResolver.openInputStream(uri)
         val file = DocumentFile.fromSingleUri(getApplication(), uri)
         viewModelScope.launch(Dispatchers.IO) {
-            val fileName = "${Constant.BUCKET_HEAD_IMG}/${user.value.id}-head-${
+            val fileName = "${Constant.BUCKET_HEAD_IMG}/${userInfo.value.userBean?.id}-head-${
                 System.currentTimeMillis().toDate()
             }.png"
             val result = userRepository.putFile(
@@ -95,24 +85,11 @@ class UserViewModel @Inject constructor(
             ) {
                 Log.d("TAG", "putHeadPicture: ${it.transferPercentage}")
             }
-            if (result.code == 200) {
-                userRepository.updateUser(result.data!!).also {
-                    if (it.code == 200) {
-                        selectUserInfo()
-                    }
-                }
-            }
+            userRepository.updateUser(result.data!!)
             contentResolver.delete(uri, null, null)
         }
     }
 
-    fun selectUserInfo() {
-        viewModelScope.launch {
-            userRepository.getInfo()?.let {
-                user.value = it
-            }
-        }
-    }
 
     fun logoutUser() {
         viewModelScope.launch {
@@ -121,7 +98,6 @@ class UserViewModel @Inject constructor(
             if (isSuccess) {
                 netSheetList.value = emptyList()
             }
-            _userIsOut.value = isSuccess
         }
     }
 

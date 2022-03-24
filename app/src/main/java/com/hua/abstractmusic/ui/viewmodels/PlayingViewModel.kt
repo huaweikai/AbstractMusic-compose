@@ -17,6 +17,7 @@ import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.LyricsEntry
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant
+import com.hua.abstractmusic.other.Constant.LOCAL_ALBUM_ID
 import com.hua.abstractmusic.other.Constant.LOCAL_ARTIST_ID
 import com.hua.abstractmusic.other.Constant.NET_SHEET_ID
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
@@ -66,11 +67,14 @@ class PlayingViewModel @Inject constructor(
     val localSheetList = mutableStateOf<List<MediaData>>(emptyList())
     val netSheetList = mutableStateOf<List<MediaData>>(emptyList())
     val localArtistList = mutableStateOf<List<MediaData>>(emptyList())
+    val localAlbumList = mutableStateOf<List<MediaData>>(emptyList())
 
     init {
         localListMap[Constant.LOCAL_SHEET_ID] = localSheetList
         netListMap[NET_SHEET_ID] = netSheetList
         localListMap[LOCAL_ARTIST_ID] = localArtistList
+        localListMap[LOCAL_ALBUM_ID] = localAlbumList
+        initializeController()
     }
 
 
@@ -339,6 +343,24 @@ class PlayingViewModel @Inject constructor(
 
     fun clearArtist() {
         moreArtistList.value = emptyList()
+    }
+
+    val moreAlbum = mutableStateOf(NULL_MEDIA_ITEM)
+
+    fun selectAlbumByMusicId(item: MediaItem) {
+        val albumId: Long = item.mediaMetadata.extras?.getLong("albumId") ?: 0L
+        if (item.mediaId.isLocal()) {
+            val parentId = "${LOCAL_ALBUM_ID}/$albumId"
+            moreAlbum.value = localAlbumList.value.find {it.mediaId == parentId }?.mediaItem ?: NULL_MEDIA_ITEM
+        } else {
+            viewModelScope.launch {
+                moreAlbum.value = netRepository.selectAlbumById(albumId.toString()).data ?: NULL_MEDIA_ITEM
+            }
+        }
+    }
+
+    fun clearAlbum() {
+        moreAlbum.value = NULL_MEDIA_ITEM
     }
 
     val itemColor = MutableStateFlow(Pair(Color.Black,Color.Black))

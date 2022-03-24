@@ -33,7 +33,7 @@ import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
  */
 @Composable
 fun HelloScreen(
-    localViewModel:HomeViewModel = LocalHomeViewModel.current,
+    homeViewModel:HomeViewModel = LocalHomeViewModel.current,
     appNavController: NavHostController = LocalAppNavController.current
 ) {
     var isGet by remember {
@@ -50,7 +50,7 @@ fun HelloScreen(
             if (isGet) {
                 val navOptions =
                     NavOptions.Builder().setPopUpTo(Screen.HelloScreen.route, true).build()
-                localViewModel.initializeController()
+                homeViewModel.refresh()
 //                viewModel.refresh()
                 appNavController.navigate(Screen.HomeScreen.route, navOptions)
             }

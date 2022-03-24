@@ -8,14 +8,16 @@ import com.hua.abstractmusic.db.user.UserDao
 import com.hua.abstractmusic.net.UserService
 import com.hua.abstractmusic.other.Constant.BUCKET_NAME
 import com.hua.abstractmusic.other.NetWork.ERROR
-import com.hua.abstractmusic.other.NetWork.NO_USER
 import com.hua.abstractmusic.other.NetWork.SERVER_ERROR
 import com.hua.abstractmusic.other.NetWork.SUCCESS
+import com.hua.abstractmusic.preference.UserInfoData
 import com.obs.services.ObsClient
 import com.obs.services.exception.ObsException
 import com.obs.services.model.ObjectMetadata
 import com.obs.services.model.ProgressStatus
 import com.obs.services.model.PutObjectRequest
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
 import java.io.InputStream
 
 /**
@@ -25,8 +27,9 @@ import java.io.InputStream
  */
 class UserRepository(
     private val userService: UserService,
-    private val dao: UserDao,
-    private val obsClient: ObsClient
+    private val userDao: UserDao,
+    private val obsClient: ObsClient,
+    private val userInfoData: UserInfoData
 ) {
 
     suspend fun getEmailCode(email: String): NetData<Unit> {
@@ -58,11 +61,7 @@ class UserRepository(
         return try {
             val result = userService.loginWithEmail(email, passWord)
             if (result.code == 200) {
-                getUser(result.data!!).data?.let {
-                    dao.insertUser(
-                        UserBean(it.id!!, it.name, it.passwd, it.email, result.data, it.head)
-                    )
-                }
+                getUser(result.data!!, true)
             }
             result
         } catch (e: Throwable) {
@@ -71,15 +70,15 @@ class UserRepository(
     }
 
     suspend fun hasUser(): NetData<Unit> {
-        if (dao.userInRoom() == 0) {
-            return NetData(NO_USER, null, "本地无用户")
-        }
         //todo(此处需要验证token是否登录后，获取最新的用户数据)
-        val token = dao.getToken()
+        val token = userInfoData.userInfo.value.userToken
         return try {
             val result = userService.testToken(token)
             if (result.code == SERVER_ERROR) {
-                dao.deleteUser()
+                userDao.deleteUser()
+                userInfoData.refreshUser()
+            } else {
+                getUser(token)
             }
             result
         } catch (e: Throwable) {
@@ -87,28 +86,38 @@ class UserRepository(
         }
     }
 
-    private suspend fun getUser(token: String): NetData<NetUser> {
-        return try {
-            userService.getUser(token)
-        } catch (e: Throwable) {
+    private suspend fun getUser(token: String, isLogin: Boolean = false) {
+        flow {
+            emit(userService.getUser(token))
+        }.onEach {
+            val user = it.data
+            if (it.code == SUCCESS) {
+                userDao.insertUser(
+                    UserBean(user?.id!!, user.name, user.passwd, user.email, user.head)
+                )
+            }
+        }.catch {
             NetData(ERROR, null, "服务器或网络异常")
-        }
-    }
-
-    suspend fun getInfo(): UserBean? {
-        return dao.getUserInfo()
+        }.onCompletion {
+            if (isLogin) {
+                userInfoData.loginUser(token)
+            } else {
+                userInfoData.refreshUser()
+            }
+        }.flowOn(Dispatchers.IO).collect()
     }
 
     suspend fun logoutUser(): NetData<Unit> {
         return try {
-            val token = dao.getToken()
+            val token = userInfoData.userInfo.value.userToken
             val result = userService.logoutUser(token)
             if (result.code == SUCCESS) {
-                dao.deleteUser()
+                userDao.deleteUser()
+                userInfoData.logout()
             }
             result
         } catch (e: Throwable) {
-            dao.deleteUser()
+            userDao.deleteUser()
             NetData(SUCCESS, null, "服务器或网络异常")
         }
     }
@@ -128,12 +137,7 @@ class UserRepository(
         return try {
             val result = userService.loginWithCode(email, code)
             if (result.code == SUCCESS) {
-                val user = userService.getUser(result.data!!).data
-                user?.let {
-                    dao.insertUser(
-                        UserBean(it.id!!, it.name, it.passwd, it.email, result.data, it.head)
-                    )
-                }
+                getUser(result.data!!,true)
             }
             result
         } catch (e: Throwable) {
@@ -158,36 +162,23 @@ class UserRepository(
                         progress(it)
                     }
                 }
-            return NetData(SUCCESS,obsClient.putObject(request).objectUrl,"")
+            return NetData(SUCCESS, obsClient.putObject(request).objectUrl, "")
 //            updateUser(obsClient.putObject(request))
         } catch (e: ObsException) {
             NetData(ERROR, null, "服务器异常")
         }
     }
 
-    suspend fun updateUser(url:String): NetData<Unit> {
-        val user = dao.getUserInfo()
+    suspend fun updateUser(url: String) {
+        val user = userInfoData.userInfo.value.userBean
         val netUser =
             NetUser(user?.id, user?.userName!!, user.email, user.password, url)
-        return try {
-            if (userService.setUser(user.token, netUser).code == 200) {
-                val result = userService.getUser(dao.getToken())
-                if (result.code == 200) {
-                    val data = result.data!!
-                    dao.insertUser(
-                        UserBean(
-                            data.id!!,
-                            data.name,
-                            data.passwd,
-                            data.email,
-                            user.token,
-                            data.head
-                        )
-                    )
-                    NetData(SUCCESS, null, "成功")
-                } else {
-                    NetData(SERVER_ERROR, null, "服务器异常")
-                }
+        val token = userInfoData.userInfo.value.userToken
+        try {
+            val updateResult = userService.setUser(token, netUser)
+            if (updateResult.code == SUCCESS) {
+                getUser(token = token)
+                NetData(SUCCESS, null, "成功")
             } else {
                 NetData(SERVER_ERROR, null, "服务器异常")
             }

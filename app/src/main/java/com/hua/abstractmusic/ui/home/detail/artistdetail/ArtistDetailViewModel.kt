@@ -5,7 +5,6 @@ import android.app.Application
 import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.viewModelScope
 import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant.ARTIST_TO_ALBUM
@@ -14,10 +13,6 @@ import com.hua.abstractmusic.other.Constant.NETWORK_ARTIST_ID
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.use_case.UseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -54,12 +49,13 @@ class ArtistDetailViewModel @Inject constructor(
             netListMap[artistAlbumId!!] = _artistAlbumDetail
         }
         playListMap[artistId!!] = _artistDetail
-        viewModelScope.launch{
-            delay(200)
-            withContext(Dispatchers.Main){
-                refresh()
-            }
-        }
+        refresh()
+//        viewModelScope.launch{
+//            delay(200)
+//            withContext(Dispatchers.Main){
+//
+//            }
+//        }
     }
 
     private val _artistDetail = mutableStateOf<List<MediaData>>(emptyList())

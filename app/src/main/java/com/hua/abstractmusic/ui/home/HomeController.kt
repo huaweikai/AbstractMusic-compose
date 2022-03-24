@@ -36,7 +36,6 @@ import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.bean.ui.home.BottomBarBean
 import com.hua.abstractmusic.bean.ui.home.IconBean
-import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.play.detail.ControllerItem
 import com.hua.abstractmusic.ui.route.Screen
@@ -51,24 +50,6 @@ import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
  */
 
 @ExperimentalPagerApi
-@Composable
-fun HomeController(
-    modifier: Modifier,
-    playListClick: () -> Unit,
-    playScreenClick: () -> Unit,
-) {
-    Column(
-        modifier = modifier
-    ) {
-//        Controller(
-//            playListClick,
-//            playScreenClick
-//        )
-//        HomeNavigation(modifier)
-    }
-}
-
-@ExperimentalPagerApi
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun Controller(
@@ -77,9 +58,9 @@ fun Controller(
     viewModel: PlayingViewModel = LocalPlayingViewModel.current
 ) {
 
-    val isTouch = remember {
-        mutableStateOf(false)
-    }
+//    val isTouch = remember {
+//        mutableStateOf(false)
+//    }
     val pagerState = rememberPagerState(viewModel.getLastMediaIndex())
 
     LaunchedEffect(viewModel.currentPlayItem.value) {
@@ -105,14 +86,14 @@ fun Controller(
             state = pagerState,
             count = viewModel.currentPlayList.value.size,
             modifier = Modifier
-                .layoutId("pager")
-                .isTouch(isTouch),
+                .layoutId("pager"),
+//                .isTouch(isTouch),
             verticalAlignment = CenterVertically
         ) { page ->
             val item = viewModel.currentPlayList.value[page].mediaItem.mediaMetadata
             Row(
                 Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = CenterVertically
             ) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
@@ -145,15 +126,15 @@ fun Controller(
             val playState = viewModel.playerState.collectAsState()
             val stateIcon =
                 if (playState.value) {
-                    R.drawable.ic_pause
+                    R.drawable.ic_controller_pause
                 } else {
-                    R.drawable.ic_play
+                    R.drawable.ic_controller_play
                 }
             val list = listOf(
-                IconBean(stateIcon, "播放", size = 48.dp, onClick = {
+                IconBean(stateIcon, "播放", size = 32.dp, onClick = {
                     viewModel.playOrPause()
                 }),
-                IconBean(R.drawable.ic_playlist, "播放列表", size = 20.dp, onClick = {
+                IconBean(R.drawable.ic_controller_list, "播放列表", size = 20.dp, onClick = {
                     playListClick()
                 })
             )
@@ -196,7 +177,7 @@ private fun controllerConstrains(margin: Dp): ConstraintSet {
 @Composable
 fun HomeNavigation(
     modifier: Modifier = Modifier,
-    navController: NavHostController = LocalHomeNavController.current
+    navController: NavHostController
 ) {
     val back = navController.currentBackStackEntryAsState()
     val bars = listOf(

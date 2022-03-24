@@ -2,7 +2,7 @@ package com.hua.abstractmusic.ui.utils
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
-import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -33,9 +33,8 @@ import coil.transform.Transformation
 import com.airbnb.lottie.compose.*
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
-import com.hua.abstractmusic.other.Constant.LOCAL_ALBUM_ID
-import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
-import com.hua.abstractmusic.ui.LocalHomeNavController
+import com.hua.abstractmusic.bean.toNavType
+import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.LocalPopWindow
 import com.hua.abstractmusic.ui.LocalPopWindowItem
@@ -196,7 +195,7 @@ fun PopupWindow(
     item: MediaItem = LocalPopWindowItem.current.value,
     config: Configuration = LocalConfiguration.current,
     viewModel: PlayingViewModel = LocalPlayingViewModel.current,
-    homeNavController: NavHostController = LocalHomeNavController.current
+    homeNavController: NavHostController = LocalAppNavController.current
 ) {
     val sheetPop = remember {
         mutableStateOf(false)
@@ -204,11 +203,14 @@ fun PopupWindow(
     val artistPop = remember {
         mutableStateOf(false)
     }
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    viewModel.selectAlbumByMusicId(item)
     if (state.value) {
         Dialog(
             onDismissRequest = {
                 state.value = false
+                viewModel.clearAlbum()
             }
         ) {
             Column(
@@ -244,9 +246,13 @@ fun PopupWindow(
                 Spacer(modifier = Modifier.height(8.dp))
                 PopItem(desc = "添加到播放队列") {
                     viewModel.addQueue(item)
+                    Toast.makeText(context, "已添加到队列中", Toast.LENGTH_SHORT).show()
+                    state.value = false
                 }
                 PopItem(desc = "添加到下一曲播放") {
                     viewModel.addQueue(item, true)
+                    Toast.makeText(context, "已添加到队列中", Toast.LENGTH_SHORT).show()
+                    state.value = false
                 }
                 PopItem(desc = "添加到歌单") {
                     viewModel.refresh()
@@ -259,15 +265,9 @@ fun PopupWindow(
                     artistPop.value = true
                 }
                 PopItem(desc = "专辑:${item.mediaMetadata.albumTitle}") {
-                    val albumId = item.mediaMetadata.extras?.getLong("albumId") ?: 0L
-                    val isLocal = item.mediaId.isLocal()
-                    val parentId = if (isLocal) {
-                        Uri.parse(LOCAL_ALBUM_ID).buildUpon().appendPath(albumId.toString())
-                    } else {
-                        Uri.parse(NETWORK_ALBUM_ID).buildUpon().appendPath(albumId.toString())
-                    }
-                    homeNavController.navigate("${Screen.LocalAlbumDetail.route}?albumId=${parentId}&isLocal=$isLocal")
                     state.value = false
+                    homeNavController.navigate("${Screen.AlbumDetailScreen.route}?mediaItem=${viewModel.moreAlbum.value.toNavType()}")
+                    viewModel.clearAlbum()
                 }
             }
         }
@@ -285,7 +285,7 @@ fun PopupWindow(
                 scope.launch {
                     viewModel.insertMusicToSheet(
                         mediaItem = item,
-                        parentId = it
+                        parentId = it.mediaId
                     )
                     sheetPop.value = false
                 }
@@ -300,10 +300,8 @@ fun PopupWindow(
             viewModel.clearArtist()
         }) {
             PopMoreLayout(list = viewModel.moreArtistList.value, title = "歌手", onClick = {
-                val isLocal = item.mediaId.isLocal()
-                val parentId = it
                 artistPop.value = false
-                homeNavController.navigate("${Screen.LocalArtistDetail.route}?artistId=${parentId}&isLocal=$isLocal")
+                homeNavController.navigate("${Screen.ArtistDetailScreen.route}?mediaItem=${it.toNavType()}")
                 viewModel.clearArtist()
             })
         }
@@ -316,7 +314,7 @@ fun PopMoreLayout(
     config: Configuration = LocalConfiguration.current,
     list: List<MediaItem>,
     title: String,
-    onClick: (String) -> Unit
+    onClick: (MediaItem) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -337,7 +335,7 @@ fun PopMoreLayout(
             ) {
                 items(list) { item ->
                     PopItem(desc = "${item.mediaMetadata.title}") {
-                        onClick(item.mediaId)
+                        onClick(item)
                     }
                 }
             }

@@ -13,7 +13,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.bean.toNavType
-import com.hua.abstractmusic.ui.LocalHomeNavController
+import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.home.local.album.LocalAlbum
 import com.hua.abstractmusic.ui.home.local.artist.LocalArtist
@@ -35,7 +35,7 @@ import kotlinx.coroutines.launch
 @ExperimentalPagerApi
 @Composable
 fun LocalScreen(
-    homeNavController: NavHostController = LocalHomeNavController.current,
+    homeNavController: NavHostController = LocalAppNavController.current,
     localViewModel: HomeViewModel = LocalHomeViewModel.current
 ) {
     val pagerState = rememberPagerState()
@@ -89,13 +89,13 @@ fun LocalScreen(
                     1 -> {
                         LocalAlbum(localViewModel){ mediaItem ->
 //                            homeNavController.navigate("${Screen.NetSearchScreen.route}")
-                            homeNavController.navigate("${Screen.LocalAlbumDetail.route}?mediaItem=${mediaItem.toNavType()}")
+                            homeNavController.navigate("${Screen.AlbumDetailScreen.route}?mediaItem=${mediaItem.toNavType()}")
                         }
                     }
                     2 -> {
                         LocalArtist (localViewModel){ mediaItem ->
 //                            homeNavController.navigate("${Screen.NetSearchScreen.route}")
-                            homeNavController.navigate("${Screen.LocalArtistDetail.route}?mediaItem=${mediaItem.toNavType()}")
+                            homeNavController.navigate("${Screen.ArtistDetailScreen.route}?mediaItem=${mediaItem.toNavType()}")
                         }
                     }
                 }

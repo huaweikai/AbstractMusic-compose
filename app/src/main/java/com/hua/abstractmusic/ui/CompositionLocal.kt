@@ -35,9 +35,9 @@ val LocalPlayingViewModel = staticCompositionLocalOf<PlayingViewModel>{
 val LocalThemeViewModel =
     staticCompositionLocalOf<ThemeViewModel> { error("Can't get theme view model") }
 
-val LocalHomeNavController = staticCompositionLocalOf<NavHostController> {
-    error("LocalHomeNavController is NULL")
-}
+//val LocalHomeNavController = staticCompositionLocalOf<NavHostController> {
+//    error("LocalHomeNavController is NULL")
+//}
 
 val LocalAppNavController = staticCompositionLocalOf<NavHostController> {
     error("LocalAppNavController is NULL")
@@ -65,3 +65,7 @@ val LocalPopWindowItem = staticCompositionLocalOf<MutableState<MediaItem>>{
 val LocalBottomControllerHeight = staticCompositionLocalOf<Dp>{
     error("")
 }
+
+//val LocalNavigationHeight = staticCompositionLocalOf<MutableState<Dp>> {
+//    error("")
+//}

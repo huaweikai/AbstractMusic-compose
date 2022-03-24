@@ -19,12 +19,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.transform.CircleCropTransformation
 import com.hua.abstractmusic.bean.toNavType
-import com.hua.abstractmusic.ui.LocalHomeNavController
+import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalUserViewModel
 import com.hua.abstractmusic.ui.home.mine.LocalSheet
 import com.hua.abstractmusic.ui.home.mine.Sheet
 import com.hua.abstractmusic.ui.route.Screen
-import com.hua.abstractmusic.ui.utils.ArtImage
+import com.hua.abstractmusic.ui.utils.CoilImage
 import com.hua.abstractmusic.ui.utils.UCropActivityResultContract
 import com.hua.abstractmusic.ui.viewmodels.UserViewModel
 import com.hua.abstractmusic.utils.getCacheDir
@@ -36,12 +36,11 @@ import com.hua.abstractmusic.utils.getCacheDir
  */
 @Composable
 fun LoggedScreen(
-    navHostController: NavHostController = LocalHomeNavController.current,
+    navHostController: NavHostController = LocalAppNavController.current,
     viewModel: UserViewModel = LocalUserViewModel.current
 ) {
     LaunchedEffect(Unit) {
         viewModel.refresh()
-        viewModel.selectUserInfo()
     }
 
     val contentResolver = LocalContext.current.contentResolver
@@ -67,19 +66,21 @@ fun LoggedScreen(
     }
 
     Column(Modifier.fillMaxSize()) {
-        val user = viewModel.user.collectAsState()
+        val user = viewModel.userInfo.collectAsState().value.userBean
         Text(text = "已经登录了")
-        ArtImage(
+        CoilImage(
             modifier = Modifier
                 .size(60.dp)
                 .clickable {
                     selectPicture.launch("image/*")
                 },
-            uri = user.value.head,
-            desc = "头像",
-            transformation = CircleCropTransformation()
+            url = user?.head,
+            contentDescription = "头像",
+            builder = {
+                transformations(CircleCropTransformation())
+            }
         )
-        Text(text = user.value.userName)
+        Text(text = "${user?.userName}")
         Button(onClick = {
             viewModel.logoutUser()
         }) {
@@ -89,7 +90,7 @@ fun LoggedScreen(
         Sheet(
             isLocal = false,
             onClick = { mediaItem ->
-                navHostController.navigate("${Screen.LocalSheetDetailScreen.route}?mediaItem=${mediaItem.toNavType()}")
+                navHostController.navigate("${Screen.SheetDetailScreen.route}?mediaItem=${mediaItem.toNavType()}")
             },
             newSheet = {
                 viewModel.createSheet(it, false)

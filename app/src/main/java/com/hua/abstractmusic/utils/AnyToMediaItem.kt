@@ -129,6 +129,11 @@ fun NetSheet.toMediaItem(parentId: Uri) =
                 .setArtworkUri(
                     if (this.artUri == null) null else Uri.parse(this.artUri)
                 )
+                .setExtras(
+                    Bundle().apply {
+                        putInt("userId",userId)
+                    }
+                )
                 .build()
         )
         .setMediaId(parentId.buildUpon().appendPath(this@toMediaItem.id.toString()).toString())

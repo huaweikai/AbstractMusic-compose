@@ -27,14 +27,14 @@ data class SheetMusic(
 
 @Entity
 data class Sheet(
-    @PrimaryKey(autoGenerate = true) var sheetId:Int = 0,
+    @PrimaryKey(autoGenerate = true) var sheetId:Int,
     val title:String,
     val artUri: String? = null,
     val desc:String? = null
 )
 
 @Entity(primaryKeys = ["musicId","sheetId"])
-data class SheetToMusic(
+class SheetToMusic(
     val sheetId: Int,
     val musicId: String
 )

@@ -33,9 +33,9 @@ import coil.compose.AsyncImage
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.ParcelizeMediaItem
+import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalComposeUtils
-import com.hua.abstractmusic.ui.LocalHomeNavController
 import com.hua.abstractmusic.ui.utils.ArtImage
 import com.hua.abstractmusic.ui.utils.LCE
 import com.hua.abstractmusic.ui.utils.MusicItem
@@ -56,7 +56,7 @@ import com.hua.blur.blur
 @Composable
 fun LocalAlbumDetail(
     item: ParcelizeMediaItem,
-    navHostController: NavHostController = LocalHomeNavController.current,
+    navHostController: NavHostController = LocalAppNavController.current,
     detailViewModel: AlbumDetailViewModel = hiltViewModel()
 ) {
     val isLocal = item.mediaId.isLocal()
