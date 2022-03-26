@@ -62,7 +62,7 @@ fun Sheet(
         mutableStateOf(NULL_MEDIA_ITEM)
     }
     Surface(
-        modifier = Modifier.fillMaxWidth().height(200.dp).padding(horizontal = 16.dp),
+        modifier = Modifier.fillMaxWidth().height(210.dp).padding(horizontal = 16.dp, vertical = 16.dp),
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {

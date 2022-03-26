@@ -22,7 +22,7 @@ fun LocalMusic(
     viewModel: HomeViewModel
 ) {
     MusicLazyItems(list = viewModel.localMusicList.value) {
-        viewModel.setPlaylist(it, viewModel.localMusicList.value)
+        viewModel.setPlayList(it, viewModel.localMusicList.value.map { it.mediaItem })
     }
 }
 

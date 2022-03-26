@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -15,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import com.hua.abstractmusic.R
@@ -22,7 +24,6 @@ import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.hello.PermissionGet
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.utils.getVersion
-import kotlinx.coroutines.delay
 
 
 /**
@@ -32,21 +33,37 @@ import kotlinx.coroutines.delay
  */
 @Composable
 fun SplashScreen(
-    appController: NavHostController = LocalAppNavController.current
+    appController: NavHostController = LocalAppNavController.current,
+    viewModel: SplashViewModel = hiltViewModel()
 ) {
 
     val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
-        val nextRoute =
-            if (PermissionGet.checkReadPermission(context)) {
-                Screen.HomeScreen.route
-            } else Screen.HelloScreen.route
-        delay(500L)
-        val navOptions = NavOptions.Builder()
-            .setPopUpTo(Screen.Splash.route, true)
-            .build()
-        appController.navigate(nextRoute, navOptions)
+//    LaunchedEffect(Unit) {
+//        val nextRoute =
+//            if (PermissionGet.checkReadPermission(context)) {
+//                Screen.HomeScreen.route
+//            } else Screen.HelloScreen.route
+//        delay(500L)
+//        val navOptions = NavOptions.Builder()
+//            .setPopUpTo(Screen.Splash.route, true)
+//            .build()
+//        appController.navigate(nextRoute, navOptions)
+//    }
+    val nextRoute =
+        if (PermissionGet.checkReadPermission(context)) {
+            Screen.HomeScreen.route
+        } else Screen.HelloScreen.route
+    val navOptions = NavOptions.Builder()
+        .setPopUpTo(Screen.Splash.route, true)
+        .build()
+
+    val isConnect = viewModel.isConnected.collectAsState()
+
+    LaunchedEffect(isConnect.value) {
+        if (isConnect.value) {
+            appController.navigate(nextRoute, navOptions)
+        }
     }
 
     ConstraintLayout(

@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.ui
 
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -8,8 +9,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.media3.common.MediaItem
 import androidx.navigation.NavHostController
 import com.hua.abstractmusic.ui.utils.WindowSize
-import com.hua.abstractmusic.ui.viewmodels.*
+import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
+import com.hua.abstractmusic.ui.viewmodels.ThemeViewModel
+import com.hua.abstractmusic.ui.viewmodels.UserViewModel
 import com.hua.abstractmusic.utils.ComposeUtils
+
 
 
 /**
@@ -17,14 +21,6 @@ import com.hua.abstractmusic.utils.ComposeUtils
  * @Date   : 2022/02/09
  * @Desc   :
  */
-
-val LocalHomeViewModel = staticCompositionLocalOf<HomeViewModel>{
-    error("LocalMusicViewModel is NULL")
-}
-
-val LocalNetViewModel = staticCompositionLocalOf<NetViewModel>{
-    error("LocalNetViewModel is Null")
-}
 
 val LocalUserViewModel = staticCompositionLocalOf<UserViewModel>{
     error("LocalUserViewModel is NULL")
@@ -35,9 +31,9 @@ val LocalPlayingViewModel = staticCompositionLocalOf<PlayingViewModel>{
 val LocalThemeViewModel =
     staticCompositionLocalOf<ThemeViewModel> { error("Can't get theme view model") }
 
-//val LocalHomeNavController = staticCompositionLocalOf<NavHostController> {
-//    error("LocalHomeNavController is NULL")
-//}
+val LocalAppSnackBar = staticCompositionLocalOf<SnackbarHostState> {
+    error("appSnackBar is error")
+}
 
 val LocalAppNavController = staticCompositionLocalOf<NavHostController> {
     error("LocalAppNavController is NULL")
@@ -65,7 +61,3 @@ val LocalPopWindowItem = staticCompositionLocalOf<MutableState<MediaItem>>{
 val LocalBottomControllerHeight = staticCompositionLocalOf<Dp>{
     error("")
 }
-
-//val LocalNavigationHeight = staticCompositionLocalOf<MutableState<Dp>> {
-//    error("")
-//}

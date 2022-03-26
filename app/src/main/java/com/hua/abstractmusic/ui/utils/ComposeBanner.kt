@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.*
 import androidx.compose.ui.platform.LocalContext
@@ -71,11 +70,11 @@ private fun <T> Banner(
             }
         }
     }
-    val indicatorState = rememberPagerState()
+//    val indicatorState = rememberPagerState()
 
     LaunchedEffect(state.currentPage) {
         val page = (state.currentPage - startIndex).floorMod(pageCount)
-        indicatorState.scrollToPage(page)
+//        indicatorState.scrollToPage(page)
     }
     Box(
         modifier = Modifier
@@ -116,18 +115,18 @@ private fun <T> Banner(
                 modifier = modifier
             )
         }
-        HorizontalPager(
-            count = items.size,
-            state = indicatorState,
-        ) {}
-        HorizontalPagerIndicator(
-            pagerState = indicatorState,
-            activeColor = Color.White,
-            inactiveColor = Color.Gray,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 12.dp)
-        )
+//        HorizontalPager(
+//            count = items.size,
+//            state = indicatorState,
+//        ) {}
+//        HorizontalPagerIndicator(
+//            pagerState = indicatorState,
+//            activeColor = Color.White,
+//            inactiveColor = Color.Gray,
+//            modifier = Modifier
+//                .align(Alignment.BottomCenter)
+//                .padding(bottom = 12.dp)
+//        )
     }
 }
 

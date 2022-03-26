@@ -11,9 +11,9 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -100,8 +100,8 @@ fun PlayListScreen(
                 val percent = createGuidelineFromStart(0.85f)
                 val itemTitle = buildAnnotatedString {
                     withStyle(
-                        if (item.isPlaying) SpanStyle(Color(0xff77D3D0)) else SpanStyle(
-                            Color.Gray
+                        if (item.isPlaying) SpanStyle(MaterialTheme.colorScheme.primary) else SpanStyle(
+                            MaterialTheme.colorScheme.surfaceTint
                         )
                     ) {
                         withStyle(style = SpanStyle(fontSize = 20.sp)) {

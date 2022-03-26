@@ -1,22 +1,21 @@
 package com.hua.abstractmusic.ui.viewmodels
 
-import android.app.Application
 import android.content.ContentResolver
 import android.net.Uri
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.viewModelScope
-import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
+import androidx.media3.common.MediaItem
+import com.hua.abstractmusic.base.viewmodel.BaseViewModel
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.bean.net.NetData
 import com.hua.abstractmusic.other.Constant
-import com.hua.abstractmusic.other.NetWork.SUCCESS
+import com.hua.abstractmusic.other.NetWork
 import com.hua.abstractmusic.preference.UserInfoData
 import com.hua.abstractmusic.repository.NetRepository
-import com.hua.abstractmusic.repository.Repository
 import com.hua.abstractmusic.repository.UserRepository
+import com.hua.abstractmusic.services.MediaConnect
 import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.use_case.UseCase
 import com.hua.abstractmusic.use_case.events.MusicInsertError
@@ -29,24 +28,19 @@ import javax.inject.Inject
 
 /**
  * @author : huaweikai
- * @Date   : 2022/01/25
+ * @Date   : 2022/03/25
  * @Desc   :
  */
 @HiltViewModel
 class UserViewModel @Inject constructor(
-    application: Application,
-    useCase: UseCase,
-    itemTree: MediaItemTree,
+    mediaConnect: MediaConnect,
+    private val itemTree: MediaItemTree,
     private val netRepository: NetRepository,
     private val userRepository: UserRepository,
-    private val repository: Repository,
-    userInfoData: UserInfoData
-) : BaseBrowserViewModel(application, useCase, itemTree) {
-
-    val userInfo = userInfoData.userInfo
-
-//    private val _userIsOut = mutableStateOf(true)
-//    val userIsOut: State<Boolean> get() = _userIsOut
+    private val useCase: UseCase,
+    private val userInfoData: UserInfoData
+) : BaseViewModel(mediaConnect) {
+    val userInfo get() = userInfoData.userInfo
 
 
     suspend fun checkUser(): NetData<Unit> {
@@ -55,16 +49,22 @@ class UserViewModel @Inject constructor(
 
 
     val sheetList = mutableStateOf<List<MediaData>>(emptyList())
-    val netSheetList = mutableStateOf<List<MediaData>>(emptyList())
+    val netSheetList = mutableStateOf<List<MediaItem>>(emptyList())
 
     init {
         localListMap[Constant.LOCAL_SHEET_ID] = sheetList
-        netListMap[Constant.NET_SHEET_ID] = netSheetList
-        initializeController()
     }
 
-    override fun onMediaConnected() {
-        refresh()
+    fun selectNetWork() {
+        viewModelScope.launch {
+            val result = netRepository.selectUserSheet()
+            netSheetList.value = if (result.isSuccess) {
+                result.getOrNull() ?: emptyList()
+            } else {
+                emptyList()
+            }
+            itemTree.addMusicToTree("${Constant.ROOT_SCHEME}${userInfo.value.userToken}", netSheetList.value)
+        }
     }
 
     fun putHeadPicture(
@@ -73,20 +73,19 @@ class UserViewModel @Inject constructor(
     ) {
         val uri = Uri.parse(url)
         val byte = contentResolver.openInputStream(uri)
-        val file = DocumentFile.fromSingleUri(getApplication(), uri)
+        val file = DocumentFile.fromSingleUri(mediaConnect.context, uri)
         viewModelScope.launch(Dispatchers.IO) {
             val fileName = "${Constant.BUCKET_HEAD_IMG}/${userInfo.value.userBean?.id}-head-${
                 System.currentTimeMillis().toDate()
             }.png"
-            val result = userRepository.putFile(
-                fileName,
-                byte,
-                file,
-            ) {
-                Log.d("TAG", "putHeadPicture: ${it.transferPercentage}")
-            }
-            userRepository.updateUser(result.data!!)
-            contentResolver.delete(uri, null, null)
+            userRepository.upLoadFile.putFile(fileName, byte, file, onSuccess = {
+                userRepository.updateUser(it)
+            }, onError = {
+
+            }, onCompletion = {
+                contentResolver.delete(uri, null, null)
+            })
+
         }
     }
 
@@ -94,7 +93,7 @@ class UserViewModel @Inject constructor(
     fun logoutUser() {
         viewModelScope.launch {
             val result = userRepository.logoutUser().code
-            val isSuccess = result == SUCCESS
+            val isSuccess = result == NetWork.SUCCESS
             if (isSuccess) {
                 netSheetList.value = emptyList()
             }
@@ -110,9 +109,9 @@ class UserViewModel @Inject constructor(
                     netRepository.createNewSheet(sheetName)
                 }
                 refresh()
-                Toast.makeText(getApplication(), "创建歌单成功", Toast.LENGTH_SHORT).show()
+                Toast.makeText(mediaConnect.context, "创建歌单成功", Toast.LENGTH_SHORT).show()
             } catch (e: MusicInsertError) {
-                Toast.makeText(getApplication(), "${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(mediaConnect.context, "${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -122,7 +121,7 @@ class UserViewModel @Inject constructor(
             val id = Uri.parse(sheetId).lastPathSegment
             try {
                 if (sheetId.isLocal()) {
-                    repository.removeSheet(id!!)
+                    userRepository.removeSheet(id!!)
                 } else {
                     netRepository.removeSheet(id!!)
                 }

@@ -3,6 +3,7 @@ package com.hua.abstractmusic.ui.play.detail
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
@@ -38,9 +39,8 @@ import com.hua.abstractmusic.utils.toTime
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun MusicScreen(
-    viewModel: PlayingViewModel = LocalPlayingViewModel.current,
+//    viewModel: PlayingViewModel = LocalPlayingViewModel.current,
 ) {
-
     val windowSize = LocalScreenSize.current
     if (windowSize == WindowSize.Expanded) {
         HorizontalScreen()
@@ -57,16 +57,19 @@ private fun VerticalScreen(
     viewModel: PlayingViewModel = LocalPlayingViewModel.current
 ) {
     val data = viewModel.currentPlayItem.value.mediaMetadata
+    val playState = viewModel.playerState.collectAsState()
     Column(
         modifier = Modifier
             .padding(
-                top = 52.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+                top = 52.dp + WindowInsets.statusBars
+                    .asPaddingValues()
+                    .calculateTopPadding()
             )
             .fillMaxSize()
     ) {
         ArtImage(
             modifier = Modifier
-                .fillMaxWidth(0.8f)
+                .fillMaxWidth(0.9f)
                 .aspectRatio(1f)
                 .align(CenterHorizontally),
             uri = data.artworkUri,
@@ -126,6 +129,7 @@ private fun HorizontalScreen(
         ArtImage(
             modifier = Modifier
                 .fillMaxHeight(0.8f)
+                .animateContentSize()
                 .align(CenterVertically)
                 .aspectRatio(1f),
             uri = data.artworkUri,

@@ -3,15 +3,20 @@ package com.hua.abstractmusic.repository
 import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.media3.common.MediaItem
+import com.hua.abstractmusic.bean.net.HomeBean
 import com.hua.abstractmusic.bean.net.NetData
 import com.hua.abstractmusic.bean.net.NetSheet
+import com.hua.abstractmusic.http.DataState
+import com.hua.abstractmusic.http.RequestStatus
 import com.hua.abstractmusic.net.MusicService
 import com.hua.abstractmusic.net.SearchService
 import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ALL_MUSIC_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ARTIST_ID
+import com.hua.abstractmusic.other.Constant.NETWORK_BANNER_ID
 import com.hua.abstractmusic.other.Constant.NET_SHEET_ID
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
+import com.hua.abstractmusic.other.Constant.ROOT_SCHEME
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ALBUM
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ALL_MUSIC
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ARTIST
@@ -25,6 +30,7 @@ import com.hua.abstractmusic.preference.UserInfoData
 import com.hua.abstractmusic.ui.home.net.detail.SearchObject
 import com.hua.abstractmusic.use_case.events.MusicInsertError
 import com.hua.abstractmusic.utils.toMediaItem
+import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * @author : huaweikai
@@ -124,6 +130,9 @@ class NetRepository(
                         service.getMusicBySheetId(id)
                     }
                     TYPE_NETWORK_SHEET -> {
+                        service.getMusicBySheetId(id)
+                    }
+                    userInfoData.userInfo.value.userToken ->{
                         service.getMusicBySheetId(id)
                     }
                     else -> NetData(ERROR, null, "未知错误")
@@ -324,6 +333,69 @@ class NetRepository(
                 )
             }
             else -> NetData(SERVER_ERROR, null, "")
+        }
+    }
+
+    suspend fun loadHomeData(): Result<HomeBean> {
+        return runCatching {
+            val banners = service.getBanner().data ?: emptyList()
+            val songs = service.getAllMusic().data ?: emptyList()
+            val sheets = service.getRecommend().data ?: emptyList()
+            val albums = service.getRecommendAlbumList().data ?: emptyList()
+
+            val bannerId = Uri.parse(NETWORK_BANNER_ID)
+            val songId = Uri.parse(NETWORK_ALL_MUSIC_ID)
+            val sheetId = Uri.parse(NET_SHEET_ID)
+            val albumId = Uri.parse(NETWORK_ALBUM_ID)
+
+            HomeBean(
+                banners = banners.map { it.toMediaItem(bannerId) },
+                songs = songs.map { it.toMediaItem(songId) },
+                sheets = sheets.map { it.toMediaItem(sheetId) },
+                albums = albums.map { it.toMediaItem(albumId) }
+            )
+        }
+    }
+
+    suspend fun selectUserSheet():Result<List<MediaItem>>{
+         return runCatching {
+            val user = userInfoData.userInfo.value
+            if(user.isLogin){
+                val result = service.getUserSheet(user.userToken)
+                result.data?.map { it.toMediaItem(Uri.parse("$ROOT_SCHEME${user.userToken}")) } ?: emptyList()
+            }else{
+                emptyList()
+            }
+        }
+    }
+
+    suspend fun <T :NetData<*>> httpRequest(
+        stateFlow: MutableStateFlow<RequestStatus<T>> ?= null,
+        block:suspend () -> T?
+    ):T?{
+        return try {
+            stateFlow?.emit(RequestStatus(status = DataState.STATE_LOADING))
+            val data = block()
+            stateFlow?.emit(
+                if(data != null){
+                    RequestStatus(
+                        code = data.code,
+                        status = when(data.code){
+                            in 200..299 -> DataState.STATE_SUCCESS
+                            in 300..599 -> DataState.STATE_FAILED
+                            else -> DataState.STATE_UNKNOWN
+                        },
+                        msg = data.msg,
+                        json = data
+                    )
+                }else{
+                    RequestStatus(status = DataState.STATE_EMPTY)
+                }
+            )
+            data
+        }catch (e:Exception){
+            stateFlow?.emit(RequestStatus(status = DataState.STATE_ERROR, error = e))
+            null
         }
     }
 }

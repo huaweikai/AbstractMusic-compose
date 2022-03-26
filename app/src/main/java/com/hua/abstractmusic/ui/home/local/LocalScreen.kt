@@ -8,13 +8,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.bean.toNavType
 import com.hua.abstractmusic.ui.LocalAppNavController
-import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.home.local.album.LocalAlbum
 import com.hua.abstractmusic.ui.home.local.artist.LocalArtist
 import com.hua.abstractmusic.ui.home.local.music.LocalMusic
@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun LocalScreen(
     homeNavController: NavHostController = LocalAppNavController.current,
-    localViewModel: HomeViewModel = LocalHomeViewModel.current
+    localViewModel: HomeViewModel = hiltViewModel()
 ) {
     val pagerState = rememberPagerState()
     val tabTitles = listOf("音乐", "专辑", "歌手")

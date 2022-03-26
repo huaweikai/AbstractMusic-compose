@@ -1,9 +1,7 @@
 package com.hua.abstractmusic.ui.viewmodels
 
 import android.annotation.SuppressLint
-import android.app.Application
 import android.net.Uri
-import android.widget.Toast
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -11,71 +9,66 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import androidx.media3.session.MediaController
 import com.hua.abstractmusic.R
-import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
+import com.hua.abstractmusic.base.viewmodel.BaseViewModel
 import com.hua.abstractmusic.bean.LyricsEntry
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant
-import com.hua.abstractmusic.other.Constant.LOCAL_ALBUM_ID
-import com.hua.abstractmusic.other.Constant.LOCAL_ARTIST_ID
-import com.hua.abstractmusic.other.Constant.NET_SHEET_ID
-import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.preference.PreferenceManager
 import com.hua.abstractmusic.repository.NetRepository
-import com.hua.abstractmusic.services.MediaItemTree
+import com.hua.abstractmusic.repository.Repository
+import com.hua.abstractmusic.services.BrowserListener
+import com.hua.abstractmusic.services.MediaConnect
 import com.hua.abstractmusic.ui.utils.LCE
 import com.hua.abstractmusic.use_case.UseCase
-import com.hua.abstractmusic.use_case.events.MusicInsertError
 import com.hua.abstractmusic.utils.ComposeUtils
 import com.hua.abstractmusic.utils.LyricsUtils
 import com.hua.abstractmusic.utils.PaletteUtils
 import com.hua.abstractmusic.utils.isLocal
 import com.hua.taglib.TaglibLibrary
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
  * @author : huaweikai
- * @Date   : 2022/02/24
+ * @Date   : 2022/03/25
  * @Desc   :
  */
 @SuppressLint("UnsafeOptInUsageError")
 @HiltViewModel
 class PlayingViewModel @Inject constructor(
-    application: Application,
-    useCase: UseCase,
-    itemTree: MediaItemTree,
-    private val repository: NetRepository,
+    mediaConnect: MediaConnect,
+    private val netRepository: NetRepository,
+    private val useCase: UseCase,
+    private val repository: Repository,
     private val taglibLibrary: TaglibLibrary,
     private val preferenceManager: PreferenceManager,
-    private val netRepository: NetRepository,
     private val composeUtils: ComposeUtils
-) : BaseBrowserViewModel(application, useCase, itemTree) {
+) : BaseViewModel(mediaConnect) {
+    //mediaConnect连接
+    val isConnect get() =  mediaConnect.isConnected
 
-    private val _currentPlayItem = mutableStateOf(NULL_MEDIA_ITEM)
+    //当前播放的item
+    private val _currentPlayItem = mutableStateOf(Constant.NULL_MEDIA_ITEM)
     val currentPlayItem: State<MediaItem> get() = _currentPlayItem
 
+    // 歌词
     private val _lyricsList = mutableStateOf<List<LyricsEntry>>(emptyList())
     val lyricList: State<List<LyricsEntry>> get() = _lyricsList
+
 
     val localSheetList = mutableStateOf<List<MediaData>>(emptyList())
     val netSheetList = mutableStateOf<List<MediaData>>(emptyList())
     val localArtistList = mutableStateOf<List<MediaData>>(emptyList())
     val localAlbumList = mutableStateOf<List<MediaData>>(emptyList())
-
-    init {
-        localListMap[Constant.LOCAL_SHEET_ID] = localSheetList
-        netListMap[NET_SHEET_ID] = netSheetList
-        localListMap[LOCAL_ARTIST_ID] = localArtistList
-        localListMap[LOCAL_ALBUM_ID] = localAlbumList
-        initializeController()
-    }
 
 
     val lyricsCanScroll = mutableStateOf(false)
@@ -93,13 +86,68 @@ class PlayingViewModel @Inject constructor(
 
     val currentPosition = mutableStateOf(0F)
 
+    private val listener = object : Player.Listener {
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            val browser = mediaConnect.browser ?: return
+            when (playbackState) {
+                Player.STATE_READY -> {
+                    maxValue.value = (browser.duration).toFloat()
+                }
+                else -> {}
+            }
+        }
 
-    private var currentDuration: Job? = null
+        override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+            _playerState.value = playWhenReady
+        }
+
+        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            updateItem(mediaItem)
+        }
+    }
+
+    private val browserListener = object :BrowserListener{
+        override fun playListUpdate() {
+            updateCurrentPlayList()
+        }
+    }
+
+    fun setController(){
+        addListener(listener)
+        addBrowserListener(browserListener)
+        val browser = this.browser?:return
+        maxValue.value = (browser.duration).toFloat() ?: 0F
+        _playerState.value = browser.isPlaying == true
+//        doSomething()
+        refresh()
+        updateItem(browser.currentMediaItem)
+    }
+
+    init {
+//        localListMap[Constant.LOCAL_SHEET_ID] = localSheetList
+////        netListMap[Constant.NET_SHEET_ID] = netSheetList
+//        localListMap[Constant.LOCAL_ARTIST_ID] = localArtistList
+//        localListMap[Constant.LOCAL_ALBUM_ID] = localAlbumList
+    }
+
+    init {
+        viewModelScope.launch {
+            _playerState.collectLatest {
+                if (it && browser?.isConnected == true) {
+                    while (true) {
+                        if (!actionSeekBar.value) {
+                            currentPosition.value = browser?.currentPosition?.toFloat() ?: 0F
+                        }
+                        delay(1000L)
+                    }
+                }
+            }
+        }
+    }
 
     override fun updateItem(item: MediaItem?) {
-        super.updateItem(item)
         val browser = this.browser ?: return
-        _currentPlayItem.value = item ?: NULL_MEDIA_ITEM
+        _currentPlayItem.value = item ?: Constant.NULL_MEDIA_ITEM
         viewModelScope.launch {
             getLyrics(browser.currentMediaItem)
             if (lyricsCanScroll.value) {
@@ -111,44 +159,41 @@ class PlayingViewModel @Inject constructor(
         updateCurrentPlayList()
     }
 
-    override fun onMediaConnected() {
-        val browser = this.browser ?: return
-        maxValue.value = (browser.duration).toFloat() ?: 0F
-        _playerState.value = browser.isPlaying == true
-        doSomething()
-        refresh()
-    }
-
-    private fun doSomething() {
-        currentDuration?.cancel()
-        currentDuration = viewModelScope.launch {
-            _playerState.collectLatest {
-                if (it && browser?.isConnected == true) {
-                    while (true) {
-                        delay(1000L)
-                        if (!actionSeekBar.value) {
-                            currentPosition.value = browser?.currentPosition?.toFloat() ?: 0F
-                        }
-                    }
-                }
+    fun setLyricsItem(startIndex: Int, shouldScroll: Boolean = false) {
+        if (lyricList.value.isNotEmpty()) {
+            val index = if (startIndex == -1) {
+                0
+            } else {
+                startIndex
+            }
+            _lyricsList.value = lyricList.value.toMutableList().map {
+                it.copy(
+                    isPlaying = it.time == lyricList.value[index].time
+                )
             }
         }
     }
 
-    override fun onMediaDisConnected(controller: MediaController) {
-        currentDuration?.cancel()
-    }
-
-    override fun onMediaPlayerStateChanged(isPlaying: Boolean) {
-        _playerState.value = isPlaying
-    }
-
-    override fun onMediaPlayBackStateChange(playerState: Int) {
-        val browser = browser ?: return
-        when (playerState) {
-            Player.STATE_READY -> {
-                maxValue.value = (browser.duration).toFloat()
+    fun getStartIndex(position: Long): Int {
+        return if (lyricList.value.isNotEmpty()) {
+            val item = lyricList.value.findLast {
+                it.time!! <= position
             }
+            if (item == null) {
+                -1
+            } else {
+                lyricList.value.indexOf(item)
+            }
+        } else {
+            0
+        }
+    }
+
+    fun getStartToNext(nextIndex: Int, start: Long): Long {
+        return if (nextIndex >= lyricList.value.size) {
+            Long.MAX_VALUE
+        } else {
+            lyricList.value[nextIndex].time!! - start
         }
     }
 
@@ -181,7 +226,7 @@ class PlayingViewModel @Inject constructor(
     private fun getLocalLyrics(uri: Uri?): String {
         return if (taglibLibrary.isAvailable) {
             try {
-                getApplication<Application>().contentResolver.openFileDescriptor(
+                mediaConnect.context.contentResolver.openFileDescriptor(
                     uri!!,
                     "r"
                 )?.use {
@@ -196,12 +241,11 @@ class PlayingViewModel @Inject constructor(
     }
 
     private suspend fun getNetLyrics(id: String): String {
-        return repository.selectLyrics(id)
+        return netRepository.selectLyrics(id)
     }
 
-
     private fun updateCurrentPlayList() {
-        val browser = browser ?: return
+        val browser = this.browser ?: return
         val list = mutableListOf<MediaData>()
         for (i in 0 until browser.mediaItemCount) {
             val item = browser.getMediaItemAt(i)
@@ -219,14 +263,45 @@ class PlayingViewModel @Inject constructor(
         }
     }
 
-    fun seekTo(position: Long) {
-        val browser = browser ?: return
-        browser.seekTo(position)
-        currentPosition.value = position.toFloat()
-        if (lyricsCanScroll.value) {
-            setLyricsItem(getStartIndex(position))
+
+
+    fun getMusicDuration(): Long {
+        val browser = this.browser ?: return 0L
+        return if (browser.currentPosition < 0) {
+            0L
+        } else {
+            browser.currentPosition
         }
     }
+
+
+//    suspend fun removeSheetItem(item: MediaItem, sheetItem: MediaItem): String {
+//        val parentId = sheetItem.mediaId
+//        val sheetId = Uri.parse(parentId).lastPathSegment
+//        val musicId = Uri.parse(item.mediaId).lastPathSegment
+//        return try {
+//            if (parentId.isLocal()) {
+//                val result = repository.removeSheetItem(sheetId!!, musicId!!)
+//                if (result == 1) "成功移除" else "移除失败"
+//            } else {
+//                netRepository.removeSheetItem(sheetId!!, musicId!!).msg
+//            }
+//        } catch (e: Exception) {
+//            "error"
+//        }
+//    }
+
+    fun removePlayItem(position: Int) {
+        val browser = this.browser?: return
+        browser.removeMediaItem(position)
+        updateCurrentPlayList()
+    }
+
+    fun getLastMediaIndex(): Int {
+        return preferenceManager.lastMediaIndex
+    }
+
+
 
     fun getNextIndex(position: Long): Int {
         val startIndex = getStartIndex(position)
@@ -240,147 +315,33 @@ class PlayingViewModel @Inject constructor(
         }
     }
 
-    fun getStartIndex(position: Long): Int {
-        return if (lyricList.value.isNotEmpty()) {
-            val item = lyricList.value.findLast {
-                it.time!! <= position
-            }
-            if (item == null) {
-                -1
-            } else {
-                lyricList.value.indexOf(item)
-            }
-        } else {
-            0
-        }
-    }
-
-    fun setLyricsItem(startIndex: Int, shouldScroll: Boolean = false) {
-        if (lyricList.value.isNotEmpty()) {
-            val index = if (startIndex == -1) {
-                0
-            } else {
-                startIndex
-            }
-            _lyricsList.value = lyricList.value.toMutableList().map {
-                it.copy(
-                    isPlaying = it.time == lyricList.value[index].time
-                )
-            }
-        }
-    }
-
-    fun getStartToNext(nextIndex: Int, start: Long): Long {
-        return if (nextIndex >= lyricList.value.size) {
-            Long.MAX_VALUE
-        } else {
-            lyricList.value[nextIndex].time!! - start
-        }
-
-    }
-
-    fun getMusicDuration(): Long {
-        val browser = this.browser ?: return 0L
-        return if (browser.currentPosition < 0) {
-            0L
-        } else {
-            browser.currentPosition
-        }
-    }
-
-    fun addQueue(item: MediaItem, nextPlay: Boolean = false) {
+    fun seekTo(position: Long) {
         val browser = this.browser ?: return
-        if (nextPlay) {
-            browser.addMediaItem(browser.currentMediaItemIndex + 1, item)
-        } else {
-            browser.addMediaItem(item)
-        }
-        // 没有相关回调，直接手动更新
-        updateCurrentPlayList()
-    }
-
-    suspend fun insertMusicToSheet(mediaItem: MediaItem, parentId: String) {
-        val sheetId = Uri.parse(parentId).lastPathSegment
-        try {
-            if (parentId.isLocal()) {
-                useCase.insertSheetCase(mediaItem, sheetId!!.toInt())
-            } else {
-                val mediaId = Uri.parse(mediaItem.mediaId).lastPathSegment
-                repository.insertMusicToSheet(sheetId!!, mediaId!!)
-            }
-        } catch (e: MusicInsertError) {
-            withContext(Dispatchers.Main) {
-                Toast.makeText(getApplication(), "${e.message}", Toast.LENGTH_SHORT).show()
-            }
+        browser.seekTo(position)
+        currentPosition.value = position.toFloat()
+        if (lyricsCanScroll.value) {
+            setLyricsItem(getStartIndex(position))
         }
     }
 
-    fun removePlayItem(position: Int) {
-        val browser = browser ?: return
-        browser.removeMediaItem(position)
-        updateCurrentPlayList()
-    }
-
-    fun getLastMediaIndex(): Int {
-        return preferenceManager.lastMediaIndex
-    }
-
-    val moreArtistList = mutableStateOf(emptyList<MediaItem>())
-
-    fun selectArtistByMusicId(item: MediaItem) {
-        if (item.mediaId.isLocal()) {
-            val artistId: Long = item.mediaMetadata.extras?.getLong("artistId") ?: 0L
-            val parentId = "${LOCAL_ARTIST_ID}/$artistId"
-            moreArtistList.value =
-                listOf(localArtistList.value.find { it.mediaId == parentId }!!.mediaItem)
-        } else {
-            viewModelScope.launch {
-                moreArtistList.value =
-                    netRepository.selectArtistByMusicId(Uri.parse(item.mediaId)).data ?: emptyList()
-            }
-        }
-    }
-
-    fun clearArtist() {
-        moreArtistList.value = emptyList()
-    }
-
-    val moreAlbum = mutableStateOf(NULL_MEDIA_ITEM)
-
-    fun selectAlbumByMusicId(item: MediaItem) {
-        val albumId: Long = item.mediaMetadata.extras?.getLong("albumId") ?: 0L
-        if (item.mediaId.isLocal()) {
-            val parentId = "${LOCAL_ALBUM_ID}/$albumId"
-            moreAlbum.value = localAlbumList.value.find {it.mediaId == parentId }?.mediaItem ?: NULL_MEDIA_ITEM
-        } else {
-            viewModelScope.launch {
-                moreAlbum.value = netRepository.selectAlbumById(albumId.toString()).data ?: NULL_MEDIA_ITEM
-            }
-        }
-    }
-
-    fun clearAlbum() {
-        moreAlbum.value = NULL_MEDIA_ITEM
-    }
-
-    val itemColor = MutableStateFlow(Pair(Color.Black,Color.Black))
+    val itemColor = MutableStateFlow(Pair(Color.Black, Color.Black))
 
     val dark = MutableStateFlow(false)
 
-    fun putTransDark(isDark: Boolean){
+    fun putTransDark(isDark: Boolean) {
         dark.value = isDark
-        transformColor(browser?.currentMediaItem)
+        transformColor(mediaConnect.browser?.currentMediaItem)
     }
 
-    fun transformColor(item: MediaItem?,isDark:Boolean = dark.value){
-        item?:return
-        viewModelScope.launch(Dispatchers.IO){
+    fun transformColor(item: MediaItem?, isDark: Boolean = dark.value) {
+        item ?: return
+        viewModelScope.launch(Dispatchers.IO) {
             val result = PaletteUtils.resolveBitmap(
                 isDark,
                 composeUtils.coilToBitmap(item.mediaMetadata.artworkUri),
-                getApplication<Application>().getColor(R.color.black)
+                mediaConnect.context.getColor(R.color.black)
             )
-            itemColor.value = Pair(Color(result.first),Color(result.second))
+            itemColor.value = Pair(Color(result.first), Color(result.second))
         }
     }
 }

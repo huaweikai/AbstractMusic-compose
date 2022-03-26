@@ -16,7 +16,9 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hua.abstractmusic.ui.navigation.AppNavigation
 import com.hua.abstractmusic.ui.theme.AbstractMusicTheme
 import com.hua.abstractmusic.ui.utils.rememberWindowSizeClass
-import com.hua.abstractmusic.ui.viewmodels.*
+import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
+import com.hua.abstractmusic.ui.viewmodels.ThemeViewModel
+import com.hua.abstractmusic.ui.viewmodels.UserViewModel
 import com.hua.abstractmusic.utils.ComposeUtils
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -26,9 +28,7 @@ class MainActivity : MonetActivity() {
 
     private val playingViewModel by viewModels<PlayingViewModel>()
     private val themeViewModel by viewModels<ThemeViewModel>()
-    private val netViewModel by viewModels<NetViewModel>()
     private val userViewModel by viewModels<UserViewModel>()
-    private val localViewModel by viewModels<HomeViewModel>()
 
     @Inject
     lateinit var composeUtils: ComposeUtils
@@ -56,9 +56,7 @@ class MainActivity : MonetActivity() {
                     LocalThemeViewModel provides themeViewModel,
                     LocalScreenSize provides windowSize,
                     LocalComposeUtils provides composeUtils,
-                    LocalNetViewModel provides netViewModel,
                     LocalUserViewModel provides userViewModel,
-                    LocalHomeViewModel provides localViewModel,
                 ) {
                     AbstractMusicTheme(
                         monet,
@@ -70,26 +68,4 @@ class MainActivity : MonetActivity() {
             }
         }
     }
-
-    override fun onStart() {
-        super.onStart()
-//        playingViewModel.initializeController()
-//        localViewModel.initializeController()
-//        netViewModel.initializeController()
-//        userViewModel.initializeController()
-    }
-
-//    override fun onStop() {
-//        playingViewModel.releaseBrowser()
-//        localViewModel.releaseBrowser()
-//        netViewModel.releaseBrowser()
-//        userViewModel.releaseBrowser()
-//        Log.d("TAG", "onStop: ")
-//        super.onStop()
-//    }
-//
-//    override fun onDestroy() {
-//        super.onDestroy()
-//        Log.d("TAG", "onDestroy: ")
-//    }
 }

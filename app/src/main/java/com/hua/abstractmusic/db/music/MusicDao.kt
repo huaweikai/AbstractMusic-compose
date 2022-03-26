@@ -55,6 +55,9 @@ interface MusicDao {
     @Delete
     suspend fun removeSheetItem(sheetToMusic: SheetToMusic):Int
 
+    @Query("delete from sheettomusic where sheetId =:sheetId and musicId =:musicId")
+    suspend fun removeSheetItem(sheetId: Int,musicId:String):Int
+
     //删除歌单
     @Query("delete from sheet where sheetId = :sheetId")
     suspend fun deleteSheet(sheetId: String)

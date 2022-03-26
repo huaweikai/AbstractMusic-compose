@@ -31,7 +31,7 @@ fun LocalArtist(
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth(),
-        contentPadding = PaddingValues(bottom = bottomControllerHeight)
+        contentPadding = PaddingValues(top = 8.dp, bottom = bottomControllerHeight)
     ) {
         items(homeViewModel.localArtistList.value,
             key = { item -> item.mediaId }

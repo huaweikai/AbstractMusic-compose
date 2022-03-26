@@ -26,14 +26,15 @@ import androidx.media3.common.MediaItem
 import androidx.navigation.NavHostController
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.bean.ParcelizeMediaItem
+import com.hua.abstractmusic.bean.toNavType
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.other.NetWork
 import com.hua.abstractmusic.ui.LocalAppNavController
-import com.hua.abstractmusic.ui.LocalPlayingViewModel
+import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalPopWindow
 import com.hua.abstractmusic.ui.LocalPopWindowItem
+import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.*
-import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 import com.hua.abstractmusic.utils.getCacheDir
 import com.hua.abstractmusic.utils.isLocal
 import kotlinx.coroutines.launch
@@ -53,11 +54,10 @@ fun SheetDetail(
     sheetDetailViewModel: SheetDetailViewModel = hiltViewModel(),
 ) {
     DisposableEffect(Unit) {
-        sheetDetailViewModel.isLocal = mediaItem.mediaId.isLocal()
-        sheetDetailViewModel.sheetId = mediaItem.mediaId
-        sheetDetailViewModel.initializeController()
+        sheetDetailViewModel.parcelItem = mediaItem
+        sheetDetailViewModel.loadData()
         this.onDispose {
-            sheetDetailViewModel.releaseBrowser()
+            sheetDetailViewModel.removeListener()
         }
     }
     val contentResolver = LocalContext.current.contentResolver
@@ -103,10 +103,12 @@ fun SheetDetail(
 //            cropPicture.launch(CropParams(uri = it))
 //        }
 //    }
+    val state = sheetDetailViewModel.screenState.collectAsState()
     CompositionLocalProvider(
         LocalPopWindowItem provides item,
         LocalPopWindow provides popState
     ) {
+        val snackbarHostState = remember{ SnackbarHostState()}
         Scaffold(
             topBar = {
                 SmallTopAppBar(
@@ -118,6 +120,13 @@ fun SheetDetail(
                     },
                     modifier = Modifier.statusBarsPadding()
                 )
+            },
+            snackbarHost = {
+                SnackbarHost(hostState = snackbarHostState){
+                    Snackbar {
+                        Text(text = it.visuals.message)
+                    }
+                }
             }
         ) {
             Column(
@@ -127,7 +136,7 @@ fun SheetDetail(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (!mediaItem.mediaId.isLocal()) {
-                    when (sheetDetailViewModel.screenState.value) {
+                    when (state.value) {
                         is LCE.Success -> {
                             Detail_Net_Success(
                                 sheetDetailViewModel
@@ -156,7 +165,8 @@ fun SheetDetail(
                 }
             }
             SheetPopWindow(
-                sheetDetailViewModel = sheetDetailViewModel
+                sheetDetailViewModel = sheetDetailViewModel,
+                snackbarHostState = snackbarHostState
             )
         }
     }
@@ -195,9 +205,9 @@ fun Detail_Success(
                 popWindowState.value = true
                 popWindowItem.value = item.mediaItem
             }, onClick = {
-                sheetDetailViewModel.setPlaylist(
+                sheetDetailViewModel.setPlayList(
                     index,
-                    sheetDetailViewModel.sheetDetailList.value
+                    sheetDetailViewModel.sheetDetailList.value.map { it.mediaItem }
                 )
             })
         }
@@ -236,6 +246,7 @@ private fun Detail_Net_Success(
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
+            .padding(PaddingValues(bottom = LocalBottomControllerHeight.current.coerceAtLeast(16.dp)))
     ) {
         itemsIndexed(sheetDetailViewModel.sheetDetailList.value) { index, item ->
             MusicItem(data = item,
@@ -243,9 +254,9 @@ private fun Detail_Net_Success(
                     popWindowState.value = true
                     popWindowItem.value = item.mediaItem
                 }, onClick = {
-                    sheetDetailViewModel.setPlaylist(
+                    sheetDetailViewModel.setPlayList(
                         index,
-                        sheetDetailViewModel.sheetDetailList.value
+                        sheetDetailViewModel.sheetDetailList.value.map { it.mediaItem }
                     )
                 }
             )
@@ -257,14 +268,18 @@ private fun Detail_Net_Success(
 @Composable
 fun SheetPopWindow(
     sheetDetailViewModel: SheetDetailViewModel,
+    snackbarHostState:SnackbarHostState,
     state: MutableState<Boolean> = LocalPopWindow.current,
     item: MediaItem = LocalPopWindowItem.current.value,
-    viewModel: PlayingViewModel = LocalPlayingViewModel.current,
     config: Configuration = LocalConfiguration.current,
+    navController: NavHostController = LocalAppNavController.current
 ) {
     val scope = rememberCoroutineScope()
+    val artistPop = remember{ mutableStateOf(false)}
+    val sheetPop = remember { mutableStateOf(false)}
     val context = LocalContext.current
     if (state.value) {
+        sheetDetailViewModel.selectAlbumByMusicId(item)
         Dialog(onDismissRequest = { state.value = false }) {
             Column(
                 modifier = Modifier
@@ -298,21 +313,70 @@ fun SheetPopWindow(
                 Divider()
                 Spacer(modifier = Modifier.height(8.dp))
                 PopItem(desc = "添加到播放队列") {
-                    viewModel.addQueue(item)
+                    sheetDetailViewModel.addQueue(item)
                 }
                 PopItem(desc = "添加到下一曲播放") {
-                    viewModel.addQueue(item, true)
+                    sheetDetailViewModel.addQueue(item, true)
                 }
-                PopItem(desc = "移出当前歌单") {
-                    scope.launch {
-                        val result = sheetDetailViewModel.removeNetSheetItem(item.mediaId)
-                        if (result.code != NetWork.SUCCESS) {
-                            Toast.makeText(context, result.msg, Toast.LENGTH_SHORT).show()
-                        }
-                    }
+                PopItem(desc = "添加到歌单") {
+                    sheetDetailViewModel.refresh(item.mediaId.isLocal())
                     state.value = false
+                    sheetPop.value = true
+                }
+                PopItem(desc = "歌手:${item.mediaMetadata.artist}") {
+                    sheetDetailViewModel.selectArtistByMusicId(item)
+                    state.value = false
+                    artistPop.value = true
+                }
+                PopItem(desc = "专辑:${item.mediaMetadata.albumTitle}") {
+                    state.value = false
+                    navController.navigate("${Screen.AlbumDetailScreen.route}?mediaItem=${sheetDetailViewModel.moreAlbum.value.toNavType()}")
+                    sheetDetailViewModel.clearAlbum()
+                }
+                if(sheetDetailViewModel.hasPermission()){
+                    PopItem(desc = "移出当前歌单") {
+                        scope.launch {
+                            val result = sheetDetailViewModel.removeNetSheetItem(item.mediaId)
+                            if (result.code != NetWork.SUCCESS) {
+                                Toast.makeText(context, result.msg, Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        state.value = false
+                    }
                 }
             }
         }
+    }
+
+    PopItemLayout(state = sheetPop, onDismiss = {}, title = {
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(text = "歌单", fontSize = 22.sp, modifier = Modifier.padding(start = 16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+    }, popItems = sheetDetailViewModel.sheetList.value.map {
+        PopItems("${it.mediaMetadata.title}") {
+            scope.launch {
+                sheetDetailViewModel.insertMusicToSheet(
+                    mediaItem = item,
+                    sheetItem = it
+                ).let {
+                    snackbarHostState.showSnackbar(it.second)
+                }
+                sheetPop.value = false
+            }
+        }
+    })
+
+    if (sheetDetailViewModel.moreArtistList.value.isNotEmpty()) {
+        PopItemLayout(state = artistPop, onDismiss = { sheetDetailViewModel.clearArtist() }, title = {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "歌手", fontSize = 22.sp, modifier = Modifier.padding(start = 16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+        }, popItems = sheetDetailViewModel.moreArtistList.value.map {
+            PopItems(title = "${it.mediaMetadata.title}") {
+                artistPop.value = false
+                navController.navigate("${Screen.ArtistDetailScreen.route}?mediaItem=${it.toNavType()}")
+                sheetDetailViewModel.clearArtist()
+            }
+        })
     }
 }

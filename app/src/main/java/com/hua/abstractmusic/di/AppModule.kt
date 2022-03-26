@@ -28,6 +28,7 @@ import com.hua.abstractmusic.use_case.sheet.GetSheetMusicBySheetId
 import com.hua.abstractmusic.use_case.sheet.InsertSheetCase
 import com.hua.abstractmusic.utils.ComposeUtils
 import com.hua.abstractmusic.utils.KEY
+import com.hua.abstractmusic.utils.UpLoadFile
 import com.hua.blur.BlurLibrary
 import com.hua.taglib.TaglibLibrary
 import com.obs.services.ObsClient
@@ -99,9 +100,10 @@ object AppModule {
     fun provideUserRepository(
         service: UserService,
         dao: UserDao,
-        obsClient: ObsClient,
-        userInfoData: UserInfoData
-    ) = UserRepository(service,dao,obsClient,userInfoData)
+        musicDao: MusicDao,
+        userInfoData: UserInfoData,
+        upLoadFile: UpLoadFile
+    ) = UserRepository(service,dao,musicDao,userInfoData,upLoadFile)
 
     @Provides
     @Singleton
@@ -197,4 +199,10 @@ object AppModule {
     @Provides
     @Singleton
     fun provideBlurLib() = BlurLibrary()
+
+    @Provides
+    @Singleton
+    fun provideUpLoadFile(
+        obsClient: ObsClient
+    ) = UpLoadFile(obsClient)
 }

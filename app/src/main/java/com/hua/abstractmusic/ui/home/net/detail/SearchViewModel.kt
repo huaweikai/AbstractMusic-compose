@@ -1,22 +1,20 @@
 package com.hua.abstractmusic.ui.home.net.detail
 
-import android.app.Application
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.focus.FocusState
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
-import com.hua.abstractmusic.base.viewmodel.BaseBrowserViewModel
+import com.hua.abstractmusic.base.viewmodel.BaseViewModel
 import com.hua.abstractmusic.bean.net.NetData
 import com.hua.abstractmusic.bean.user.SearchHistory
 import com.hua.abstractmusic.db.user.UserDao
 import com.hua.abstractmusic.other.NetWork.ERROR
 import com.hua.abstractmusic.other.NetWork.SERVER_ERROR
 import com.hua.abstractmusic.repository.NetRepository
-import com.hua.abstractmusic.services.MediaItemTree
+import com.hua.abstractmusic.services.MediaConnect
 import com.hua.abstractmusic.ui.utils.LCE
-import com.hua.abstractmusic.use_case.UseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,12 +26,10 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    application: Application,
-    useCase: UseCase,
-    itemTree: MediaItemTree,
+    mediaConnect: MediaConnect,
     private val netRepository: NetRepository,
     private val userDao: UserDao
-) : BaseBrowserViewModel(application, useCase, itemTree) {
+) : BaseViewModel(mediaConnect) {
     private val _searchText = mutableStateOf(ChangeText(hint = "搜你想要的"))
     val searchText: State<ChangeText> = _searchText
 

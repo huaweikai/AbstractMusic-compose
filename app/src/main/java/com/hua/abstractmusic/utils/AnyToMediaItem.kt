@@ -11,44 +11,12 @@ import com.hua.abstractmusic.bean.net.NetAlbum
 import com.hua.abstractmusic.bean.net.NetArtist
 import com.hua.abstractmusic.bean.net.NetMusic
 import com.hua.abstractmusic.bean.net.NetSheet
-import java.text.SimpleDateFormat
-import java.util.*
 
 /**
  * @author : huaweikai
  * @Date   : 2021/11/28
  * @Desc   : more
  */
-fun Long.toTime(): String {
-    val simpleDateFormat = SimpleDateFormat("mm:ss", Locale.CHINESE)
-    val date = Date(this)
-    return simpleDateFormat.format(date)
-}
-
-fun Long.toDate(): String {
-    val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINESE)
-    val date = Date(this)
-    return simpleDateFormat.format(date)
-}
-
-fun String.toTime(): Long {
-    val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.CHINESE)
-    return try {
-        simpleDateFormat.parse(this)!!.time
-    } catch (e: Throwable) {
-        0
-    }
-}
-
-fun Long.toYear(): Int? {
-    val simpleDateFormat = SimpleDateFormat("yyyy", Locale.CHINESE)
-    return try {
-        simpleDateFormat.format(Date(this)).toIntOrNull()
-    } catch (e: Exception) {
-        null
-    }
-}
-
 @SuppressLint("UnsafeOptInUsageError")
 fun NetAlbum.toMediaItem(parentId: Uri): MediaItem {
     return MediaItem.Builder()

@@ -13,10 +13,7 @@ import androidx.compose.material.TabRowDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -60,17 +57,18 @@ fun LocalArtistDetail(
     viewModel: ArtistDetailViewModel = hiltViewModel()
 ) {
     val state = rememberCollapsingToolbarScaffoldState()
-    LaunchedEffect(Unit){
+    LaunchedEffect(Unit) {
         viewModel.isLocal = item.mediaId.isLocal()
         viewModel.artistId = item.mediaId
-        viewModel.initializeController()
+        viewModel.loadData()
     }
     DisposableEffect(Unit) {
         this.onDispose {
-            viewModel.releaseBrowser()
+            viewModel.removeListener()
         }
     }
-    Surface{
+    val screenState = viewModel.screenState.collectAsState()
+    Surface {
         CollapsingToolbarScaffold(
             modifier = Modifier.fillMaxSize(),
             state = state,
@@ -132,39 +130,42 @@ fun LocalArtistDetail(
             }
         ) {
             Column {
-//            if(isLocal){
-//                ArtistHorizontalPager(
-//                    viewModel = viewModel,
-//                    modifier = Modifier
-//                        .fillMaxSize()
-////                        .background(MaterialTheme.colorScheme.background)
-//                )
-//            }else{
-                when (viewModel.screenState.value) {
-                    is LCE.Loading -> {
-                        Column(
-                            Modifier.fillMaxSize().padding(top = 16.dp),
-                            verticalArrangement = Arrangement.Top,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            CircularProgressIndicator()
+                if (viewModel.isLocal) {
+                    ArtistHorizontalPager(
+                        viewModel = viewModel,
+                        modifier = Modifier
+                            .fillMaxSize()
+//                        .background(MaterialTheme.colorScheme.background)
+                    )
+                } else {
+                    when (screenState.value) {
+                        is LCE.Loading -> {
+                            Column(
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(top = 16.dp),
+                                verticalArrangement = Arrangement.Top,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                        is LCE.Error -> {
+
+                        }
+                        is LCE.Success -> {
+                            ArtistHorizontalPager(
+                                viewModel = viewModel,
+                                modifier = Modifier
+                                    .fillMaxSize()
+//                                .background(MaterialTheme.colorScheme.background)
+                            )
                         }
                     }
-                    is LCE.Error -> {
-
-                    }
-                    is LCE.Success -> {
-                        ArtistHorizontalPager(
-                            viewModel = viewModel,
-                            modifier = Modifier
-                                .fillMaxSize()
-//                                .background(MaterialTheme.colorScheme.background)
-                        )
-                    }
                 }
-            }
 
 //        }
+            }
         }
     }
 }
@@ -225,7 +226,7 @@ private fun ArtistHorizontalPager(
                             isDetail = true,
                             index = index,
                             onClick = {
-                                viewModel.setPlaylist(index, viewModel.artistDetail.value)
+                                viewModel.setPlayList(index, viewModel.artistDetail.value.map { it.mediaItem })
                             }
                         )
                     }

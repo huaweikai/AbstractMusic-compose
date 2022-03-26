@@ -48,7 +48,9 @@ class InsertSheetCase(
                 artist = "$artist",
                 trackerNumber = trackNumber,
                 mediaUri = "$mediaUri",
-                albumUri = "$artworkUri"
+                albumUri = "$artworkUri",
+                artistId = extras?.getLong("artistId") ?:0L,
+                albumId = extras?.getLong("albumId") ?: 0L
             ).also {
                 if(sheet.artUri == null){
                     repository.insertSheet(sheet.copy(

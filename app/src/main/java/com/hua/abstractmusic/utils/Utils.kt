@@ -12,8 +12,12 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.core.content.contentValuesOf
+import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.other.Constant.LOCAL
+import com.hua.abstractmusic.preference.UserInfo
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * @author : huaweikai
@@ -51,6 +55,53 @@ fun String.isLocal():Boolean {
     val type = Uri.parse(this).authority
     return type?.startsWith(LOCAL) ?: true
 }
+
+fun String.isSheet(userInfo: UserInfo):Boolean{
+    val type = Uri.parse(this).authority
+    if(this.isLocal()){
+        return type?.startsWith(Constant.TYPE_LOCAL_SHEET) ?: true
+    }else{
+        return type?.startsWith(userInfo.userToken) ?: true
+    }
+}
+
+
+fun Long.toTime(): String {
+    val simpleDateFormat = SimpleDateFormat("mm:ss", Locale.CHINESE)
+    val date = Date(this)
+    return simpleDateFormat.format(date)
+}
+
+fun Long.toDate(): String {
+    val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINESE)
+    val date = Date(this)
+    return simpleDateFormat.format(date)
+}
+
+fun Long.toDay(): String {
+    val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.CHINESE)
+    val date = Date(this)
+    return simpleDateFormat.format(date)
+}
+
+fun String.toTime(): Long {
+    val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.CHINESE)
+    return try {
+        simpleDateFormat.parse(this)!!.time
+    } catch (e: Throwable) {
+        0
+    }
+}
+
+fun Long.toYear(): Int? {
+    val simpleDateFormat = SimpleDateFormat("yyyy", Locale.CHINESE)
+    return try {
+        simpleDateFormat.format(Date(this)).toIntOrNull()
+    } catch (e: Exception) {
+        null
+    }
+}
+
 val Int.textDp: TextUnit
     @Composable get() =  this.textDp(density = LocalDensity.current)
 

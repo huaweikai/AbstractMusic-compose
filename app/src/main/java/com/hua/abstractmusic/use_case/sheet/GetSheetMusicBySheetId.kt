@@ -2,6 +2,7 @@ package com.hua.abstractmusic.use_case.sheet
 
 import android.annotation.SuppressLint
 import android.net.Uri
+import android.os.Bundle
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import com.hua.abstractmusic.repository.Repository
@@ -28,6 +29,12 @@ class GetSheetMusicBySheetId(
                 .setAlbumTitle(it.album)
                 .setSubtitle(it.displaySubtitle)
                 .setFolderType(it.browserType)
+                .setExtras(
+                    Bundle().apply {
+                        putLong("artistId",it.artistId)
+                        putLong("albumId",it.albumId)
+                    }
+                )
                 .setMediaUri(Uri.parse(it.mediaUri))
                 .build()
             mediaItems.add(

@@ -1,31 +1,26 @@
 package com.hua.abstractmusic.ui.utils
 
 import android.annotation.SuppressLint
-import android.content.res.Configuration
-import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.media3.common.MediaItem
-import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
@@ -33,15 +28,8 @@ import coil.transform.Transformation
 import com.airbnb.lottie.compose.*
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.MediaData
-import com.hua.abstractmusic.bean.toNavType
-import com.hua.abstractmusic.ui.LocalAppNavController
-import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.LocalPopWindow
 import com.hua.abstractmusic.ui.LocalPopWindowItem
-import com.hua.abstractmusic.ui.route.Screen
-import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
-import com.hua.abstractmusic.utils.isLocal
-import kotlinx.coroutines.launch
 
 
 /**
@@ -116,11 +104,13 @@ fun MusicItem(
 //                            color = MaterialTheme.colorScheme.onBackground
                         )
                     } else {
-                        ArtImage(
+                        CoilImage(
                             modifier = Modifier.size(50.dp),
-                            uri = data.mediaItem.mediaMetadata.artworkUri!!,
-                            transformation = RoundedCornersTransformation(5f),
-                            desc = "专辑图"
+                            url = data.mediaItem.mediaMetadata.artworkUri,
+                            builder = {
+                                transformations(RoundedCornersTransformation(5f))
+                            },
+                            contentDescription = "专辑图",
                         )
                     }
                 }
@@ -174,7 +164,6 @@ fun ArtImage(
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
             .apply {
-//                placeholder(R.drawable.ic_music_launcher)
                 data(uri)
                 error(R.drawable.music)
                 transformations(transformation)
@@ -184,192 +173,4 @@ fun ArtImage(
         modifier = modifier,
         contentScale = contentScale
     )
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnsafeOptInUsageError")
-@Composable
-fun PopupWindow(
-    state: MutableState<Boolean> = LocalPopWindow.current,
-    item: MediaItem = LocalPopWindowItem.current.value,
-    config: Configuration = LocalConfiguration.current,
-    viewModel: PlayingViewModel = LocalPlayingViewModel.current,
-    homeNavController: NavHostController = LocalAppNavController.current
-) {
-    val sheetPop = remember {
-        mutableStateOf(false)
-    }
-    val artistPop = remember {
-        mutableStateOf(false)
-    }
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    viewModel.selectAlbumByMusicId(item)
-    if (state.value) {
-        Dialog(
-            onDismissRequest = {
-                state.value = false
-                viewModel.clearAlbum()
-            }
-        ) {
-            Column(
-                modifier = Modifier
-                    .width((config.screenWidthDp * 0.75).dp)
-                    .heightIn(max = (config.screenHeightDp * 0.6).dp)
-                    .padding(horizontal = 8.dp)
-                    .background(MaterialTheme.colorScheme.background, RoundedCornerShape(12.dp))
-            ) {
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(90.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    ArtImage(
-                        modifier = Modifier.size(80.dp),
-                        uri = item.mediaMetadata.artworkUri,
-                        desc = "",
-                        transformation = RoundedCornersTransformation(16f)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Column(Modifier.fillMaxHeight(), verticalArrangement = Arrangement.Center) {
-                        TitleAndArtist(
-                            title = "${item.mediaMetadata.title}",
-                            subTitle = "${item.mediaMetadata.artist}",
-                            height = 4.dp
-                        )
-                    }
-                }
-                Divider()
-                Spacer(modifier = Modifier.height(8.dp))
-                PopItem(desc = "添加到播放队列") {
-                    viewModel.addQueue(item)
-                    Toast.makeText(context, "已添加到队列中", Toast.LENGTH_SHORT).show()
-                    state.value = false
-                }
-                PopItem(desc = "添加到下一曲播放") {
-                    viewModel.addQueue(item, true)
-                    Toast.makeText(context, "已添加到队列中", Toast.LENGTH_SHORT).show()
-                    state.value = false
-                }
-                PopItem(desc = "添加到歌单") {
-                    viewModel.refresh()
-                    state.value = false
-                    sheetPop.value = true
-                }
-                PopItem(desc = "歌手:${item.mediaMetadata.artist}") {
-                    viewModel.selectArtistByMusicId(item)
-                    state.value = false
-                    artistPop.value = true
-                }
-                PopItem(desc = "专辑:${item.mediaMetadata.albumTitle}") {
-                    state.value = false
-                    homeNavController.navigate("${Screen.AlbumDetailScreen.route}?mediaItem=${viewModel.moreAlbum.value.toNavType()}")
-                    viewModel.clearAlbum()
-                }
-            }
-        }
-    }
-    if (sheetPop.value) {
-        Dialog(onDismissRequest = {
-            sheetPop.value = false
-        }) {
-            val sheets = if (item.mediaId.isLocal()) {
-                viewModel.localSheetList.value
-            } else {
-                viewModel.netSheetList.value
-            }.map { it.mediaItem }
-            PopMoreLayout(list = sheets, title = "歌单", onClick = {
-                scope.launch {
-                    viewModel.insertMusicToSheet(
-                        mediaItem = item,
-                        parentId = it.mediaId
-                    )
-                    sheetPop.value = false
-                }
-                sheetPop.value = false
-            })
-        }
-    }
-
-    if (artistPop.value && viewModel.moreArtistList.value.isNotEmpty()) {
-        Dialog(onDismissRequest = {
-            artistPop.value = false
-            viewModel.clearArtist()
-        }) {
-            PopMoreLayout(list = viewModel.moreArtistList.value, title = "歌手", onClick = {
-                artistPop.value = false
-                homeNavController.navigate("${Screen.ArtistDetailScreen.route}?mediaItem=${it.toNavType()}")
-                viewModel.clearArtist()
-            })
-        }
-    }
-}
-
-@SuppressLint("UnsafeOptInUsageError")
-@Composable
-fun PopMoreLayout(
-    config: Configuration = LocalConfiguration.current,
-    list: List<MediaItem>,
-    title: String,
-    onClick: (MediaItem) -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .width((config.screenWidthDp * 0.75).dp)
-            .padding(horizontal = 8.dp)
-            .background(MaterialTheme.colorScheme.background, RoundedCornerShape(8.dp))
-    ) {
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(text = title, fontSize = 22.sp, modifier = Modifier.padding(start = 16.dp))
-        Spacer(modifier = Modifier.height(16.dp))
-        if (list.isNotEmpty()) {
-            Divider()
-            Spacer(modifier = Modifier.height(8.dp))
-            LazyColumn(
-                Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = (config.screenHeightDp * 0.4).dp)
-            ) {
-                items(list) { item ->
-                    PopItem(desc = "${item.mediaMetadata.title}") {
-                        onClick(item)
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PopItem(
-    desc: String,
-    onClick: () -> Unit
-) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp)
-            .height(50.dp)
-            .background(
-                MaterialTheme.colorScheme.background,
-                RoundedCornerShape(8.dp)
-            )
-            .clickable {
-                onClick()
-            },
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = desc,
-            fontSize = 16.sp,
-            maxLines = 1,
-            textAlign = TextAlign.Start,
-        )
-    }
 }

@@ -57,7 +57,7 @@ class Repository(
     }
 
     suspend fun removeSheetItem(sheetId: String,musicId:String):Int{
-        return dao.removeSheetItem(SheetToMusic(sheetId.toInt(),musicId))
+        return dao.removeSheetItem(sheetId.toInt(),musicId)
     }
 
     suspend fun removeSheet(sheetId:String){

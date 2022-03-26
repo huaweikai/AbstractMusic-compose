@@ -69,12 +69,12 @@ fun LocalAlbumDetail(
         bitmap.value = composeUtils.coilToBitmap(item.artUri).blur(50)
         detailViewModel.id = item.mediaId
         detailViewModel.isLocal = isLocal
-        detailViewModel.initializeController()
+        detailViewModel.loadData()
     }
 
     DisposableEffect(Unit) {
         this.onDispose {
-            detailViewModel.releaseBrowser()
+            detailViewModel.removeListener()
         }
     }
     Box(modifier = Modifier.fillMaxSize()) {
@@ -148,9 +148,9 @@ fun AlbumShow(
         item {
             AlbumDetailDesc(item = item)
         }
-//        if (isLocal) {
-//            albumItems(detailViewModel)
-//        } else {
+        if (isLocal) {
+            albumItems(detailViewModel)
+        } else {
             when (detailViewModel.screenState.value) {
                 is LCE.Loading -> {
                     item {
@@ -170,9 +170,9 @@ fun AlbumShow(
                     albumItems(detailViewModel)
                 }
             }
-//        }
-        item {
-            AlbumDetailTail(item = item)
+            item {
+                AlbumDetailTail(item = item)
+            }
         }
     }
 }
@@ -188,7 +188,7 @@ private fun LazyListScope.albumItems(
             isDetail = true,
             index = index,
             onClick = {
-                detailViewModel.setPlaylist(index, detailViewModel.albumDetail.value)
+                detailViewModel.setPlayList(index, detailViewModel.albumDetail.value.map { it.mediaItem })
             }
         )
     }

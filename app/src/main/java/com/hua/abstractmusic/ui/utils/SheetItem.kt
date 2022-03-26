@@ -20,15 +20,15 @@ import coil.transform.RoundedCornersTransformation
 @Composable
 fun SheetItem(
     item: MediaItem,
-    onClick:(String)->Unit
+    onClick:(MediaItem)->Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
-            .padding(horizontal = 8.dp)
+            .padding(horizontal = 8.dp, vertical = 8.dp)
             .clickable {
-                onClick(item.mediaId)
+                onClick(item)
             }
     ) {
         CoilImage(

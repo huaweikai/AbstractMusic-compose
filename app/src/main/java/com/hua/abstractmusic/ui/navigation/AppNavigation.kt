@@ -1,6 +1,7 @@
 package com.hua.abstractmusic.ui.navigation
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -14,7 +15,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material3.Surface
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +35,8 @@ import com.google.accompanist.navigation.material.BottomSheetNavigator
 import com.google.accompanist.navigation.material.ModalBottomSheetLayout
 import com.google.accompanist.navigation.material.bottomSheet
 import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.PagerState
+import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.bean.NavTypeMediaItem
 import com.hua.abstractmusic.bean.defaultParcelizeMediaItem
 import com.hua.abstractmusic.other.Constant
@@ -66,12 +69,15 @@ import kotlinx.coroutines.launch
 
 val controllerDone = listOf(
     Screen.PlayScreen.route,
-    Screen.PlayListScreen.route
+    Screen.PlayListScreen.route,
+    Screen.Splash.route,
+    Screen.HelloScreen.route
 )
 
 @OptIn(
     ExperimentalAnimationApi::class,
-    com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi::class
+    com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi::class,
+    androidx.compose.material3.ExperimentalMaterial3Api::class
 )
 @ExperimentalPagerApi
 @ExperimentalFoundationApi
@@ -90,34 +96,56 @@ fun AppNavigation(
     val density = LocalDensity.current
     val playingViewModel = LocalPlayingViewModel.current
     val sheetState =
-        rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+        rememberModalBottomSheetState(ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
     val bottomSheetNavigator = remember {
         BottomSheetNavigator(sheetState)
     }
-    val playScreenState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden,skipHalfExpanded = true)
     val controller = rememberNavController(bottomSheetNavigator)
+    val scope = rememberCoroutineScope()
 
     val popupWindow = remember {
         mutableStateOf(false)
     }
+    val snackBarHostState = remember { SnackbarHostState() }
     val popItem = remember {
         mutableStateOf(Constant.NULL_MEDIA_ITEM)
     }
+    val viewPageState = rememberPagerState(1)
     CompositionLocalProvider(
         LocalAppNavController provides controller,
         LocalBottomControllerHeight provides bottomControllerHeight,
-//        LocalNavigationHeight provides bottomNavigationHeight,
+        LocalAppSnackBar provides snackBarHostState,
         LocalPopWindowItem provides popItem,
         LocalPopWindow provides popupWindow,
     ) {
-        PlayScreen(state = playScreenState) {
-            Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            snackbarHost = {
+                SnackbarHost(hostState = snackBarHostState) { data ->
+                    Snackbar(
+                        modifier = Modifier.padding(
+                            PaddingValues(
+                                start = 16.dp,
+                                end = 16.dp,
+                                bottom = bottomNavigationHeight.value.coerceAtLeast(80.dp)
+                            )
+                        )
+                    ) {
+                        Text(text = data.visuals.message)
+                    }
+                }
+            }
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it)
+            ) {
                 ModalBottomSheetLayout(bottomSheetNavigator = bottomSheetNavigator) {
                     NavHost(
                         navController = LocalAppNavController.current,
                         startDestination = Screen.Splash.route
                     ) {
-                        router(sheetState, bottomNavigationHeight)
+                        router(sheetState, bottomNavigationHeight,viewPageState)
                     }
                 }
                 MusicController(
@@ -133,7 +161,6 @@ fun AppNavigation(
                         .onSizeChanged {
                             bottomControllerHeight = with(density) { it.height.toDp() + 16.dp }
                         },
-                    playScreenState = playScreenState
                 )
             }
             PopupWindow()
@@ -142,7 +169,15 @@ fun AppNavigation(
     LaunchedEffect(key1 = themeViewModel.isReady) {
         if (!themeViewModel.isReady.value) themeViewModel.init()
     }
+    val isConnect = playingViewModel.isConnect.collectAsState()
+    LaunchedEffect(isConnect.value) {
+        if (isConnect.value) {
+            playingViewModel.setController()
+        }
+    }
 }
+
+
 
 @OptIn(
     ExperimentalFoundationApi::class,
@@ -152,7 +187,8 @@ fun AppNavigation(
 )
 fun NavGraphBuilder.router(
     sheetPlayState: ModalBottomSheetState,
-    bottomNavigationHeight: MutableState<Dp>
+    bottomNavigationHeight: MutableState<Dp>,
+    viewPageState:PagerState
 ) {
     composable(route = Screen.Splash.route) {
         SplashScreen()
@@ -163,11 +199,6 @@ fun NavGraphBuilder.router(
     composable(route = Screen.HomeScreen.route) {
 
         HomeScreen(
-//            onBack = {
-//                scope.launch {
-//                    sheetPlayState.hide()
-//                }
-//            },
             onSizeChange = {
                 bottomNavigationHeight.value = it
             }
@@ -181,12 +212,6 @@ fun NavGraphBuilder.router(
             ) {
                 type = NavTypeMediaItem()
                 defaultValue = defaultParcelizeMediaItem
-            },
-            navArgument(
-                name = "isSearch"
-            ) {
-                type = NavType.BoolType
-                defaultValue = false
             }
         ),
     ) {
@@ -261,25 +286,16 @@ fun NavGraphBuilder.router(
         }
     }
     bottomSheet(Screen.PlayScreen.route) {
+        val scope = rememberCoroutineScope()
         Column(modifier = Modifier.fillMaxSize()) {
-            PlayScreen()
+            PlayScreen(viewPageState = viewPageState)
+            BackHandler(true) {
+                scope.launch {
+                    sheetPlayState.hide()
+                }
+            }
         }
     }
-
-    //        composable(
-//            route = "${Screen.NetDetailScreen.route}?type={type}",
-//            arguments = arrayListOf(
-//                navArgument(
-//                    name = "type"
-//                ) {
-//                    type = NavType.StringType
-//                    defaultValue = ALL_MUSIC_TYPE
-//                }
-//            )
-//        ) {
-//            val type = it.getValue("type", ALL_MUSIC_TYPE)
-//            NetDetail(type)
-//        }
 }
 
 @SuppressLint("UnsafeOptInUsageError")
@@ -287,7 +303,7 @@ fun NavGraphBuilder.router(
 @Composable
 fun MusicController(
     controller: NavHostController,
-    playScreenState:ModalBottomSheetState,
+//    playScreenState: ModalBottomSheetState,
     playingViewModel: PlayingViewModel,
     modifier: Modifier
 ) {
@@ -297,6 +313,7 @@ fun MusicController(
     }
     val backState = controller.currentBackStackEntryAsState().value
     LaunchedEffect(playingViewModel.currentPlayItem.value, backState) {
+        Log.d("TAG", "MusicController:${playingViewModel.currentPlayItem.value} ")
         if (playingViewModel.currentPlayItem.value != NULL_MEDIA_ITEM) {
             isVis.value = backState?.destination?.route !in controllerDone
         } else {
@@ -319,10 +336,10 @@ fun MusicController(
                     controller.navigate(Screen.PlayListScreen.route)
                 },
                 playScreenClick = {
-                    scope.launch {
-                        playScreenState.show()
-                    }
-//                    controller.navigate(Screen.PlayScreen.route)
+                    controller.navigate(Screen.PlayScreen.route)
+//                    scope.launch {
+//                        playScreenState.show()
+//                    }
                 })
         }
 

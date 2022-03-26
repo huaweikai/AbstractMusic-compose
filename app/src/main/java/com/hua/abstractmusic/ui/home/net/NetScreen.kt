@@ -20,6 +20,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.media3.common.MediaItem
 import androidx.navigation.NavHostController
 import coil.transform.RoundedCornersTransformation
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -27,12 +29,11 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.hua.abstractmusic.R
-import com.hua.abstractmusic.bean.MediaData
+import com.hua.abstractmusic.bean.net.HomeBean
 import com.hua.abstractmusic.bean.toNavType
 import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalComposeUtils
-import com.hua.abstractmusic.ui.LocalNetViewModel
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.*
 import com.hua.abstractmusic.ui.viewmodels.NetViewModel
@@ -48,13 +49,16 @@ import com.hua.abstractmusic.utils.PaletteUtils
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun NetScreen(
-    netViewModel: NetViewModel = LocalNetViewModel.current,
+    netViewModel: NetViewModel = hiltViewModel(),
     navHostController: NavHostController = LocalAppNavController.current
 ) {
 
     val appBarColors = TopAppBarDefaults.smallTopAppBarColors(
         containerColor = MaterialTheme.colorScheme.surface
     )
+
+    val state = netViewModel.screenState.collectAsState()
+
     Scaffold(
         topBar = {
             SmallTopAppBar(
@@ -76,17 +80,22 @@ fun NetScreen(
             )
         },
     ) {
+        val homeBean = netViewModel.homeData.collectAsState()
         SwipeRefresh(
-            state = rememberSwipeRefreshState(netViewModel.screenState.value == LCE.Loading),
+            state = rememberSwipeRefreshState(state.value == LCE.Loading),
             onRefresh = {
                 netViewModel.refresh()
             },
             modifier = Modifier
                 .padding(it)
         ) {
-            when (netViewModel.screenState.value) {
+            when (state.value) {
                 LCE.Loading -> {
-                    Loading()
+                    if (homeBean.value.isEmpty()) {
+                        Loading()
+                    } else {
+                        SuccessContent(netViewModel = netViewModel)
+                    }
                 }
                 LCE.Error -> {
                     Error {
@@ -110,6 +119,7 @@ private fun SuccessContent(
     navHostController: NavHostController = LocalAppNavController.current,
 ) {
     val height = LocalBottomControllerHeight.current
+    val data = netViewModel.homeData.collectAsState()
     LazyColumn(
         modifier = Modifier
             .fillMaxSize(),
@@ -119,26 +129,30 @@ private fun SuccessContent(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            HorizontalBanner(
-                netViewModel.bannerList.value.map {
-                    it.mediaItem.mediaMetadata.artworkUri
-                }
-            ) {
+            HorizontalBanner(data.value.banners?.map { it.mediaMetadata.artworkUri }
+                ?: emptyList()) {
                 navHostController.navigate(
                     "${Screen.AlbumDetailScreen.route}?mediaItem=${
-                        netViewModel.bannerList.value[it].mediaItem.toNavType()
+                        data.value.banners?.get(it)?.toNavType()
                     }"
                 )
             }
         }
         item {
-            RecommendSongList(netViewModel = netViewModel)
+            RecommendSongList(data.value)
         }
         item {
-            RecommendSheetList(netViewModel = netViewModel, navHostController)
+            RecommendSheetList(
+                netViewModel = netViewModel, data = data.value,
+                navHostController = navHostController
+            )
         }
         item {
-            RecommendAlbum(netViewModel = netViewModel, navHostController = navHostController)
+            RecommendAlbum(
+                netViewModel = netViewModel,
+                data = data.value,
+                navHostController = navHostController
+            )
         }
     }
 }
@@ -147,7 +161,7 @@ private fun SuccessContent(
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun RecommendSongList(
-    netViewModel: NetViewModel
+    data: HomeBean
 ) {
     RecommendTitle(
         recommendTitle = "大家都在听~",
@@ -181,9 +195,9 @@ private fun RecommendSongList(
                 .fillMaxWidth(),
             contentPadding = PaddingValues(start = 16.dp, end = 32.dp)
         ) { page ->
-            if (netViewModel.musicList.value.isNotEmpty()) {
+            if (data.songs?.isNotEmpty() == true) {
                 SongItems(
-                    netViewModel.musicList.value,
+                    data.songs,
                     page
                 )
             }
@@ -194,22 +208,23 @@ private fun RecommendSongList(
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 private fun RecommendSheetList(
+    data: HomeBean,
     netViewModel: NetViewModel,
     navHostController: NavHostController
 ) {
     RecommendTitle(recommendTitle = "最新歌单请查收~") {
-        LazyRow(contentPadding = PaddingValues(horizontal = 16.dp)){
-            if (netViewModel.recommendList.value.isNotEmpty() && netViewModel.recommendList.value.size == 12) {
+        LazyRow(contentPadding = PaddingValues(horizontal = 16.dp)) {
+            if (data.sheets?.isNotEmpty() == true) {
                 items(6) { index ->
-                    Column(Modifier.padding(end = 16.dp)){
+                    Column(Modifier.padding(end = 16.dp)) {
                         repeat(2) {
                             val i = if (it == 0) index else index + 6
-                            val item = netViewModel.recommendList.value[i]
+                            val item = data.sheets[i]
                             RecommendItem(item = item, onclick = {
-                                navHostController.navigate("${Screen.SheetDetailScreen.route}?mediaItem=${it.mediaItem.toNavType()}&isUser=false")
+                                navHostController.navigate("${Screen.SheetDetailScreen.route}?mediaItem=${it.toNavType()}")
                             }) {
 //                                netViewModel.recommendId = it.mediaId
-                                netViewModel.listInit(it.mediaId)
+                                netViewModel.listPlay(it.mediaId)
                             }
                         }
                     }
@@ -219,23 +234,28 @@ private fun RecommendSheetList(
     }
 }
 
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 private fun RecommendAlbum(
+    data: HomeBean,
     netViewModel: NetViewModel,
     navHostController: NavHostController
 ) {
     RecommendTitle(recommendTitle = "最新专辑") {
-        LazyRow(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(horizontal = 16.dp)) {
-            items(netViewModel.albumList.value) {
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 16.dp)
+        ) {
+            items(data.albums ?: emptyList()) {
                 Column(modifier = Modifier.padding(end = 16.dp)) {
                     RecommendItem(item = it, onclick = {
                         navHostController.navigate(
                             "${Screen.AlbumDetailScreen.route}?mediaItem=${
-                                it.mediaItem.toNavType()
+                                it.toNavType()
                             }"
                         )
                     }, onPlay = {
-                        netViewModel.listInit(it.mediaId)
+                        netViewModel.listPlay(it.mediaId)
                     })
                 }
             }
@@ -246,18 +266,18 @@ private fun RecommendAlbum(
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 private fun RecommendItem(
-    item: MediaData,
-    onclick: (MediaData) -> Unit,
-    onPlay: (MediaData) -> Unit
+    item: MediaItem,
+    onclick: (MediaItem) -> Unit,
+    onPlay: (MediaItem) -> Unit
 ) {
     val composeUtils = LocalComposeUtils.current
     val context = LocalContext.current
-    val background = remember(item.mediaItem) {
+    val background = remember(item) {
         mutableStateOf(Color.Gray)
     }
     LaunchedEffect(Unit) {
         val bitmap =
-            composeUtils.coilToBitmap(item.mediaItem.mediaMetadata.artworkUri)
+            composeUtils.coilToBitmap(item.mediaMetadata.artworkUri)
         val pair =
             PaletteUtils.resolveBitmap(
                 false,
@@ -283,7 +303,7 @@ private fun RecommendItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f),
-                url = item.mediaItem.mediaMetadata.artworkUri,
+                url = item.mediaMetadata.artworkUri,
                 contentDescription = "",
                 builder = { transformations(RoundedCornersTransformation(20f)) }
             )
@@ -302,7 +322,7 @@ private fun RecommendItem(
         }
         Spacer(modifier = Modifier.height(3.dp))
         Text(
-            text = "${item.mediaItem.mediaMetadata.title}",
+            text = "${item.mediaMetadata.title}",
             maxLines = 2,
             fontSize = 14.sp,
             overflow = TextOverflow.Ellipsis
@@ -342,14 +362,14 @@ private fun RecommendTitle(
 
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
-private fun SongItems(list: List<MediaData>, page: Int) {
+private fun SongItems(list: List<MediaItem>, page: Int) {
     Column(
         Modifier
             .fillMaxWidth(),
         verticalArrangement = Arrangement.Center
     ) {
         repeat(3) {
-            val data = list[page * 3 + it].mediaItem.mediaMetadata
+            val data = list[page * 3 + it].mediaMetadata
             Row(
                 Modifier
                     .fillMaxWidth()

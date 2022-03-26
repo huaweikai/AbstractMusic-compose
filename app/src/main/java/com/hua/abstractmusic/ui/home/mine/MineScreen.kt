@@ -27,9 +27,11 @@ fun MineScreen(
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        val result = viewModel.checkUser()
-        if (result.code == NetWork.SERVER_ERROR) {
-            Toast.makeText(context, result.msg, Toast.LENGTH_SHORT).show()
+        if(viewModel.userInfo.value.isLogin){
+            val result =  viewModel.checkUser()
+            if (result.code == NetWork.SERVER_ERROR) {
+                Toast.makeText(context, result.msg, Toast.LENGTH_SHORT).show()
+            }
         }
     }
     DisposableEffect(Unit) {

@@ -1,7 +1,6 @@
 package com.hua.abstractmusic.ui.play
 
 import android.annotation.SuppressLint
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -23,12 +22,10 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
-import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.ui.LocalMusicScreenSecondColor
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.play.detail.ListScreen
@@ -56,17 +53,12 @@ fun PlayScreen(
         modifier = Modifier
             .fillMaxSize(),
         sheetContent = {
-            val scope = rememberCoroutineScope()
-            PlayScreen()
-            BackHandler(true) {
-                scope.launch {
-                    state.hide()
-                }
-            }
+//            PlayScreen()
         },
         sheetShape = RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp),
         sheetBackgroundColor = if (isDark) Color.Black else Color.White
     ) {
+        val scope = rememberCoroutineScope()
         content()
     }
 }
@@ -75,10 +67,9 @@ fun PlayScreen(
 @OptIn(ExperimentalPagerApi::class, androidx.compose.material.ExperimentalMaterialApi::class)
 @Composable
 fun PlayScreen(
+    viewPageState: PagerState,
     viewModel: PlayingViewModel = LocalPlayingViewModel.current,
 ) {
-    val viewPageState = rememberPagerState(1)
-    val context = LocalContext.current
     val itemColor = viewModel.itemColor.collectAsState().value
 
     CompositionLocalProvider(
@@ -99,6 +90,7 @@ fun PlayScreen(
             Modifier
                 .fillMaxSize(),
         ) {
+            val scope = rememberCoroutineScope()
             PlayScreenContent(viewPageState)
             PlayScreenTab(viewPageState)
         }

@@ -70,7 +70,6 @@ class UserInfoData @Inject constructor(
             userToken = "",
             userBean = null
         )
-
     }
 }
 

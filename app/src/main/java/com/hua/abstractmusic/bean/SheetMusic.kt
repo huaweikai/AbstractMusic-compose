@@ -21,6 +21,8 @@ data class SheetMusic(
     val trackerNumber: Int? = null,
     val mediaUri: String,
     val albumUri: String,
+    val artistId:Long,
+    val albumId:Long,
     val isPlayable: Boolean = true,
     val browserType: Int = MediaMetadata.FOLDER_TYPE_NONE
 )
@@ -33,9 +35,11 @@ data class Sheet(
     val desc:String? = null
 )
 
-@Entity(primaryKeys = ["musicId","sheetId"])
+@Entity(primaryKeys = ["sheetId","musicId"])
 class SheetToMusic(
+//    @PrimaryKey(autoGenerate = true) var id:Int,
     val sheetId: Int,
+    @ColumnInfo(index = true)
     val musicId: String
 )
 

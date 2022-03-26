@@ -11,7 +11,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -48,12 +47,6 @@ fun NetSearchScreen(
     navController: NavHostController = LocalAppNavController.current
 ) {
     val searchText = searchViewModel.searchText.value
-    DisposableEffect(Unit) {
-        searchViewModel.initializeController()
-        this.onDispose {
-            searchViewModel.releaseBrowser()
-        }
-    }
     Scaffold(
         topBar = {
             SmallTopAppBar(
@@ -231,7 +224,7 @@ private fun SearchItem(
                     }
                     is SearchObject.Sheet -> {
                         SheetItem(item = it) {
-                            hostController.navigate("${Screen.SheetDetailScreen.route}?sheetId=$it&isSearch=true")
+                            hostController.navigate("${Screen.SheetDetailScreen.route}?mediaItem=${it.toNavType()}")
                         }
                     }
                 }
