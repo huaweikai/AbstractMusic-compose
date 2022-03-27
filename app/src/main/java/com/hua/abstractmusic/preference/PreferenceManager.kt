@@ -8,9 +8,13 @@ package com.hua.abstractmusic.preference
 class PreferenceManager(
     lastMediaIndex: MediaIndexPreference,
     themeColorPreference: ThemeColorPreference,
-    userTokenPreference:UserTokenPreference
+    userTokenPreference:UserTokenPreference,
+    repeatModePreference: RepeatModePreference,
+    shuffleModePreference: ShuffleModePreference
 ) {
     var lastMediaIndex by lastMediaIndex
     var themeColor by themeColorPreference
     var userToken by userTokenPreference
+    var repeatMode by repeatModePreference
+    var shuffleMode by shuffleModePreference
 }

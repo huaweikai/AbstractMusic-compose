@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,7 +32,7 @@ import kotlinx.coroutines.launch
  * @Date   : 2022/01/26
  * @Desc   :
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.ui.ExperimentalComposeUiApi::class)
 @Composable
 fun LoginScreen(
     navController: NavHostController = LocalAppNavController.current,
@@ -72,6 +73,7 @@ fun LoginScreen(
         }
     }
 
+    val focus = LocalFocusManager.current
 
     Scaffold(
         topBar = {
@@ -110,6 +112,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(5.dp))
             Button(
                 onClick = {
+                    focus.clearFocus()
                     scope.launch {
                         val result = viewModel.login(loginMode)
                         if (result.code == 200) {

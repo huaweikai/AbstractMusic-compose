@@ -69,6 +69,8 @@ object Compose {
     const val lifecycle_viewModel_compose =
         "androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha07"
 
+    const val compose_glance = "androidx.glance:glance-appwidget:1.0.0-alpha03"
+
 }
 
 object Other {

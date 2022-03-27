@@ -222,8 +222,8 @@ private fun AlbumDetailDesc(
             verticalArrangement = Arrangement.Center
         ) {
             TitleAndArtist(
-                title = "${item.title}",
-                subTitle = "${item.artist}",
+                title = item.title,
+                subTitle = item.artist,
                 titleStyle = {
                     this.copy(fontSize = 22.sp)
                 },

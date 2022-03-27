@@ -3,6 +3,12 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Documents/.gradle/caches/transforms-3/6f127c103d730005ea8004f95f10406b/transformed/jetified-media3-session-1.0.0-alpha01/res/drawable-anydpi-v21/exo_icon_next.xml" value="0.1095" />
+        <entry key="..\:/Documents/AS/AbstractMusic/app/src/main/res/drawable/ic_mode_order_play.xml" value="0.101" />
+        <entry key="..\:/Documents/AS/AbstractMusic/app/src/main/res/drawable/ic_mode_play.xml" value="0.101" />
+        <entry key="..\:/Documents/AS/AbstractMusic/app/src/main/res/drawable/ic_mode_repeat_off.xml" value="0.103" />
+        <entry key="..\:/Documents/AS/AbstractMusic/app/src/main/res/layout/widget_loading.xml" value="0.17481884057971014" />
+        <entry key="..\:/Documents/AS/AbstractMusic/app/src/main/res/xml/music_controller.xml" value="0.1816123188405797" />
         <entry key="..\:/Documents/test/AbstractMusic/app/src/main/res/drawable/ic_hello_net.xml" value="0.265625" />
         <entry key="..\:/Documents/test/AbstractMusic/app/src/main/res/drawable/ic_hello_save.xml" value="0.265625" />
         <entry key="..\:/Documents/test/AbstractMusic/app/src/main/res/drawable/ic_hello_service.xml" value="0.265625" />

@@ -101,7 +101,7 @@ fun PlayListScreen(
                 val itemTitle = buildAnnotatedString {
                     withStyle(
                         if (item.isPlaying) SpanStyle(MaterialTheme.colorScheme.primary) else SpanStyle(
-                            MaterialTheme.colorScheme.surfaceTint
+                            MaterialTheme.colorScheme.onSurface
                         )
                     ) {
                         withStyle(style = SpanStyle(fontSize = 20.sp)) {

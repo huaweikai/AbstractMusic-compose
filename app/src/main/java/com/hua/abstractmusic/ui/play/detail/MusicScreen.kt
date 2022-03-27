@@ -3,22 +3,31 @@ package com.hua.abstractmusic.ui.play.detail
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.media3.common.Player
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.ui.home.IconBean
@@ -30,34 +39,56 @@ import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.ui.utils.WindowSize
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 import com.hua.abstractmusic.utils.toTime
+import kotlinx.coroutines.launch
 
 /**
  * @author : huaweikai
  * @Date   : 2022/01/20
  * @Desc   : view
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun MusicScreen(
-//    viewModel: PlayingViewModel = LocalPlayingViewModel.current,
+    snackBarState: SnackbarHostState,
+    viewModel: PlayingViewModel = LocalPlayingViewModel.current,
 ) {
+    val itemColor = viewModel.itemColor.collectAsState().value
     val windowSize = LocalScreenSize.current
-    if (windowSize == WindowSize.Expanded) {
-        HorizontalScreen()
-    } else if (windowSize == WindowSize.Compact) {
-        VerticalScreen()
+    CompositionLocalProvider(
+        LocalContentColor provides animateColorAsState(
+            targetValue = itemColor.first,
+            tween(600)
+        ).value,
+        androidx.compose.material.LocalContentColor provides animateColorAsState(
+            targetValue = itemColor.first,
+            tween(600)
+        ).value,
+        LocalMusicScreenSecondColor provides animateColorAsState(
+            targetValue = itemColor.second,
+            tween(600)
+        ).value
+    ) {
+        if (windowSize == WindowSize.Expanded) {
+            HorizontalScreen()
+        } else if (windowSize == WindowSize.Compact) {
+            VerticalScreen(snackBarState)
+        }
     }
+
 
 }
 
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 private fun VerticalScreen(
+    snackbarHostState: SnackbarHostState,
     configuration: Configuration = LocalConfiguration.current,
     viewModel: PlayingViewModel = LocalPlayingViewModel.current
 ) {
     val data = viewModel.currentPlayItem.value.mediaMetadata
     val playState = viewModel.playerState.collectAsState()
+    val scale by animateFloatAsState(if (playState.value) 1f else 0.9f, animationSpec = tween(300))
     Column(
         modifier = Modifier
             .padding(
@@ -67,15 +98,24 @@ private fun VerticalScreen(
             )
             .fillMaxSize()
     ) {
-        ArtImage(
+        Box(
             modifier = Modifier
                 .fillMaxWidth(0.9f)
-                .aspectRatio(1f)
-                .align(CenterHorizontally),
-            uri = data.artworkUri,
-            desc = "",
-            transformation = RoundedCornersTransformation(30f)
-        )
+                .align(Alignment.CenterHorizontally)
+                .aspectRatio(1f),
+            contentAlignment = Center
+        ) {
+            ArtImage(
+                modifier = Modifier
+                    .graphicsLayer(scaleX = scale, scaleY = scale)
+                    .fillMaxWidth()
+                    .aspectRatio(1f),
+                uri = data.artworkUri,
+                desc = "",
+                transformation = RoundedCornersTransformation(30f)
+            )
+        }
+
         Spacer(modifier = Modifier.height(32.dp))
         TitleAndArtist(
             title = "${data.title}",
@@ -95,6 +135,8 @@ private fun VerticalScreen(
         Mode(
             modifier = Modifier
                 .align(Alignment.End)
+                .padding(end = 16.dp),
+            snackbarHostState = snackbarHostState
         )
         Spacer(modifier = Modifier.height(8.dp))
         MusicSlider(
@@ -207,19 +249,69 @@ private fun SecondText(
 
 @Composable
 private fun Mode(
-    modifier: Modifier
+    modifier: Modifier,
+    snackbarHostState: SnackbarHostState,
+    viewModel: PlayingViewModel = LocalPlayingViewModel.current
 ) {
+    val scope = rememberCoroutineScope()
+    val repeatUi = remember {
+        mutableStateOf(R.drawable.ic_mode_repeat_off)
+    }
+    val shuffleBack by animateColorAsState(
+        if (viewModel.shuffleUI.value) LocalMusicScreenSecondColor.current else Color.Transparent
+    )
+
+    LaunchedEffect(viewModel.repeatModeUI.value) {
+        repeatUi.value = when (viewModel.repeatModeUI.value) {
+            Player.REPEAT_MODE_OFF -> R.drawable.ic_mode_repeat_off
+            Player.REPEAT_MODE_ONE -> R.drawable.ic_mode_repeat_one
+            Player.REPEAT_MODE_ALL -> R.drawable.ic_mode_repeat_all
+            else -> R.drawable.ic_mode_repeat_off
+        }
+    }
     Row(
         modifier = modifier
     ) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_mode_shuffle),
-            contentDescription = ""
-        )
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .background(
+                    shuffleBack, RoundedCornerShape(8.dp)
+                ),
+            contentAlignment = Center
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_mode_shuffle),
+                contentDescription = "",
+                modifier = Modifier
+                    .size(32.dp)
+                    .clickable {
+                        val result = viewModel.setShuffle()
+                        scope.launch {
+                            snackbarHostState.showSnackbar(if (result) "已开启随机播放" else "已关闭随机播放")
+                        }
+                    }
+            )
+        }
         Spacer(modifier = Modifier.padding(start = 16.dp))
         Icon(
-            painter = painterResource(id = R.drawable.ic_mode_order_play),
-            contentDescription = ""
+            painter = painterResource(id = repeatUi.value),
+            contentDescription = "",
+            modifier = Modifier
+                .size(32.dp)
+                .clickable {
+                    val message = when (viewModel.setRepeatMode()) {
+                        Player.REPEAT_MODE_ALL -> "已开启循环列表"
+                        Player.REPEAT_MODE_OFF -> "已开启顺序播放"
+                        Player.REPEAT_MODE_ONE -> "已开启单曲循环"
+                        else -> ""
+                    }
+                    if (message.isNotBlank()) {
+                        scope.launch {
+                            snackbarHostState.showSnackbar(message)
+                        }
+                    }
+                }
         )
     }
 

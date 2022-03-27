@@ -22,11 +22,11 @@ data class ParcelizeMediaItem(
     val desc: String?,
     val year: Int?,
     val trackNumber: Int?,
-    val userId:Int?
+    val userId: Int?
 ) : Parcelable
 
 val defaultParcelizeMediaItem = ParcelizeMediaItem(
-    "0", "", "", "", null, null, null,null
+    "0", "", "", "", null, null, null, null
 )
 
 class NavTypeMediaItem : NavType<ParcelizeMediaItem>(true) {
@@ -57,4 +57,17 @@ fun MediaItem.toNavType() = Gson().toJson(
         userId = mediaMetadata.extras?.getInt("userId")
     )
 )
+
+@SuppressLint("UnsafeOptInUsageError")
+fun MediaItem.toParcel() =
+    ParcelizeMediaItem(
+        mediaId = mediaId,
+        title = "${mediaMetadata.title}",
+        artist = "${mediaMetadata.artist}",
+        artUri = "${mediaMetadata.artworkUri}",
+        desc = "${mediaMetadata.subtitle ?: ""}",
+        year = mediaMetadata.releaseYear,
+        trackNumber = mediaMetadata.trackNumber,
+        userId = mediaMetadata.extras?.getInt("userId")
+    )
 

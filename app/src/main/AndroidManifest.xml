@@ -29,7 +29,7 @@
         </activity>
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
-            android:screenOrientation="portrait"
+            android:screenOrientation="fullSensor"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <service android:name=".services.PlayerService"
             android:exported="false">
@@ -38,6 +38,17 @@
                 <action android:name="android.media.browse.MediaBrowserService"/>
             </intent-filter>
         </service>
+        <receiver android:name=".ui.weight.MusicWidgetReceiver"
+            android:enabled="@bool/glance_appwidget_available"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/music_controller" />
+        </receiver>
     </application>
 
 </manifest>

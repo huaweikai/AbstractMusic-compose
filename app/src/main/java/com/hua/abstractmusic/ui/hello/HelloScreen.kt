@@ -55,6 +55,7 @@ fun HelloScreen(
     Surface {
         Column(
             modifier = Modifier
+                .statusBarsPadding()
                 .fillMaxSize()
         ) {
             Spacer(modifier = Modifier.padding(top = 30.dp))

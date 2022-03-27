@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.Player.REPEAT_MODE_OFF
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.base.viewmodel.BaseViewModel
 import com.hua.abstractmusic.bean.LyricsEntry
@@ -65,16 +66,14 @@ class PlayingViewModel @Inject constructor(
     val lyricList: State<List<LyricsEntry>> get() = _lyricsList
 
 
-    val localSheetList = mutableStateOf<List<MediaData>>(emptyList())
-    val netSheetList = mutableStateOf<List<MediaData>>(emptyList())
-    val localArtistList = mutableStateOf<List<MediaData>>(emptyList())
-    val localAlbumList = mutableStateOf<List<MediaData>>(emptyList())
-
-
     val lyricsCanScroll = mutableStateOf(false)
     val lyricsState = LazyListState(firstVisibleItemScrollOffset = -500)
     private val _lyricsLoadState = MutableStateFlow<LCE>(LCE.Loading)
     val lyricsLoadState: StateFlow<LCE> get() = _lyricsLoadState.asStateFlow()
+
+    val shuffleUI = mutableStateOf(false)
+
+    val repeatModeUI = mutableStateOf<Int>(REPEAT_MODE_OFF)
 
     private val _currentPlayList = mutableStateOf<List<MediaData>>(emptyList())
     val currentPlayList: State<List<MediaData>> get() = _currentPlayList
@@ -104,6 +103,13 @@ class PlayingViewModel @Inject constructor(
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             updateItem(mediaItem)
         }
+        override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
+            shuffleUI.value = shuffleModeEnabled
+        }
+
+        override fun onRepeatModeChanged(repeatMode: Int) {
+            repeatModeUI.value = repeatMode
+        }
     }
 
     private val browserListener = object :BrowserListener{
@@ -118,16 +124,10 @@ class PlayingViewModel @Inject constructor(
         val browser = this.browser?:return
         maxValue.value = (browser.duration).toFloat() ?: 0F
         _playerState.value = browser.isPlaying == true
-//        doSomething()
         refresh()
         updateItem(browser.currentMediaItem)
-    }
-
-    init {
-//        localListMap[Constant.LOCAL_SHEET_ID] = localSheetList
-////        netListMap[Constant.NET_SHEET_ID] = netSheetList
-//        localListMap[Constant.LOCAL_ARTIST_ID] = localArtistList
-//        localListMap[Constant.LOCAL_ALBUM_ID] = localAlbumList
+        shuffleUI.value = browser.shuffleModeEnabled
+        repeatModeUI.value = browser.repeatMode
     }
 
     init {
@@ -290,6 +290,22 @@ class PlayingViewModel @Inject constructor(
 //            "error"
 //        }
 //    }
+
+    fun setRepeatMode():Int?{
+        val browser = this.browser?:return null
+        when (browser.repeatMode) {
+            Player.REPEAT_MODE_ALL -> browser.repeatMode = Player.REPEAT_MODE_OFF
+            Player.REPEAT_MODE_OFF -> browser.repeatMode = Player.REPEAT_MODE_ONE
+            Player.REPEAT_MODE_ONE -> browser.repeatMode = Player.REPEAT_MODE_ALL
+        }
+        return browser.repeatMode
+    }
+
+    fun setShuffle():Boolean{
+        val browser = this.browser ?: return false
+        browser.shuffleModeEnabled = !browser.shuffleModeEnabled
+        return browser.shuffleModeEnabled
+    }
 
     fun removePlayItem(position: Int) {
         val browser = this.browser?: return
