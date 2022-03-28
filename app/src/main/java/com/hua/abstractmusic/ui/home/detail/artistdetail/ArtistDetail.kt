@@ -33,10 +33,7 @@ import com.hua.abstractmusic.bean.toNavType
 import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.route.Screen
-import com.hua.abstractmusic.ui.utils.AlbumItem
-import com.hua.abstractmusic.ui.utils.LCE
-import com.hua.abstractmusic.ui.utils.MusicItem
-import com.hua.abstractmusic.ui.utils.indicatorOffset
+import com.hua.abstractmusic.ui.utils.*
 import com.hua.abstractmusic.utils.isLocal
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.CollapsingToolbarScaffold
@@ -67,7 +64,6 @@ fun LocalArtistDetail(
             viewModel.removeListener()
         }
     }
-    val screenState = viewModel.screenState.collectAsState()
     Surface {
         CollapsingToolbarScaffold(
             modifier = Modifier.fillMaxSize(),
@@ -131,47 +127,62 @@ fun LocalArtistDetail(
         ) {
             Column {
                 if (viewModel.isLocal) {
-                    ArtistHorizontalPager(
-                        viewModel = viewModel,
-                        modifier = Modifier
-                            .fillMaxSize()
-//                        .background(MaterialTheme.colorScheme.background)
-                    )
+                    ArtistLocalDetail(viewModel = viewModel)
                 } else {
-                    when (screenState.value) {
-                        is LCE.Loading -> {
-                            Column(
-                                Modifier
-                                    .fillMaxSize()
-                                    .padding(top = 16.dp),
-                                verticalArrangement = Arrangement.Top,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                CircularProgressIndicator()
-                            }
-                        }
-                        is LCE.Error -> {
-
-                        }
-                        is LCE.Success -> {
-                            ArtistHorizontalPager(
-                                viewModel = viewModel,
-                                modifier = Modifier
-                                    .fillMaxSize()
-//                                .background(MaterialTheme.colorScheme.background)
-                            )
-                        }
-                    }
+                    ArtistNetDetail(viewModel = viewModel)
                 }
-
-//        }
             }
         }
     }
 }
 
-@ExperimentalPagerApi
-@androidx.media3.common.util.UnstableApi
+
+@Composable
+private fun ArtistLocalDetail(
+    viewModel: ArtistDetailViewModel
+) {
+    ArtistHorizontalPager(
+        viewModel = viewModel,
+        modifier = Modifier
+            .fillMaxSize()
+    )
+}
+
+@Composable
+private fun ArtistNetDetail(
+    viewModel: ArtistDetailViewModel
+) {
+    val screenState = viewModel.screenState.collectAsState()
+    when (screenState.value) {
+        is LCE.Loading -> {
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .padding(top = 16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+        is LCE.Error -> {
+            Error {
+                viewModel.loadData()
+            }
+        }
+        is LCE.Success -> {
+            ArtistHorizontalPager(
+                viewModel = viewModel,
+                modifier = Modifier
+                    .fillMaxSize()
+            )
+        }
+    }
+}
+
+
+@OptIn(ExperimentalPagerApi::class)
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 private fun ArtistHorizontalPager(
     viewModel: ArtistDetailViewModel,
@@ -221,12 +232,16 @@ private fun ArtistHorizontalPager(
                     Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = bottomBarHeight)
                 ) {
-                    itemsIndexed(viewModel.artistDetail.value, key = {_, item -> item.mediaId }) { index, item ->
+                    itemsIndexed(
+                        viewModel.artistDetail.value,
+                        key = { _, item -> item.mediaId }) { index, item ->
                         MusicItem(data = item,
                             isDetail = true,
                             index = index,
                             onClick = {
-                                viewModel.setPlayList(index, viewModel.artistDetail.value.map { it.mediaItem })
+                                viewModel.setPlayList(
+                                    index,
+                                    viewModel.artistDetail.value.map { it.mediaItem })
                             }
                         )
                     }
@@ -239,7 +254,9 @@ private fun ArtistHorizontalPager(
                         .fillMaxWidth(),
                     contentPadding = PaddingValues(bottom = bottomBarHeight)
                 ) {
-                    items(viewModel.artistAlbumDetail.value,key = {item -> item.mediaId }) { item ->
+                    items(
+                        viewModel.artistAlbumDetail.value,
+                        key = { item -> item.mediaId }) { item ->
                         Spacer(modifier = Modifier.height(8.dp))
                         AlbumItem(
                             item = item.mediaItem,

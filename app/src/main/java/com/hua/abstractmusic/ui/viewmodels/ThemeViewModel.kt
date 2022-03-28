@@ -25,22 +25,31 @@ import javax.inject.Inject
 class ThemeViewModel @Inject constructor(
     private val preferenceManager: PreferenceManager
 ) : ViewModel() {
-    private val _isReady = mutableStateOf(Build.VERSION.SDK_INT < Build.VERSION_CODES.O && preferenceManager.themeColor == Int.MIN_VALUE)
-    val isReady: State<Boolean> get() = _isReady
-    private val _color = mutableStateOf<ColorScheme?>(null)
-    val monetColor: State<ColorScheme?> get() = _color
-    fun init() {
-        if (preferenceManager.themeColor != Int.MIN_VALUE) {
-            getMonetColor(Color(preferenceManager.themeColor))
-        } else {
-            _isReady.value = true
-        }
-    }
+    private val _isCustom = mutableStateOf(preferenceManager.themeColor != Int.MIN_VALUE)
+    val isCustom :State<Boolean> get() = _isCustom
+    private val _color = mutableStateOf(
+        if(_isCustom.value) Monet.getMonetColor(preferenceManager.themeColor) else null
+    )
+    val monetColor :State<ColorScheme?> get() = _color
+//    private val _isReady = mutableStateOf(Build.VERSION.SDK_INT < Build.VERSION_CODES.O && preferenceManager.themeColor == Int.MIN_VALUE)
+//    val isReady: State<Boolean> get() = _isReady
+//    private val _color = mutableStateOf<ColorScheme?>(null)
+//    val monetColor: State<ColorScheme?> get() = _color
+
+    val hasWallPermission = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+
+//    fun init() {
+//        if (preferenceManager.themeColor != Int.MIN_VALUE) {
+//            getMonetColor(Color(preferenceManager.themeColor))
+//        } else {
+//            _isReady.value = true
+//        }
+//    }
 
     fun getMonetColor(seed: Color) {
         viewModelScope.launch(Dispatchers.Default) {
             val new = Monet.getMonetColor(seed.toArgb())
-            _isReady.value = true
+//            _isReady.value = true
             _color.value = new
         }
     }

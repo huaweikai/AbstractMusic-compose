@@ -21,7 +21,7 @@ private val DarkColorPalette = darkColorScheme()
 
 private val LightColorPalette = lightColorScheme()
 
-private val defaultColor = Color(0xff33b5e5)
+val defaultColor = Color(0xff33b5e5)
 
 //@SuppressLint("NewApi")
 @Composable

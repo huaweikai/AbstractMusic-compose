@@ -75,34 +75,3 @@ class AlbumDetailViewModel @Inject constructor(
         }
     }
 }
-//@SuppressLint("UnsafeOptInUsageError")
-//@HiltViewModel
-//class AlbumDetailViewModel @Inject constructor(
-//    application: Application,
-//    useCase: UseCase,
-//    itemTree: MediaItemTree,
-//    private val blurLibrary: BlurLibrary
-//) : BaseBrowserViewModel(application, useCase, itemTree) {
-//    var id: String? = null
-//    var isLocal: Boolean = true
-//    var item: MediaItem? = null
-//    override fun onMediaConnected() {
-//        if (isLocal) {
-//            localListMap[id!!] = _albumDetail
-//        } else {
-//            netListMap[id!!] = _albumDetail
-//        }
-//        playListMap[id!!] = _albumDetail
-//        refresh()
-////        viewModelScope.launch(Dispatchers.IO){
-////            delay(200)
-////            withContext(Dispatchers.Main){
-////
-////            }
-////        }
-//    }
-//
-//
-//    private val _albumDetail = mutableStateOf<List<MediaData>>(emptyList())
-//    val albumDetail: State<List<MediaData>> get() = _albumDetail
-//}

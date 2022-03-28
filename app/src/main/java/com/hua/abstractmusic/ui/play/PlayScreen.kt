@@ -166,7 +166,7 @@ private fun PlayScreenContent(
         count = 3,
         reverseLayout = false,
         modifier = Modifier
-            .clip(RoundedCornerShape(topEnd = 30.dp, topStart = 30.dp))
+//            .clip(RoundedCornerShape(topEnd = 30.dp, topStart = 30.dp))
             .background(if (isSystemInDarkTheme()) Color.Black else Color.White)
             .fillMaxSize(),
     ) { page ->

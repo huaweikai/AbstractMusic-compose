@@ -1,7 +1,10 @@
 package com.hua.abstractmusic.ui.home.local
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -47,6 +50,14 @@ fun LocalScreen(
                     modifier = Modifier
                         .statusBarsPadding(),
                     title = { Text("本地音乐") },
+                    actions = {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "",
+                            modifier = Modifier.padding(end = 16.dp).clickable {
+                                localViewModel.refresh(true)
+                            })
+                    }
                 )
         },
     ) {

@@ -2,8 +2,10 @@ package com.hua.abstractmusic.ui.home.detail.albumdetail
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -25,6 +27,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight.Companion.W400
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -33,13 +36,12 @@ import coil.compose.AsyncImage
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.ParcelizeMediaItem
+import com.hua.abstractmusic.bean.toGson
 import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalComposeUtils
-import com.hua.abstractmusic.ui.utils.ArtImage
-import com.hua.abstractmusic.ui.utils.LCE
-import com.hua.abstractmusic.ui.utils.MusicItem
-import com.hua.abstractmusic.ui.utils.TitleAndArtist
+import com.hua.abstractmusic.ui.route.Screen
+import com.hua.abstractmusic.ui.utils.*
 import com.hua.abstractmusic.utils.isLocal
 import com.hua.blur.blur
 
@@ -60,9 +62,8 @@ fun LocalAlbumDetail(
     detailViewModel: AlbumDetailViewModel = hiltViewModel()
 ) {
     val isLocal = item.mediaId.isLocal()
-    val context = LocalContext.current
     val bitmap = remember {
-        mutableStateOf(Bitmap.createBitmap(60,60,Bitmap.Config.ARGB_8888))
+        mutableStateOf(Bitmap.createBitmap(60, 60, Bitmap.Config.ARGB_8888))
     }
     val composeUtils = LocalComposeUtils.current
     LaunchedEffect(Unit) {
@@ -97,7 +98,11 @@ fun LocalAlbumDetail(
                 )
             }
         ) {
-            AlbumShow(item = item, detailViewModel = detailViewModel, isLocal = isLocal)
+            if (isLocal) {
+                AlbumLocalDetail(item = item, detailViewModel = detailViewModel)
+            } else {
+                AlbumNetDetail(item = item, detailViewModel = detailViewModel,navHostController)
+            }
         }
         Box(
             Modifier
@@ -133,10 +138,9 @@ fun LocalAlbumDetail(
 
 
 @Composable
-fun AlbumShow(
+fun AlbumLocalDetail(
     item: ParcelizeMediaItem,
-    detailViewModel: AlbumDetailViewModel,
-    isLocal: Boolean = true
+    detailViewModel: AlbumDetailViewModel
 ) {
     val bottomBarHeight = LocalBottomControllerHeight.current
     LazyColumn(
@@ -148,36 +152,60 @@ fun AlbumShow(
         item {
             AlbumDetailDesc(item = item)
         }
-        if (isLocal) {
-            albumItems(detailViewModel)
-        } else {
-            when (detailViewModel.screenState.value) {
-                is LCE.Loading -> {
-                    item {
-                        Column(
-                            Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    }
-                }
-                is LCE.Error -> {
-
-                }
-                is LCE.Success -> {
-                    albumItems(detailViewModel)
-                }
-            }
-            item {
-                AlbumDetailTail(item = item)
-            }
+        albumItems(detailViewModel)
+        item {
+            AlbumDetailTail(item = item)
         }
     }
 }
 
-private fun LazyListScope.albumItems(
+@Composable
+fun AlbumNetDetail(
+    item: ParcelizeMediaItem,
+    detailViewModel: AlbumDetailViewModel,
+    navHostController: NavHostController
+) {
+    val bottomBarHeight = LocalBottomControllerHeight.current
+    val screenState = detailViewModel.screenState.collectAsState()
+    LazyColumn(
+        Modifier
+            .fillMaxSize()
+            .background(Color.Transparent),
+        contentPadding = PaddingValues(bottom = bottomBarHeight)
+    ) {
+        item {
+            AlbumDetailDesc(item = item,navHostController)
+        }
+        when (screenState.value) {
+            is LCE.Loading -> {
+                item {
+                    Column(
+                        Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+            }
+            is LCE.Error -> {
+                item {
+                    Error {
+                        detailViewModel.loadData()
+                    }
+                }
+            }
+            is LCE.Success -> {
+                albumItems(detailViewModel)
+            }
+        }
+        item {
+            AlbumDetailTail(item = item)
+        }
+    }
+}
+
+fun LazyListScope.albumItems(
     detailViewModel: AlbumDetailViewModel
 ) {
     itemsIndexed(
@@ -188,7 +216,9 @@ private fun LazyListScope.albumItems(
             isDetail = true,
             index = index,
             onClick = {
-                detailViewModel.setPlayList(index, detailViewModel.albumDetail.value.map { it.mediaItem })
+                detailViewModel.setPlayList(
+                    index,
+                    detailViewModel.albumDetail.value.map { it.mediaItem })
             }
         )
     }
@@ -197,7 +227,8 @@ private fun LazyListScope.albumItems(
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 private fun AlbumDetailDesc(
-    item: ParcelizeMediaItem
+    item: ParcelizeMediaItem,
+    appNavHostController: NavHostController? = null
 ) {
     Spacer(modifier = Modifier.height(20.dp))
     Row(
@@ -234,7 +265,9 @@ private fun AlbumDetailDesc(
             )
             if (item.desc?.isNotBlank() == true) {
                 Spacer(modifier = Modifier.height(5.dp))
-                Text(text = "${item.desc}", maxLines = 2)
+                Text(text = "${item.desc}", maxLines = 2, overflow = TextOverflow.Clip, modifier = Modifier.clickable {
+                    appNavHostController?.navigate("${Screen.OtherDetail.route}?item=${item.toGson()}")
+                })
             }
         }
     }

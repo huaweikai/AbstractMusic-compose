@@ -17,7 +17,7 @@ sealed class Screen(val route: String) {
     object AlbumDetailScreen : Screen("album_screen")
     object ArtistDetailScreen : Screen("artist_screen")
 
-    object NetDetailScreen : Screen("net_detail_screen")
+    object SettingScreen : Screen("setting_screen")
 
     object RegisterScreen : Screen("register_screen")
     object LoginScreen : Screen("login_screen")
@@ -29,4 +29,6 @@ sealed class Screen(val route: String) {
     object PlayScreen : Screen("play_screen")
 
     object PlayListScreen : Screen("playlist_screen")
+
+    object OtherDetail:Screen("other_screen")
 }

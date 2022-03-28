@@ -33,21 +33,18 @@ import com.hua.abstractmusic.ui.route.Screen
 fun HelloScreen(
     appNavController: NavHostController = LocalAppNavController.current
 ) {
-    var isGet by remember {
-        mutableStateOf(true)
-    }
     val permissionGet = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
         onResult = {
+            var isGet = true
             it.forEach { map ->
-                if (!map.value) {
+                if(!map.value){
                     isGet = false
                 }
             }
             if (isGet) {
                 val navOptions =
                     NavOptions.Builder().setPopUpTo(Screen.HelloScreen.route, true).build()
-//                viewModel.refresh()
                 appNavController.navigate(Screen.HomeScreen.route, navOptions)
             }
         }

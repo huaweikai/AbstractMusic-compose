@@ -14,6 +14,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,8 +23,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -37,6 +41,7 @@ import com.google.accompanist.navigation.material.bottomSheet
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
+import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.NavTypeMediaItem
 import com.hua.abstractmusic.bean.defaultParcelizeMediaItem
 import com.hua.abstractmusic.other.Constant
@@ -55,6 +60,7 @@ import com.hua.abstractmusic.ui.home.net.detail.NetSearchScreen
 import com.hua.abstractmusic.ui.play.PlayListScreen
 import com.hua.abstractmusic.ui.play.PlayScreen
 import com.hua.abstractmusic.ui.route.Screen
+import com.hua.abstractmusic.ui.setting.SettingScreen
 import com.hua.abstractmusic.ui.splash.SplashScreen
 import com.hua.abstractmusic.ui.utils.PopupWindow
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
@@ -71,7 +77,8 @@ val controllerDone = listOf(
     Screen.PlayScreen.route,
     Screen.PlayListScreen.route,
     Screen.Splash.route,
-    Screen.HelloScreen.route
+    Screen.HelloScreen.route,
+    Screen.SettingScreen.route
 )
 
 @OptIn(
@@ -101,7 +108,6 @@ fun AppNavigation(
         BottomSheetNavigator(sheetState)
     }
     val controller = rememberNavController(bottomSheetNavigator)
-    val scope = rememberCoroutineScope()
 
     val popupWindow = remember {
         mutableStateOf(false)
@@ -133,19 +139,23 @@ fun AppNavigation(
                         Text(text = data.visuals.message)
                     }
                 }
-            }
+            },
+            modifier = Modifier.navigationBarsPadding()
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(it)
             ) {
-                ModalBottomSheetLayout(bottomSheetNavigator = bottomSheetNavigator) {
+                ModalBottomSheetLayout(
+                    bottomSheetNavigator = bottomSheetNavigator,
+                    sheetShape = RoundedCornerShape(topEnd = 16.dp, topStart = 16.dp)
+                ) {
                     NavHost(
                         navController = LocalAppNavController.current,
                         startDestination = Screen.Splash.route
                     ) {
-                        router(sheetState, bottomNavigationHeight,viewPageState)
+                        router(sheetState, bottomNavigationHeight, viewPageState)
                     }
                 }
                 MusicController(
@@ -166,9 +176,9 @@ fun AppNavigation(
             PopupWindow()
         }
     }
-    LaunchedEffect(key1 = themeViewModel.isReady) {
-        if (!themeViewModel.isReady.value) themeViewModel.init()
-    }
+//    LaunchedEffect(key1 = themeViewModel.isReady) {
+//        if (!themeViewModel.isReady.value) themeViewModel.init()
+//    }
     val isConnect = playingViewModel.isConnect.collectAsState()
     LaunchedEffect(isConnect.value) {
         if (isConnect.value) {
@@ -176,7 +186,6 @@ fun AppNavigation(
         }
     }
 }
-
 
 
 @OptIn(
@@ -188,7 +197,7 @@ fun AppNavigation(
 fun NavGraphBuilder.router(
     sheetPlayState: ModalBottomSheetState,
     bottomNavigationHeight: MutableState<Dp>,
-    viewPageState:PagerState
+    viewPageState: PagerState
 ) {
     composable(route = Screen.Splash.route) {
         SplashScreen()
@@ -249,29 +258,26 @@ fun NavGraphBuilder.router(
         LoginScreen()
     }
     composable(
-        route = "${Screen.SheetDetailScreen.route}?mediaItem={mediaItem}&isUser={isUser}",
+        route = "${Screen.SheetDetailScreen.route}?mediaItem={mediaItem}",
         arguments = arrayListOf(
             navArgument(
                 name = "mediaItem"
             ) {
                 type = NavTypeMediaItem()
                 defaultValue = defaultParcelizeMediaItem
-            },
-            navArgument(
-                name = "isUser"
-            ) {
-                type = NavType.BoolType
-                defaultValue = true
             }
         )
     ) {
         val item = it.getValue("mediaItem", defaultParcelizeMediaItem)
-        val isUser = item.userId
-        SheetDetail(mediaItem = item)
+        SheetDetail(parcelItem = item)
     }
 
     composable(Screen.NetSearchScreen.route) {
         NetSearchScreen()
+    }
+
+    composable(Screen.SettingScreen.route) {
+        SettingScreen()
     }
 
     bottomSheet(Screen.PlayListScreen.route) {
@@ -296,6 +302,39 @@ fun NavGraphBuilder.router(
             }
         }
     }
+    bottomSheet(route = "${Screen.OtherDetail.route}?item={item}", arguments = listOf(
+        navArgument("item") {
+            type = NavTypeMediaItem()
+        }
+    )) {
+        val item = it.getValue("item", defaultParcelizeMediaItem)
+        val scope = rememberCoroutineScope()
+        Column(
+            modifier = Modifier.height(IntrinsicSize.Min),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_level_button),
+                modifier = Modifier.padding(16.dp),
+                contentDescription = ""
+            )
+            Text(text = item.title, fontSize = 24.sp)
+            Spacer(modifier = Modifier.height(16.dp))
+            Column(Modifier.fillMaxWidth()) {
+                Text(
+                    text = item.desc ?: "暂无介绍",
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 32.dp),
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
+                )
+            }
+        }
+        BackHandler(true) {
+            scope.launch {
+                sheetPlayState.hide()
+            }
+        }
+    }
 }
 
 @SuppressLint("UnsafeOptInUsageError")
@@ -315,7 +354,10 @@ fun MusicController(
     LaunchedEffect(playingViewModel.currentPlayItem.value, backState) {
         Log.d("TAG", "MusicController:${playingViewModel.currentPlayItem.value} ")
         if (playingViewModel.currentPlayItem.value != NULL_MEDIA_ITEM) {
-            isVis.value = backState?.destination?.route !in controllerDone
+            isVis.value =
+                backState?.destination?.route !in controllerDone && backState?.destination?.route?.contains(
+                    Screen.OtherDetail.route
+                ) == false
         } else {
             isVis.value = false
         }
@@ -337,11 +379,7 @@ fun MusicController(
                 },
                 playScreenClick = {
                     controller.navigate(Screen.PlayScreen.route)
-//                    scope.launch {
-//                        playScreenState.show()
-//                    }
                 })
         }
-
     }
 }

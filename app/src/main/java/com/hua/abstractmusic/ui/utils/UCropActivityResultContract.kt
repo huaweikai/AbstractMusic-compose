@@ -29,6 +29,7 @@ class UCropActivityResultContract(
             if(options != null){
                 withOptions(options)
             }
+            withMaxResultSize(720,720)
         }.getIntent(context)
     }
 

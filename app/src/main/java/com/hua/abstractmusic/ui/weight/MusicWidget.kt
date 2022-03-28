@@ -22,12 +22,15 @@ import coil.ImageLoader
 import coil.request.ImageRequest
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.ParcelizeMediaItem
+import com.hua.abstractmusic.services.MediaConnect
 import com.hua.abstractmusic.services.PlayerService
 import com.hua.abstractmusic.ui.MainActivity
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * @author : huaweikai
@@ -39,8 +42,6 @@ class MusicWidget(
     private val bitmap: Bitmap?,
     private val state: Boolean
 ) : GlanceAppWidget() {
-
-
     @Composable
     override fun Content() {
         val context = LocalContext.current
@@ -81,6 +82,7 @@ class MusicWidget(
                     Spacer(GlanceModifier.height(8.dp))
                 }
             }
+            Spacer(modifier = GlanceModifier.height(16.dp))
             val icon =
                 if (state) R.drawable.ic_controller_pause else R.drawable.ic_controller_play
             Row(
@@ -130,7 +132,11 @@ class MusicWidget(
     }
 }
 
+@AndroidEntryPoint
 class MusicWidgetReceiver : GlanceAppWidgetReceiver() {
+
+    @Inject
+    lateinit var mediaConnect :MediaConnect
     private val job = SupervisorJob()
     private val scope = CoroutineScope(job + Dispatchers.Main)
     private val nullItem = ParcelizeMediaItem(

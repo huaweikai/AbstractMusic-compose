@@ -1,5 +1,6 @@
 package com.hua.abstractmusic.ui.viewmodels
 
+import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.net.Uri
 import android.widget.Toast
@@ -7,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
+import com.google.common.util.concurrent.MoreExecutors
 import com.hua.abstractmusic.base.viewmodel.BaseViewModel
 import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.bean.net.NetData
@@ -43,6 +45,7 @@ class UserViewModel @Inject constructor(
     val userInfo get() = userInfoData.userInfo
 
 
+
     suspend fun checkUser(): NetData<Unit> {
         return userRepository.hasUser()
     }
@@ -63,7 +66,10 @@ class UserViewModel @Inject constructor(
             } else {
                 emptyList()
             }
-            itemTree.addMusicToTree("${Constant.ROOT_SCHEME}${userInfo.value.userToken}", netSheetList.value)
+            itemTree.addMusicToTree(
+                "${Constant.ROOT_SCHEME}${userInfo.value.userToken}",
+                netSheetList.value
+            )
         }
     }
 
@@ -128,7 +134,17 @@ class UserViewModel @Inject constructor(
                 refresh()
             } catch (e: Exception) {
             }
-
         }
+    }
+
+    @SuppressLint("UnsafeOptInUsageError")
+    fun listPlay(id:String){
+        val browser = mediaConnect.browser?:return
+        val childFeature = browser.getChildren(
+            id,0, Int.MAX_VALUE,null
+        )
+        childFeature.addListener({
+            setPlayList(0,childFeature.get()?.value ?: emptyList())
+        },MoreExecutors.directExecutor())
     }
 }

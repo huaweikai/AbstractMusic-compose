@@ -18,7 +18,7 @@ val Typography = Typography(
         textAlign = TextAlign.Start
     ),
     titleLarge = TextStyle(
-        fontSize = 26.sp,
+        fontSize = 22.sp,
         fontWeight = FontWeight.W400,
         textAlign = TextAlign.Start
     ),

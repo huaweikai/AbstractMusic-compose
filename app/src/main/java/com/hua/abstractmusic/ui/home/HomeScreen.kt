@@ -45,7 +45,7 @@ val pages = listOf(MainPageItem.Net, MainPageItem.Local, MainPageItem.Mine)
 @Composable
 fun HomeScreen(
 //    onBack: () -> Unit,
-    onSizeChange:(Dp)->Unit
+    onSizeChange: (Dp) -> Unit
 ) {
     val appNavHostController = LocalAppNavController.current
     DisposableEffect(Unit) {
@@ -71,10 +71,12 @@ fun HomeScreen(
         },
     )
     {
-        HomeNavigationNav(homeNavController,
+        HomeNavigationNav(
+            homeNavController,
             Modifier
                 .fillMaxSize()
-                .padding(it))
+                .padding(it)
+        )
     }
 }
 

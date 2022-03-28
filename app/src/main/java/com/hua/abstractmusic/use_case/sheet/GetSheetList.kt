@@ -21,6 +21,7 @@ class GetSheetList(
         sheets?.forEach {
             val metadataBuilder = MediaMetadata.Builder()
                 .setTitle(it.title)
+                .setArtist("本地")
                 .setArtworkUri(
                     if (it.artUri != null) Uri.parse(it.artUri) else null
                 )

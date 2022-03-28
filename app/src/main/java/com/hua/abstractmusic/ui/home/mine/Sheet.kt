@@ -50,6 +50,7 @@ fun Sheet(
     isLocal: Boolean = true,
     onClick: (MediaItem) -> Unit,
     newSheet: (String) -> Unit,
+    listPlay: (String) -> Unit,
     sheetList: MutableState<List<MediaData>>
 ) {
     val diaLogState = remember {
@@ -62,11 +63,14 @@ fun Sheet(
         mutableStateOf(NULL_MEDIA_ITEM)
     }
     Surface(
-        modifier = Modifier.fillMaxWidth().height(220.dp).padding(horizontal = 16.dp, vertical = 16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(220.dp)
+            .padding(horizontal = 16.dp, vertical = 16.dp),
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
-        Column{
+        Column {
             Row(
                 modifier = Modifier
                     .padding(
@@ -95,7 +99,7 @@ fun Sheet(
                     RecommendItem(item = sheet, onclick = {
                         onClick(it.mediaItem)
                     }, onPlay = {
-                        //todo
+                        listPlay(it.mediaId)
                     }) {
                         deleteSheetState.value = true
                         item.value = sheet.mediaItem
@@ -123,7 +127,10 @@ fun LocalSheet(
         newSheet = {
             userViewModel.createSheet(it, true)
         },
-        sheetList = userViewModel.sheetList
+        sheetList = userViewModel.sheetList,
+        listPlay = {
+            userViewModel.listPlay(id = it)
+        }
     )
 }
 

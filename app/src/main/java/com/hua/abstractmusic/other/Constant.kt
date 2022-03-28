@@ -29,8 +29,6 @@ object Constant {
     const val LOCAL_SHEET_ID = "${ROOT_SCHEME}${TYPE_LOCAL_SHEET}"
 
 
-
-
     const val LOCAL_ARTIST_ID = "${ROOT_SCHEME}${TYPE_LOCAL_ARTIST}"
 
     const val NETWORK = "network"
@@ -45,8 +43,8 @@ object Constant {
     const val NETWORK_ALBUM_ID = "${ROOT_SCHEME}$TYPE_NETWORK_ALBUM"
 
     //在线所有
-    const val TYPE_NETWORK_ALL_MUSIC = "${NETWORK}_all_music"
-    const val NETWORK_ALL_MUSIC_ID = "$ROOT_SCHEME$TYPE_NETWORK_ALL_MUSIC"
+    const val TYPE_NETWORK_MUSIC = "${NETWORK}_all_music"
+    const val NETWORK_MUSIC_ID = "$ROOT_SCHEME$TYPE_NETWORK_MUSIC"
 
     //在线歌手
     const val TYPE_NETWORK_ARTIST = "${NETWORK}_artist"
@@ -73,8 +71,8 @@ object Constant {
     const val USER_ROOM_NAME = "USERDB"
 
 
-//        const val BASE_URL = "http://119.3.175.64:8080"
-    const val BASE_URL = "http://192.168.123.199:8080"
+    const val BASE_URL = "http://119.3.175.64:8080"
+//    const val BASE_URL = "http://192.168.123.199:8080"
 
     const val NOTIFICATION_CHANNEL_ID = "music_notification"
     const val NOTIFICATION_ID = 1

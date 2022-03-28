@@ -93,6 +93,7 @@ fun NetSheet.toMediaItem(parentId: Uri) =
                 .setIsPlayable(false)
                 .setFolderType(MediaMetadata.FOLDER_TYPE_PLAYLISTS)
                 .setArtist(author)
+                .setSubtitle(this.sheetDesc)
                 .setTrackNumber(num)
                 .setArtworkUri(
                     if (this.artUri == null) null else Uri.parse(this.artUri)

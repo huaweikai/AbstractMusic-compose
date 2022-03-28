@@ -11,14 +11,14 @@ import com.hua.abstractmusic.http.RequestStatus
 import com.hua.abstractmusic.net.MusicService
 import com.hua.abstractmusic.net.SearchService
 import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
-import com.hua.abstractmusic.other.Constant.NETWORK_ALL_MUSIC_ID
+import com.hua.abstractmusic.other.Constant.NETWORK_MUSIC_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ARTIST_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_BANNER_ID
 import com.hua.abstractmusic.other.Constant.NET_SHEET_ID
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.other.Constant.ROOT_SCHEME
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ALBUM
-import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ALL_MUSIC
+import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_MUSIC
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_ARTIST
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_BANNER
 import com.hua.abstractmusic.other.Constant.TYPE_NETWORK_RECOMMEND
@@ -56,7 +56,7 @@ class NetRepository(
                     }
                     result = NetData(getResult.code, list, getResult.msg)
                 }
-                TYPE_NETWORK_ALL_MUSIC -> {
+                TYPE_NETWORK_MUSIC -> {
                     val list = mutableListOf<MediaItem>()
                     val getResult = service.getAllMusic()
                     getResult.data?.forEach {
@@ -110,7 +110,6 @@ class NetRepository(
 
     suspend fun selectMusicById(parentId: Uri): NetData<List<MediaItem>>? {
         return try {
-            val result: NetData<List<MediaItem>>
             val id = parentId.lastPathSegment
             val mediaItems = mutableListOf<MediaItem>()
             val getResult = if (id == null) {
@@ -264,7 +263,7 @@ class NetRepository(
             when (searchObject) {
                 is SearchObject.Music -> {
                     val result = searchService.searchMusic(searchObject.name)
-                    val parentId = Uri.parse(NETWORK_ALL_MUSIC_ID)
+                    val parentId = Uri.parse(NETWORK_MUSIC_ID)
                     NetData(result.code, result.data?.map {
                         it.toMediaItem(parentId)
                     }, result.msg)
@@ -344,7 +343,7 @@ class NetRepository(
             val albums = service.getRecommendAlbumList().data ?: emptyList()
 
             val bannerId = Uri.parse(NETWORK_BANNER_ID)
-            val songId = Uri.parse(NETWORK_ALL_MUSIC_ID)
+            val songId = Uri.parse(NETWORK_MUSIC_ID)
             val sheetId = Uri.parse(NET_SHEET_ID)
             val albumId = Uri.parse(NETWORK_ALBUM_ID)
 

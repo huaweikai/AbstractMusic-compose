@@ -39,9 +39,9 @@ class UpLoadFile(
             onSuccess(it)
         }.catch {
             onError(it.message ?:"")
-        }.onCompletion {
+        }.flowOn(Dispatchers.IO).onCompletion {
             onCompletion()
-        }.flowOn(Dispatchers.IO).collect()
+        }.flowOn(Dispatchers.Main).collect()
     }
 
 }

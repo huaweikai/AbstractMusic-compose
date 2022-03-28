@@ -45,7 +45,7 @@ class NavTypeMediaItem : NavType<ParcelizeMediaItem>(true) {
 }
 
 @SuppressLint("UnsafeOptInUsageError")
-fun MediaItem.toNavType() = Gson().toJson(
+fun MediaItem.toNavType(): String = Gson().toJson(
     ParcelizeMediaItem(
         mediaId = mediaId,
         title = "${mediaMetadata.title}",
@@ -57,6 +57,8 @@ fun MediaItem.toNavType() = Gson().toJson(
         userId = mediaMetadata.extras?.getInt("userId")
     )
 )
+
+fun ParcelizeMediaItem.toGson(): String = Gson().toJson(this)
 
 @SuppressLint("UnsafeOptInUsageError")
 fun MediaItem.toParcel() =

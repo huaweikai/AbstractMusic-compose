@@ -63,4 +63,8 @@ class Repository(
     suspend fun removeSheet(sheetId:String){
         dao.deleteSheet(sheetId)
     }
+
+    suspend fun updateSheetDesc(sheet: Sheet){
+        dao.insertSheet(sheet)
+    }
 }

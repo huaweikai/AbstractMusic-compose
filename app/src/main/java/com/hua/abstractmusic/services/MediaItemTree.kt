@@ -12,7 +12,7 @@ import com.hua.abstractmusic.other.Constant.LOCAL_ALL_ID
 import com.hua.abstractmusic.other.Constant.LOCAL_ARTIST_ID
 import com.hua.abstractmusic.other.Constant.LOCAL_SHEET_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ALBUM_ID
-import com.hua.abstractmusic.other.Constant.NETWORK_ALL_MUSIC_ID
+import com.hua.abstractmusic.other.Constant.NETWORK_MUSIC_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_ARTIST_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_BANNER_ID
 import com.hua.abstractmusic.other.Constant.NETWORK_RECOMMEND_ID
@@ -42,7 +42,7 @@ class MediaItemTree(
             ROOT_SCHEME, LOCAL_ALL_ID, LOCAL_ALBUM_ID,
             LOCAL_ARTIST_ID, LOCAL_SHEET_ID, NETWORK_ALBUM_ID,
             NETWORK_ARTIST_ID, NETWORK_BANNER_ID,
-            NETWORK_RECOMMEND_ID, NETWORK_ALL_MUSIC_ID, NET_SHEET_ID
+            NETWORK_RECOMMEND_ID, NETWORK_MUSIC_ID, NET_SHEET_ID
         )
         list.forEach {
             treeNodes[it] = MediaItemNode(
@@ -109,7 +109,7 @@ class MediaItemTree(
 
     fun addOnLineToTree(bean: HomeBean){
         treeNodes[NETWORK_BANNER_ID]!!.setChild(bean.banners ?: emptyList())
-        treeNodes[NETWORK_ALL_MUSIC_ID]!!.setChild(bean.songs ?: emptyList())
+        treeNodes[NETWORK_MUSIC_ID]!!.setChild(bean.songs ?: emptyList())
         treeNodes[NET_SHEET_ID]!!.setChild(bean.sheets ?: emptyList())
         treeNodes[NETWORK_ALBUM_ID]!!.setChild(bean.albums ?: emptyList())
     }

@@ -1,10 +1,14 @@
 package com.hua.abstractmusic.ui.utils
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -38,19 +42,17 @@ fun Loading() {
 
 @Composable
 fun Error(
-    onclick:()->Unit
+    onclick: () -> Unit
 ) {
     Column(
         Modifier
-            .fillMaxSize()
-            .clickable {
-                onclick()
-            },
+            .fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column {
-            Text(text = "加载失败,请点击屏幕重试")
+        Image(imageVector = Icons.Default.Warning, contentDescription = "")
+        Button(onClick = { onclick() }) {
+            Text(text = "点击重试")
         }
     }
 }

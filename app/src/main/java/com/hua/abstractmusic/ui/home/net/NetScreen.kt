@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,6 +30,7 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.hua.abstractmusic.R
+import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.bean.net.HomeBean
 import com.hua.abstractmusic.bean.toNavType
 import com.hua.abstractmusic.ui.LocalAppNavController
@@ -139,7 +141,7 @@ private fun SuccessContent(
             }
         }
         item {
-            RecommendSongList(data.value)
+            RecommendSongList(netViewModel)
         }
         item {
             RecommendSheetList(
@@ -161,13 +163,17 @@ private fun SuccessContent(
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun RecommendSongList(
-    data: HomeBean
+    netViewModel: NetViewModel
 ) {
     RecommendTitle(
         recommendTitle = "大家都在听~",
         button = {
             IconButton(
-                onClick = { },
+                onClick = {
+                    netViewModel.setPlayList(
+                        0,
+                        netViewModel.playLists.value.map { it.mediaItem })
+                },
                 modifier = Modifier
                     .background(
                         MaterialTheme.colorScheme.surfaceVariant,
@@ -180,7 +186,7 @@ private fun RecommendSongList(
                     horizontalArrangement = Arrangement.Start
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.PlayArrow,
+                        imageVector = Icons.Default.PlayArrow,
                         contentDescription = "",
                         modifier = Modifier.size(16.dp)
                     )
@@ -195,11 +201,13 @@ private fun RecommendSongList(
                 .fillMaxWidth(),
             contentPadding = PaddingValues(start = 16.dp, end = 32.dp)
         ) { page ->
-            if (data.songs?.isNotEmpty() == true) {
+            if (netViewModel.playLists.value.isNotEmpty()) {
                 SongItems(
-                    data.songs,
+                    netViewModel.playLists.value,
                     page
-                )
+                ) {
+                    netViewModel.setPlayList(it, netViewModel.playLists.value.map { it.mediaItem })
+                }
             }
         }
     }
@@ -223,7 +231,6 @@ private fun RecommendSheetList(
                             RecommendItem(item = item, onclick = {
                                 navHostController.navigate("${Screen.SheetDetailScreen.route}?mediaItem=${it.toNavType()}")
                             }) {
-//                                netViewModel.recommendId = it.mediaId
                                 netViewModel.listPlay(it.mediaId)
                             }
                         }
@@ -362,17 +369,23 @@ private fun RecommendTitle(
 
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
-private fun SongItems(list: List<MediaItem>, page: Int) {
+private fun SongItems(list: List<MediaData>, page: Int, onclick: (Int) -> Unit) {
     Column(
         Modifier
             .fillMaxWidth(),
         verticalArrangement = Arrangement.Center
     ) {
         repeat(3) {
-            val data = list[page * 3 + it].mediaMetadata
+            val mediaData = list[page * 3 + it]
+            val data = mediaData.mediaItem.mediaMetadata
             Row(
                 Modifier
                     .fillMaxWidth()
+                    .clickable {
+                        onclick(
+                            list.indexOf(mediaData)
+                        )
+                    }
                     .height(60.dp)
             ) {
                 CoilImage(
@@ -391,6 +404,9 @@ private fun SongItems(list: List<MediaItem>, page: Int) {
                     TitleAndArtist(
                         title = "${data.title}",
                         subTitle = "${data.artist}",
+                        color =
+                        if (mediaData.isPlaying) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onBackground
                     )
                 }
             }

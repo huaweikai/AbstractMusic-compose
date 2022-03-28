@@ -78,12 +78,12 @@ class PlayingViewModel @Inject constructor(
     private val _currentPlayList = mutableStateOf<List<MediaData>>(emptyList())
     val currentPlayList: State<List<MediaData>> get() = _currentPlayList
 
-    val actionSeekBar = mutableStateOf(false)
+//    val actionSeekBar = mutableStateOf(false)
     private val _playerState = MutableStateFlow(false)
     val playerState = _playerState.asStateFlow()
     val maxValue = mutableStateOf(0F)
 
-    val currentPosition = mutableStateOf(0F)
+//    val currentPosition = mutableStateOf(0F)
 
     private val listener = object : Player.Listener {
         override fun onPlaybackStateChanged(playbackState: Int) {
@@ -130,20 +130,20 @@ class PlayingViewModel @Inject constructor(
         repeatModeUI.value = browser.repeatMode
     }
 
-    init {
-        viewModelScope.launch {
-            _playerState.collectLatest {
-                if (it && browser?.isConnected == true) {
-                    while (true) {
-                        if (!actionSeekBar.value) {
-                            currentPosition.value = browser?.currentPosition?.toFloat() ?: 0F
-                        }
-                        delay(1000L)
-                    }
-                }
-            }
-        }
-    }
+//    init {
+//        viewModelScope.launch {
+//            _playerState.collectLatest {
+//                if (it && browser?.isConnected == true) {
+//                    while (true) {
+//                        if (!actionSeekBar.value) {
+//                            currentPosition.value = browser?.currentPosition?.toFloat() ?: 0F
+//                        }
+//                        delay(1000L)
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     override fun updateItem(item: MediaItem?) {
         val browser = this.browser ?: return
@@ -155,7 +155,7 @@ class PlayingViewModel @Inject constructor(
             }
         }
         transformColor(item)
-        currentPosition.value = browser.currentPosition.toFloat()
+//        currentPosition.value = browser.currentPosition.toFloat()
         updateCurrentPlayList()
     }
 
@@ -334,7 +334,7 @@ class PlayingViewModel @Inject constructor(
     fun seekTo(position: Long) {
         val browser = this.browser ?: return
         browser.seekTo(position)
-        currentPosition.value = position.toFloat()
+//        currentPosition.value = position.toFloat()
         if (lyricsCanScroll.value) {
             setLyricsItem(getStartIndex(position))
         }

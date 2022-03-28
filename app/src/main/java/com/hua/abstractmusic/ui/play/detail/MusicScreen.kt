@@ -39,6 +39,7 @@ import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.ui.utils.WindowSize
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 import com.hua.abstractmusic.utils.toTime
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -55,6 +56,7 @@ fun MusicScreen(
 ) {
     val itemColor = viewModel.itemColor.collectAsState().value
     val windowSize = LocalScreenSize.current
+
     CompositionLocalProvider(
         LocalContentColor provides animateColorAsState(
             targetValue = itemColor.first,
@@ -144,11 +146,6 @@ private fun VerticalScreen(
                 .fillMaxWidth(0.9f)
                 .align(CenterHorizontally)
         )
-        SecondText(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .align(CenterHorizontally)
-        )
         Spacer(modifier = Modifier.height(18.dp))
         PlayController(modifier = Modifier.align(CenterHorizontally))
     }
@@ -198,7 +195,6 @@ private fun HorizontalScreen(
                 color = LocalContentColor.current,
             )
             MusicSlider(modifier = Modifier.fillMaxWidth())
-            SecondText(modifier = Modifier.fillMaxWidth())
             PlayController(modifier = Modifier.fillMaxWidth())
         }
     }
@@ -210,40 +206,50 @@ private fun MusicSlider(
     modifier: Modifier,
     viewModel: PlayingViewModel = LocalPlayingViewModel.current
 ) {
-    Slider(
-        value = viewModel.currentPosition.value.coerceAtLeast(0F),
-        valueRange = 0f..viewModel.maxValue.value.coerceAtLeast(0F),
-        onValueChange = {
-            //点击准备改变时，先设置我已经对seekbar操作，让更新seekbar暂停。
-            viewModel.actionSeekBar.value = true
-            viewModel.currentPosition.value = it
-        },
-        onValueChangeFinished = {
-            //结束后，先去seekto再去更新ui
-            viewModel.seekTo(viewModel.currentPosition.value.toLong())
-            viewModel.actionSeekBar.value = false
-        },
-        colors = SliderDefaults.colors(
-            thumbColor = LocalContentColor.current,
-            inactiveTrackColor = LocalMusicScreenSecondColor.current,
-            activeTrackColor = LocalContentColor.current
-        ),
-        modifier = modifier
-    )
-}
-
-@androidx.media3.common.util.UnstableApi
-@Composable
-private fun SecondText(
-    modifier: Modifier,
-    viewModel: PlayingViewModel = LocalPlayingViewModel.current
-) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.SpaceBetween
+    val currentPosition = remember {
+        mutableStateOf(viewModel.getMusicDuration())
+    }
+    val playState = viewModel.playerState.collectAsState()
+    val action = remember { mutableStateOf(false) }
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Slider(
+            value = currentPosition.value.toFloat(),
+            valueRange = 0f..viewModel.maxValue.value.coerceAtLeast(0F),
+            onValueChange = {
+                //点击准备改变时，先设置我已经对seekbar操作，让更新seekbar暂停。
+                action.value = true
+                currentPosition.value = it.toLong()
+            },
+            onValueChangeFinished = {
+                //结束后，先去seekto再去更新ui
+                viewModel.seekTo(currentPosition.value)
+                action.value = false
+            },
+            colors = SliderDefaults.colors(
+                thumbColor = LocalContentColor.current,
+                inactiveTrackColor = LocalMusicScreenSecondColor.current,
+                activeTrackColor = LocalContentColor.current
+            ),
+            modifier = modifier
+        )
+        Row(
+            modifier = modifier,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = currentPosition.value.toTime())
+            Text(text = viewModel.maxValue.value.toLong().toTime())
+        }
+    }
+    LaunchedEffect(
+        currentPosition.value,
+        playState.value,
+        action.value,
+        viewModel.currentPlayItem.value
     ) {
-        Text(text = viewModel.currentPosition.value.toLong().toTime())
-        Text(text = viewModel.maxValue.value.toLong().toTime())
+        if (playState.value && !action.value) {
+            delay(700L)
+            currentPosition.value = viewModel.getMusicDuration()
+        }
     }
 }
 
