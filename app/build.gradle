@@ -126,6 +126,9 @@ dependencies {
 
     implementation Other.uCrop
     implementation Other.monet
+    implementation Other.tinyPinyin
+    implementation Other.tinyAndroid
+    implementation Other.hutool
 
     implementation Other.huawei_obs
     implementation project(Other.taglib)

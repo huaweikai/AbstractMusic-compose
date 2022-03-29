@@ -2,6 +2,7 @@ package com.hua.abstractmusic.ui.play.detail
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
@@ -23,10 +24,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.media3.common.Player
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.R
@@ -39,8 +44,11 @@ import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.ui.utils.WindowSize
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 import com.hua.abstractmusic.utils.toTime
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.concurrent.Executors
 
 /**
  * @author : huaweikai
@@ -206,24 +214,23 @@ private fun MusicSlider(
     modifier: Modifier,
     viewModel: PlayingViewModel = LocalPlayingViewModel.current
 ) {
-    val currentPosition = remember {
-        mutableStateOf(viewModel.getMusicDuration())
-    }
     val playState = viewModel.playerState.collectAsState()
     val action = remember { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxWidth()) {
         Slider(
-            value = currentPosition.value.toFloat(),
+            value = viewModel.currentPosition.value,
             valueRange = 0f..viewModel.maxValue.value.coerceAtLeast(0F),
             onValueChange = {
                 //点击准备改变时，先设置我已经对seekbar操作，让更新seekbar暂停。
-                action.value = true
-                currentPosition.value = it.toLong()
+                viewModel.cancelUpdatePosition()
+                viewModel.currentPosition.value = it
             },
             onValueChangeFinished = {
                 //结束后，先去seekto再去更新ui
-                viewModel.seekTo(currentPosition.value)
-                action.value = false
+                viewModel.seekTo(viewModel.currentPosition.value.toLong())
+                if(playState.value){
+                    viewModel.startUpdatePosition()
+                }
             },
             colors = SliderDefaults.colors(
                 thumbColor = LocalContentColor.current,
@@ -236,19 +243,37 @@ private fun MusicSlider(
             modifier = modifier,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = currentPosition.value.toTime())
+            Text(text = viewModel.currentPosition.value.toLong().toTime())
             Text(text = viewModel.maxValue.value.toLong().toTime())
         }
     }
+
     LaunchedEffect(
-        currentPosition.value,
-        playState.value,
-        action.value,
-        viewModel.currentPlayItem.value
+        playState.value
     ) {
-        if (playState.value && !action.value) {
-            delay(700L)
-            currentPosition.value = viewModel.getMusicDuration()
+        if (playState.value) {
+            viewModel.startUpdatePosition()
+        } else {
+            viewModel.cancelUpdatePosition()
+        }
+    }
+
+    val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(Unit) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                if (playState.value) {
+                    viewModel.startUpdatePosition()
+                }
+            } else if (event == Lifecycle.Event.ON_PAUSE) {
+                viewModel.cancelUpdatePosition()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        this.onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 }

@@ -96,9 +96,11 @@ fun PopupWindow(
             state.value = false
         },
         PopItems("添加到歌单") {
-            viewModel.refresh(item.mediaId.isLocal())
-            state.value = false
-            sheetPop.value = true
+            scope.launch {
+                viewModel.refresh(item.mediaId.isLocal())
+                state.value = false
+                sheetPop.value = true
+            }
         }, PopItems("歌手:${item.mediaMetadata.artist}") {
             viewModel.selectArtistByMusicId(item)
             state.value = false
@@ -109,7 +111,6 @@ fun PopupWindow(
             viewModel.clearAlbum()
         }
     ))
-
     PopItemLayout(state = sheetPop, onDismiss = {}, title = {
         Spacer(modifier = Modifier.height(16.dp))
         Text(text = "歌单", fontSize = 22.sp, modifier = Modifier.padding(start = 16.dp))

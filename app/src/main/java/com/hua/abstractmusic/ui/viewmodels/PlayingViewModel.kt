@@ -2,6 +2,7 @@ package com.hua.abstractmusic.ui.viewmodels
 
 import android.annotation.SuppressLint
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -10,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.Player.REPEAT_MODE_OFF
+import androidx.media3.common.Timeline
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.base.viewmodel.BaseViewModel
 import com.hua.abstractmusic.bean.LyricsEntry
@@ -28,14 +30,11 @@ import com.hua.abstractmusic.utils.PaletteUtils
 import com.hua.abstractmusic.utils.isLocal
 import com.hua.taglib.TaglibLibrary
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -55,7 +54,7 @@ class PlayingViewModel @Inject constructor(
     private val composeUtils: ComposeUtils
 ) : BaseViewModel(mediaConnect) {
     //mediaConnect连接
-    val isConnect get() =  mediaConnect.isConnected
+    val isConnect get() = mediaConnect.isConnected
 
     //当前播放的item
     private val _currentPlayItem = mutableStateOf(Constant.NULL_MEDIA_ITEM)
@@ -78,20 +77,28 @@ class PlayingViewModel @Inject constructor(
     private val _currentPlayList = mutableStateOf<List<MediaData>>(emptyList())
     val currentPlayList: State<List<MediaData>> get() = _currentPlayList
 
-//    val actionSeekBar = mutableStateOf(false)
+    //    val actionSeekBar = mutableStateOf(false)
     private val _playerState = MutableStateFlow(false)
     val playerState = _playerState.asStateFlow()
     val maxValue = mutableStateOf(0F)
 
-//    val currentPosition = mutableStateOf(0F)
+    val currentPosition = mutableStateOf(0F)
 
     private val listener = object : Player.Listener {
         override fun onPlaybackStateChanged(playbackState: Int) {
             val browser = mediaConnect.browser ?: return
             when (playbackState) {
+                Player.STATE_BUFFERING -> {
+
+                }
                 Player.STATE_READY -> {
+                    currentPosition.value = browser.currentPosition.toFloat()
                     maxValue.value = (browser.duration).toFloat()
                 }
+                Player.STATE_IDLE -> {
+                    _playerState.value = false
+                }
+                Player.STATE_ENDED -> _playerState.value = false
                 else -> {}
             }
         }
@@ -103,6 +110,7 @@ class PlayingViewModel @Inject constructor(
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             updateItem(mediaItem)
         }
+
         override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
             shuffleUI.value = shuffleModeEnabled
         }
@@ -112,16 +120,16 @@ class PlayingViewModel @Inject constructor(
         }
     }
 
-    private val browserListener = object :BrowserListener{
+    private val browserListener = object : BrowserListener {
         override fun playListUpdate() {
             updateCurrentPlayList()
         }
     }
 
-    fun setController(){
+    fun setController() {
         addListener(listener)
         addBrowserListener(browserListener)
-        val browser = this.browser?:return
+        val browser = this.browser ?: return
         maxValue.value = (browser.duration).toFloat() ?: 0F
         _playerState.value = browser.isPlaying == true
         refresh()
@@ -130,20 +138,23 @@ class PlayingViewModel @Inject constructor(
         repeatModeUI.value = browser.repeatMode
     }
 
-//    init {
-//        viewModelScope.launch {
-//            _playerState.collectLatest {
-//                if (it && browser?.isConnected == true) {
-//                    while (true) {
-//                        if (!actionSeekBar.value) {
-//                            currentPosition.value = browser?.currentPosition?.toFloat() ?: 0F
-//                        }
-//                        delay(1000L)
-//                    }
-//                }
-//            }
-//        }
-//    }
+    private var job: Job? = null
+
+    fun startUpdatePosition() {
+        cancelUpdatePosition()
+        job = viewModelScope.launch(Dispatchers.Default){
+            while (true) {
+                withContext(Dispatchers.Main){
+                    currentPosition.value = browser?.currentPosition?.toFloat() ?: 0F
+                }
+                delay(1000L)
+            }
+        }
+    }
+
+    fun cancelUpdatePosition() {
+        job?.cancel()
+    }
 
     override fun updateItem(item: MediaItem?) {
         val browser = this.browser ?: return
@@ -264,7 +275,6 @@ class PlayingViewModel @Inject constructor(
     }
 
 
-
     fun getMusicDuration(): Long {
         val browser = this.browser ?: return 0L
         return if (browser.currentPosition < 0) {
@@ -291,8 +301,8 @@ class PlayingViewModel @Inject constructor(
 //        }
 //    }
 
-    fun setRepeatMode():Int?{
-        val browser = this.browser?:return null
+    fun setRepeatMode(): Int? {
+        val browser = this.browser ?: return null
         when (browser.repeatMode) {
             Player.REPEAT_MODE_ALL -> browser.repeatMode = Player.REPEAT_MODE_OFF
             Player.REPEAT_MODE_OFF -> browser.repeatMode = Player.REPEAT_MODE_ONE
@@ -301,14 +311,14 @@ class PlayingViewModel @Inject constructor(
         return browser.repeatMode
     }
 
-    fun setShuffle():Boolean{
+    fun setShuffle(): Boolean {
         val browser = this.browser ?: return false
         browser.shuffleModeEnabled = !browser.shuffleModeEnabled
         return browser.shuffleModeEnabled
     }
 
     fun removePlayItem(position: Int) {
-        val browser = this.browser?: return
+        val browser = this.browser ?: return
         browser.removeMediaItem(position)
         updateCurrentPlayList()
     }
@@ -316,7 +326,6 @@ class PlayingViewModel @Inject constructor(
     fun getLastMediaIndex(): Int {
         return preferenceManager.lastMediaIndex
     }
-
 
 
     fun getNextIndex(position: Long): Int {

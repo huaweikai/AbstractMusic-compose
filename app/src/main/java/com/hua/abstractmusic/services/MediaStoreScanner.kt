@@ -9,6 +9,8 @@ import android.os.Bundle
 import android.provider.MediaStore
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import cn.hutool.extra.pinyin.PinyinUtil
+import com.github.promeg.pinyinhelper.Pinyin
 import com.hua.abstractmusic.bean.net.NetData
 import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.other.Constant.ALBUM_ART_URI
@@ -158,6 +160,9 @@ class MediaStoreScanner(
                 )
             }
         }
+        localMusicList.sortBy {
+            PinyinUtil.getPinyin("${it.mediaMetadata.title}")
+        }
         return localMusicList
     }
 
@@ -210,6 +215,9 @@ class MediaStoreScanner(
                         .build()
                 )
             }
+        }
+        albumList.sortBy {
+            PinyinUtil.getPinyin("${it.mediaMetadata.title}")
         }
         return albumList
     }
@@ -275,6 +283,9 @@ class MediaStoreScanner(
                         .build()
                 )
             }
+        }
+        localArtists.sortBy {
+            PinyinUtil.getPinyin("${it.mediaMetadata.title}")
         }
         return localArtists
     }

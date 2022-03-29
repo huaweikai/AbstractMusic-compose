@@ -88,6 +88,10 @@ object Other {
 
     const val monet = "com.github.KieronQuinn:MonetCompat:0.4.1"
 
+    const val tinyPinyin = "com.github.promeg:tinypinyin:2.0.3"
+    const val tinyAndroid = "com.github.promeg:tinypinyin-lexicons-android-cncity:2.0.3"
+    const val hutool = "cn.hutool:hutool-extra:5.6.0"
+
 }
 
 object Test {

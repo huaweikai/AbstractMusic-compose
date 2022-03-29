@@ -39,21 +39,19 @@ class PopItemViewModel @Inject constructor(
 
     val sheetList = mutableStateOf(emptyList<MediaItem>())
 
-    fun refresh(isLocal:Boolean){
-        if(isLocal){
-            val browser = mediaConnect.browser?:return
+    suspend fun refresh(isLocal: Boolean) {
+        if (isLocal) {
+            val browser = mediaConnect.browser ?: return
             val browserFuture = browser.getChildren(
-                LOCAL_SHEET_ID,0, Int.MAX_VALUE,null
+                LOCAL_SHEET_ID, 0, Int.MAX_VALUE, null
             )
             browserFuture.addListener({
                 sheetList.value = browserFuture.get().value ?: emptyList()
-            },MoreExecutors.directExecutor())
-        }else{
-            viewModelScope.launch {
-                val result = netRepository.selectUserSheet()
-                if(result.isSuccess){
-                    sheetList.value = result.getOrNull() ?: emptyList()
-                }
+            }, MoreExecutors.directExecutor())
+        } else {
+            val result = netRepository.selectUserSheet()
+            if (result.isSuccess) {
+                sheetList.value = result.getOrNull() ?: emptyList()
             }
         }
     }
@@ -106,7 +104,6 @@ class PopItemViewModel @Inject constructor(
             Pair(false, e.message ?: "")
         }
     }
-
 
 
     val moreAlbum = mutableStateOf(NULL_MEDIA_ITEM)
