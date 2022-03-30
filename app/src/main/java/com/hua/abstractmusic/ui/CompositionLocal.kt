@@ -42,6 +42,11 @@ val LocalAppNavController = staticCompositionLocalOf<NavHostController> {
 val LocalMusicScreenSecondColor = staticCompositionLocalOf<Color>{
     error("color is null")
 }
+
+val LocalMusicScreenFirstColor = staticCompositionLocalOf<Color>{
+    error("color is null")
+}
+
 val LocalScreenSize = compositionLocalOf<WindowSize> {
     error("")
 }

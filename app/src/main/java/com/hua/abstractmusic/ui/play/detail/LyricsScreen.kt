@@ -6,10 +6,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyItemScope
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material.Card
@@ -23,8 +20,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.*
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.bean.LyricsEntry
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
@@ -34,6 +35,7 @@ import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.ui.utils.translucent
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 import com.hua.abstractmusic.utils.textDp
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -49,7 +51,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun LyricsScreen(
     viewModel: PlayingViewModel = LocalPlayingViewModel.current,
-    configuration: Configuration = LocalConfiguration.current,
 ) {
 
     Column(
@@ -61,7 +62,9 @@ fun LyricsScreen(
             Modifier
                 .fillMaxWidth()
                 .padding(
-                    top = 48.dp + WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+                    top = 48.dp + WindowInsets.statusBars
+                        .asPaddingValues()
+                        .calculateTopPadding()
                 )
                 .height(70.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -79,7 +82,8 @@ fun LyricsScreen(
             ) {
                 TitleAndArtist(
                     title = "${viewModel.currentPlayItem.value.mediaMetadata.title}",
-                    subTitle = "${viewModel.currentPlayItem.value.mediaMetadata.artist}"
+                    subTitle = "${viewModel.currentPlayItem.value.mediaMetadata.artist}",
+                    height = 8.dp
                 )
             }
         }
@@ -104,38 +108,54 @@ private fun LyricsSuccess(
     viewModel: PlayingViewModel = LocalPlayingViewModel.current,
     configuration: Configuration = LocalConfiguration.current,
 ) {
+    val lyricsState = rememberLazyListState(initialFirstVisibleItemScrollOffset = -500)
     val current = remember {
         mutableStateOf(26)
     }
+    val scope = rememberCoroutineScope()
     val height = (configuration.screenHeightDp - current.value) / 2
-    val isTouch = remember {
-        mutableStateOf(false)
-    }
+    val isTouch = remember { mutableStateOf(false) }
     val playerState = viewModel.playerState.collectAsState().value
-    LaunchedEffect(
-        viewModel.lyricList.value,
-        playerState,
-        isTouch.value,
-        viewModel.lyricsCanScroll.value
-    ) {
-        if (viewModel.lyricList.value.isNotEmpty() && playerState && viewModel.lyricsCanScroll.value) {
-            val start = viewModel.getMusicDuration()
-            val nextIndex = viewModel.getNextIndex(start)
-            delay(viewModel.getStartToNext(nextIndex, start))
-            if(!isTouch.value){
-                viewModel.lyricsState.animateScrollToItem((nextIndex).coerceAtLeast(0), -height.toInt())
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(Unit){
+        val observer = LifecycleEventObserver{_,event->
+            if(event == Lifecycle.Event.ON_RESUME){
+                viewModel.startUpdateLyrics()
+            }else if(event == Lifecycle.Event.ON_PAUSE){
+                viewModel.cancelUpdateLyrics()
             }
-            viewModel.setLyricsItem(nextIndex)
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        this.onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
-
+    LaunchedEffect(playerState){
+        if(playerState){
+            viewModel.startUpdateLyrics()
+        }else{
+            viewModel.cancelUpdateLyrics()
+        }
+    }
+    LaunchedEffect(viewModel.lyricList.value,isTouch.value){
+        if(viewModel.lyricList.value.isNotEmpty() && viewModel.lyricsCanScroll.value && !isTouch.value){
+            lyricsState.animateScrollToItem(viewModel.getStartIndex(viewModel.getMusicDuration()),-height)
+        }
+    }
     LazyColumn(
         Modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            .moreClick(isTouch)
+            .moreClick(
+                onUp = {
+                    scope.launch(Dispatchers.Default){ delay(1000L); isTouch.value = false }
+                },
+                onTouch = { isTouch.value = true }
+            )
             .translucent(),
-        state = viewModel.lyricsState
+        state = lyricsState
     ) {
         blackItem()
         items(viewModel.lyricList.value) { lyrics ->
@@ -250,7 +270,8 @@ private val blackItem: (LazyListScope.() -> Unit) = {
 }
 
 private fun Modifier.moreClick(
-    isTouch: MutableState<Boolean>
+    onTouch:()->Unit,
+    onUp:()->Unit
 ) = this.pointerInput(Unit) {
     awaitPointerEventScope {
         while (true) {
@@ -260,12 +281,8 @@ private fun Modifier.moreClick(
                 dragEvent!!.positionChangeConsumed() -> {
                     return@awaitPointerEventScope
                 }
-                dragEvent.changedToDownIgnoreConsumed() -> {
-                    isTouch.value = true
-                }
-                dragEvent.changedToUpIgnoreConsumed() -> {
-                    isTouch.value = false
-                }
+                dragEvent.changedToDownIgnoreConsumed() -> onTouch()
+                dragEvent.changedToUpIgnoreConsumed() -> onUp()
             }
         }
     }

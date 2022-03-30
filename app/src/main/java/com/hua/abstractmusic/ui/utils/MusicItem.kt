@@ -61,8 +61,8 @@ fun MusicItem(
         iterations = LottieConstants.IterateForever
     )
     Surface(
-        color = MaterialTheme.colorScheme.background,
-        contentColor = MaterialTheme.colorScheme.onBackground
+//        color = MaterialTheme.colorScheme.background,
+//        contentColor = MaterialTheme.colorScheme.onBackground
     ) {
         ConstraintLayout(
             modifier = modifier

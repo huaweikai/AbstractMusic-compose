@@ -6,6 +6,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -14,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.SwipeableDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.rememberModalBottomSheetState
@@ -23,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -103,7 +106,10 @@ fun AppNavigation(
     val density = LocalDensity.current
     val playingViewModel = LocalPlayingViewModel.current
     val sheetState =
-        rememberModalBottomSheetState(ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
+        rememberModalBottomSheetState(
+            ModalBottomSheetValue.Hidden,
+            skipHalfExpanded = true
+        )
     val bottomSheetNavigator = remember {
         BottomSheetNavigator(sheetState)
     }
@@ -149,7 +155,7 @@ fun AppNavigation(
             ) {
                 ModalBottomSheetLayout(
                     bottomSheetNavigator = bottomSheetNavigator,
-                    sheetShape = RoundedCornerShape(topEnd = 16.dp, topStart = 16.dp)
+                    sheetShape = RoundedCornerShape(topEnd = 16.dp, topStart = 16.dp),
                 ) {
                     NavHost(
                         navController = LocalAppNavController.current,
@@ -282,12 +288,10 @@ fun NavGraphBuilder.router(
 
     bottomSheet(Screen.PlayListScreen.route) {
         val scope = rememberCoroutineScope()
-        Column(modifier = Modifier.fillMaxHeight(0.5f)) {
-            PlayListScreen()
-            BackHandler(true) {
-                scope.launch {
-                    sheetPlayState.hide()
-                }
+        PlayListScreen()
+        BackHandler(true) {
+            scope.launch {
+                sheetPlayState.hide()
             }
         }
     }

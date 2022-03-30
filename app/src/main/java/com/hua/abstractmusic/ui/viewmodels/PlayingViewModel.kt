@@ -2,7 +2,6 @@ package com.hua.abstractmusic.ui.viewmodels
 
 import android.annotation.SuppressLint
 import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -11,7 +10,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.Player.REPEAT_MODE_OFF
-import androidx.media3.common.Timeline
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.base.viewmodel.BaseViewModel
 import com.hua.abstractmusic.bean.LyricsEntry
@@ -34,7 +32,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import javax.inject.Inject
 
 /**
@@ -66,7 +63,8 @@ class PlayingViewModel @Inject constructor(
 
 
     val lyricsCanScroll = mutableStateOf(false)
-    val lyricsState = LazyListState(firstVisibleItemScrollOffset = -500)
+
+    //    val lyricsState = LazyListState(firstVisibleItemScrollOffset = -500)
     private val _lyricsLoadState = MutableStateFlow<LCE>(LCE.Loading)
     val lyricsLoadState: StateFlow<LCE> get() = _lyricsLoadState.asStateFlow()
 
@@ -93,6 +91,7 @@ class PlayingViewModel @Inject constructor(
                 }
                 Player.STATE_READY -> {
                     currentPosition.value = browser.currentPosition.toFloat()
+                    setLyricsItem(getStartIndex(browser.currentPosition))
                     maxValue.value = (browser.duration).toFloat()
                 }
                 Player.STATE_IDLE -> {
@@ -138,13 +137,13 @@ class PlayingViewModel @Inject constructor(
         repeatModeUI.value = browser.repeatMode
     }
 
-    private var job: Job? = null
+    private var positionJob: Job? = null
 
     fun startUpdatePosition() {
         cancelUpdatePosition()
-        job = viewModelScope.launch(Dispatchers.Default){
+        positionJob = viewModelScope.launch(Dispatchers.Default) {
             while (true) {
-                withContext(Dispatchers.Main){
+                withContext(Dispatchers.Main) {
                     currentPosition.value = browser?.currentPosition?.toFloat() ?: 0F
                 }
                 delay(1000L)
@@ -153,8 +152,30 @@ class PlayingViewModel @Inject constructor(
     }
 
     fun cancelUpdatePosition() {
-        job?.cancel()
+        positionJob?.cancel()
     }
+
+    private var lyricsJob: Job? = null
+
+    fun startUpdateLyrics() {
+        cancelUpdateLyrics()
+        lyricsJob = viewModelScope.launch(Dispatchers.Main) {
+            while (lyricsCanScroll.value) {
+                val startTime = getMusicDuration()
+                val start = getStartIndex(startTime)
+                setLyricsItem(start)
+                val next = getNextIndex(startTime)
+                withContext(Dispatchers.Default) {
+                    delay(getStartToNext(next, startTime))
+                }
+            }
+        }
+    }
+
+    fun cancelUpdateLyrics() {
+        lyricsJob?.cancel()
+    }
+
 
     override fun updateItem(item: MediaItem?) {
         val browser = this.browser ?: return
@@ -166,7 +187,6 @@ class PlayingViewModel @Inject constructor(
             }
         }
         transformColor(item)
-//        currentPosition.value = browser.currentPosition.toFloat()
         updateCurrentPlayList()
     }
 
@@ -343,10 +363,7 @@ class PlayingViewModel @Inject constructor(
     fun seekTo(position: Long) {
         val browser = this.browser ?: return
         browser.seekTo(position)
-//        currentPosition.value = position.toFloat()
-        if (lyricsCanScroll.value) {
-            setLyricsItem(getStartIndex(position))
-        }
+        startUpdateLyrics()
     }
 
     val itemColor = MutableStateFlow(Pair(Color.Black, Color.Black))

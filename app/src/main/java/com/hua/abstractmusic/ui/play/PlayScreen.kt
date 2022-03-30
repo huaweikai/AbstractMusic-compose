@@ -20,9 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
-import com.hua.abstractmusic.ui.LocalBottomControllerHeight
-import com.hua.abstractmusic.ui.LocalMusicScreenSecondColor
-import com.hua.abstractmusic.ui.LocalPlayingViewModel
+import com.hua.abstractmusic.ui.*
 import com.hua.abstractmusic.ui.play.detail.ListScreen
 import com.hua.abstractmusic.ui.play.detail.LyricsScreen
 import com.hua.abstractmusic.ui.play.detail.MusicScreen
@@ -69,13 +67,12 @@ fun PlayScreen(
     viewModel: PlayingViewModel = LocalPlayingViewModel.current,
 ) {
     val itemColor = viewModel.itemColor.collectAsState().value
-
     CompositionLocalProvider(
         LocalContentColor provides animateColorAsState(
             targetValue = itemColor.first,
             tween(600)
         ).value,
-        androidx.compose.material.LocalContentColor provides animateColorAsState(
+        LocalMusicScreenFirstColor provides animateColorAsState(
             targetValue = itemColor.first,
             tween(600)
         ).value,
@@ -104,7 +101,6 @@ fun PlayScreen(
                 Modifier
                     .fillMaxSize(),
             ) {
-                val scope = rememberCoroutineScope()
                 PlayScreenContent(viewPageState, snackBarHostState)
                 PlayScreenTab(viewPageState)
             }
@@ -146,7 +142,7 @@ private fun PlayScreenTab(
                     Text(
                         text = title,
                         color = if (viewPageState.currentPage == index)
-                            LocalContentColor.current else LocalMusicScreenSecondColor.current
+                            LocalMusicScreenFirstColor.current else LocalMusicScreenSecondColor.current
                     )
                 }
             }
@@ -161,24 +157,28 @@ private fun PlayScreenContent(
     viewPageState: PagerState,
     snackbarHostState: SnackbarHostState
 ) {
-    HorizontalPager(
-        state = viewPageState,
-        count = 3,
-        reverseLayout = false,
-        modifier = Modifier
-//            .clip(RoundedCornerShape(topEnd = 30.dp, topStart = 30.dp))
-            .background(if (isSystemInDarkTheme()) Color.Black else Color.White)
-            .fillMaxSize(),
-    ) { page ->
-        when (page) {
-            0 -> {
-                ListScreen()
-            }
-            1 -> {
-                MusicScreen(snackbarHostState)
-            }
-            2 -> {
-                LyricsScreen()
+    CompositionLocalProvider(
+        LocalContentColor provides LocalMusicScreenFirstColor.current,
+        androidx.compose.material.LocalContentColor provides LocalMusicScreenFirstColor.current
+    ) {
+        HorizontalPager(
+            state = viewPageState,
+            count = 3,
+            reverseLayout = false,
+            modifier = Modifier
+                .background(if (isSystemInDarkTheme()) Color.Black else Color.White)
+                .fillMaxSize(),
+        ) { page ->
+            when (page) {
+                0 -> {
+                    ListScreen()
+                }
+                1 -> {
+                    MusicScreen(snackbarHostState)
+                }
+                2 -> {
+                    LyricsScreen()
+                }
             }
         }
     }

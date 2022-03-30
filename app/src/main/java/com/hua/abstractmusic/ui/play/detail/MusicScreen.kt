@@ -85,8 +85,6 @@ fun MusicScreen(
             VerticalScreen(snackBarState)
         }
     }
-
-
 }
 
 @SuppressLint("UnsafeOptInUsageError")
