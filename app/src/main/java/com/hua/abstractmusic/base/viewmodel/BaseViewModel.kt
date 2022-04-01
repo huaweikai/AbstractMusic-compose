@@ -104,14 +104,7 @@ abstract class BaseViewModel(
     }
 
     //
-    fun playOrPause() {
-        val browser = mediaConnect.browser ?: return
-        if (browser.isPlaying) {
-            browser.pause()
-        } else {
-            browser.play()
-        }
-    }
+
 
     fun skipTo(position: Int, autoPlay: Boolean = false) {
         val browser = mediaConnect.browser ?: return

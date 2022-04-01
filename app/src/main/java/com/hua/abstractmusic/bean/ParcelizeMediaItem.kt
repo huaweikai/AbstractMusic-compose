@@ -1,9 +1,11 @@
 package com.hua.abstractmusic.bean
 
 import android.annotation.SuppressLint
+import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.navigation.NavType
 import com.google.gson.Gson
 import kotlinx.parcelize.Parcelize
@@ -19,14 +21,16 @@ data class ParcelizeMediaItem(
     val title: String,
     val artist: String,
     val artUri: String,
-    val desc: String?,
-    val year: Int?,
-    val trackNumber: Int?,
-    val userId: Int?
+    val albumId: Long? = null,
+    val desc: String? = null,
+    val year: Int? = null,
+    val trackNumber: Int? = null,
+    val userId: Int? = null,
+    val artistId: Long? = null
 ) : Parcelable
 
 val defaultParcelizeMediaItem = ParcelizeMediaItem(
-    "0", "", "", "", null, null, null, null
+    "0", "", "", "",
 )
 
 class NavTypeMediaItem : NavType<ParcelizeMediaItem>(true) {
@@ -54,7 +58,9 @@ fun MediaItem.toNavType(): String = Gson().toJson(
         desc = "${mediaMetadata.subtitle ?: ""}",
         year = mediaMetadata.releaseYear,
         trackNumber = mediaMetadata.trackNumber,
-        userId = mediaMetadata.extras?.getInt("userId")
+        userId = mediaMetadata.extras?.getInt("userId"),
+        albumId = mediaMetadata.extras?.getLong("albumId") ?: 0L,
+        artistId = mediaMetadata.extras?.getLong("artistId")
     )
 )
 
@@ -70,6 +76,8 @@ fun MediaItem.toParcel() =
         desc = "${mediaMetadata.subtitle ?: ""}",
         year = mediaMetadata.releaseYear,
         trackNumber = mediaMetadata.trackNumber,
-        userId = mediaMetadata.extras?.getInt("userId")
+        userId = mediaMetadata.extras?.getInt("userId"),
+        albumId = mediaMetadata.extras?.getLong("albumId") ?: 0L,
+        artistId = mediaMetadata.extras?.getLong("artistId")
     )
 

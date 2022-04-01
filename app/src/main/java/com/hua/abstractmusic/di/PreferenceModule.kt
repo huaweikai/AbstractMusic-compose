@@ -29,6 +29,7 @@ object PreferenceModule {
         ThemeColorPreference(mmkv),
         UserTokenPreference(mmkv),
         RepeatModePreference(mmkv),
-        ShuffleModePreference(mmkv)
+        ShuffleModePreference(mmkv),
+        MediaPositionPreference(mmkv)
     )
 }

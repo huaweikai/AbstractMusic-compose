@@ -213,7 +213,10 @@ private fun MusicSlider(
     viewModel: PlayingViewModel = LocalPlayingViewModel.current
 ) {
     val playState = viewModel.playerState.collectAsState()
-    val action = remember { mutableStateOf(false) }
+    val sliderValue = remember{ mutableStateOf(viewModel.getMusicDuration().toFloat())}
+    val isFirst = remember{
+        mutableStateOf(true)
+    }
     Column(modifier = Modifier.fillMaxWidth()) {
         Slider(
             value = viewModel.currentPosition.value,
@@ -221,14 +224,10 @@ private fun MusicSlider(
             onValueChange = {
                 //点击准备改变时，先设置我已经对seekbar操作，让更新seekbar暂停。
                 viewModel.cancelUpdatePosition()
-                viewModel.currentPosition.value = it
+                sliderValue.value = it
             },
             onValueChangeFinished = {
                 //结束后，先去seekto再去更新ui
-                viewModel.seekTo(viewModel.currentPosition.value.toLong())
-                if(playState.value){
-                    viewModel.startUpdatePosition()
-                }
             },
             colors = SliderDefaults.colors(
                 thumbColor = LocalContentColor.current,
@@ -244,6 +243,18 @@ private fun MusicSlider(
             Text(text = viewModel.currentPosition.value.toLong().toTime())
             Text(text = viewModel.maxValue.value.toLong().toTime())
         }
+    }
+
+    LaunchedEffect(sliderValue.value){
+        viewModel.currentPosition.value = sliderValue.value
+        if(!isFirst.value){
+            delay(500L)
+            viewModel.seekTo(sliderValue.value.toLong())
+            if (playState.value) {
+                viewModel.startUpdatePosition()
+            }
+        }
+        isFirst.value = false
     }
 
     LaunchedEffect(

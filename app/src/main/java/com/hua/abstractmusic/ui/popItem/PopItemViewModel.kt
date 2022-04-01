@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import com.google.common.util.concurrent.MoreExecutors
+import com.hua.abstractmusic.bean.ParcelizeMediaItem
 import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.other.Constant.LOCAL_SHEET_ID
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
@@ -81,7 +82,7 @@ class PopItemViewModel @Inject constructor(
     fun addQueue(item: MediaItem, nextPlay: Boolean = false): Int {
         val browser = mediaConnect.browser ?: return 0
         val index = if (nextPlay) browser.currentMediaItemIndex + 1 else browser.mediaItemCount
-        browser.addMediaItem(index, item)
+        browser.addMediaItem(index,item)
         // 没有相关回调，直接手动更新
         mediaConnect.updatePlayList()
         return index

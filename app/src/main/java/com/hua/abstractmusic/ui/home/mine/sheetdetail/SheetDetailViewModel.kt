@@ -354,7 +354,7 @@ class SheetDetailViewModel @Inject constructor(
                 title = sheet.title,
                 artist = sheet.author,
                 artUri = sheet.artUri ?: "",
-                desc = sheet.sheetDesc,null,null,null
+                desc = sheet.sheetDesc
             )
         )
     }

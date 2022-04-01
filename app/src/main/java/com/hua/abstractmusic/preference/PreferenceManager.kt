@@ -10,11 +10,13 @@ class PreferenceManager(
     themeColorPreference: ThemeColorPreference,
     userTokenPreference:UserTokenPreference,
     repeatModePreference: RepeatModePreference,
-    shuffleModePreference: ShuffleModePreference
+    shuffleModePreference: ShuffleModePreference,
+    mediaPositionPreference: MediaPositionPreference
 ) {
     var lastMediaIndex by lastMediaIndex
     var themeColor by themeColorPreference
     var userToken by userTokenPreference
     var repeatMode by repeatModePreference
     var shuffleMode by shuffleModePreference
+    var mediaPosition by mediaPositionPreference
 }

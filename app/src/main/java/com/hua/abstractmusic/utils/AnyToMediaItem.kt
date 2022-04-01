@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import com.hua.abstractmusic.bean.ParcelizeMediaItem
 import com.hua.abstractmusic.bean.net.NetAlbum
 import com.hua.abstractmusic.bean.net.NetArtist
 import com.hua.abstractmusic.bean.net.NetMusic
@@ -107,7 +108,26 @@ fun NetSheet.toMediaItem(parentId: Uri) =
         )
         .setMediaId(parentId.buildUpon().appendPath(this@toMediaItem.id.toString()).toString())
         .build()
-
+@SuppressLint("UnsafeOptInUsageError")
+fun ParcelizeMediaItem.toMediaItem() = MediaItem.Builder()
+    .setMediaMetadata(
+        MediaMetadata.Builder()
+            .setTitle(title)
+            .setArtist(artist)
+            .setArtworkUri(
+                if (artUri.isNotBlank()) Uri.parse(artUri) else null
+            )
+            .setExtras(Bundle().apply {
+                putLong("albumId",albumId ?: 0L)
+                putLong("artistId",artistId ?: 0L)
+            })
+            .setSubtitle(desc)
+            .setReleaseYear(year)
+            .setTrackNumber(trackNumber)
+            .build()
+    )
+    .setMediaId(mediaId)
+    .build()
 /**
  * 根据手机的分辨率从 px(像素) 的单位 转成为 dp
  */

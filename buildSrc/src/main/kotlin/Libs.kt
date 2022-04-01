@@ -38,7 +38,7 @@ object Compose {
         "androidx.activity:activity-compose:${Version.activity_compose_version}"
     const val compose_material_md3 = "androidx.compose.material3:material3:$compose_md3_version"
     const val compose_ui_util = "androidx.compose.ui:ui-util:$compose_version"
-    const val compose_navigation = "androidx.navigation:navigation-compose:2.4.0-rc01"
+    const val compose_navigation = "androidx.navigation:navigation-compose:2.4.0"
 
     const val compose_hilt_navigation =
         "androidx.hilt:hilt-navigation-compose:$hilt_compose_version"

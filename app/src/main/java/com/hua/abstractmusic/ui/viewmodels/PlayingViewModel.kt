@@ -82,22 +82,19 @@ class PlayingViewModel @Inject constructor(
 
     val currentPosition = mutableStateOf(0F)
 
+
     private val listener = object : Player.Listener {
         override fun onPlaybackStateChanged(playbackState: Int) {
             val browser = mediaConnect.browser ?: return
             when (playbackState) {
-                Player.STATE_BUFFERING -> {
-
-                }
                 Player.STATE_READY -> {
+                    _playerState.value = browser.playWhenReady
                     currentPosition.value = browser.currentPosition.toFloat()
                     setLyricsItem(getStartIndex(browser.currentPosition))
                     maxValue.value = (browser.duration).toFloat()
                 }
-                Player.STATE_IDLE -> {
-                    _playerState.value = false
-                }
-                Player.STATE_ENDED -> _playerState.value = false
+                Player.STATE_ENDED ->  _playerState.value = false
+
                 else -> {}
             }
         }
@@ -125,13 +122,24 @@ class PlayingViewModel @Inject constructor(
         }
     }
 
+    fun playOrPause() {
+        val browser = mediaConnect.browser ?: return
+        if (browser.isPlaying) {
+            browser.pause()
+        } else {
+            browser.play()
+        }
+        if(browser.playbackState == Player.STATE_ENDED){
+            browser.seekTo(_currentPlayList.value.size - 1,0)
+        }
+    }
+
     fun setController() {
         addListener(listener)
         addBrowserListener(browserListener)
         val browser = this.browser ?: return
         maxValue.value = (browser.duration).toFloat() ?: 0F
         _playerState.value = browser.isPlaying == true
-        refresh()
         updateItem(browser.currentMediaItem)
         shuffleUI.value = browser.shuffleModeEnabled
         repeatModeUI.value = browser.repeatMode
@@ -220,7 +228,7 @@ class PlayingViewModel @Inject constructor(
         }
     }
 
-    fun getStartToNext(nextIndex: Int, start: Long): Long {
+    private fun getStartToNext(nextIndex: Int, start: Long): Long {
         return if (nextIndex >= lyricList.value.size) {
             Long.MAX_VALUE
         } else {
@@ -240,6 +248,7 @@ class PlayingViewModel @Inject constructor(
             if (lyrics.isBlank()) {
                 _lyricsList.value = emptyList()
                 _lyricsLoadState.value = LCE.Error
+                lyricsCanScroll.value = false
             } else {
                 stringToLyrics(lyrics)
                 _lyricsLoadState.value = LCE.Success

@@ -3,6 +3,7 @@ package com.hua.abstractmusic.ui.setting
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.RangeSlider
 import androidx.compose.material.Switch
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -12,6 +13,8 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,6 +22,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -58,7 +62,7 @@ fun SettingMain(
     settingNavController: NavHostController,
 ) {
     val themeViewModel: ThemeViewModel = LocalThemeViewModel.current
-    val userViewModel: UserViewModel = LocalUserViewModel.current
+    val settingViewModel: SettingViewModel = hiltViewModel()
     val appNavController: NavHostController = LocalAppNavController.current
     Scaffold(
         topBar = {
@@ -69,7 +73,9 @@ fun SettingMain(
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
                         contentDescription = "",
-                        modifier = Modifier.padding(8.dp).clickable { appNavController.navigateUp() })
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .clickable { appNavController.navigateUp() })
                 }
             )
         }
@@ -93,13 +99,22 @@ fun SettingMain(
                     settingNavController.navigate("setting_theme")
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            val loginState = userViewModel.userInfo.collectAsState().value.isLogin
+            Spacer(modifier = Modifier.height(8.dp))
+            val isOpen = settingViewModel.timeOpen.collectAsState()
+            SettingSwitchItem(title = "定时播放", switchState = isOpen.value, onSwitch = {
+                settingViewModel.startTimer(it)
+            }, enabled = true)
+            val (s,setS) = remember{ mutableStateOf(0F)}
+            AnimatedVisibility(visible = isOpen.value, modifier =  Modifier.padding(horizontal = 16.dp)) {
+                Slider(value = s, onValueChange = setS, valueRange = 0F..5F, steps = 5)
+            }
+
+            val loginState = settingViewModel.userInfo.collectAsState().value.isLogin
             if (loginState) {
                 Button(
                     onClick = {
-                        userViewModel.logoutUser()
-//                        appNavController.navigateUp()
+                        settingViewModel.logoutUser()
+                        appNavController.navigateUp()
                     },
                     modifier = Modifier
                         .fillMaxWidth()

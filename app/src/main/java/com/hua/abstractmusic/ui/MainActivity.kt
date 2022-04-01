@@ -46,8 +46,8 @@ class MainActivity : MonetActivity() {
         //不会在系统视图下面绘制
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
-        lifecycleScope.launchWhenCreated {
-            monet.awaitMonetReady()
+//        lifecycleScope.launchWhenCreated {
+//            monet.awaitMonetReady()
             setContent {
                 rememberSystemUiController().setStatusBarColor(
                     Color.Transparent,
@@ -74,7 +74,7 @@ class MainActivity : MonetActivity() {
                         AppNavigation()
                     }
                 }
-            }
+//            }
         }
     }
 }

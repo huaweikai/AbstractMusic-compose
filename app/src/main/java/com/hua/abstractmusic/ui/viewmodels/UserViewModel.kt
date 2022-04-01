@@ -95,17 +95,6 @@ class UserViewModel @Inject constructor(
         }
     }
 
-
-    fun logoutUser() {
-        viewModelScope.launch {
-            val result = userRepository.logoutUser().code
-            val isSuccess = result == NetWork.SUCCESS
-            if (isSuccess) {
-                netSheetList.value = emptyList()
-            }
-        }
-    }
-
     fun createSheet(sheetName: String, isLocal: Boolean) {
         viewModelScope.launch(Dispatchers.Main) {
             try {

@@ -14,6 +14,7 @@ import com.hua.abstractmusic.other.NetWork.ERROR
 import com.hua.abstractmusic.other.NetWork.SERVER_ERROR
 import com.hua.abstractmusic.repository.NetRepository
 import com.hua.abstractmusic.services.MediaConnect
+import com.hua.abstractmusic.services.MediaItemTree
 import com.hua.abstractmusic.ui.utils.LCE
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -28,7 +29,7 @@ import javax.inject.Inject
 class SearchViewModel @Inject constructor(
     mediaConnect: MediaConnect,
     private val netRepository: NetRepository,
-    private val userDao: UserDao
+    private val userDao: UserDao,
 ) : BaseViewModel(mediaConnect) {
     private val _searchText = mutableStateOf(ChangeText(hint = "搜你想要的"))
     val searchText: State<ChangeText> = _searchText

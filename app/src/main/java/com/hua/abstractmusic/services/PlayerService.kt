@@ -128,7 +128,7 @@ class PlayerService : MediaLibraryService() {
                 val list = useCase.getCurrentListCase()
                 if (list.isNotEmpty()) {
                     withContext(Dispatchers.Main) {
-                        browser?.setMediaItems(list, index, 0)
+                        browser?.setMediaItems(list, index, preferenceManager.mediaPosition)
                         browser?.prepare()
                         browser?.shuffleModeEnabled = preferenceManager.shuffleMode
                         browser?.repeatMode = preferenceManager.repeatMode
@@ -186,6 +186,7 @@ class PlayerService : MediaLibraryService() {
                 }
                 else -> {
                     notificationManager.hideNotification()
+                    preferenceManager.mediaPosition = 0L
                 }
             }
         }
@@ -199,6 +200,7 @@ class PlayerService : MediaLibraryService() {
             if (!playWhenReady) {
                 stopForeground(false)
             }
+            preferenceManager.mediaPosition = browser?.currentPosition ?: 0L
         }
 
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {

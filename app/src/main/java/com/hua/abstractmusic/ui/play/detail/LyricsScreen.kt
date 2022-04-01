@@ -115,7 +115,7 @@ private fun LyricsSuccess(
     val scope = rememberCoroutineScope()
     val height = (configuration.screenHeightDp - current.value) / 2
     val isTouch = remember { mutableStateOf(false) }
-    val playerState = viewModel.playerState.collectAsState().value
+    val playerState = viewModel.playerState.collectAsState()
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -132,15 +132,18 @@ private fun LyricsSuccess(
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
-    LaunchedEffect(playerState){
-        if(playerState){
+    LaunchedEffect(playerState.value){
+        if(playerState.value){
             viewModel.startUpdateLyrics()
         }else{
             viewModel.cancelUpdateLyrics()
         }
     }
     LaunchedEffect(viewModel.lyricList.value,isTouch.value){
-        if(viewModel.lyricList.value.isNotEmpty() && viewModel.lyricsCanScroll.value && !isTouch.value){
+        if(viewModel.lyricList.value.isNotEmpty() &&
+            viewModel.lyricsCanScroll.value &&
+            !isTouch.value && playerState.value
+        ){
             lyricsState.animateScrollToItem(viewModel.getStartIndex(viewModel.getMusicDuration()),-height)
         }
     }
@@ -150,7 +153,7 @@ private fun LyricsSuccess(
             .fillMaxHeight()
             .moreClick(
                 onUp = {
-                    scope.launch(Dispatchers.Default){ delay(1000L); isTouch.value = false }
+                    scope.launch(Dispatchers.Default) { delay(1000L); isTouch.value = false }
                 },
                 onTouch = { isTouch.value = true }
             )
