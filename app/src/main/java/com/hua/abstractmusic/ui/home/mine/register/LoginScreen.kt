@@ -12,10 +12,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavHostController
 import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.route.Screen
@@ -40,6 +44,7 @@ fun LoginScreen(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val focus = LocalFocusManager.current
     var loginMode by remember {
         mutableStateOf(true)
     }
@@ -62,23 +67,27 @@ fun LoginScreen(
                         && viewModel.loginEmailCodeText.value.isCode()
         }
     }
+    val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(Unit) {
+        val observer = LifecycleEventObserver { source, event ->
+            if(event == Lifecycle.Event.ON_PAUSE){
+                focus.clearFocus()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
         this.onDispose {
             viewModel.loginClear()
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
     LaunchedEffect(viewModel.loginEmailText.value) {
-        if (!viewModel.loginCodeIsWait.value) {
-            viewModel.loginEmailCodeEnable.value = viewModel.loginEmailText.value.isEmail()
-        }
+            viewModel.loginEmailCodeEnable.value = viewModel.loginEmailText.value.isEmail() && !viewModel.registerTimeEnable.value
     }
-
-    val focus = LocalFocusManager.current
 
     Scaffold(
         topBar = {
             SmallTopAppBar(
-                title = { Text(text = "登录", fontSize = 18.sp)},
+                title = { Text(text = "登录")},
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "")

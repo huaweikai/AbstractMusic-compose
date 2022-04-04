@@ -1,14 +1,13 @@
 package com.hua.abstractmusic.preference
 
+import androidx.lifecycle.viewModelScope
 import com.hua.abstractmusic.bean.user.UserBean
 import com.hua.abstractmusic.db.user.UserDao
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,6 +32,12 @@ class UserInfoData @Inject constructor(
     )
     val userInfo get() = _userInfo.asStateFlow()
 
+    private val _registerEnabled = MutableStateFlow(false)
+    val registerEnabled :StateFlow<Boolean> get()= _registerEnabled
+
+    private val _registerTime = MutableStateFlow(0)
+    val registerTime:StateFlow<Int> get() = _registerTime
+
     init {
         refreshUser()
     }
@@ -50,6 +55,18 @@ class UserInfoData @Inject constructor(
             )
         }
     }
+
+    fun actionRegister(){
+        _registerEnabled.value = true
+        serviceScope.launch {
+            for (i in 120 downTo 0) {
+                _registerTime.value = i
+                delay(1000L)
+            }
+            _registerEnabled.value = false
+        }
+    }
+
 
     fun loginUser(userToken: String) {
         serviceScope.launch {

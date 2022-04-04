@@ -37,7 +37,7 @@ fun RegisterScreen(
     navHostController: NavHostController = LocalAppNavController.current
 ) {
     LaunchedEffect(viewModel.registerEmailText.value) {
-        viewModel.registerCodeButtonEnabled.value = viewModel.registerEmailText.value.isEmail()
+        viewModel.registerCodeButtonEnabled.value = viewModel.registerEmailText.value.isEmail() && !viewModel.registerTimeEnable.value
     }
     LaunchedEffect(
         viewModel.registerEmailError.value,

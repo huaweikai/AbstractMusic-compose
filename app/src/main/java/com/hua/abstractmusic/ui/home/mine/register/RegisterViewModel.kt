@@ -6,8 +6,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hua.abstractmusic.bean.net.NetData
 import com.hua.abstractmusic.other.NetWork
+import com.hua.abstractmusic.preference.UserInfoData
 import com.hua.abstractmusic.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,7 +21,8 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val userInfoData: UserInfoData
 ):ViewModel() {
     //注册时，防止横屏数据消失
     val registerEmailText = mutableStateOf("")
@@ -37,6 +40,8 @@ class RegisterViewModel @Inject constructor(
 
     private val _codeText = mutableStateOf("点击获取验证码")
     val codeText: State<String> get() = _codeText
+
+    val registerTimeEnable get() =  userInfoData.registerEnabled
 
 
     fun registerClear() {
@@ -59,18 +64,40 @@ class RegisterViewModel @Inject constructor(
         registerCodeButtonEnabled.value = false
         val result = userRepository.getEmailCode(registerEmailText.value)
         if (result.code == NetWork.SUCCESS) {
-            viewModelScope.launch {
-                for (i in 120 downTo 0) {
-                    _codeText.value = "再获取还需${i}秒"
-                    delay(1000L)
-                }
-                _codeText.value = "点击获取验证码"
-                registerCodeButtonEnabled.value = true
-            }
+            userInfoData.actionRegister()
         } else if (result.code == NetWork.SERVER_ERROR || result.code == NetWork.ERROR) {
             registerCodeButtonEnabled.value = true
         }
         return result.msg
+    }
+
+    init {
+        viewModelScope.launch {
+            userInfoData.registerEnabled.collect{
+                registerCodeButtonEnabled.value = !it
+                if(it){
+                    startCodeTime()
+                }else{
+                    cancelCodeTimeJob()
+                    _codeText.value = "点击获取验证码"
+                }
+            }
+        }
+    }
+
+    private var codeTimeJob :Job ?= null
+
+    fun startCodeTime(){
+        cancelCodeTimeJob()
+        codeTimeJob = viewModelScope.launch {
+            userInfoData.registerTime.collect{
+                _codeText.value = "再获取还需${it}秒"
+            }
+        }
+    }
+
+    fun cancelCodeTimeJob(){
+        codeTimeJob?.cancel()
     }
 
     suspend fun register(): NetData<String> {
