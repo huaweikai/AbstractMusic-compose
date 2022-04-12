@@ -17,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,9 +29,6 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.hua.abstractmusic.R
-import com.hua.abstractmusic.bean.MediaData
-import com.hua.abstractmusic.bean.net.HomeBean
-import com.hua.abstractmusic.bean.toNavType
 import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalComposeUtils
@@ -40,6 +36,8 @@ import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.*
 import com.hua.abstractmusic.ui.viewmodels.NetViewModel
 import com.hua.abstractmusic.utils.PaletteUtils
+import com.hua.model.music.MediaData
+import com.hua.model.parcel.toNavType
 
 
 /**
@@ -47,7 +45,7 @@ import com.hua.abstractmusic.utils.PaletteUtils
  * @Date   : 2022/01/08
  * @Desc   : 在线音乐的screen
  */
-@OptIn(ExperimentalPagerApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun NetScreen(
@@ -55,11 +53,9 @@ fun NetScreen(
     navHostController: NavHostController = LocalAppNavController.current
 ) {
 
-    val appBarColors = TopAppBarDefaults.smallTopAppBarColors(
-        containerColor = MaterialTheme.colorScheme.surface
-    )
-
     val state = netViewModel.screenState.collectAsState()
+
+    val snackbarHostState = SnackbarHostState()
 
     Scaffold(
         topBar = {
@@ -68,7 +64,6 @@ fun NetScreen(
                     Text(text = "在线音乐")
                 },
                 modifier = Modifier.statusBarsPadding(),
-                colors = appBarColors,
                 actions = {
                     IconButton(onClick = {
                         navHostController.navigate(Screen.NetSearchScreen.route)
@@ -81,8 +76,14 @@ fun NetScreen(
                 },
             )
         },
+        snackbarHost = {
+            SnackbarHost(hostState = netViewModel.snackBarState){
+                Snackbar(modifier = Modifier.padding(horizontal = 16.dp, vertical = 72.dp)){
+                    Text(text = it.visuals.message)
+                }
+            }
+        }
     ) {
-        val homeBean = netViewModel.homeData.collectAsState()
         SwipeRefresh(
             state = rememberSwipeRefreshState(state.value == LCE.Loading),
             onRefresh = {
@@ -93,7 +94,7 @@ fun NetScreen(
         ) {
             when (state.value) {
                 LCE.Loading -> {
-                    if (homeBean.value.isEmpty()) {
+                    if (netViewModel.bannerList.value.isEmpty()) {
                         Loading()
                     } else {
                         SuccessContent(netViewModel = netViewModel)
@@ -120,8 +121,6 @@ private fun SuccessContent(
     netViewModel: NetViewModel,
     navHostController: NavHostController = LocalAppNavController.current,
 ) {
-    val height = LocalBottomControllerHeight.current
-    val data = netViewModel.homeData.collectAsState()
     LazyColumn(
         modifier = Modifier
             .fillMaxSize(),
@@ -131,11 +130,10 @@ private fun SuccessContent(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            HorizontalBanner(data.value.banners?.map { it.mediaMetadata.artworkUri }
-                ?: emptyList()) {
+            HorizontalBanner(netViewModel.bannerList.value.map { it.mediaMetadata.artworkUri }) {
                 navHostController.navigate(
                     "${Screen.AlbumDetailScreen.route}?mediaItem=${
-                        data.value.banners?.get(it)?.toNavType()
+                        netViewModel.bannerList.value[it].toNavType()
                     }"
                 )
             }
@@ -145,14 +143,13 @@ private fun SuccessContent(
         }
         item {
             RecommendSheetList(
-                netViewModel = netViewModel, data = data.value,
+                netViewModel = netViewModel,
                 navHostController = navHostController
             )
         }
         item {
             RecommendAlbum(
                 netViewModel = netViewModel,
-                data = data.value,
                 navHostController = navHostController
             )
         }
@@ -172,7 +169,7 @@ private fun RecommendSongList(
                 onClick = {
                     netViewModel.setPlayList(
                         0,
-                        netViewModel.playLists.value.map { it.mediaItem })
+                        netViewModel.playList.value.map { it.mediaItem })
                 },
                 modifier = Modifier
                     .background(
@@ -201,12 +198,12 @@ private fun RecommendSongList(
                 .fillMaxWidth(),
             contentPadding = PaddingValues(start = 16.dp, end = 32.dp)
         ) { page ->
-            if (netViewModel.playLists.value.isNotEmpty()) {
+            if (netViewModel.playList.value.isNotEmpty()) {
                 SongItems(
-                    netViewModel.playLists.value,
+                    netViewModel.playList.value,
                     page
                 ) {
-                    netViewModel.setPlayList(it, netViewModel.playLists.value.map { it.mediaItem })
+                    netViewModel.setPlayList(it, netViewModel.playList.value.map { it.mediaItem })
                 }
             }
         }
@@ -216,18 +213,17 @@ private fun RecommendSongList(
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 private fun RecommendSheetList(
-    data: HomeBean,
     netViewModel: NetViewModel,
     navHostController: NavHostController
 ) {
     RecommendTitle(recommendTitle = "最新歌单请查收~") {
         LazyRow(contentPadding = PaddingValues(horizontal = 16.dp)) {
-            if (data.sheets?.isNotEmpty() == true) {
+            if(netViewModel.recommendSheet.value.isNotEmpty()){
                 items(6) { index ->
                     Column(Modifier.padding(end = 16.dp)) {
                         repeat(2) {
                             val i = if (it == 0) index else index + 6
-                            val item = data.sheets[i]
+                            val item = netViewModel.recommendSheet.value[i]
                             RecommendItem(item = item, onclick = {
                                 navHostController.navigate("${Screen.SheetDetailScreen.route}?mediaItem=${it.toNavType()}")
                             }) {
@@ -244,7 +240,6 @@ private fun RecommendSheetList(
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 private fun RecommendAlbum(
-    data: HomeBean,
     netViewModel: NetViewModel,
     navHostController: NavHostController
 ) {
@@ -253,7 +248,7 @@ private fun RecommendAlbum(
             modifier = Modifier.fillMaxWidth(),
             contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
-            items(data.albums ?: emptyList()) {
+            items(netViewModel.recommendAlbum.value) {
                 Column(modifier = Modifier.padding(end = 16.dp)) {
                     RecommendItem(item = it, onclick = {
                         navHostController.navigate(

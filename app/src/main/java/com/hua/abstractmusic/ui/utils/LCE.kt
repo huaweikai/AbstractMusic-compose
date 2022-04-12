@@ -5,15 +5,20 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import com.hua.abstractmusic.R
 
 
 /**
@@ -50,7 +55,7 @@ fun Error(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(imageVector = Icons.Default.Warning, contentDescription = "")
+        Icon(painter = painterResource(id = R.drawable.ic_network_error),modifier = Modifier.size(48.dp), contentDescription = "")
         Button(onClick = { onclick() }) {
             Text(text = "点击重试")
         }

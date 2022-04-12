@@ -1,35 +1,27 @@
 package com.hua.abstractmusic.di
 
 import android.content.Context
-import androidx.room.Room
 import coil.ImageLoader
-import com.hua.abstractmusic.db.music.MusicDao
-import com.hua.abstractmusic.db.music.MusicRoomBase
 import com.hua.abstractmusic.db.user.UserDao
-import com.hua.abstractmusic.db.user.UserRoomBase
-import com.hua.abstractmusic.net.MusicService
-import com.hua.abstractmusic.net.SearchService
-import com.hua.abstractmusic.net.UserService
-import com.hua.abstractmusic.other.Constant.BASE_URL
-import com.hua.abstractmusic.other.Constant.MUSIC_ROOM_NAME
-import com.hua.abstractmusic.other.Constant.USER_ROOM_NAME
+import com.hua.network.api.SearchApi
+import com.hua.network.api.UserService
 import com.hua.abstractmusic.preference.UserInfoData
-import com.hua.abstractmusic.repository.NetRepository
-import com.hua.abstractmusic.repository.Repository
+import com.hua.abstractmusic.repository.LocalRepository
+import com.hua.abstractmusic.repository.NetWorkRepository
 import com.hua.abstractmusic.repository.UserRepository
-import com.hua.abstractmusic.services.MediaItemTree
-import com.hua.abstractmusic.services.MediaStoreScanner
-import com.hua.abstractmusic.use_case.UseCase
-import com.hua.abstractmusic.use_case.currentlist.ClearCurrentListCase
-import com.hua.abstractmusic.use_case.currentlist.GetCurrentListCase
-import com.hua.abstractmusic.use_case.currentlist.InsertMusicToCurrentItemCase
-import com.hua.abstractmusic.use_case.sheet.GetSheetList
-import com.hua.abstractmusic.use_case.sheet.GetSheetMusicBySheetId
-import com.hua.abstractmusic.use_case.sheet.InsertSheetCase
+import com.hua.service.usecase.currentlist.ClearCurrentListCase
+import com.hua.service.usecase.currentlist.InsertMusicToCurrentItemCase
+import com.hua.service.usecase.sheet.InsertSheetCase
 import com.hua.abstractmusic.utils.ComposeUtils
 import com.hua.abstractmusic.utils.KEY
 import com.hua.abstractmusic.utils.UpLoadFile
 import com.hua.blur.BlurLibrary
+import com.hua.network.api.MusicAPI
+import com.hua.service.MediaConnect
+import com.hua.service.MediaItemTree
+import com.hua.service.MediaStoreScanner
+import com.hua.service.room.dao.MusicDao
+import com.hua.service.usecase.UseCase
 import com.hua.taglib.TaglibLibrary
 import com.obs.services.ObsClient
 import dagger.Module
@@ -37,11 +29,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import okhttp3.OkHttpClient
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.create
-import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 /**
@@ -55,77 +44,21 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideMusicRoomDatabase(
-        @ApplicationContext context: Context
-    ) = Room.databaseBuilder(
-        context, MusicRoomBase::class.java, MUSIC_ROOM_NAME
-    ).build()
-
-    @Provides
-    @Singleton
-    fun provideMusicRoomDao(
-        roomBase: MusicRoomBase
-    ): MusicDao = roomBase.dao
-
-    @Provides
-    @Singleton
-    fun provideUserRoomDatabase(
-        @ApplicationContext context: Context
-    ) = Room.databaseBuilder(
-        context, UserRoomBase::class.java, USER_ROOM_NAME
-    ).build()
-
-    @Provides
-    @Singleton
-    fun provideUserRoomDao(
-        userRoomBase: UserRoomBase
-    ): UserDao = userRoomBase.userDao
-
-    @Provides
-    @Singleton
-    fun provideRepository(
-        dao: MusicDao
-    ): Repository = Repository(dao)
-
-    @Provides
-    @Singleton
-    fun provideNetRepository(
-        service: MusicService,
-        searchService: SearchService,
-        userInfoData: UserInfoData
-    ) = NetRepository(service,searchService,userInfoData)
-
-    @Provides
-    @Singleton
     fun provideUserRepository(
         service: UserService,
         dao: UserDao,
         musicDao: MusicDao,
         userInfoData: UserInfoData,
         upLoadFile: UpLoadFile
-    ) = UserRepository(service,dao,musicDao,userInfoData,upLoadFile)
+    ) = UserRepository(service, dao, musicDao, userInfoData, upLoadFile)
 
-    @Provides
-    @Singleton
-    fun provideUseCase(
-        repository: Repository
-    ): UseCase =
-        UseCase(
-            InsertMusicToCurrentItemCase(repository),
-            ClearCurrentListCase(repository),
-            GetCurrentListCase(repository),
-            GetSheetList(repository),
-            GetSheetMusicBySheetId(repository),
-            InsertSheetCase(repository)
-        )
 
     @Provides
     @Singleton
     fun provideScanner(
-        useCase: UseCase,
-        netRepository: NetRepository
+        useCase: UseCase
     ): MediaStoreScanner =
-        MediaStoreScanner(useCase,netRepository)
+        MediaStoreScanner(useCase)
 
     @Provides
     @Singleton
@@ -134,41 +67,6 @@ object AppModule {
         scanner: MediaStoreScanner
     ): MediaItemTree =
         MediaItemTree(context, scanner)
-
-
-    @Provides
-    @Singleton
-    fun provideOkHttp(): OkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(3, TimeUnit.SECONDS)
-        .build()
-
-    @Provides
-    @Singleton
-    fun provideRetrofit(
-        okHttpClient: OkHttpClient
-    ): Retrofit = Retrofit.Builder()
-        .baseUrl(BASE_URL)
-        .client(okHttpClient)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-    @Provides
-    @Singleton
-    fun provideNetService(
-        retrofit: Retrofit
-    ) = retrofit.create<MusicService>()
-
-    @Provides
-    @Singleton
-    fun provideUserService(
-        retrofit: Retrofit
-    ) = retrofit.create<UserService>()
-
-    @Provides
-    @Singleton
-    fun provideSearchService(
-        retrofit: Retrofit
-    ) = retrofit.create<SearchService>()
 
     @Provides
     @Singleton
@@ -199,6 +97,23 @@ object AppModule {
     @Provides
     @Singleton
     fun provideBlurLib() = BlurLibrary()
+
+    @Provides
+    @Singleton
+    fun provideLocalRepository(
+        dao: MusicDao,
+        mediaConnect: MediaConnect,
+        taglibLibrary: TaglibLibrary
+    ): LocalRepository = LocalRepository(mediaConnect, taglibLibrary, dao)
+
+    @Provides
+    @Singleton
+    fun provideNetRepository(
+        service: MusicAPI,
+        searchApi: SearchApi,
+        userInfoData: UserInfoData,
+        itemTree: MediaItemTree,
+    ) = NetWorkRepository(service, searchApi, itemTree,userInfoData)
 
     @Provides
     @Singleton

@@ -29,6 +29,8 @@ import com.hua.abstractmusic.ui.utils.PassWordEditText
 import com.hua.abstractmusic.utils.isCode
 import com.hua.abstractmusic.utils.isEmail
 import com.hua.abstractmusic.utils.isPassWord
+import com.hua.network.onFailure
+import com.hua.network.onSuccess
 import kotlinx.coroutines.launch
 
 /**
@@ -124,10 +126,11 @@ fun LoginScreen(
                     focus.clearFocus()
                     scope.launch {
                         val result = viewModel.login(loginMode)
-                        if (result.code == 200) {
+                        result.onSuccess {
                             navController.navigateUp()
-                        } else {
-                            Toast.makeText(context, result.msg, Toast.LENGTH_SHORT).show()
+                        }
+                        result.onFailure {
+                            Toast.makeText(context, it.errorMsg, Toast.LENGTH_SHORT).show()
                         }
                     }
                 },

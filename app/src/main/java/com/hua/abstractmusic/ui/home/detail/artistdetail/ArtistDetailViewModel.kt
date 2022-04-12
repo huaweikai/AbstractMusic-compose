@@ -8,12 +8,15 @@ import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import com.hua.abstractmusic.base.viewmodel.BaseViewModel
-import com.hua.abstractmusic.bean.MediaData
-import com.hua.abstractmusic.other.Constant
-import com.hua.abstractmusic.other.NetWork
-import com.hua.abstractmusic.repository.NetRepository
-import com.hua.abstractmusic.services.MediaConnect
+import com.hua.abstractmusic.repository.NetWorkRepository
 import com.hua.abstractmusic.ui.utils.LCE
+import com.hua.model.music.MediaData
+import com.hua.model.other.Constants
+import com.hua.network.ApiResult
+import com.hua.network.get
+import com.hua.network.onFailure
+import com.hua.network.onSuccess
+import com.hua.service.MediaConnect
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -27,7 +30,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ArtistDetailViewModel @Inject constructor(
     mediaConnect: MediaConnect,
-    private val netRepository: NetRepository
+    private val netRepository: NetWorkRepository
 ) : BaseViewModel(mediaConnect) {
     private var artistAlbumId: String? = null
     var isLocal: Boolean = true
@@ -36,9 +39,9 @@ class ArtistDetailViewModel @Inject constructor(
             field = value
             val id = Uri.parse(value).lastPathSegment
             artistAlbumId = if(isLocal){
-                "${Constant.LOCAL_ARTIST_ID}/${Constant.ARTIST_TO_ALBUM}/$id"
+                "${Constants.LOCAL_ARTIST_ID}/${Constants.ARTIST_TO_ALBUM}/$id"
             }else{
-                "${Constant.NETWORK_ARTIST_ID}/${Constant.ARTIST_TO_ALBUM}/$id"
+                "${Constants.NETWORK_ARTIST_ID}/${Constants.ARTIST_TO_ALBUM}/$id"
             }
         }
 
@@ -59,18 +62,20 @@ class ArtistDetailViewModel @Inject constructor(
         playListMap[artistId!!] = _artistDetail
     }
 
-    fun netRefresh(){
+    private fun netRefresh(){
+        val browser = mediaConnect.browser?:return
         val artistId = artistId?:return
         viewModelScope.launch {
             _screenState.value = LCE.Loading
             val albums = netRepository.selectAlbumByArtist(Uri.parse(artistAlbumId))
-            val list = netRepository.selectMusicById(Uri.parse(artistId))
-            if(albums?.code == NetWork.SUCCESS && list?.code == NetWork.SUCCESS){
-                _artistDetail.value = list.data?.map { MediaData(it) }?: emptyList()
-                _artistAlbumDetail.value = albums.data?.map { MediaData(it) }?: emptyList()
+            val list = netRepository.selectMusicByType(Uri.parse(artistId))
+            _artistDetail.value = list.get { emptyList() }.map { MediaData(it, isPlaying = it.mediaId == browser.currentMediaItem?.mediaId) }
+            _artistAlbumDetail.value = albums.get { emptyList() }.map { MediaData(it) }
+            list.onSuccess {
                 playListMap[artistId] = _artistDetail
                 _screenState.value = LCE.Success
-            }else{
+            }
+            list.onFailure {
                 _screenState.value = LCE.Error
             }
         }

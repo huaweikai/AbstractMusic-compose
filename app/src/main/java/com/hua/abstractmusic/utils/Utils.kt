@@ -13,8 +13,9 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.core.content.contentValuesOf
 import com.hua.abstractmusic.other.Constant
-import com.hua.abstractmusic.other.Constant.LOCAL
 import com.hua.abstractmusic.preference.UserInfo
+import com.hua.model.other.Constants
+import com.hua.model.other.Constants.LOCAL
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -59,7 +60,7 @@ fun String.isLocal():Boolean {
 fun String.isSheet(userInfo: UserInfo):Boolean{
     val type = Uri.parse(this).authority
     if(this.isLocal()){
-        return type?.startsWith(Constant.TYPE_LOCAL_SHEET) ?: true
+        return type?.startsWith(Constants.TYPE_LOCAL_SHEET) ?: true
     }else{
         return type?.startsWith(userInfo.userToken) ?: true
     }

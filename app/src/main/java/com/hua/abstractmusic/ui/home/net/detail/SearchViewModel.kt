@@ -7,15 +7,13 @@ import androidx.compose.ui.focus.FocusState
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import com.hua.abstractmusic.base.viewmodel.BaseViewModel
-import com.hua.abstractmusic.bean.net.NetData
-import com.hua.abstractmusic.bean.user.SearchHistory
 import com.hua.abstractmusic.db.user.UserDao
-import com.hua.abstractmusic.other.NetWork.ERROR
-import com.hua.abstractmusic.other.NetWork.SERVER_ERROR
-import com.hua.abstractmusic.repository.NetRepository
-import com.hua.abstractmusic.services.MediaConnect
-import com.hua.abstractmusic.services.MediaItemTree
+import com.hua.abstractmusic.repository.NetWorkRepository
 import com.hua.abstractmusic.ui.utils.LCE
+import com.hua.model.user.HistoryPO
+import com.hua.network.ApiResult
+import com.hua.network.Error
+import com.hua.service.MediaConnect
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,15 +26,15 @@ import javax.inject.Inject
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     mediaConnect: MediaConnect,
-    private val netRepository: NetRepository,
+    private val netRepository: NetWorkRepository,
     private val userDao: UserDao,
 ) : BaseViewModel(mediaConnect) {
     private val _searchText = mutableStateOf(ChangeText(hint = "搜你想要的"))
     val searchText: State<ChangeText> = _searchText
 
-    val searchMaps = HashMap<SearchObject, MutableState<NetData<List<MediaItem>>>>()
+    val searchMaps = HashMap<SearchObject, MutableState<ApiResult<List<MediaItem>>>>()
 
-    val nullNetData = NetData<List<MediaItem>>(SERVER_ERROR, emptyList(), "")
+    val nullNetData:ApiResult<List<MediaItem>> = ApiResult.Failure(Error())
     val searchHistory = userDao.selectHistory()
 
     val searchMusic = mutableStateOf(nullNetData)
@@ -80,12 +78,12 @@ class SearchViewModel @Inject constructor(
             searchMaps.keys.forEach {
                 searchMaps[it]!!.value = netRepository.search(it)
             }
-            searchState.value = if (searchMusic.value.code != ERROR) LCE.Success else LCE.Error
+            searchState.value = if (searchMusic.value is ApiResult.Success) LCE.Success else LCE.Error
             val c = userDao.selectHistoryList().find { it.history == search }
             if(c != null){
                 userDao.deleteHistory(c.id)
             }
-            userDao.insertHistory(SearchHistory(history = search))
+            userDao.insertHistory(HistoryPO(history = search))
         }
     }
     fun clear(){

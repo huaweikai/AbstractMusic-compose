@@ -6,9 +6,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import com.hua.abstractmusic.base.viewmodel.BaseViewModel
-import com.hua.abstractmusic.bean.MediaData
-import com.hua.abstractmusic.other.Constant
-import com.hua.abstractmusic.services.MediaConnect
+import com.hua.model.music.MediaData
+import com.hua.service.MediaConnect
+import com.hua.model.other.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -39,11 +39,11 @@ class HomeViewModel @Inject constructor(
     }
 
     init {
-        localListMap[Constant.LOCAL_ALL_ID] = _localMusicList
-        localListMap[Constant.LOCAL_ALBUM_ID] = _localAlbumList
-        localListMap[Constant.LOCAL_ARTIST_ID] = _localArtistList
+        localListMap[Constants.LOCAL_ALL_ID] = _localMusicList
+        localListMap[Constants.LOCAL_ALBUM_ID] = _localAlbumList
+        localListMap[Constants.LOCAL_ARTIST_ID] = _localArtistList
 
-        playListMap[Constant.LOCAL_ALL_ID] = _localMusicList
+        playListMap[Constants.LOCAL_ALL_ID] = _localMusicList
         addListener(listener)
         refresh(false)
     }

@@ -1,16 +1,13 @@
 package com.hua.abstractmusic.repository
 
-import com.hua.abstractmusic.bean.net.NetData
-import com.hua.abstractmusic.bean.user.NetUser
-import com.hua.abstractmusic.bean.user.UserBean
-import com.hua.abstractmusic.db.music.MusicDao
 import com.hua.abstractmusic.db.user.UserDao
-import com.hua.abstractmusic.net.UserService
-import com.hua.abstractmusic.other.NetWork.ERROR
-import com.hua.abstractmusic.other.NetWork.SERVER_ERROR
-import com.hua.abstractmusic.other.NetWork.SUCCESS
+import com.hua.network.api.UserService
 import com.hua.abstractmusic.preference.UserInfoData
 import com.hua.abstractmusic.utils.UpLoadFile
+import com.hua.model.user.UserPO
+import com.hua.model.user.UserVO
+import com.hua.network.ApiResult
+import com.hua.service.room.dao.MusicDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 
@@ -22,17 +19,13 @@ import kotlinx.coroutines.flow.*
 class UserRepository(
     private val userService: UserService,
     private val userDao: UserDao,
-    private val dao:MusicDao,
+    private val dao: MusicDao,
     private val userInfoData: UserInfoData,
     val upLoadFile: UpLoadFile
 ) {
 
-    suspend fun getEmailCode(email: String): NetData<Unit> {
-        return try {
-            userService.getEmailCode(email)
-        } catch (e: Throwable) {
-            NetData(ERROR, null, "服务器或网络异常")
-        }
+    suspend fun getEmailCode(email: String): ApiResult<String> {
+        return userService.getEmailCode(email)
     }
 
     suspend fun register(
@@ -40,58 +33,51 @@ class UserRepository(
         username: String,
         passWord: String,
         code: Int
-    ): NetData<String> {
-        return try {
-            userService.register(email, username, passWord, code)
-        } catch (e: Throwable) {
-            NetData(ERROR, null, "服务器或网络异常")
-        }
-
+    ): ApiResult<String> {
+        return userService.register(email, username, passWord, code)
     }
 
     suspend fun loginWithEmail(
         email: String,
         passWord: String
-    ): NetData<String> {
-        return try {
-            val result = userService.loginWithEmail(email, passWord)
-            if (result.code == 200) {
-                getUser(result.data!!, true)
-            }
-            result
-        } catch (e: Throwable) {
-            NetData(ERROR, null, "服务器或网络异常")
+    ): ApiResult<String> {
+        val result = userService.loginWithEmail(email, passWord)
+        if (result is ApiResult.Success) {
+            getUser(result.data, true)
         }
+        return userService.loginWithEmail(email, passWord)
     }
 
-    suspend fun hasUser(): NetData<Unit> {
+    suspend fun hasUser(): ApiResult<Unit> {
         val token = userInfoData.userInfo.value.userToken
-        return try {
-            val result = userService.testToken(token)
-            if (result.code == SERVER_ERROR) {
-                userDao.deleteUser()
-                userInfoData.logout()
-            } else {
-                getUser(token)
-            }
-            result
-        } catch (e: Throwable) {
-            NetData(ERROR, null, "服务器或网络异常")
+        val result = userService.testToken(token)
+        if (result is ApiResult.Failure && result.error.errorCode == 500) {
+            userDao.deleteUser()
+            userInfoData.logout()
+        } else {
+            getUser(token)
         }
+        return result
     }
+
 
     private suspend fun getUser(token: String, isLogin: Boolean = false) {
         flow {
             emit(userService.getUser(token))
         }.onEach {
-            val user = it.data
-            if (it.code == SUCCESS) {
+            if (it is ApiResult.Success) {
+                val user = it.data
                 userDao.insertUser(
-                    UserBean(user?.id!!, user.name, user.passwd, user.email, user.head,user.createTime)
+                    UserPO(
+                        user.id!!,
+                        user.name,
+                        user.passwd,
+                        user.email,
+                        user.head,
+                        user.createTime
+                    )
                 )
             }
-        }.catch {
-            NetData(ERROR, null, "服务器或网络异常")
         }.onCompletion {
             if (isLogin) {
                 userInfoData.loginUser(token)
@@ -101,87 +87,44 @@ class UserRepository(
         }.flowOn(Dispatchers.IO).collect()
     }
 
-    suspend fun logoutUser(): NetData<Unit> {
-        return try {
-            val token = userInfoData.userInfo.value.userToken
-            val result = userService.logoutUser(token)
-            if (result.code == SUCCESS) {
-                userDao.deleteUser()
-                userInfoData.logout()
-            }
-            result
-        } catch (e: Throwable) {
+    suspend fun logoutUser(): ApiResult<String> {
+        val token = userInfoData.userInfo.value.userToken
+        val result = userService.logoutUser(token)
+        if (result is ApiResult.Success || result is ApiResult.Failure && result.error.errorCode == 500) {
             userDao.deleteUser()
-            NetData(SUCCESS, null, "服务器或网络异常")
+            userInfoData.logout()
         }
+        return result
+
     }
 
-    suspend fun getEmailCodeWithLogin(email: String): NetData<Unit> {
-        return try {
-            userService.getEmailCodeWithLogin(email)
-        } catch (e: Throwable) {
-            NetData(ERROR, null, "服务器或网络异常")
-        }
+    suspend fun getEmailCodeWithLogin(email: String): ApiResult<String> {
+        return userService.getEmailCodeWithLogin(email)
     }
 
     suspend fun loginWithCode(
         email: String,
         code: Int
-    ): NetData<String> {
-        return try {
-            val result = userService.loginWithCode(email, code)
-            if (result.code == SUCCESS) {
-                getUser(result.data!!,true)
-            }
-            result
-        } catch (e: Throwable) {
-            NetData(ERROR, null, "服务器或网络异常")
+    ): ApiResult<String> {
+        val result = userService.loginWithCode(email, code)
+        if (result is ApiResult.Success) {
+            getUser(result.data, true)
         }
+        return result
     }
-
-//    fun putFile(
-//        fileName: String,
-//        byte: InputStream?,
-//        file: DocumentFile?,
-//        progress: (ProgressStatus) -> Unit
-//    ): NetData<String> {
-//        return try {
-//            val request = PutObjectRequest(BUCKET_NAME, fileName)
-//                .apply {
-//                    metadata = ObjectMetadata().apply {
-//                        this.contentLength = file?.length()
-//                    }
-//                    input = byte
-//                    setProgressListener {
-//                        progress(it)
-//                    }
-//                }
-//            return NetData(SUCCESS, obsClient.putObject(request).objectUrl, "")
-////            updateUser(obsClient.putObject(request))
-//        } catch (e: ObsException) {
-//            NetData(ERROR, null, "服务器异常")
-//        }
-//    }
 
     suspend fun updateUser(url: String) {
         val user = userInfoData.userInfo.value.userBean
         val netUser =
-            NetUser(user?.id, user?.userName!!, user.email, user.password, url,user.createTime)
+            UserVO(user?.id, user?.userName!!, user.email, user.password, url, user.createTime)
         val token = userInfoData.userInfo.value.userToken
-        try {
-            val updateResult = userService.setUser(token, netUser)
-            if (updateResult.code == SUCCESS) {
-                getUser(token = token)
-                NetData(SUCCESS, null, "成功")
-            } else {
-                NetData(SERVER_ERROR, null, "服务器异常")
-            }
-        } catch (e: Throwable) {
-            NetData(ERROR, null, "服务器或网络异常")
+        val updateResult = userService.setUser(token, netUser)
+        if (updateResult is ApiResult.Success) {
+            getUser(token = token)
         }
     }
 
-    suspend fun removeSheet(sheetId:String){
+    suspend fun removeLocalSheet(sheetId: String) {
         dao.deleteSheet(sheetId)
     }
 }

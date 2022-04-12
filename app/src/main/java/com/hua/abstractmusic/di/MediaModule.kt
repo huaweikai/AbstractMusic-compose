@@ -2,9 +2,9 @@ package com.hua.abstractmusic.di
 
 import android.content.ComponentName
 import android.content.Context
-import com.hua.abstractmusic.services.MediaConnect
-import com.hua.abstractmusic.services.MediaItemTree
-import com.hua.abstractmusic.services.PlayerService
+import com.hua.service.MediaConnect
+import com.hua.service.MediaItemTree
+import com.hua.service.PlayerService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,5 +26,5 @@ object MediaModule {
     fun provideMediaConnect(
         @ApplicationContext context: Context,
         itemTree: MediaItemTree
-    ) = MediaConnect(context, ComponentName(context,PlayerService::class.java), itemTree )
+    ) = MediaConnect(context, ComponentName(context, PlayerService::class.java), itemTree )
 }

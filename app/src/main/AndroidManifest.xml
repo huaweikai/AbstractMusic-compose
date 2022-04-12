@@ -22,6 +22,7 @@
             android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.AbstractMusic.NoActionBar">
             <intent-filter>
+                <action android:name="com.hua.abstractmusic.NOTIFICATION_START"/>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -31,7 +32,7 @@
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="fullSensor"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
-        <service android:name=".services.PlayerService"
+        <service android:name="com.hua.service.PlayerService"
             android:exported="false">
             <intent-filter>
                 <action android:name="androidx.media3.session.MediaSessionService"/>

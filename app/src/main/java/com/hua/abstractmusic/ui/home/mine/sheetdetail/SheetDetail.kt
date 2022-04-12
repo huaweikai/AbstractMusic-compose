@@ -37,10 +37,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.transform.RoundedCornersTransformation
-import com.hua.abstractmusic.bean.ParcelizeMediaItem
-import com.hua.abstractmusic.bean.toNavType
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
-import com.hua.abstractmusic.other.NetWork
 import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalPopWindow
@@ -50,6 +47,10 @@ import com.hua.abstractmusic.ui.utils.*
 import com.hua.abstractmusic.utils.getCacheDir
 import com.hua.abstractmusic.utils.isLocal
 import com.hua.abstractmusic.utils.toMediaItem
+import com.hua.model.parcel.ParcelizeMediaItem
+import com.hua.model.parcel.toNavType
+import com.hua.network.onFailure
+import com.hua.network.onSuccess
 import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.launch
 
@@ -141,7 +142,7 @@ fun NavSheetDetail(
             )
         },
         snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState) {
+            SnackbarHost(hostState = snackbarHostState, modifier = Modifier.padding(bottom = 48.dp)) {
                 Snackbar {
                     Text(text = it.visuals.message)
                 }
@@ -277,10 +278,9 @@ fun SheetChangeScreen(
             Modifier
                 .fillMaxSize()
                 .padding(it)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             Column(
                 Modifier
                     .fillMaxWidth(),
@@ -343,9 +343,8 @@ fun SheetChangeScreen(
                             CoilImage(
                                 url = data.artworkUri,
                                 modifier = Modifier
-                                    .fillMaxHeight(0.9f)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .aspectRatio(1f),
+                                    .size(50.dp)
+                                    .clip(RoundedCornerShape(8.dp)),
                             )
                             Spacer(modifier = Modifier.width(16.dp))
                             Column(
@@ -354,8 +353,7 @@ fun SheetChangeScreen(
                             ) {
                                 TitleAndArtist(
                                     title = "${data.title}",
-                                    subTitle = "${data.artist}",
-                                    height = 8.dp
+                                    subTitle = "${data.artist}"
                                 )
                             }
                         }
@@ -425,23 +423,15 @@ fun NetSheetDetail(
             }
         }
         item {
+            Spacer(modifier = Modifier.height(8.dp))
             when (state.value) {
                 is LCE.Error -> {
-                    Column(
-                        Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(text = "请刷新重试")
-                    }
+                        Error {
+                            sheetDetailViewModel.loadData()
+                        }
                 }
                 is LCE.Loading -> {
-                    Column(
-                        Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        CircularProgressIndicator()
-                    }
+                        Loading()
                 }
                 is LCE.Success -> {}
             }
@@ -498,6 +488,7 @@ fun SheetImgAndDesc(
     navController: NavHostController
 ) {
     val item = viewModel.sheetDetail.collectAsState().value
+    val subTitle = if(item.sheetDesc.isNullOrBlank()) "暂无介绍" else item.sheetDesc
     Column(
         Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -513,7 +504,7 @@ fun SheetImgAndDesc(
         Text(text = item.title, fontSize = 22.sp, lineHeight = 26.sp)
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = if (item.sheetDesc.isNullOrBlank()) "暂无介绍" else item.sheetDesc,
+            text = subTitle!!,
             fontSize = 18.sp,
             lineHeight = 22.sp,
             modifier = Modifier.clickable {
@@ -533,9 +524,16 @@ fun MediaPopWindow(
     config: Configuration = LocalConfiguration.current,
     navController: NavHostController = LocalAppNavController.current
 ) {
-    val scope = rememberCoroutineScope()
     val artistPop = remember { mutableStateOf(false) }
     val sheetPop = remember { mutableStateOf(false) }
+    val snack = sheetDetailViewModel.snackBarTitle.collectAsState(initial = "")
+    LaunchedEffect(snack.value){
+        if(snack.value.isNotBlank()){
+            snackbarHostState.showSnackbar(snack.value)
+            sheetPop.value = false
+        }
+    }
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     if (state.value) {
         sheetDetailViewModel.selectAlbumByMusicId(item)
@@ -578,9 +576,11 @@ fun MediaPopWindow(
                     sheetDetailViewModel.addQueue(item, true)
                 }
                 PopItem(desc = "添加到歌单") {
-                    sheetDetailViewModel.refreshSheetLocalList(item.mediaId.isLocal())
-                    state.value = false
-                    sheetPop.value = true
+                    scope.launch {
+                        sheetDetailViewModel.refreshSheetLocalList(item.mediaId.isLocal())
+                        state.value = false
+                        sheetPop.value = true
+                    }
                 }
                 PopItem(desc = "歌手:${item.mediaMetadata.artist}") {
                     sheetDetailViewModel.selectArtistByMusicId(item)
@@ -596,8 +596,8 @@ fun MediaPopWindow(
                     PopItem(desc = "移出当前歌单") {
                         scope.launch {
                             val result = sheetDetailViewModel.removeNetSheetItem(item.mediaId)
-                            if (result.code != NetWork.SUCCESS) {
-                                Toast.makeText(context, result.msg, Toast.LENGTH_SHORT).show()
+                            result.onFailure {
+                                Toast.makeText(context, it.errorMsg, Toast.LENGTH_SHORT).show()
                             }
                         }
                         state.value = false
@@ -613,15 +613,10 @@ fun MediaPopWindow(
         Spacer(modifier = Modifier.height(16.dp))
     }, popItems = sheetDetailViewModel.sheetList.value.map {
         PopItems("${it.mediaMetadata.title}") {
-            scope.launch {
                 sheetDetailViewModel.insertMusicToSheet(
                     mediaItem = item,
                     sheetItem = it
-                ).let {
-                    snackbarHostState.showSnackbar(it.second)
-                }
-                sheetPop.value = false
-            }
+                )
         }
     })
 

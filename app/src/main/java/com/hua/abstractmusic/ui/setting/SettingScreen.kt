@@ -36,6 +36,7 @@ import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.theme.defaultColor
 import com.hua.abstractmusic.ui.viewmodels.ThemeViewModel
 import com.hua.abstractmusic.ui.viewmodels.UserViewModel
+import com.hua.abstractmusic.utils.toTime
 
 
 /**
@@ -102,13 +103,21 @@ fun SettingMain(
             Spacer(modifier = Modifier.height(8.dp))
             val isOpen = settingViewModel.timeOpen.collectAsState()
             SettingSwitchItem(title = "定时播放", switchState = isOpen.value, onSwitch = {
-                settingViewModel.startTimer(it)
+                settingViewModel.startTimer(0F,it)
             }, enabled = true)
-            val (s,setS) = remember{ mutableStateOf(0F)}
             AnimatedVisibility(visible = isOpen.value, modifier =  Modifier.padding(horizontal = 16.dp)) {
-                Slider(value = s, onValueChange = setS, valueRange = 0F..5F, steps = 5)
+                Column {
+                    Slider(value = settingViewModel.timeSlider.value, onValueChange = {
+                        settingViewModel.startTimer(it)
+                    }, valueRange = 0F..5F, steps = 4)
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        val time = settingViewModel.mediaTime.collectAsState()
+                        Text(text = "${(settingViewModel.timeSlider.value.toInt() + 1) * 5}分钟")
+                        Text(text = "剩余${time.value.toTime()}")
+                    }
+                }
             }
-
+            Spacer(modifier = Modifier.height(16.dp))
             val loginState = settingViewModel.userInfo.collectAsState().value.isLogin
             if (loginState) {
                 Button(
@@ -117,10 +126,10 @@ fun SettingMain(
                         appNavController.navigateUp()
                     },
                     modifier = Modifier
+                        .padding(horizontal = 16.dp)
                         .fillMaxWidth()
-                        .padding(32.dp)
                 ) {
-                    Text(text = "退出登录", color = Color.Red)
+                    Text(text = "退出登录")
                 }
             }
         }

@@ -13,31 +13,26 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material3.Text
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.*
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.airbnb.lottie.compose.*
 import com.hua.abstractmusic.R
-import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
+import com.hua.model.music.MediaData
 
 
 /**
@@ -85,15 +80,20 @@ fun PlayListScreen(
         Row(
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp), horizontalArrangement = Arrangement.SpaceBetween
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            val text = buildAnnotatedString {
+                withStyle(SpanStyle(fontSize = 22.sp)){
+                    append("播放列表")
+                }
+                withStyle(SpanStyle(fontSize = 16.sp)){
+                    append(" (${viewModel.currentPlayIndex.value}/${viewModel.currentPlayTotal.value})")
+                }
+            }
             Text(
-                text = "播放列表",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-//                modifier = Modifier
-//                    .fillMaxWidth()
+                text = text
             )
             Image(
                 painter = painterResource(id = R.drawable.ic_delete_all),
@@ -149,6 +149,7 @@ private fun ListItem(
     )
     ConstraintLayout(
         modifier = Modifier
+            .height(42.dp)
             .fillMaxWidth()
             .background(
                 if (item.isPlaying) MaterialTheme.colorScheme.onBackground.copy(alpha = 0.10f) else Color.Transparent,
@@ -200,13 +201,17 @@ private fun ListItem(
         }
 
         Image(
-            painter = painterResource(id = R.drawable.ic_delete_item),
+            painter = painterResource(id = R.drawable.ic_list_remove),
             contentDescription = "删除",
             Modifier
                 .constrainAs(delete) {
-                    end.linkTo(parent.end,8.dp)
+                    end.linkTo(
+                        parent.end, 16
+                            .dp
+                    )
                     top.linkTo(text.top)
                     bottom.linkTo(text.bottom)
+                    width = Dimension.preferredValue(16.dp)
                 }
                 .clickable {
                     onRemove()

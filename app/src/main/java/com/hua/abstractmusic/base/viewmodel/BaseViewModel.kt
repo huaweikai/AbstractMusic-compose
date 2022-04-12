@@ -5,11 +5,10 @@ import androidx.compose.runtime.MutableState
 import androidx.lifecycle.ViewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import com.google.common.util.concurrent.MoreExecutors
-import com.hua.abstractmusic.bean.MediaData
-import com.hua.abstractmusic.services.BrowserListener
-import com.hua.abstractmusic.services.MediaConnect
 import com.hua.abstractmusic.ui.utils.LCE
+import com.hua.model.music.MediaData
+import com.hua.service.BrowserListener
+import com.hua.service.MediaConnect
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -24,9 +23,10 @@ abstract class BaseViewModel(
 ) : ViewModel() {
     val localListMap = HashMap<String, MutableState<List<MediaData>>>()
     val playListMap = HashMap<String, MutableState<List<MediaData>>>()
+    val netListMap = HashMap<String, MutableState<List<MediaItem>>>()
 
     private var listener: Player.Listener? = null
-    private var browserListener :BrowserListener ?= null
+    private var browserListener : BrowserListener?= null
 
     val _screenState = MutableStateFlow<LCE>(LCE.Loading)
     val screenState get() = _screenState.asStateFlow()
@@ -35,6 +35,11 @@ abstract class BaseViewModel(
     fun addListener(listener:Player.Listener){
         this.listener = listener
         mediaConnect.addListener(listener)
+    }
+
+    fun releaseListener(){
+        mediaConnect.removeListener(listener)
+        mediaConnect.removeBrowserListener(browserListener)
     }
 
     fun addBrowserListener(browserListener:BrowserListener){
@@ -62,19 +67,12 @@ abstract class BaseViewModel(
     }
     fun getChildren(parentId:String){
         val browser = mediaConnect.browser ?: return
-        val childrenFeature = browser.getChildren(
-            parentId, 0, Int.MAX_VALUE, null
-        )
-        childrenFeature.addListener({
-            childrenFeature.get().value?.map {
-                MediaData(
-                    it,
-                    it.mediaId == browser.currentMediaItem?.mediaId
-                )
-            }.apply {
-                localListMap[parentId]!!.value = this ?: emptyList()
-            }
-        }, MoreExecutors.directExecutor())
+        localListMap[parentId]!!.value = mediaConnect.getChildren(parentId).map {
+            MediaData(
+                it,
+                it.mediaId == browser.currentMediaItem?.mediaId
+            )
+        }
     }
 
     fun removeListener(){

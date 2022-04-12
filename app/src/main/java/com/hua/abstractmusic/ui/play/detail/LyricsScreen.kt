@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,7 +28,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import coil.transform.RoundedCornersTransformation
-import com.hua.abstractmusic.bean.LyricsEntry
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
 import com.hua.abstractmusic.ui.utils.ArtImage
 import com.hua.abstractmusic.ui.utils.LCE
@@ -35,6 +35,7 @@ import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.ui.utils.translucent
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 import com.hua.abstractmusic.utils.textDp
+import com.hua.model.lyrics.LyricsDTO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -214,7 +215,7 @@ private fun LyricsError(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LazyItemScope.LyricsItem(
-    lyricsEntry: LyricsEntry,
+    lyricsEntry: LyricsDTO,
     current: Boolean = false,
     currentTextElementHeightPxState: MutableState<Int>,
     textSize: Int,
@@ -235,7 +236,7 @@ private fun LazyItemScope.LyricsItem(
             }
             .padding(0.dp, (textSize * 0.1F).dp),
         shape = RoundedCornerShape(10.dp),
-        backgroundColor = if (current) Color.Transparent.copy(alpha = 0.1f) else Color.Transparent,
+        backgroundColor = if (current) MaterialTheme.colorScheme.onBackground.copy(alpha = 0.07f) else Color.Transparent,
         elevation = 0.dp
     ) {
         val paddingY = (textSize * 0.3F).dp

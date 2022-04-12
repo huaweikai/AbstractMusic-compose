@@ -11,28 +11,36 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.media3.common.MediaItem
 import androidx.navigation.NavHostController
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
-import com.hua.abstractmusic.bean.MediaData
-import com.hua.abstractmusic.bean.toNavType
-import com.hua.abstractmusic.other.NetWork.SERVER_ERROR
 import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.home.local.artist.ArtistLazyItem
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.*
+import com.hua.model.music.MediaData
+import com.hua.model.other.Constants
+import com.hua.model.parcel.toNavType
+import com.hua.network.ApiResult
+import com.hua.network.get
 import kotlinx.coroutines.launch
 
 /**
@@ -47,6 +55,19 @@ fun NetSearchScreen(
     navController: NavHostController = LocalAppNavController.current
 ) {
     val searchText = searchViewModel.searchText.value
+    val focus = LocalFocusManager.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(Unit) {
+        val observer = LifecycleEventObserver { source, event ->
+            if (event == Lifecycle.Event.ON_PAUSE) {
+                focus.clearFocus()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        this.onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
     Scaffold(
         topBar = {
             SmallTopAppBar(
@@ -54,7 +75,7 @@ fun NetSearchScreen(
                     TransparentHintTextField(
                         text = searchText.text,
                         hint = searchText.hint,
-                        onValueChange = { searchViewModel.addEvent(TextEvent.TextValueChange(it))},
+                        onValueChange = { searchViewModel.addEvent(TextEvent.TextValueChange(it)) },
                         onFocusChange = {
                             searchViewModel.addEvent(
                                 TextEvent.TextFocusChange(it)
@@ -68,6 +89,7 @@ fun NetSearchScreen(
                         ),
                         keyboardActions = KeyboardActions(
                             onSearch = {
+                                focus.clearFocus()
                                 searchViewModel.search()
                             }
                         )
@@ -195,42 +217,56 @@ private fun SearchItem(
     searchViewModel: SearchViewModel,
     hostController: NavHostController = LocalAppNavController.current
 ) {
+    val screenState = searchViewModel.searchState
     val data = searchViewModel.searchMaps[searchObject]?.value
-    if (data?.code == SERVER_ERROR) {
-        SearchEmpty {
-
+    when (screenState.value) {
+        is LCE.Loading -> {
+            Loading()
         }
-    } else {
-        LazyColumn(Modifier.fillMaxWidth()) {
-            itemsIndexed(data?.data ?: emptyList()) { index, it ->
-                when (searchObject) {
-                    is SearchObject.Music -> {
-                        MusicItem(data = MediaData(it)) {
-                            searchViewModel.setPlayList(
-                                index,
-                                searchViewModel.searchMusic.value.data!!
-                            )
-                        }
-                    }
-                    is SearchObject.Album -> {
-                        AlbumItem(item = it) {
-                            hostController.navigate("${Screen.AlbumDetailScreen.route}?mediaItem=${it.toNavType()}")
-                        }
-                    }
-                    is SearchObject.Artist -> {
-                        ArtistLazyItem(item = it, onClick = {
-                            hostController.navigate("${Screen.ArtistDetailScreen.route}?mediaItem=${it.toNavType()}")
-                        })
-                    }
-                    is SearchObject.Sheet -> {
-                        SheetItem(item = it) {
-                            hostController.navigate("${Screen.SheetDetailScreen.route}?mediaItem=${it.toNavType()}")
+        is LCE.Error -> {
+            Error {
+                searchViewModel.search()
+            }
+        }
+        is LCE.Success -> {
+            if (data?.get { emptyList() }?.isEmpty() == true) {
+                SearchEmpty {
+                    searchViewModel.search()
+                }
+            } else {
+                LazyColumn(Modifier.fillMaxWidth()) {
+                    itemsIndexed(data?.get { emptyList() } ?: emptyList()) { index, it ->
+                        when (searchObject) {
+                            is SearchObject.Music -> {
+                                MusicItem(data = MediaData(it)) {
+                                    searchViewModel.setPlayList(
+                                        index,
+                                        searchViewModel.searchMusic.value.get { emptyList() }
+                                    )
+                                }
+                            }
+                            is SearchObject.Album -> {
+                                AlbumItem(item = it) {
+                                    hostController.navigate("${Screen.AlbumDetailScreen.route}?mediaItem=${it.toNavType()}")
+                                }
+                            }
+                            is SearchObject.Artist -> {
+                                ArtistLazyItem(item = it, onClick = {
+                                    hostController.navigate("${Screen.ArtistDetailScreen.route}?mediaItem=${it.toNavType()}")
+                                })
+                            }
+                            is SearchObject.Sheet -> {
+                                SheetItem(item = it) {
+                                    hostController.navigate("${Screen.SheetDetailScreen.route}?mediaItem=${it.toNavType()}")
+                                }
+                            }
                         }
                     }
                 }
             }
         }
     }
+
 }
 
 @Composable
@@ -249,9 +285,9 @@ private fun SearchEmpty(
     }
 }
 
-sealed class SearchObject(val value: String) {
-    data class Music(val name: String) : SearchObject(name)
-    data class Album(val name: String) : SearchObject(name)
-    data class Artist(val name: String) : SearchObject(name)
-    data class Sheet(val name: String) : SearchObject(name)
+sealed class SearchObject(val value: String, val parentId: String) {
+    data class Music(val name: String) : SearchObject(name, Constants.NETWORK_MUSIC_ID)
+    data class Album(val name: String) : SearchObject(name, Constants.NETWORK_ALBUM_ID)
+    data class Artist(val name: String) : SearchObject(name, Constants.NETWORK_ARTIST_ID)
+    data class Sheet(val name: String) : SearchObject(name, Constants.NET_SHEET_ID)
 }

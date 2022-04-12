@@ -2,7 +2,6 @@ package com.hua.abstractmusic.ui.viewmodels
 
 import android.annotation.SuppressLint
 import android.net.Uri
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
@@ -12,26 +11,26 @@ import androidx.media3.common.Player
 import androidx.media3.common.Player.REPEAT_MODE_OFF
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.base.viewmodel.BaseViewModel
-import com.hua.abstractmusic.bean.LyricsEntry
-import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.other.Constant
-import com.hua.abstractmusic.preference.PreferenceManager
-import com.hua.abstractmusic.repository.NetRepository
-import com.hua.abstractmusic.repository.Repository
-import com.hua.abstractmusic.services.BrowserListener
-import com.hua.abstractmusic.services.MediaConnect
+import com.hua.abstractmusic.repository.LocalRepository
+import com.hua.abstractmusic.repository.NetWorkRepository
 import com.hua.abstractmusic.ui.utils.LCE
-import com.hua.abstractmusic.use_case.UseCase
 import com.hua.abstractmusic.utils.ComposeUtils
 import com.hua.abstractmusic.utils.LyricsUtils
 import com.hua.abstractmusic.utils.PaletteUtils
 import com.hua.abstractmusic.utils.isLocal
-import com.hua.taglib.TaglibLibrary
+import com.hua.model.lyrics.LyricsDTO
+import com.hua.model.music.MediaData
+import com.hua.service.BrowserListener
+import com.hua.service.MediaConnect
+import com.hua.service.preference.PreferenceManager
+import com.hua.service.usecase.UseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import javax.inject.Inject
 
 /**
@@ -43,10 +42,9 @@ import javax.inject.Inject
 @HiltViewModel
 class PlayingViewModel @Inject constructor(
     mediaConnect: MediaConnect,
-    private val netRepository: NetRepository,
+    private val netRepository: NetWorkRepository,
     private val useCase: UseCase,
-    private val repository: Repository,
-    private val taglibLibrary: TaglibLibrary,
+    private val repository: LocalRepository,
     private val preferenceManager: PreferenceManager,
     private val composeUtils: ComposeUtils
 ) : BaseViewModel(mediaConnect) {
@@ -58,11 +56,14 @@ class PlayingViewModel @Inject constructor(
     val currentPlayItem: State<MediaItem> get() = _currentPlayItem
 
     // 歌词
-    private val _lyricsList = mutableStateOf<List<LyricsEntry>>(emptyList())
-    val lyricList: State<List<LyricsEntry>> get() = _lyricsList
+    private val _lyricsList = mutableStateOf<List<LyricsDTO>>(emptyList())
+    val lyricList: State<List<LyricsDTO>> get() = _lyricsList
 
 
     val lyricsCanScroll = mutableStateOf(false)
+
+    val currentPlayIndex = mutableStateOf(0)
+    val currentPlayTotal = mutableStateOf(0)
 
     //    val lyricsState = LazyListState(firstVisibleItemScrollOffset = -500)
     private val _lyricsLoadState = MutableStateFlow<LCE>(LCE.Loading)
@@ -82,6 +83,15 @@ class PlayingViewModel @Inject constructor(
 
     val currentPosition = mutableStateOf(0F)
 
+    init {
+        viewModelScope.launch {
+            mediaConnect.isConnected.collectLatest {
+                if (it) setController() else releaseListener()
+            }
+        }
+
+    }
+
 
     private val listener = object : Player.Listener {
         override fun onPlaybackStateChanged(playbackState: Int) {
@@ -93,7 +103,7 @@ class PlayingViewModel @Inject constructor(
                     setLyricsItem(getStartIndex(browser.currentPosition))
                     maxValue.value = (browser.duration).toFloat()
                 }
-                Player.STATE_ENDED ->  _playerState.value = false
+                Player.STATE_ENDED -> _playerState.value = false
 
                 else -> {}
             }
@@ -129,8 +139,8 @@ class PlayingViewModel @Inject constructor(
         } else {
             browser.play()
         }
-        if(browser.playbackState == Player.STATE_ENDED){
-            browser.seekTo(_currentPlayList.value.size - 1,0)
+        if (browser.playbackState == Player.STATE_ENDED) {
+            browser.seekTo(_currentPlayList.value.size - 1, 0)
         }
     }
 
@@ -150,7 +160,7 @@ class PlayingViewModel @Inject constructor(
     fun startUpdatePosition() {
         cancelUpdatePosition()
         positionJob = viewModelScope.launch(Dispatchers.Default) {
-            while (true) {
+            while (isActive) {
                 withContext(Dispatchers.Main) {
                     currentPosition.value = browser?.currentPosition?.toFloat() ?: 0F
                 }
@@ -241,9 +251,9 @@ class PlayingViewModel @Inject constructor(
         _lyricsLoadState.value = LCE.Loading
         withContext(Dispatchers.IO) {
             val lyrics = if (item.mediaId.isLocal()) {
-                getLocalLyrics(item.mediaMetadata.mediaUri)
+                repository.selectLyrics(item.mediaMetadata.mediaUri)
             } else {
-                getNetLyrics(Uri.parse(item.mediaId).lastPathSegment ?: "")
+                netRepository.selectLyrics(Uri.parse(item.mediaId))
             }
             if (lyrics.isBlank()) {
                 _lyricsList.value = emptyList()
@@ -263,27 +273,6 @@ class PlayingViewModel @Inject constructor(
         _lyricsList.value = lyricResult.second
     }
 
-    private fun getLocalLyrics(uri: Uri?): String {
-        return if (taglibLibrary.isAvailable) {
-            try {
-                mediaConnect.context.contentResolver.openFileDescriptor(
-                    uri!!,
-                    "r"
-                )?.use {
-                    taglibLibrary.getLyricsByTaglib(it.detachFd())
-                } ?: ""
-            } catch (e: Exception) {
-                ""
-            }
-        } else {
-            ""
-        }
-    }
-
-    private suspend fun getNetLyrics(id: String): String {
-        return netRepository.selectLyrics(id)
-    }
-
     private fun updateCurrentPlayList() {
         val browser = this.browser ?: return
         val list = mutableListOf<MediaData>()
@@ -297,6 +286,8 @@ class PlayingViewModel @Inject constructor(
             )
         }
         _currentPlayList.value = list
+        currentPlayIndex.value = browser.currentMediaItemIndex + 1
+        currentPlayTotal.value = list.size
         viewModelScope.launch(Dispatchers.IO) {
             useCase.clearCurrentListCase()
             useCase.insertMusicToCurrentItemCase(list)
@@ -312,23 +303,6 @@ class PlayingViewModel @Inject constructor(
             browser.currentPosition
         }
     }
-
-
-//    suspend fun removeSheetItem(item: MediaItem, sheetItem: MediaItem): String {
-//        val parentId = sheetItem.mediaId
-//        val sheetId = Uri.parse(parentId).lastPathSegment
-//        val musicId = Uri.parse(item.mediaId).lastPathSegment
-//        return try {
-//            if (parentId.isLocal()) {
-//                val result = repository.removeSheetItem(sheetId!!, musicId!!)
-//                if (result == 1) "成功移除" else "移除失败"
-//            } else {
-//                netRepository.removeSheetItem(sheetId!!, musicId!!).msg
-//            }
-//        } catch (e: Exception) {
-//            "error"
-//        }
-//    }
 
     fun setRepeatMode(): Int? {
         val browser = this.browser ?: return null

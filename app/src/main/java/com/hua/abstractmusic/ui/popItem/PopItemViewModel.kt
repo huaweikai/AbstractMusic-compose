@@ -6,19 +6,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
-import com.google.common.util.concurrent.MoreExecutors
-import com.hua.abstractmusic.bean.ParcelizeMediaItem
 import com.hua.abstractmusic.other.Constant
-import com.hua.abstractmusic.other.Constant.LOCAL_SHEET_ID
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.preference.UserInfoData
-import com.hua.abstractmusic.repository.NetRepository
-import com.hua.abstractmusic.services.MediaConnect
-import com.hua.abstractmusic.services.MediaItemTree
-import com.hua.abstractmusic.use_case.UseCase
-import com.hua.abstractmusic.use_case.events.MusicInsertError
+import com.hua.abstractmusic.repository.LocalRepository
+import com.hua.abstractmusic.repository.NetWorkRepository
 import com.hua.abstractmusic.utils.isLocal
+import com.hua.model.other.Constants.LOCAL_SHEET_ID
+import com.hua.network.ApiResult
+import com.hua.network.get
+import com.hua.network.onFailure
+import com.hua.network.onSuccess
+import com.hua.service.MediaConnect
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,9 +31,8 @@ import javax.inject.Inject
 @SuppressLint("UnsafeOptInUsageError")
 @HiltViewModel
 class PopItemViewModel @Inject constructor(
-    private val useCase: UseCase,
-    private val netRepository: NetRepository,
-    private val itemTree: MediaItemTree,
+    private val netRepository: NetWorkRepository,
+    private val repository: LocalRepository,
     private val mediaConnect: MediaConnect,
     private val userInfo: UserInfoData
 ) : ViewModel() {
@@ -40,19 +40,15 @@ class PopItemViewModel @Inject constructor(
 
     val sheetList = mutableStateOf(emptyList<MediaItem>())
 
+    val snackEvent = MutableSharedFlow<String>()
+
     suspend fun refresh(isLocal: Boolean) {
         if (isLocal) {
-            val browser = mediaConnect.browser ?: return
-            val browserFuture = browser.getChildren(
-                LOCAL_SHEET_ID, 0, Int.MAX_VALUE, null
-            )
-            browserFuture.addListener({
-                sheetList.value = browserFuture.get().value ?: emptyList()
-            }, MoreExecutors.directExecutor())
+            sheetList.value = mediaConnect.getChildren(LOCAL_SHEET_ID)
         } else {
             val result = netRepository.selectUserSheet()
-            if (result.isSuccess) {
-                sheetList.value = result.getOrNull() ?: emptyList()
+            if (result is ApiResult.Success) {
+                sheetList.value = result.data
             }
         }
     }
@@ -61,17 +57,20 @@ class PopItemViewModel @Inject constructor(
 
 
     fun selectArtistByMusicId(item: MediaItem) {
-        if (item.mediaId.isLocal()) {
-            val artistId: Long = item.mediaMetadata.extras?.getLong("artistId") ?: 0L
-            val parentId = "${Constant.LOCAL_ARTIST_ID}/$artistId"
-            moreArtistList.value =
-                listOf(itemTree.getItem(parentId) ?: NULL_MEDIA_ITEM)
-        } else {
-            viewModelScope.launch {
-                moreArtistList.value =
-                    netRepository.selectArtistByMusicId(Uri.parse(item.mediaId)).data ?: emptyList()
+        viewModelScope.launch {
+            val result = if (item.mediaId.isLocal()) {
+                repository.selectArtistByMusicId(item)
+            } else {
+                netRepository.selectArtistByMusicId(item)
             }
+            moreArtistList.value = result.get { listOf(NULL_MEDIA_ITEM) }
+//            if (result is ApiResult.Success) {
+//                moreArtistList.value = result.data
+//            } else {
+//                moreArtistList.value = listOf(NULL_MEDIA_ITEM)
+//            }
         }
+
     }
 
     fun clearArtist() {
@@ -81,8 +80,14 @@ class PopItemViewModel @Inject constructor(
 
     fun addQueue(item: MediaItem, nextPlay: Boolean = false): Int {
         val browser = mediaConnect.browser ?: return 0
-        val index = if (nextPlay) browser.currentMediaItemIndex + 1 else browser.mediaItemCount
-        browser.addMediaItem(index,item)
+        val index = if (nextPlay) {
+            showSnackBar("${item.mediaMetadata.title}将在下一首播放")
+            browser.currentMediaItemIndex + 1
+        } else {
+            showSnackBar("${item.mediaMetadata.title}已添加到队尾")
+            browser.mediaItemCount
+        }
+        browser.addMediaItem(index, item)
         // 没有相关回调，直接手动更新
         mediaConnect.updatePlayList()
         return index
@@ -91,18 +96,18 @@ class PopItemViewModel @Inject constructor(
     suspend fun insertMusicToSheet(
         mediaItem: MediaItem,
         sheetItem: MediaItem
-    ): Pair<Boolean, String> {
+    ) {
         val sheetId = Uri.parse(sheetItem.mediaId).lastPathSegment
-        return try {
-            if (sheetItem.mediaId.isLocal()) {
-                useCase.insertSheetCase(mediaItem, sheetId!!.toInt())
-            } else {
-                val mediaId = Uri.parse(mediaItem.mediaId).lastPathSegment
-                netRepository.insertMusicToSheet(sheetId!!, mediaId!!)
-            }
-            Pair(true, "${mediaItem.mediaMetadata.title}已加入歌单${sheetItem.mediaMetadata.title}")
-        } catch (e: MusicInsertError) {
-            Pair(false, e.message ?: "")
+        val result = if (sheetItem.mediaId.isLocal()) {
+            repository.insertMusicToSheet(sheetId!!,mediaItem)
+        } else {
+            netRepository.insertMusicToSheet(sheetId!!,mediaItem)
+        }
+        result.onSuccess {
+            showSnackBar("加入歌单成功")
+        }
+        result.onFailure {
+            showSnackBar((result as ApiResult.Failure).error.errorMsg ?:"")
         }
     }
 
@@ -110,20 +115,29 @@ class PopItemViewModel @Inject constructor(
     val moreAlbum = mutableStateOf(NULL_MEDIA_ITEM)
 
     fun selectAlbumByMusicId(item: MediaItem) {
-        val albumId: Long = item.mediaMetadata.extras?.getLong("albumId") ?: 0L
-        if (item.mediaId.isLocal()) {
-            val parentId = "${Constant.LOCAL_ALBUM_ID}/$albumId"
-            moreAlbum.value = itemTree.getItem(parentId) ?: NULL_MEDIA_ITEM
-        } else {
-            viewModelScope.launch {
-                moreAlbum.value = netRepository.selectAlbumById(albumId.toString()).data
-                    ?: Constant.NULL_MEDIA_ITEM
+        viewModelScope.launch {
+            val result = if (item.mediaId.isLocal()) {
+                repository.selectAlbumByMusicId(item)
+            }else{
+                netRepository.selectAlbumByMusicId(item)
             }
+            moreAlbum.value = result.get { NULL_MEDIA_ITEM }
+//            if(result is ApiResult.Success){
+//                moreAlbum.value = result.data
+//            }else{
+//                moreAlbum.value = NULL_MEDIA_ITEM
+//            }
         }
     }
 
     fun clearAlbum() {
         moreAlbum.value = Constant.NULL_MEDIA_ITEM
+    }
+
+    private fun showSnackBar(message: String){
+        viewModelScope.launch {
+            snackEvent.emit(message)
+        }
     }
 
 }

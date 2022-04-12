@@ -1,7 +1,7 @@
 package com.hua.abstractmusic.preference
 
 import androidx.navigation.NavBackStackEntry
-import com.hua.abstractmusic.bean.ParcelizeMediaItem
+import com.hua.model.parcel.ParcelizeMediaItem
 
 
 /**

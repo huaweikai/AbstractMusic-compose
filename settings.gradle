@@ -12,3 +12,6 @@ rootProject.name = "AbstractMusic"
 include ':app'
 include ':taglib'
 include ':blur'
+include ':network'
+include ':service'
+include ':model'

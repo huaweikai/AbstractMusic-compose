@@ -8,8 +8,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hua.abstractmusic.preference.PreferenceManager
 import com.hua.abstractmusic.ui.utils.Monet
+import com.hua.service.preference.PreferenceManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.kdrag0n.monet.theme.ColorScheme
 import kotlinx.coroutines.Dispatchers

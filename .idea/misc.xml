@@ -3,6 +3,9 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/AbstractMusic-compose/app/src/main/res/drawable/ic_list_remove.xml" value="0.1" />
+        <entry key="..\:/AbstractMusic-compose/app/src/main/res/drawable/ic_network_error.xml" value="0.1" />
+        <entry key="..\:/AbstractMusic-compose/service/src/main/res/drawable/ic_play_next.xml" value="0.107" />
         <entry key="..\:/Documents/.gradle/caches/transforms-3/6f127c103d730005ea8004f95f10406b/transformed/jetified-media3-session-1.0.0-alpha01/res/drawable-anydpi-v21/exo_icon_next.xml" value="0.1095" />
         <entry key="..\:/Documents/AS/AbstractMusic/app/src/main/res/drawable/ic_mode_order_play.xml" value="0.101" />
         <entry key="..\:/Documents/AS/AbstractMusic/app/src/main/res/drawable/ic_mode_play.xml" value="0.101" />

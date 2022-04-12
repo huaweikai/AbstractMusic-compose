@@ -1,9 +1,9 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id "kotlinx-serialization"
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
-    id 'kotlin-parcelize'
 }
 
 android {
@@ -13,8 +13,8 @@ android {
         applicationId "com.hua.abstractmusic"
         minSdk Version.minSdkVersion
         targetSdk Version.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
@@ -133,6 +133,11 @@ dependencies {
     implementation Other.huawei_obs
     implementation project(Other.taglib)
     implementation project(Other.blur)
+    implementation project(":network")
+    implementation project(":service")
+//    implementation project(":model")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.8.1'
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

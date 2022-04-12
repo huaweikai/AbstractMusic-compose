@@ -2,11 +2,10 @@ package com.hua.abstractmusic.ui.setting
 
 import androidx.lifecycle.viewModelScope
 import com.hua.abstractmusic.base.viewmodel.BaseViewModel
-import com.hua.abstractmusic.other.NetWork
 import com.hua.abstractmusic.preference.SettingInfoData
 import com.hua.abstractmusic.preference.UserInfoData
 import com.hua.abstractmusic.repository.UserRepository
-import com.hua.abstractmusic.services.MediaConnect
+import com.hua.service.MediaConnect
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -26,19 +25,23 @@ class SettingViewModel @Inject constructor(
     val timeOpen get() = settingInfoData.timeOpen
     val userInfo get() = userInfoData.userInfo
 
-    fun startTimer(isOpen:Boolean){
+    val timeSlider get() = settingInfoData.slideValue
+
+    val mediaTime get() = settingInfoData.time
+
+    fun startTimer(value:Float,isOpen:Boolean = true){
         if(isOpen){
-            settingInfoData.setTime(0)
+            settingInfoData.setTime(value){
+                mediaConnect.browser?.pause()
+            }
         }else{
             settingInfoData.closeTime()
         }
-
     }
 
     fun logoutUser() {
         viewModelScope.launch {
-            val result = userRepository.logoutUser().code
-            val isSuccess = result == NetWork.SUCCESS
+            userRepository.logoutUser()
         }
     }
 

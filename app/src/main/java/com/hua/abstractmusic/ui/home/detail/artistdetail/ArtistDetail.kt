@@ -28,13 +28,13 @@ import coil.compose.AsyncImage
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
-import com.hua.abstractmusic.bean.ParcelizeMediaItem
-import com.hua.abstractmusic.bean.toNavType
 import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.*
 import com.hua.abstractmusic.utils.isLocal
+import com.hua.model.parcel.ParcelizeMediaItem
+import com.hua.model.parcel.toNavType
 import kotlinx.coroutines.launch
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ScrollStrategy

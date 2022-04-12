@@ -25,8 +25,6 @@ import androidx.media3.common.MediaItem
 import androidx.navigation.NavHostController
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.R
-import com.hua.abstractmusic.bean.MediaData
-import com.hua.abstractmusic.bean.toNavType
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalComposeUtils
@@ -36,6 +34,8 @@ import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.CoilImage
 import com.hua.abstractmusic.ui.viewmodels.UserViewModel
 import com.hua.abstractmusic.utils.PaletteUtils
+import com.hua.model.music.MediaData
+import com.hua.model.parcel.toNavType
 
 
 /**

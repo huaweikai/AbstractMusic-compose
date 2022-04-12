@@ -79,6 +79,7 @@ object Other {
 
     const val retrofit2 = "com.squareup.retrofit2:retrofit:$retrofit_version"
     const val retrofit2_gson = "com.squareup.retrofit2:converter-gson:$retrofit_version"
+    const val okhttp = "com.squareup.okhttp3:okhttp:5.0.0-alpha.6"
 
     const val huawei_obs = "com.huaweicloud:esdk-obs-android:3.21.12"
     const val taglib = ":taglib"

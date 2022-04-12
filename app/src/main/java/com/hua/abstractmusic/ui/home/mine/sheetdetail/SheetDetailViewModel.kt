@@ -1,9 +1,7 @@
 package com.hua.abstractmusic.ui.home.mine.sheetdetail
 
 import android.annotation.SuppressLint
-import android.content.ContentResolver
 import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.viewModelScope
@@ -11,25 +9,26 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import com.google.gson.Gson
 import com.hua.abstractmusic.base.viewmodel.BaseViewModel
-import com.hua.abstractmusic.bean.MediaData
-import com.hua.abstractmusic.bean.ParcelizeMediaItem
-import com.hua.abstractmusic.bean.Sheet
-import com.hua.abstractmusic.bean.net.NetData
-import com.hua.abstractmusic.bean.net.NetSheet
 import com.hua.abstractmusic.other.Constant
-import com.hua.abstractmusic.other.NetWork
 import com.hua.abstractmusic.preference.UserInfoData
-import com.hua.abstractmusic.repository.NetRepository
-import com.hua.abstractmusic.repository.Repository
-import com.hua.abstractmusic.repository.UserRepository
-import com.hua.abstractmusic.services.MediaConnect
+import com.hua.abstractmusic.repository.*
 import com.hua.abstractmusic.ui.utils.LCE
-import com.hua.abstractmusic.use_case.UseCase
-import com.hua.abstractmusic.use_case.events.MusicInsertError
+import com.hua.service.usecase.events.MusicInsertError
 import com.hua.abstractmusic.utils.isLocal
 import com.hua.abstractmusic.utils.toDate
+import com.hua.model.music.MediaData
+import com.hua.model.other.Constants
+import com.hua.model.parcel.ParcelizeMediaItem
+import com.hua.model.sheet.SheetVO
+import com.hua.network.ApiResult
+import com.hua.network.get
+import com.hua.network.onFailure
+import com.hua.network.onSuccess
+import com.hua.service.MediaConnect
+import com.hua.service.usecase.UseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -45,13 +44,12 @@ import javax.inject.Inject
 class SheetDetailViewModel @Inject constructor(
     mediaConnect: MediaConnect,
     private val userRepository: UserRepository,
-    private val netRepository: NetRepository,
-    private val repository: Repository,
+    private val netRepository: NetWorkRepository,
+    private val repository: LocalRepository,
     private val userInfoData: UserInfoData,
-    private val useCase: UseCase,
 ) : BaseViewModel(mediaConnect) {
 
-    var isLocal:Boolean = true
+    var isLocal: Boolean = true
 
     var parcelItem: ParcelizeMediaItem? = null
         set(value) {
@@ -72,13 +70,15 @@ class SheetDetailViewModel @Inject constructor(
     val sheetChangeList = mutableStateOf<List<MediaData>>(emptyList())
     var mediaData: MediaData? = null
 
-    val sheetDetail = MutableStateFlow(NetSheet(0, 0, "", num = 0, author = ""))
+    val sheetDetail = MutableStateFlow(SheetVO(0, 0, "", num = 0, author = ""))
 
     private val listener = object : Player.Listener {
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             updateItem(mediaItem)
         }
     }
+
+    val snackBarTitle = MutableSharedFlow<String>()
 
     fun loadData() {
         parcelItem ?: return
@@ -91,18 +91,15 @@ class SheetDetailViewModel @Inject constructor(
     }
 
     fun refreshSheetDesc() {
+        parcelItem ?: return
         viewModelScope.launch {
-            if (parcelItem?.mediaId?.isLocal() == true) {
-                val localSheet = repository.selectSheetBySheetId(sheetDetail.value.id)
-                sheetDetail.value = sheetDetail.value.copy(
-                    id = localSheet.sheetId,
-                    userId = -1,
-                    title = localSheet.title,
-                    artUri = localSheet.artUri,
-                    sheetDesc = localSheet.desc
-                )
+            val result = if (parcelItem!!.mediaId.isLocal()) {
+                repository.selectSheetById(Uri.parse(sheetDetail.value.id.toString()))
             } else {
-                sheetDetail.value = netRepository.selectSheetById(Uri.parse(parcelItem!!.mediaId))
+                netRepository.selectSheetById(Uri.parse(parcelItem!!.mediaId))
+            }
+            result.onSuccess {
+                sheetDetail.value = it.toSheetVO()
             }
         }
     }
@@ -111,7 +108,7 @@ class SheetDetailViewModel @Inject constructor(
         addListener(listener)
     }
 
-    fun refreshSheetLocalList() {
+    private fun refreshSheetLocalList() {
         parcelItem ?: return
         localListMap[parcelItem!!.mediaId] = sheetDetailList
         super.refresh()
@@ -121,19 +118,19 @@ class SheetDetailViewModel @Inject constructor(
         playListMap[parcelItem!!.mediaId] = sheetDetailList
     }
 
-    fun netfreshSheetList() {
+   private fun netfreshSheetList() {
         parcelItem ?: return
         viewModelScope.launch {
             _screenState.value = LCE.Loading
-            val sheets = netRepository.selectMusicById(Uri.parse(parcelItem!!.mediaId))
-            if (sheets?.code == NetWork.SUCCESS) {
+            val sheets = netRepository.selectMusicByType(Uri.parse(parcelItem!!.mediaId))
+            if (sheets is ApiResult.Success) {
                 mediaConnect.itemTree.addMusicToTree(parcelItem!!.mediaId, sheets.data)
-                sheetDetailList.value = sheets.data?.map {
+                sheetDetailList.value = sheets.data.map {
                     MediaData(
                         it,
                         isPlaying = it.mediaId == mediaConnect.browser?.currentMediaItem?.mediaId
                     )
-                } ?: emptyList()
+                }
                 sheetChangeList.value =
                     mediaConnect.itemTree.getCacheItems(parcelItem!!.mediaId).map {
                         MediaData(it)
@@ -147,23 +144,16 @@ class SheetDetailViewModel @Inject constructor(
     }
 
     fun uploadSheetDesc(
-        onBack:()->Unit
+        onBack: () -> Unit
     ) {
         parcelItem ?: return
         viewModelScope.launch {
             val sheetDesc = sheetDetail.value
             if (parcelItem!!.mediaId.isLocal()) {
-                repository.updateSheetDesc(
-                    Sheet(
-                        sheetId = sheetDesc.id,
-                        title = sheetDesc.title,
-                        artUri = sheetDesc.artUri,
-                        desc = sheetDesc.sheetDesc
-                    )
-                )
+                repository.updateSheet(sheetDesc)
                 onBack()
             } else {
-                putImgUpdateNetSheet(sheetDesc,onBack)
+                putImgUpdateNetSheet(sheetDesc, onBack)
             }
         }
     }
@@ -179,13 +169,13 @@ class SheetDetailViewModel @Inject constructor(
         sheetChangeList.value = list
     }
 
-    fun uploadSheetDesc(sheet: NetSheet) {
+    fun uploadSheetDesc(sheet: SheetVO) {
         sheetDetail.value = sheet
     }
 
-    fun putImgUpdateNetSheet(
-        sheet: NetSheet,
-        onBack:()->Unit
+    private fun putImgUpdateNetSheet(
+        sheet: SheetVO,
+        onBack: () -> Unit
     ) {
         if (sheet.artUri == parcelItem?.artUri) {
             viewModelScope.launch {
@@ -206,7 +196,8 @@ class SheetDetailViewModel @Inject constructor(
                     byte,
                     file,
                     onSuccess = {
-                        val path = "https://abstractmusic.obs.cn-north-4.myhuaweicloud.com/$fileName"
+                        val path =
+                            "https://abstractmusic.obs.cn-north-4.myhuaweicloud.com/$fileName"
                         netRepository.updateSheet(sheet.copy(artUri = path))
                     },
                     onError = {
@@ -229,7 +220,7 @@ class SheetDetailViewModel @Inject constructor(
 
     suspend fun removeNetSheetItem(
         id: String
-    ): NetData<Unit> {
+    ): ApiResult<Unit> {
         val musicId = Uri.parse(id).lastPathSegment!!
         val sheetId = Uri.parse(parcelItem?.mediaId).lastPathSegment!!
         return if (parcelItem?.mediaId?.isLocal() == false) {
@@ -240,12 +231,11 @@ class SheetDetailViewModel @Inject constructor(
             sheetChangeList.value = list
             result
         } else {
-            if (repository.removeSheetItem(sheetId, musicId) == 1) {
+            val result = repository.removeSheetItem(sheetId, musicId)
+            if (result is ApiResult.Success) {
                 refreshSheetLocalList()
-                NetData(NetWork.SUCCESS, null, "")
-            } else {
-                NetData(NetWork.ERROR, null, "移出失败，稍后尝试")
             }
+            result
         }
     }
 
@@ -268,16 +258,13 @@ class SheetDetailViewModel @Inject constructor(
 
 
     fun selectArtistByMusicId(item: MediaItem) {
-        if (item.mediaId.isLocal()) {
-            val artistId: Long = item.mediaMetadata.extras?.getLong("artistId") ?: 0L
-            val parentId = "${Constant.LOCAL_ARTIST_ID}/$artistId"
-            moreArtistList.value =
-                listOf(mediaConnect.itemTree.getItem(parentId) ?: Constant.NULL_MEDIA_ITEM)
-        } else {
-            viewModelScope.launch {
-                moreArtistList.value =
-                    netRepository.selectArtistByMusicId(Uri.parse(item.mediaId)).data ?: emptyList()
+        viewModelScope.launch {
+            val result = if(item.mediaId.isLocal()){
+                repository.selectArtistByMusicId(item)
+            }else{
+                netRepository.selectArtistByMusicId(item)
             }
+            moreArtistList.value = result.get { emptyList() }
         }
     }
 
@@ -288,15 +275,13 @@ class SheetDetailViewModel @Inject constructor(
     val moreAlbum = mutableStateOf(Constant.NULL_MEDIA_ITEM)
 
     fun selectAlbumByMusicId(item: MediaItem) {
-        val albumId: Long = item.mediaMetadata.extras?.getLong("albumId") ?: 0L
-        if (item.mediaId.isLocal()) {
-            val parentId = "${Constant.LOCAL_ALBUM_ID}/$albumId"
-            moreAlbum.value = mediaConnect.itemTree.getItem(parentId) ?: Constant.NULL_MEDIA_ITEM
-        } else {
-            viewModelScope.launch {
-                moreAlbum.value = netRepository.selectAlbumById(albumId.toString()).data
-                    ?: Constant.NULL_MEDIA_ITEM
+        viewModelScope.launch {
+            val result = if(item.mediaId.isLocal()){
+                repository.selectAlbumByMusicId(item)
+            }else{
+                netRepository.selectAlbumByMusicId(item)
             }
+            moreAlbum.value = result.get { Constant.NULL_MEDIA_ITEM }
         }
     }
 
@@ -304,22 +289,25 @@ class SheetDetailViewModel @Inject constructor(
         moreAlbum.value = Constant.NULL_MEDIA_ITEM
     }
 
-    suspend fun insertMusicToSheet(
+    fun insertMusicToSheet(
         mediaItem: MediaItem,
         sheetItem: MediaItem
-    ): Pair<Boolean, String> {
-        val sheetId = Uri.parse(sheetItem.mediaId).lastPathSegment
-        return try {
-            if (sheetItem.mediaId.isLocal()) {
-                useCase.insertSheetCase(mediaItem, sheetId!!.toInt())
-            } else {
-                val mediaId = Uri.parse(mediaItem.mediaId).lastPathSegment
-                netRepository.insertMusicToSheet(sheetId!!, mediaId!!)
+    ) {
+        viewModelScope.launch {
+            val sheetId = Uri.parse(sheetItem.mediaId).lastPathSegment
+            val result = if(sheetItem.mediaId.isLocal()){
+                repository.insertMusicToSheet(sheetId!!,mediaItem)
+            }else{
+                netRepository.insertMusicToSheet(sheetId!!,mediaItem)
             }
-            Pair(true, "${mediaItem.mediaMetadata.title}已加入歌单${sheetItem.mediaMetadata.title}")
-        } catch (e: MusicInsertError) {
-            Pair(false, e.message ?: "")
+            result.onSuccess {
+                showSnackBar("加入歌单成功")
+            }
+            result.onFailure {
+                showSnackBar(it.errorMsg ?:"")
+            }
         }
+
     }
 
     val user get() = userInfoData.userInfo.value
@@ -328,25 +316,23 @@ class SheetDetailViewModel @Inject constructor(
 
     fun refreshSheetLocalList(isLocal: Boolean) {
         sheetList.value = mediaConnect.itemTree.getCacheItems(
-            if (isLocal) Constant.LOCAL_SHEET_ID else "${Constant.ROOT_SCHEME}${user.userToken}"
+            if (isLocal) Constants.LOCAL_SHEET_ID else "${Constants.ROOT_SCHEME}${user.userToken}"
         )
     }
 
     fun deleteSheet() {
         viewModelScope.launch {
             val id = Uri.parse(parcelItem?.mediaId).lastPathSegment
-            try {
-                if (parcelItem?.mediaId?.isLocal() == true) {
-                    userRepository.removeSheet(id!!)
-                } else {
-                    netRepository.removeSheet(id!!)
-                }
-                refresh()
-            } catch (e: Exception) {
+            if (parcelItem?.mediaId?.isLocal() == true) {
+                repository.deleteSheet(id!!)
+            }else{
+                netRepository.deleteSheet(id!!)
             }
+            refresh()
         }
     }
-    fun getSheetDesc():String{
+
+    fun getSheetDesc(): String {
         val sheet = sheetDetail.value
         return Gson().toJson(
             ParcelizeMediaItem(
@@ -358,4 +344,21 @@ class SheetDetailViewModel @Inject constructor(
             )
         )
     }
+
+    private fun showSnackBar(message:String){
+        viewModelScope.launch {
+            snackBarTitle.emit(message)
+        }
+    }
 }
+
+@SuppressLint("UnsafeOptInUsageError")
+private fun MediaItem.toSheetVO() = SheetVO(
+    id = Uri.parse(this.mediaId).lastPathSegment?.toInt() ?: 0,
+    userId = this.mediaMetadata.extras?.getInt("userId") ?: -1,
+    title = this.mediaMetadata.title.toString(),
+    artUri = this.mediaMetadata.artworkUri.toString(),
+    sheetDesc = "${this.mediaMetadata.subtitle}",
+    num = 0,
+    author = this.mediaMetadata.artist.toString()
+)

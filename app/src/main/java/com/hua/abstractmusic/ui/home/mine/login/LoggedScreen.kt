@@ -21,8 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.hua.abstractmusic.bean.toNavType
-import com.hua.abstractmusic.bean.user.UserBean
 import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalUserViewModel
@@ -36,6 +34,8 @@ import com.hua.abstractmusic.ui.utils.UCropActivityResultContract
 import com.hua.abstractmusic.ui.viewmodels.UserViewModel
 import com.hua.abstractmusic.utils.getCacheDir
 import com.hua.abstractmusic.utils.toTime
+import com.hua.model.parcel.toNavType
+import com.hua.model.user.UserPO
 
 /**
  * @author : huaweikai
@@ -167,7 +167,7 @@ fun SubscribedPlayList(
 
 @Composable
 fun UserInfo(
-    data: UserBean?,
+    data: UserPO?,
     modifier: Modifier = Modifier,
     avatarSize: Dp = 80.dp,
     viewModel: UserViewModel
@@ -211,7 +211,7 @@ fun UserInfo(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 val day = (System.currentTimeMillis() - data.createTime.toTime()) / 864e5
-                Text(text = "${day.toInt()} 天")
+                Text(text = "来到抽象音乐 ${day.toInt()} 天")
             }
         }
         CoilImage(

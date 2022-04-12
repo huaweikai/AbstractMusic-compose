@@ -16,7 +16,6 @@ import androidx.navigation.NavHostController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
-import com.hua.abstractmusic.bean.toNavType
 import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.home.local.album.LocalAlbum
 import com.hua.abstractmusic.ui.home.local.artist.LocalArtist
@@ -24,6 +23,7 @@ import com.hua.abstractmusic.ui.home.local.music.LocalMusic
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.indicatorOffset3
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
+import com.hua.model.parcel.toNavType
 import kotlinx.coroutines.launch
 
 

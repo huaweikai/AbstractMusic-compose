@@ -14,7 +14,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -58,8 +57,8 @@ fun PlayScreen(
 
 @SuppressLint("UnsafeOptInUsageError")
 @OptIn(
-    ExperimentalPagerApi::class, androidx.compose.material.ExperimentalMaterialApi::class,
-    androidx.compose.material3.ExperimentalMaterial3Api::class
+    ExperimentalPagerApi::class, ExperimentalMaterialApi::class,
+    ExperimentalMaterial3Api::class
 )
 @Composable
 fun PlayScreen(

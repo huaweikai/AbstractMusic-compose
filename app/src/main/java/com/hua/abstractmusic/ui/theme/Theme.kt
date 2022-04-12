@@ -21,7 +21,7 @@ private val DarkColorPalette = darkColorScheme()
 
 private val LightColorPalette = lightColorScheme()
 
-val defaultColor = Color(0xff33b5e5)
+val defaultColor = Color(red = 103, green = 80, blue = 164)
 
 //@SuppressLint("NewApi")
 @Composable
@@ -40,8 +40,8 @@ fun AbstractMusicTheme(
         montMicColor && darkTheme && customColor == null -> monet.getMonetColors().darkMonetCompatScheme()
         customColor != null && darkTheme -> customColor.darkMonetCompatScheme()
         customColor != null && !darkTheme -> customColor.lightMonetCompatScheme()
-        darkTheme -> Monet.getMonetColor(defaultColor.toArgb()).darkMonetCompatScheme()
-        else -> Monet.getMonetColor(defaultColor.toArgb()).lightMonetCompatScheme()
+        darkTheme -> DarkColorPalette
+        else -> LightColorPalette
     }
     LocalPlayingViewModel.current.putTransDark(darkTheme)
     MaterialTheme(

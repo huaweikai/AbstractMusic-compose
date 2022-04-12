@@ -21,14 +21,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
 import androidx.navigation.NavHostController
 import coil.transform.RoundedCornersTransformation
-import com.hua.abstractmusic.bean.toNavType
 import com.hua.abstractmusic.ui.LocalAppNavController
-import com.hua.abstractmusic.ui.LocalAppSnackBar
 import com.hua.abstractmusic.ui.LocalPopWindow
 import com.hua.abstractmusic.ui.LocalPopWindowItem
 import com.hua.abstractmusic.ui.popItem.PopItemViewModel
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.utils.isLocal
+import com.hua.model.parcel.toNavType
 import kotlinx.coroutines.launch
 
 
@@ -45,7 +44,7 @@ fun PopupWindow(
     item: MediaItem = LocalPopWindowItem.current.value,
     viewModel: PopItemViewModel = hiltViewModel(),
     homeNavController: NavHostController = LocalAppNavController.current,
-    snackBarHostState: SnackbarHostState = LocalAppSnackBar.current
+    snackBarHostState: SnackbarHostState
 ) {
     val sheetPop = remember {
         mutableStateOf(false)
@@ -55,6 +54,17 @@ fun PopupWindow(
     }
     val scope = rememberCoroutineScope()
     viewModel.selectAlbumByMusicId(item)
+
+    val snackTitle = viewModel.snackEvent.collectAsState(initial = "").value
+
+    LaunchedEffect(snackTitle){
+        if(snackTitle.isNotBlank()){
+            snackBarHostState.showSnackbar(snackTitle)
+            state.value = false
+            artistPop.value = false
+            sheetPop.value = false
+        }
+    }
 
 
     PopItemLayout(state = state, onDismiss = { viewModel.clearAlbum() }, title = {
@@ -83,17 +93,9 @@ fun PopupWindow(
     }, popItems = listOf(
         PopItems("添加到播放队列") {
             viewModel.addQueue(item)
-            scope.launch {
-                snackBarHostState.showSnackbar("${item.mediaMetadata.title}已添加到队尾")
-            }
-            state.value = false
         },
         PopItems("添加到下一曲播放") {
             viewModel.addQueue(item, true)
-            scope.launch {
-                snackBarHostState.showSnackbar("${item.mediaMetadata.title}将在下一首播放")
-            }
-            state.value = false
         },
         PopItems("添加到歌单") {
             scope.launch {
@@ -121,9 +123,7 @@ fun PopupWindow(
                 viewModel.insertMusicToSheet(
                     mediaItem = item,
                     sheetItem = it
-                ).let {
-                    snackBarHostState.showSnackbar(it.second)
-                }
+                )
             }
             sheetPop.value = false
         }
@@ -168,7 +168,7 @@ fun PopItemLayout(
                     .background(MaterialTheme.colorScheme.background, RoundedCornerShape(12.dp))
             ) {
                 title()
-                Divider()
+                Divider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),thickness = 0.5.dp)
                 LazyColumn(Modifier.fillMaxWidth()) {
                     items(popItems) {
                         PopItem(desc = it.title) {

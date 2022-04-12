@@ -15,11 +15,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
 import coil.transform.RoundedCornersTransformation
-import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.utils.ArtImage
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
+import com.hua.model.music.MediaData
 
 
 /**

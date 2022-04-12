@@ -15,9 +15,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.SwipeableDefaults
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,14 +22,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -45,8 +40,6 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.R
-import com.hua.abstractmusic.bean.NavTypeMediaItem
-import com.hua.abstractmusic.bean.defaultParcelizeMediaItem
 import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.preference.getValue
@@ -68,6 +61,8 @@ import com.hua.abstractmusic.ui.splash.SplashScreen
 import com.hua.abstractmusic.ui.utils.PopupWindow
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 import com.hua.abstractmusic.ui.viewmodels.ThemeViewModel
+import com.hua.model.parcel.NavTypeMediaItem
+import com.hua.model.parcel.defaultParcelizeMediaItem
 import kotlinx.coroutines.launch
 
 /**
@@ -126,7 +121,6 @@ fun AppNavigation(
     CompositionLocalProvider(
         LocalAppNavController provides controller,
         LocalBottomControllerHeight provides bottomControllerHeight,
-        LocalAppSnackBar provides snackBarHostState,
         LocalPopWindowItem provides popItem,
         LocalPopWindow provides popupWindow,
     ) {
@@ -179,18 +173,18 @@ fun AppNavigation(
                         },
                 )
             }
-            PopupWindow()
+            PopupWindow(snackBarHostState = snackBarHostState)
         }
     }
 //    LaunchedEffect(key1 = themeViewModel.isReady) {
 //        if (!themeViewModel.isReady.value) themeViewModel.init()
 //    }
-    val isConnect = playingViewModel.isConnect.collectAsState()
-    LaunchedEffect(isConnect.value) {
-        if (isConnect.value) {
-            playingViewModel.setController()
-        }
-    }
+//    val isConnect = playingViewModel.isConnect.collectAsState()
+//    LaunchedEffect(isConnect.value) {
+//        if (isConnect.value) {
+//            playingViewModel.setController()
+//        }
+//    }
 }
 
 
@@ -356,7 +350,6 @@ fun MusicController(
     }
     val backState = controller.currentBackStackEntryAsState().value
     LaunchedEffect(playingViewModel.currentPlayItem.value, backState) {
-        Log.d("TAG", "MusicController:${playingViewModel.currentPlayItem.value} ")
         if (playingViewModel.currentPlayItem.value != NULL_MEDIA_ITEM) {
             isVis.value =
                 backState?.destination?.route !in controllerDone && backState?.destination?.route?.contains(

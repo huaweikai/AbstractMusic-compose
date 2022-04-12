@@ -35,8 +35,6 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.R
-import com.hua.abstractmusic.bean.ParcelizeMediaItem
-import com.hua.abstractmusic.bean.toGson
 import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalComposeUtils
@@ -44,6 +42,8 @@ import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.*
 import com.hua.abstractmusic.utils.isLocal
 import com.hua.blur.blur
+import com.hua.model.parcel.ParcelizeMediaItem
+import com.hua.model.parcel.toGson
 
 
 /**

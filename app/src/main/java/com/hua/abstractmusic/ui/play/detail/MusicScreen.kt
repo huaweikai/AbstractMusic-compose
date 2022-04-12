@@ -96,7 +96,7 @@ private fun VerticalScreen(
 ) {
     val data = viewModel.currentPlayItem.value.mediaMetadata
     val playState = viewModel.playerState.collectAsState()
-    val scale by animateFloatAsState(if (playState.value) 1f else 0.9f, animationSpec = tween(300))
+    val scale by animateFloatAsState(if (playState.value) 1f else 0.95f, animationSpec = tween(300))
     Column(
         modifier = Modifier
             .padding(

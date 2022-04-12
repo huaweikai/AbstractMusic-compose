@@ -70,12 +70,6 @@ private fun <T> Banner(
             }
         }
     }
-//    val indicatorState = rememberPagerState()
-
-    LaunchedEffect(state.currentPage) {
-        val page = (state.currentPage - startIndex).floorMod(pageCount)
-//        indicatorState.scrollToPage(page)
-    }
     Box(
         modifier = Modifier
             .fillMaxWidth()

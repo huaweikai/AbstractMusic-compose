@@ -4,14 +4,16 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hua.abstractmusic.bean.net.NetData
-import com.hua.abstractmusic.other.NetWork
 import com.hua.abstractmusic.preference.UserInfoData
 import com.hua.abstractmusic.repository.UserRepository
+import com.hua.network.ApiResult
+import com.hua.network.get
+import com.hua.network.onFailure
+import com.hua.network.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.serializer
 import javax.inject.Inject
 
 /**
@@ -63,12 +65,13 @@ class RegisterViewModel @Inject constructor(
     suspend fun getRegisterEmailCode(): String {
         registerCodeButtonEnabled.value = false
         val result = userRepository.getEmailCode(registerEmailText.value)
-        if (result.code == NetWork.SUCCESS) {
+        result.onSuccess {
             userInfoData.actionRegister()
-        } else if (result.code == NetWork.SERVER_ERROR || result.code == NetWork.ERROR) {
+        }
+        result.onFailure {
             registerCodeButtonEnabled.value = true
         }
-        return result.msg
+        return result.get { it.error.errorMsg ?:"" }
     }
 
     init {
@@ -100,7 +103,7 @@ class RegisterViewModel @Inject constructor(
         codeTimeJob?.cancel()
     }
 
-    suspend fun register(): NetData<String> {
+    suspend fun register(): ApiResult<String> {
         return userRepository.register(
             registerEmailText.value,
             registerNameText.value,

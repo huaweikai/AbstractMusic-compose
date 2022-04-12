@@ -1,7 +1,7 @@
 package com.hua.abstractmusic.utils
 
 import android.text.format.DateUtils
-import com.hua.abstractmusic.bean.LyricsEntry
+import com.hua.model.lyrics.LyricsDTO
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern
@@ -14,13 +14,13 @@ import java.util.regex.Pattern
 object LyricsUtils {
     private val dateFormat = SimpleDateFormat("mm:ss.SSS", Locale.CHINESE)
 
-    fun stringToLyrics(lyrics: String): Pair<Boolean, List<LyricsEntry>> {
+    fun stringToLyrics(lyrics: String): Pair<Boolean, List<LyricsDTO>> {
         if (lyrics.isEmpty()) {
             return Pair(false, emptyList())
         }
         val lyricsList = lyrics.split("\n")
 
-        val lyricsListAll = mutableListOf<LyricsEntry>()
+        val lyricsListAll = mutableListOf<LyricsDTO>()
 
         if (lyricsList.isNullOrEmpty()) {
             return Pair(false, emptyList())
@@ -37,13 +37,13 @@ object LyricsUtils {
                         val ss = matcher.group(3)?.toLong() ?: 0L
                         val time =
                             min * DateUtils.MINUTE_IN_MILLIS + mus * DateUtils.SECOND_IN_MILLIS + ss
-                        lyricsListAll.add(LyricsEntry(false,time, line.substring(end)))
+                        lyricsListAll.add(LyricsDTO(false,time, line.substring(end)))
                     }
                 }
             }
         } else {
             for (line in lyricsList) {
-                lyricsListAll.add(LyricsEntry(false,null, line))
+                lyricsListAll.add(LyricsDTO(false,null, line))
             }
         }
         return Pair(canScroll, lyricsListAll)

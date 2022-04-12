@@ -6,10 +6,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
-import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.utils.MusicItem
 import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
+import com.hua.model.music.MediaData
 
 
 /**

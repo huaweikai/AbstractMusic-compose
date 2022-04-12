@@ -7,11 +7,11 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
-import com.hua.abstractmusic.other.NetWork
 import com.hua.abstractmusic.ui.LocalUserViewModel
 import com.hua.abstractmusic.ui.home.mine.login.LoggedScreen
 import com.hua.abstractmusic.ui.home.mine.nologin.NoLoginScreen
 import com.hua.abstractmusic.ui.viewmodels.UserViewModel
+import com.hua.network.ApiResult
 
 
 /**
@@ -29,8 +29,8 @@ fun MineScreen(
     LaunchedEffect(Unit) {
         if(viewModel.userInfo.value.isLogin){
             val result =  viewModel.checkUser()
-            if (result.code == NetWork.SERVER_ERROR) {
-                Toast.makeText(context, result.msg, Toast.LENGTH_SHORT).show()
+            if (result is ApiResult.Failure) {
+                Toast.makeText(context, result.error.errorMsg, Toast.LENGTH_SHORT).show()
             }
         }
     }

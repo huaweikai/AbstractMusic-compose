@@ -33,7 +33,6 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.R
-import com.hua.abstractmusic.bean.MediaData
 import com.hua.abstractmusic.bean.ui.home.BottomBarBean
 import com.hua.abstractmusic.bean.ui.home.IconBean
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
@@ -41,6 +40,7 @@ import com.hua.abstractmusic.ui.play.detail.ControllerItem
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
+import com.hua.model.music.MediaData
 
 
 /**

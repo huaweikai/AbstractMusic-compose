@@ -1,7 +1,7 @@
 package com.hua.abstractmusic.ui.splash
 
 import androidx.lifecycle.ViewModel
-import com.hua.abstractmusic.services.MediaConnect
+import com.hua.service.MediaConnect
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

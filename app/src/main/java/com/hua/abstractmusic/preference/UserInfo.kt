@@ -1,8 +1,8 @@
 package com.hua.abstractmusic.preference
 
-import androidx.lifecycle.viewModelScope
-import com.hua.abstractmusic.bean.user.UserBean
 import com.hua.abstractmusic.db.user.UserDao
+import com.hua.model.user.UserPO
+import com.hua.service.preference.PreferenceManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -93,5 +93,5 @@ class UserInfoData @Inject constructor(
 data class UserInfo(
     val isLogin: Boolean,
     val userToken: String,
-    val userBean: UserBean?
+    val userBean: UserPO?
 )

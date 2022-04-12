@@ -4,10 +4,12 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hua.abstractmusic.bean.net.NetData
-import com.hua.abstractmusic.other.NetWork
 import com.hua.abstractmusic.preference.UserInfoData
 import com.hua.abstractmusic.repository.UserRepository
+import com.hua.network.ApiResult
+import com.hua.network.get
+import com.hua.network.onFailure
+import com.hua.network.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -83,26 +85,27 @@ class LoginViewModel @Inject constructor(
     suspend fun getLoginEmailCode(): String {
         loginEmailCodeEnable.value = false
         val result = userRepository.getEmailCodeWithLogin(loginEmailText.value)
-        if (result.code == NetWork.SUCCESS) {
+        result.onSuccess {
             userInfoData.actionRegister()
-        } else if (result.code == NetWork.SERVER_ERROR || result.code == NetWork.ERROR) {
+        }
+        result.onFailure {
             loginEmailCodeEnable.value = true
         }
-        return result.msg
+        return result.get { it.error.errorMsg ?:"" }
     }
 
-    suspend fun login(isPassWord: Boolean): NetData<String> {
+    suspend fun login(isPassWord: Boolean): ApiResult<String> {
         return if (isPassWord) loginWithEmail() else loginWithCode()
     }
 
-    private suspend fun loginWithEmail(): NetData<String> {
+    private suspend fun loginWithEmail(): ApiResult<String> {
         return  userRepository.loginWithEmail(
             loginEmailText.value,
             loginPasswordText.value
         )
     }
 
-    private suspend fun loginWithCode(): NetData<String> {
+    private suspend fun loginWithCode(): ApiResult<String> {
         return userRepository.loginWithCode(
             loginEmailText.value,
             loginEmailCodeText.value.toInt()

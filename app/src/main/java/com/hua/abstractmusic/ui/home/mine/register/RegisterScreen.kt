@@ -24,6 +24,8 @@ import com.hua.abstractmusic.utils.isCode
 import com.hua.abstractmusic.utils.isEmail
 import com.hua.abstractmusic.utils.isPassWord
 import com.hua.abstractmusic.utils.isUser
+import com.hua.network.get
+import com.hua.network.onSuccess
 import kotlinx.coroutines.launch
 
 /**
@@ -146,8 +148,8 @@ fun RegisterScreen(
                 onClick = {
                     scope.launch {
                         val data = viewModel.register()
-                        Toast.makeText(context, data.msg, Toast.LENGTH_SHORT).show()
-                        if (data.code == 200) {
+                        Toast.makeText(context, data.get{it.error.errorMsg}, Toast.LENGTH_SHORT).show()
+                        data.onSuccess {
                             navHostController.navigateUp()
                         }
                     }

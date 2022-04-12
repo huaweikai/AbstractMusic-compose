@@ -1,17 +1,18 @@
 package com.hua.abstractmusic.utils
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
-import com.hua.abstractmusic.bean.ParcelizeMediaItem
-import com.hua.abstractmusic.bean.net.NetAlbum
-import com.hua.abstractmusic.bean.net.NetArtist
-import com.hua.abstractmusic.bean.net.NetMusic
-import com.hua.abstractmusic.bean.net.NetSheet
+import com.hua.model.album.AlbumVO
+import com.hua.model.artist.ArtistVO
+import com.hua.model.music.MusicVO
+import com.hua.model.parcel.ParcelizeMediaItem
+import com.hua.model.sheet.SheetPO
+import com.hua.model.sheet.SheetVO
+import com.hua.model.other.Constants
 
 /**
  * @author : huaweikai
@@ -19,7 +20,7 @@ import com.hua.abstractmusic.bean.net.NetSheet
  * @Desc   : more
  */
 @SuppressLint("UnsafeOptInUsageError")
-fun NetAlbum.toMediaItem(parentId: Uri): MediaItem {
+fun AlbumVO.toMediaItem(parentId: Uri): MediaItem {
     return MediaItem.Builder()
         .setMediaMetadata(
             MediaMetadata.Builder()
@@ -39,7 +40,7 @@ fun NetAlbum.toMediaItem(parentId: Uri): MediaItem {
 }
 
 @SuppressLint("UnsafeOptInUsageError")
-fun NetArtist.toMediaItem(parentId: Uri): MediaItem {
+fun ArtistVO.toMediaItem(parentId: Uri): MediaItem {
     return MediaItem.Builder()
         .setMediaMetadata(
             MediaMetadata.Builder()
@@ -58,7 +59,7 @@ fun NetArtist.toMediaItem(parentId: Uri): MediaItem {
 }
 
 @SuppressLint("UnsafeOptInUsageError")
-fun NetMusic.toMediaItem(parentId: Uri): MediaItem {
+fun MusicVO.toMediaItem(parentId: Uri): MediaItem {
     return MediaItem.Builder()
         .setMediaMetadata(
             MediaMetadata.Builder()
@@ -86,7 +87,7 @@ fun NetMusic.toMediaItem(parentId: Uri): MediaItem {
 }
 
 @SuppressLint("UnsafeOptInUsageError")
-fun NetSheet.toMediaItem(parentId: Uri) =
+fun SheetVO.toMediaItem(parentId: Uri) =
     MediaItem.Builder()
         .setMediaMetadata(
             MediaMetadata.Builder()
@@ -128,11 +129,21 @@ fun ParcelizeMediaItem.toMediaItem() = MediaItem.Builder()
     )
     .setMediaId(mediaId)
     .build()
-/**
- * 根据手机的分辨率从 px(像素) 的单位 转成为 dp
- */
-fun Number.px2dip(context: Context, pxValue: Float): Int {
-    val scale: Float = context.resources.displayMetrics.density
-    return (pxValue / scale + 0.5f).toInt()
-}
+
+@SuppressLint("UnsafeOptInUsageError")
+fun SheetPO.toMediaItem() = MediaItem.Builder()
+    .setMediaMetadata(
+        MediaMetadata.Builder()
+            .setTitle(title)
+            .setSubtitle(desc)
+            .setArtworkUri(
+                if(artUri == null) null else Uri.parse(artUri)
+            )
+            .setArtist("本地")
+            .setIsPlayable(false)
+            .setFolderType(MediaMetadata.FOLDER_TYPE_MIXED)
+            .build()
+    )
+    .setMediaId(Uri.parse("${Constants.LOCAL_SHEET_ID}/$sheetId").toString())
+    .build()
 
