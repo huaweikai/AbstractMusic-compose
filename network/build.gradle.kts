@@ -50,6 +50,6 @@ dependencies {
     kapt(Google.hilt_compiler)
     implementation("androidx.annotation:annotation:1.3.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
-    api(project(":model"))
+    api(project(Module.model))
 //    implementation(project(":model"))
 }

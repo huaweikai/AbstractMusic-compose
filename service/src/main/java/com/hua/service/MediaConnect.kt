@@ -11,6 +11,7 @@ import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
+import com.hua.model.other.Constants
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
@@ -49,7 +50,7 @@ class MediaConnect(
         browserFuture.addListener({
             isConnected.value = true
             //初始化本地
-//            listOf(Constant.LOCAL_ALL_ID, Constant.LOCAL_ALBUM_ID, Constant.LOCAL_ARTIST_ID).forEach {
+//            listOf(Constants.LOCAL_ALL_ID, Constants.LOCAL_ALBUM_ID, Constants.LOCAL_ARTIST_ID).forEach {
 //                browser?.getChildren(it, Int.MAX_VALUE, Int.MAX_VALUE, null)
 //            }
         }, MoreExecutors.directExecutor())

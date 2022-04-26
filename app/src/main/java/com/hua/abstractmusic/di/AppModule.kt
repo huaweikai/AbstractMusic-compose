@@ -1,7 +1,9 @@
 package com.hua.abstractmusic.di
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import coil.ImageLoader
+import com.hua.abstractmusic.R
 import com.hua.abstractmusic.db.user.UserDao
 import com.hua.network.api.SearchApi
 import com.hua.network.api.UserService
@@ -29,8 +31,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import retrofit2.Retrofit
-import retrofit2.create
+import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -84,13 +85,6 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideComposeUtils(
-        imageLoader: ImageLoader,
-        @ApplicationContext context: Context
-    ) = ComposeUtils(imageLoader, context)
-
-    @Provides
-    @Singleton
     fun provideMediaTaglib() = TaglibLibrary()
 
 
@@ -113,11 +107,15 @@ object AppModule {
         searchApi: SearchApi,
         userInfoData: UserInfoData,
         itemTree: MediaItemTree,
-    ) = NetWorkRepository(service, searchApi, itemTree,userInfoData)
+    ) = NetWorkRepository(service, searchApi, itemTree, userInfoData)
 
-    @Provides
     @Singleton
-    fun provideUpLoadFile(
-        obsClient: ObsClient
-    ) = UpLoadFile(obsClient)
+    @Provides
+    @Named("ErrorBitmap")
+    fun providerErrorBitmap(
+        @ApplicationContext context: Context
+    ) = BitmapFactory.decodeResource(
+        context.resources,
+        R.drawable.music
+    )
 }

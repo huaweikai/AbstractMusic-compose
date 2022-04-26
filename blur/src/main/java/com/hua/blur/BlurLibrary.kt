@@ -30,6 +30,7 @@ class BlurLibrary {
     }
 }
 
+@Deprecated("模糊不可用")
 fun Bitmap.blur(radius: Int): Bitmap {
     val bitmapOut = copy(Bitmap.Config.ARGB_8888, true)
     val cores = Runtime.getRuntime().availableProcessors()

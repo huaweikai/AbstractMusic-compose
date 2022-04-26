@@ -1,8 +1,10 @@
 package com.hua.abstractmusic.other
 
 import android.annotation.SuppressLint
+import android.graphics.BitmapFactory
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import com.hua.abstractmusic.R
 
 
 /**

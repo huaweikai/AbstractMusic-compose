@@ -39,12 +39,6 @@ inline fun <T> ApiResult<T>.onFailure(action: (Error) -> Unit): ApiResult<T>{
     return this
 }
 
-/**
- * 将ApiResult转换为UiModel
- * 如果是[ApiResult.Success]则转换为[UiModel.Success]
- * 否则转换为[UiModel.Error]
- * 避免每次写模板代码
- */
 //fun <T> ApiResult<T>.transToUiModel(): UiModel<T>{
 //    return when(this){
 //        is ApiResult.Success ->{

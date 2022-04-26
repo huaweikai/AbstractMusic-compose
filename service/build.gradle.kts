@@ -35,9 +35,9 @@ android {
 }
 
 dependencies {
-    implementation(AndroidX.media3_common)
-    implementation(AndroidX.media3_exoplayer)
-    implementation(AndroidX.media3_session)
+    api(AndroidX.media3_common)
+    api(AndroidX.media3_exoplayer)
+    api(AndroidX.media3_session)
     implementation(AndroidX.media3_ui)
     implementation(AndroidX.media1)
 
@@ -51,7 +51,9 @@ dependencies {
     kapt(AndroidX.room_compiler)
     implementation(AndroidX.room_ktx)
     implementation(Other.hutool)
+    implementation(Other.tinyPinyin)
+    implementation(Other.tinyAndroid)
     implementation(AndroidX.core)
 
-    implementation(project(":model"))
+    implementation(project(Module.model))
 }

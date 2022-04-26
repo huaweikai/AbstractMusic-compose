@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.media3.common.MediaItem
 import androidx.navigation.NavHostController
 import com.hua.abstractmusic.ui.utils.WindowSize
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 import com.hua.abstractmusic.ui.viewmodels.ThemeViewModel
 import com.hua.abstractmusic.ui.viewmodels.UserViewModel
@@ -31,8 +32,8 @@ val LocalPlayingViewModel = staticCompositionLocalOf<PlayingViewModel>{
 val LocalThemeViewModel =
     staticCompositionLocalOf<ThemeViewModel> { error("Can't get theme view model") }
 
-val LocalAppSnackBar = staticCompositionLocalOf<SnackbarHostState> {
-    error("appSnackBar is error")
+val LocalHomeViewModel = staticCompositionLocalOf<HomeViewModel> {
+    error("LocalHomeViewModel is NULL")
 }
 
 val LocalAppNavController = staticCompositionLocalOf<NavHostController> {

@@ -21,7 +21,9 @@ import androidx.navigation.NavOptions
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.bean.ui.hello.PermissionBean
 import com.hua.abstractmusic.ui.LocalAppNavController
+import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.route.Screen
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 
 
 /**
@@ -31,7 +33,8 @@ import com.hua.abstractmusic.ui.route.Screen
  */
 @Composable
 fun HelloScreen(
-    appNavController: NavHostController = LocalAppNavController.current
+    appNavController: NavHostController = LocalAppNavController.current,
+    homeViewModel: HomeViewModel = LocalHomeViewModel.current
 ) {
     val permissionGet = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -45,6 +48,7 @@ fun HelloScreen(
             if (isGet) {
                 val navOptions =
                     NavOptions.Builder().setPopUpTo(Screen.HelloScreen.route, true).build()
+                homeViewModel.refresh(true)
                 appNavController.navigate(Screen.HomeScreen.route, navOptions)
             }
         }

@@ -23,6 +23,8 @@ object Google {
     const val hilt_compiler = "com.google.dagger:hilt-compiler:$hilt_version"
     const val hilt_viewModel = "androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03"
 
+    const val gson = "com.google.code.gson:gson:2.8.5"
+
 //        const val exoplayer_core = "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
 //        const val exoplayer_ui = "com.google.android.exoplayer:exoplayer-ui:${exoplayer_version}"
 //        const val exoplayer_media2 = "com.google.android.exoplayer:extension-media2:$exoplayer_version"
@@ -82,8 +84,6 @@ object Other {
     const val okhttp = "com.squareup.okhttp3:okhttp:5.0.0-alpha.6"
 
     const val huawei_obs = "com.huaweicloud:esdk-obs-android:3.21.12"
-    const val taglib = ":taglib"
-    const val blur = ":blur"
     const val uCrop = "com.github.yalantis:ucrop:2.2.8"
     const val status_bar_color = "cn.chitanda:dynamicstatusbar:2.5.1"
 
@@ -93,6 +93,14 @@ object Other {
     const val tinyAndroid = "com.github.promeg:tinypinyin-lexicons-android-cncity:2.0.3"
     const val hutool = "cn.hutool:hutool-extra:5.6.0"
 
+}
+
+object Module{
+    const val taglib = ":taglib"
+    const val blur = ":blur"
+    const val model = ":model"
+    const val network = ":network"
+    const val service = ":service"
 }
 
 object Test {

@@ -3,6 +3,7 @@ package com.hua.abstractmusic.ui.viewmodels
 import android.annotation.SuppressLint
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import com.hua.abstractmusic.base.viewmodel.BaseViewModel
@@ -10,6 +11,8 @@ import com.hua.model.music.MediaData
 import com.hua.service.MediaConnect
 import com.hua.model.other.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -45,7 +48,17 @@ class HomeViewModel @Inject constructor(
 
         playListMap[Constants.LOCAL_ALL_ID] = _localMusicList
         addListener(listener)
-        refresh(false)
+        viewModelScope.launch {
+            mediaConnect.isConnected.collectLatest {
+                if(it) {
+                    addListener(listener)
+                    refresh(true)
+                }else{
+                    removeListener()
+                }
+            }
+        }
+
     }
 
     fun refresh(isAction: Boolean) {

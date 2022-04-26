@@ -8,13 +8,16 @@ import com.obs.services.model.PutObjectRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import java.io.InputStream
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * @author : huaweikai
  * @Date   : 2022/03/24
  * @Desc   :
  */
-class UpLoadFile(
+@Singleton
+class UpLoadFile @Inject constructor(
     private val obsClient: ObsClient
 ){
 

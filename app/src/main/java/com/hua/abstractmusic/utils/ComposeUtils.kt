@@ -2,22 +2,30 @@ package com.hua.abstractmusic.utils
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import androidx.core.graphics.drawable.toBitmap
 import coil.ImageLoader
 import coil.request.ImageRequest
 import com.hua.abstractmusic.R
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Singleton
 
 /**
  * @author : huaweikai
  * @Date   : 2022/02/17
  * @Desc   :
  */
-class ComposeUtils(
+@Singleton
+class ComposeUtils @Inject constructor(
     private val imageLoader: ImageLoader,
-    private val context: Context
+    @ApplicationContext private val context: Context
 ) {
+    @Inject
+    @Named("ErrorBitmap")
+    lateinit var errorBitmap: Bitmap
+
     suspend fun coilToBitmap(
         uri: Any?
     ): Bitmap {
@@ -30,10 +38,7 @@ class ComposeUtils(
         return try {
             (result.drawable as BitmapDrawable).bitmap
         } catch (e: Exception) {
-            BitmapFactory.decodeResource(
-                context.resources,
-                R.drawable.music
-            )
+            errorBitmap
         }
     }
 

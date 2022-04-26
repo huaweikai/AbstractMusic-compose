@@ -10,13 +10,18 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -48,9 +53,21 @@ fun HomeScreen(
     onSizeChange: (Dp) -> Unit
 ) {
     val appNavHostController = LocalAppNavController.current
+    val lifecycle = LocalLifecycleOwner.current
+    val height = remember{
+        mutableStateOf(0.dp)
+    }
     DisposableEffect(Unit) {
+        val observer = LifecycleEventObserver{_,event->
+            if(event == Lifecycle.Event.ON_STOP){
+                onSizeChange(0.dp)
+            }else if(event == Lifecycle.Event.ON_START){
+                onSizeChange(height.value)
+            }
+        }
+        lifecycle.lifecycle.addObserver(observer)
         this.onDispose {
-            onSizeChange(0.dp)
+           lifecycle.lifecycle.removeObserver(observer)
         }
     }
     val density = LocalDensity.current
@@ -64,6 +81,7 @@ fun HomeScreen(
                 modifier = Modifier.onSizeChanged {
                     with(density) {
                         onSizeChange(it.height.toDp())
+                        height.value = it.height.toDp()
                     }
                 },
                 homeNavController

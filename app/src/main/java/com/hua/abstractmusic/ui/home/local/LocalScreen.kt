@@ -7,6 +7,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,6 +19,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.hua.abstractmusic.ui.LocalAppNavController
+import com.hua.abstractmusic.ui.LocalHomeViewModel
 import com.hua.abstractmusic.ui.home.local.album.LocalAlbum
 import com.hua.abstractmusic.ui.home.local.artist.LocalArtist
 import com.hua.abstractmusic.ui.home.local.music.LocalMusic
@@ -39,7 +42,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun LocalScreen(
     homeNavController: NavHostController = LocalAppNavController.current,
-    localViewModel: HomeViewModel = hiltViewModel()
+    localViewModel: HomeViewModel = LocalHomeViewModel.current
 ) {
     val pagerState = rememberPagerState()
     val tabTitles = listOf("音乐", "专辑", "歌手")
@@ -54,9 +57,11 @@ fun LocalScreen(
                         Icon(
                             imageVector = Icons.Default.Refresh,
                             contentDescription = "",
-                            modifier = Modifier.padding(end = 16.dp).clickable {
-                                localViewModel.refresh(true)
-                            })
+                            modifier = Modifier
+                                .padding(end = 16.dp)
+                                .clickable {
+                                    localViewModel.refresh(true)
+                                })
                     }
                 )
         },
@@ -95,15 +100,17 @@ fun LocalScreen(
             ) { page ->
                 when (page) {
                     0 -> {
-                        LocalMusic(localViewModel)
+                        LocalMusic(modifier = Modifier.fillMaxSize(),localViewModel)
                     }
                     1 -> {
+//                        LocalMusic(modifier = Modifier.fillMaxSize(),localViewModel)
                         LocalAlbum(localViewModel){ mediaItem ->
 //                            homeNavController.navigate("${Screen.NetSearchScreen.route}")
                             homeNavController.navigate("${Screen.AlbumDetailScreen.route}?mediaItem=${mediaItem.toNavType()}")
                         }
                     }
                     2 -> {
+//                        LocalMusic(modifier = Modifier.fillMaxSize(),localViewModel)
                         LocalArtist (localViewModel){ mediaItem ->
 //                            homeNavController.navigate("${Screen.NetSearchScreen.route}")
                             homeNavController.navigate("${Screen.ArtistDetailScreen.route}?mediaItem=${mediaItem.toNavType()}")

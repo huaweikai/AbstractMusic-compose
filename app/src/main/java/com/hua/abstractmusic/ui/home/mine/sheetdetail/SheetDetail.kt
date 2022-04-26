@@ -46,12 +46,9 @@ import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.*
 import com.hua.abstractmusic.utils.getCacheDir
 import com.hua.abstractmusic.utils.isLocal
-import com.hua.abstractmusic.utils.toMediaItem
 import com.hua.model.parcel.ParcelizeMediaItem
 import com.hua.model.parcel.toNavType
 import com.hua.network.onFailure
-import com.hua.network.onSuccess
-import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.launch
 
 
@@ -207,6 +204,7 @@ fun SheetChangeScreen(
     sheetNavHostController: NavHostController,
     sheetDetailViewModel: SheetDetailViewModel
 ) {
+    LifecycleFocusClearUtils()
     val context = LocalContext.current
     val cropPicture = rememberLauncherForActivityResult(UCropActivityResultContract()) {
         if (it != null) {

@@ -359,17 +359,18 @@ fun MusicController(
             isVis.value = false
         }
     }
-    AnimatedVisibility(
-        visible = isVis.value,
+//    AnimatedVisibility(
+//        visible = isVis.value,
+//        modifier = modifier,
+//        enter = slideInHorizontally { fullWidth -> -fullWidth },
+//        exit = slideOutHorizontally { fullWidth -> fullWidth }
+//    ) {
+    Surface(
         modifier = modifier,
-        enter = slideInHorizontally { fullWidth -> -fullWidth },
-        exit = slideOutHorizontally { fullWidth -> fullWidth }
+        shape = RoundedCornerShape(8.dp),
+        tonalElevation = 3.dp,
     ) {
-        Surface(
-            modifier = Modifier,
-            shape = RoundedCornerShape(8.dp),
-            tonalElevation = 3.dp,
-        ) {
+        if (isVis.value) {
             Controller(
                 playListClick = {
                     controller.navigate(Screen.PlayListScreen.route)
@@ -379,4 +380,5 @@ fun MusicController(
                 })
         }
     }
+//    }
 }

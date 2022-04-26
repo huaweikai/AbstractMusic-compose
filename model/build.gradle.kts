@@ -47,6 +47,6 @@ dependencies {
     kapt(AndroidX.room_compiler)
     implementation(AndroidX.media3_common)
     implementation(Compose.compose_navigation)
-    implementation("com.google.code.gson:gson:2.8.5")
+    implementation(Google.gson)
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
 }

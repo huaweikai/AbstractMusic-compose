@@ -20,6 +20,7 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hua.abstractmusic.ui.navigation.AppNavigation
 import com.hua.abstractmusic.ui.theme.AbstractMusicTheme
 import com.hua.abstractmusic.ui.utils.rememberWindowSizeClass
+import com.hua.abstractmusic.ui.viewmodels.HomeViewModel
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 import com.hua.abstractmusic.ui.viewmodels.ThemeViewModel
 import com.hua.abstractmusic.ui.viewmodels.UserViewModel
@@ -33,6 +34,7 @@ class MainActivity : MonetActivity() {
     private val playingViewModel by viewModels<PlayingViewModel>()
     private val themeViewModel by viewModels<ThemeViewModel>()
     private val userViewModel by viewModels<UserViewModel>()
+    private val homeViewModel by viewModels<HomeViewModel>()
 
     @Inject
     lateinit var composeUtils: ComposeUtils
@@ -47,8 +49,8 @@ class MainActivity : MonetActivity() {
         //不会在系统视图下面绘制
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
-//        lifecycleScope.launchWhenCreated {
-//            monet.awaitMonetReady()
+        lifecycleScope.launchWhenCreated {
+            monet.awaitMonetReady()
             setContent {
                 rememberSystemUiController().setStatusBarColor(
                     Color.Transparent,
@@ -59,6 +61,7 @@ class MainActivity : MonetActivity() {
                     LocalPlayingViewModel provides playingViewModel,
                     LocalThemeViewModel provides themeViewModel,
                     LocalScreenSize provides windowSize,
+                    LocalHomeViewModel provides homeViewModel,
                     LocalComposeUtils provides composeUtils,
                     LocalUserViewModel provides userViewModel,
                 ) {
@@ -69,7 +72,7 @@ class MainActivity : MonetActivity() {
                         AppNavigation()
                     }
                 }
-//            }
+            }
         }
     }
 }

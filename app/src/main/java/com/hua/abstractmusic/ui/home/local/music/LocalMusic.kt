@@ -19,30 +19,21 @@ import com.hua.model.music.MediaData
  */
 @Composable
 fun LocalMusic(
-    viewModel: HomeViewModel
-) {
-    MusicLazyItems(list = viewModel.localMusicList.value) {
-        viewModel.setPlayList(it, viewModel.localMusicList.value.map { it.mediaItem })
-    }
-}
-
-@Composable
-fun MusicLazyItems(
-    list: List<MediaData>,
+    modifier: Modifier,
+    viewModel: HomeViewModel,
     bottomControllerHeight: Dp = LocalBottomControllerHeight.current,
-    onclick: (Int) -> Unit,
 ) {
     LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         contentPadding = PaddingValues(bottom = bottomControllerHeight)
     ) {
         items(
-            count = list.size,
+            count = viewModel.localMusicList.value.size,
             itemContent = { index->
                 MusicItem(
-                    data = list[index],
+                    data = viewModel.localMusicList.value[index],
                     onClick = {
-                        onclick(index)
+                        viewModel.setPlayList(index, viewModel.localMusicList.value.map { it.mediaItem })
                     }
                 )
             }

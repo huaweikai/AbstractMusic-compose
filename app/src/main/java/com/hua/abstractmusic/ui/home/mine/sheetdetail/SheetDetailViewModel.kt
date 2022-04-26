@@ -358,7 +358,7 @@ private fun MediaItem.toSheetVO() = SheetVO(
     userId = this.mediaMetadata.extras?.getInt("userId") ?: -1,
     title = this.mediaMetadata.title.toString(),
     artUri = this.mediaMetadata.artworkUri.toString(),
-    sheetDesc = "${this.mediaMetadata.subtitle}",
+    sheetDesc = "${this.mediaMetadata.subtitle?:""}",
     num = 0,
     author = this.mediaMetadata.artist.toString()
 )

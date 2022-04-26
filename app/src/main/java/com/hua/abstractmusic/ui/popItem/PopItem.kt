@@ -25,6 +25,7 @@ import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalPopWindow
 import com.hua.abstractmusic.ui.LocalPopWindowItem
 import com.hua.abstractmusic.ui.popItem.PopItemViewModel
+import com.hua.abstractmusic.ui.popItem.SnackData
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.utils.isLocal
 import com.hua.model.parcel.toNavType
@@ -55,14 +56,11 @@ fun PopupWindow(
     val scope = rememberCoroutineScope()
     viewModel.selectAlbumByMusicId(item)
 
-    val snackTitle = viewModel.snackEvent.collectAsState(initial = "").value
+    val snackData = viewModel.snackEvent.collectAsState(initial = SnackData(message = ""))
 
-    LaunchedEffect(snackTitle){
-        if(snackTitle.isNotBlank()){
-            snackBarHostState.showSnackbar(snackTitle)
-            state.value = false
-            artistPop.value = false
-            sheetPop.value = false
+    LaunchedEffect(snackData.value) {
+        if (snackData.value.message.isNotBlank()) {
+            snackBarHostState.showSnackbar(snackData.value.message)
         }
     }
 
@@ -93,9 +91,11 @@ fun PopupWindow(
     }, popItems = listOf(
         PopItems("添加到播放队列") {
             viewModel.addQueue(item)
+            state.value = false
         },
         PopItems("添加到下一曲播放") {
             viewModel.addQueue(item, true)
+            state.value = false
         },
         PopItems("添加到歌单") {
             scope.launch {
@@ -119,12 +119,10 @@ fun PopupWindow(
         Spacer(modifier = Modifier.height(16.dp))
     }, popItems = viewModel.sheetList.value.map {
         PopItems("${it.mediaMetadata.title}") {
-            scope.launch {
-                viewModel.insertMusicToSheet(
-                    mediaItem = item,
-                    sheetItem = it
-                )
-            }
+            viewModel.insertMusicToSheet(
+                mediaItem = item,
+                sheetItem = it
+            )
             sheetPop.value = false
         }
     })
@@ -168,7 +166,10 @@ fun PopItemLayout(
                     .background(MaterialTheme.colorScheme.background, RoundedCornerShape(12.dp))
             ) {
                 title()
-                Divider(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),thickness = 0.5.dp)
+                Divider(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                    thickness = 0.5.dp
+                )
                 LazyColumn(Modifier.fillMaxWidth()) {
                     items(popItems) {
                         PopItem(desc = it.title) {

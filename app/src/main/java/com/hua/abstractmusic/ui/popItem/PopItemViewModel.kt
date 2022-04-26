@@ -40,7 +40,7 @@ class PopItemViewModel @Inject constructor(
 
     val sheetList = mutableStateOf(emptyList<MediaItem>())
 
-    val snackEvent = MutableSharedFlow<String>()
+    val snackEvent = MutableSharedFlow<SnackData>()
 
     suspend fun refresh(isLocal: Boolean) {
         if (isLocal) {
@@ -93,21 +93,23 @@ class PopItemViewModel @Inject constructor(
         return index
     }
 
-    suspend fun insertMusicToSheet(
+    fun insertMusicToSheet(
         mediaItem: MediaItem,
         sheetItem: MediaItem
     ) {
-        val sheetId = Uri.parse(sheetItem.mediaId).lastPathSegment
-        val result = if (sheetItem.mediaId.isLocal()) {
-            repository.insertMusicToSheet(sheetId!!,mediaItem)
-        } else {
-            netRepository.insertMusicToSheet(sheetId!!,mediaItem)
-        }
-        result.onSuccess {
-            showSnackBar("加入歌单成功")
-        }
-        result.onFailure {
-            showSnackBar((result as ApiResult.Failure).error.errorMsg ?:"")
+        viewModelScope.launch {
+            val sheetId = Uri.parse(sheetItem.mediaId).lastPathSegment
+            val result = if (sheetItem.mediaId.isLocal()) {
+                repository.insertMusicToSheet(sheetId!!, mediaItem)
+            } else {
+                netRepository.insertMusicToSheet(sheetId!!, mediaItem)
+            }
+            result.onSuccess {
+                showSnackBar("加入歌单成功")
+            }
+            result.onFailure {
+                showSnackBar((result as ApiResult.Failure).error.errorMsg ?: "")
+            }
         }
     }
 
@@ -118,7 +120,7 @@ class PopItemViewModel @Inject constructor(
         viewModelScope.launch {
             val result = if (item.mediaId.isLocal()) {
                 repository.selectAlbumByMusicId(item)
-            }else{
+            } else {
                 netRepository.selectAlbumByMusicId(item)
             }
             moreAlbum.value = result.get { NULL_MEDIA_ITEM }
@@ -134,10 +136,17 @@ class PopItemViewModel @Inject constructor(
         moreAlbum.value = Constant.NULL_MEDIA_ITEM
     }
 
-    private fun showSnackBar(message: String){
+    private fun showSnackBar(message: String) {
         viewModelScope.launch {
-            snackEvent.emit(message)
+            snackEvent.emit(
+                SnackData(message = message)
+            )
         }
     }
 
 }
+
+data class SnackData(
+    val time: Long = System.currentTimeMillis(),
+    val message: String
+)

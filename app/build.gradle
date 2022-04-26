@@ -4,10 +4,20 @@ plugins {
     id "kotlinx-serialization"
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
+//    id 'com.google.devtools.ksp' version '1.6.10-1.0.4'
 }
 
 android {
     compileSdk Version.compileSdkVersion
+
+    splits{
+        abi{
+            enable true
+            reset()
+            include 'x86_64','arm64-v8a'
+            universalApk true
+        }
+    }
 
     defaultConfig {
         applicationId "com.hua.abstractmusic"
@@ -68,13 +78,6 @@ dependencies {
     implementation AndroidX.activity
     implementation AndroidX.activity_ktx
 
-    implementation AndroidX.media3_session
-    implementation AndroidX.media3_exoplayer
-    implementation AndroidX.media3_ui
-    implementation AndroidX.media3_common
-    implementation AndroidX.media_okhttp_datasource
-    implementation AndroidX.media1
-
     implementation AndroidX.room_runtime
     kapt AndroidX.room_compiler
     implementation AndroidX.room_ktx
@@ -90,6 +93,7 @@ dependencies {
     implementation Google.hilt_android
     kapt Google.hilt_compiler
     implementation Google.hilt_viewModel
+    implementation Google.gson
 
 
     implementation Compose.compose_ui
@@ -121,23 +125,20 @@ dependencies {
 
     implementation Other.coil
 
-    implementation Other.retrofit2
-    implementation Other.retrofit2_gson
-
     implementation Other.uCrop
     implementation Other.monet
-    implementation Other.tinyPinyin
-    implementation Other.tinyAndroid
-    implementation Other.hutool
 
     implementation Other.huawei_obs
-    implementation project(Other.taglib)
-    implementation project(Other.blur)
+    implementation project(":taglib")
+    implementation project(":blur")
     implementation project(":network")
     implementation project(":service")
-//    implementation project(":model")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.8.1'
+
+//    implementation 'io.github.raamcosta.compose-destinations:core:1.4.4-beta'
+//    ksp 'io.github.raamcosta.compose-destinations:ksp:1.4.4-beta'
+//    implementation 'io.github.raamcosta.compose-destinations:animations-core:1.4.4-beta'
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

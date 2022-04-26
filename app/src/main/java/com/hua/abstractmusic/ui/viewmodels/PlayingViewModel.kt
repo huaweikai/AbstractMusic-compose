@@ -8,7 +8,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import androidx.media3.common.Player.REPEAT_MODE_OFF
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.base.viewmodel.BaseViewModel
 import com.hua.abstractmusic.other.Constant
@@ -48,8 +47,6 @@ class PlayingViewModel @Inject constructor(
     private val preferenceManager: PreferenceManager,
     private val composeUtils: ComposeUtils
 ) : BaseViewModel(mediaConnect) {
-    //mediaConnect连接
-    val isConnect get() = mediaConnect.isConnected
 
     //当前播放的item
     private val _currentPlayItem = mutableStateOf(Constant.NULL_MEDIA_ITEM)
@@ -59,29 +56,28 @@ class PlayingViewModel @Inject constructor(
     private val _lyricsList = mutableStateOf<List<LyricsDTO>>(emptyList())
     val lyricList: State<List<LyricsDTO>> get() = _lyricsList
 
-
     val lyricsCanScroll = mutableStateOf(false)
 
     val currentPlayIndex = mutableStateOf(0)
     val currentPlayTotal = mutableStateOf(0)
 
-    //    val lyricsState = LazyListState(firstVisibleItemScrollOffset = -500)
     private val _lyricsLoadState = MutableStateFlow<LCE>(LCE.Loading)
     val lyricsLoadState: StateFlow<LCE> get() = _lyricsLoadState.asStateFlow()
 
     val shuffleUI = mutableStateOf(false)
 
-    val repeatModeUI = mutableStateOf<Int>(REPEAT_MODE_OFF)
+    val repeatModeUI = mutableStateOf<Int>(Player.REPEAT_MODE_OFF)
 
     private val _currentPlayList = mutableStateOf<List<MediaData>>(emptyList())
     val currentPlayList: State<List<MediaData>> get() = _currentPlayList
 
-    //    val actionSeekBar = mutableStateOf(false)
     private val _playerState = MutableStateFlow(false)
     val playerState = _playerState.asStateFlow()
     val maxValue = mutableStateOf(0F)
 
     val currentPosition = mutableStateOf(0F)
+
+    private var screenIsDark = false
 
     init {
         viewModelScope.launch {
@@ -351,14 +347,12 @@ class PlayingViewModel @Inject constructor(
 
     val itemColor = MutableStateFlow(Pair(Color.Black, Color.Black))
 
-    val dark = MutableStateFlow(false)
-
     fun putTransDark(isDark: Boolean) {
-        dark.value = isDark
-        transformColor(mediaConnect.browser?.currentMediaItem)
+        screenIsDark = isDark
+        transformColor(mediaConnect.browser?.currentMediaItem,isDark)
     }
 
-    fun transformColor(item: MediaItem?, isDark: Boolean = dark.value) {
+    private fun transformColor(item: MediaItem?, isDark: Boolean = screenIsDark) {
         item ?: return
         viewModelScope.launch(Dispatchers.IO) {
             val result = PaletteUtils.resolveBitmap(
