@@ -39,40 +39,25 @@ import com.hua.abstractmusic.ui.route.Screen
  */
 val pages = listOf(MainPageItem.Net, MainPageItem.Local, MainPageItem.Mine)
 
+/**
+ * @param onSizeChange 当底部导航尺寸发生变化，进行回调
+ */
 @OptIn(
     ExperimentalMaterial3Api::class,
     com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi::class
 )
 @SuppressLint("UnsafeOptInUsageError")
-@ExperimentalFoundationApi
-@ExperimentalPagerApi
-@ExperimentalMaterialApi
 @Composable
 fun HomeScreen(
-//    onBack: () -> Unit,
     onSizeChange: (Dp) -> Unit
 ) {
-    val appNavHostController = LocalAppNavController.current
-    val lifecycle = LocalLifecycleOwner.current
-    val height = remember{
-        mutableStateOf(0.dp)
-    }
     DisposableEffect(Unit) {
-        val observer = LifecycleEventObserver{_,event->
-            if(event == Lifecycle.Event.ON_STOP){
-                onSizeChange(0.dp)
-            }else if(event == Lifecycle.Event.ON_START){
-                onSizeChange(height.value)
-            }
-        }
-        lifecycle.lifecycle.addObserver(observer)
         this.onDispose {
-           lifecycle.lifecycle.removeObserver(observer)
+            onSizeChange(0.dp)
         }
     }
     val density = LocalDensity.current
 
-    val backState = appNavHostController.currentBackStackEntryAsState().value
     val homeNavController: NavHostController = rememberNavController()
 
     Scaffold(
@@ -81,7 +66,6 @@ fun HomeScreen(
                 modifier = Modifier.onSizeChanged {
                     with(density) {
                         onSizeChange(it.height.toDp())
-                        height.value = it.height.toDp()
                     }
                 },
                 homeNavController
@@ -108,23 +92,27 @@ fun HomeBottomBar(
         modifier = modifier
     ) {
         pages.forEach { item ->
-            NavigationBarItem(selected =
-            item.route == back.value?.destination?.route, onClick = {
-                navController.navigate(item.route) {
-                    popUpTo(navController.graph.findStartDestination().id) {
-                        saveState = true
+            NavigationBarItem(
+                selected = item.route == back.value?.destination?.route,
+                onClick = {
+                    navController.navigate(item.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
                     }
-                    launchSingleTop = true
-                    restoreState = true
-                }
-            }, icon = {
-                Icon(
-                    painter = painterResource(id = item.icon),
-                    contentDescription = null
-                )
-            }, label = {
-                Text(text = stringResource(id = item.label))
-            }, alwaysShowLabel = false
+                },
+                icon = {
+                    Icon(
+                        painter = painterResource(id = item.icon),
+                        contentDescription = null
+                    )
+                },
+                label = {
+                    Text(text = stringResource(id = item.label))
+                },
+                alwaysShowLabel = false
             )
         }
     }

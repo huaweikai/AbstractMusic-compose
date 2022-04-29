@@ -59,6 +59,8 @@ object Constants {
     val sheetId = Uri.parse(NET_SHEET_ID)
     val albumId = Uri.parse(NETWORK_ALBUM_ID)
 
+    const val PARCEL_ITEM_ID = "mediaItem"
+
     val homeList = listOf(
         NETWORK_BANNER_ID, NETWORK_MUSIC_ID, NET_SHEET_ID, NETWORK_ALBUM_ID
     )

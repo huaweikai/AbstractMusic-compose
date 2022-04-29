@@ -4,14 +4,18 @@ import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import com.hua.abstractmusic.base.viewmodel.BaseViewModel
 import com.hua.abstractmusic.repository.NetWorkRepository
 import com.hua.abstractmusic.ui.utils.LCE
+import com.hua.abstractmusic.utils.isLocal
 import com.hua.model.music.MediaData
 import com.hua.model.other.Constants
+import com.hua.model.other.Constants.PARCEL_ITEM_ID
+import com.hua.model.parcel.ParcelizeMediaItem
 import com.hua.network.ApiResult
 import com.hua.network.get
 import com.hua.network.onFailure
@@ -30,9 +34,11 @@ import javax.inject.Inject
 @HiltViewModel
 class ArtistDetailViewModel @Inject constructor(
     mediaConnect: MediaConnect,
-    private val netRepository: NetWorkRepository
+    private val netRepository: NetWorkRepository,
+    savedStateHandle: SavedStateHandle?
 ) : BaseViewModel(mediaConnect) {
     private var artistAlbumId: String? = null
+    var item:ParcelizeMediaItem ?= null
     var isLocal: Boolean = true
     var artistId: String? = null
         set(value) {
@@ -44,14 +50,25 @@ class ArtistDetailViewModel @Inject constructor(
                 "${Constants.NETWORK_ARTIST_ID}/${Constants.ARTIST_TO_ALBUM}/$id"
             }
         }
-
     private val listener = object : Player.Listener{
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             updateItem(mediaItem)
         }
     }
+    private val _artistDetail = mutableStateOf<List<MediaData>>(emptyList())
+    val artistDetail: State<List<MediaData>> get() = _artistDetail
 
+    private val _artistAlbumDetail = mutableStateOf<List<MediaData>>(emptyList())
+    val artistAlbumDetail: State<List<MediaData>> get() = _artistAlbumDetail
     init {
+        savedStateHandle?.let { saveState ->
+            item = saveState.get<ParcelizeMediaItem>(PARCEL_ITEM_ID)
+            item?.let {
+                isLocal = it.mediaId.isLocal()
+                artistId = it.mediaId
+                loadData()
+            }
+        }
         addListener(listener)
     }
 
@@ -88,10 +105,4 @@ class ArtistDetailViewModel @Inject constructor(
             netRefresh()
         }
     }
-
-    private val _artistDetail = mutableStateOf<List<MediaData>>(emptyList())
-    val artistDetail: State<List<MediaData>> get() = _artistDetail
-
-    private val _artistAlbumDetail = mutableStateOf<List<MediaData>>(emptyList())
-    val artistAlbumDetail: State<List<MediaData>> get() = _artistAlbumDetail
 }

@@ -85,16 +85,18 @@ fun PlayListScreen(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             val text = buildAnnotatedString {
-                withStyle(SpanStyle(fontSize = 22.sp)){
+                withStyle(SpanStyle(fontSize = 22.sp)) {
                     append("播放列表")
                 }
-                withStyle(SpanStyle(fontSize = 16.sp)){
-                    append(" (${viewModel.currentPlayIndex.value}/${viewModel.currentPlayTotal.value})")
+                withStyle(SpanStyle(fontSize = 16.sp)) {
+                    if (viewModel.currentPlayTotal.value == 0) {
+                        append("-")
+                    } else {
+                        append(" (${viewModel.currentPlayIndex.value}/${viewModel.currentPlayTotal.value})")
+                    }
                 }
             }
-            Text(
-                text = text
-            )
+            Text(text = text)
             Image(
                 painter = painterResource(id = R.drawable.ic_delete_all),
                 contentDescription = "清空",
@@ -113,11 +115,14 @@ fun PlayListScreen(
                 contentPadding = PaddingValues()
             ) {
                 itemsIndexed(viewModel.currentPlayList.value) { index: Int, item: MediaData ->
-                    ListItem(item = item, onClick = {
-                        viewModel.skipTo(index, true)
-                    }, onRemove = {
-                        viewModel.removePlayItem(index)
-                    })
+                    ListItem(
+                        item = item,
+                        onClick = {
+                            viewModel.skipTo(index, true)
+                        }, onRemove = {
+                            viewModel.removePlayItem(index)
+                        }
+                    )
                 }
             }
         } else {
@@ -129,7 +134,6 @@ fun PlayListScreen(
                 Text(text = "当前并无播放音乐")
             }
         }
-
     }
 }
 

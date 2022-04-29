@@ -49,21 +49,11 @@ import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 @ExperimentalPagerApi
 @Composable
 fun LocalArtistDetail(
-    item: ParcelizeMediaItem,
     homeNavController: NavHostController = LocalAppNavController.current,
     viewModel: ArtistDetailViewModel = hiltViewModel()
 ) {
+    val item = viewModel.item ?:return
     val state = rememberCollapsingToolbarScaffoldState()
-    LaunchedEffect(Unit) {
-        viewModel.isLocal = item.mediaId.isLocal()
-        viewModel.artistId = item.mediaId
-        viewModel.loadData()
-    }
-    DisposableEffect(Unit) {
-        this.onDispose {
-            viewModel.removeListener()
-        }
-    }
     Surface {
         CollapsingToolbarScaffold(
             modifier = Modifier.fillMaxSize(),
@@ -108,7 +98,7 @@ fun LocalArtistDetail(
                     }
                 }
                 Text(
-                    text = "${item.title}",
+                    text = item.title,
                     color = Color.White,
                     modifier = Modifier
                         .padding(

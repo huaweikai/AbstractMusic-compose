@@ -2,15 +2,19 @@ package com.hua.abstractmusic.ui.home.detail.albumdetail
 
 import android.annotation.SuppressLint
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import com.hua.abstractmusic.base.viewmodel.BaseViewModel
 import com.hua.abstractmusic.repository.NetWorkRepository
 import com.hua.abstractmusic.ui.utils.LCE
+import com.hua.abstractmusic.utils.isLocal
 import com.hua.model.music.MediaData
+import com.hua.model.parcel.ParcelizeMediaItem
 import com.hua.network.ApiResult
 import com.hua.service.MediaConnect
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,9 +30,10 @@ import javax.inject.Inject
 @HiltViewModel
 class AlbumDetailViewModel @Inject constructor(
     mediaConnect: MediaConnect,
-    private val netRepository: NetWorkRepository
+    private val netRepository: NetWorkRepository,
+    savedStateHandle: SavedStateHandle?
 ) : BaseViewModel(mediaConnect) {
-    var item: MediaItem? = null
+    var item: ParcelizeMediaItem? = null
     var id: String? = null
     var isLocal: Boolean = true
 
@@ -42,6 +47,12 @@ class AlbumDetailViewModel @Inject constructor(
     }
 
     init {
+        savedStateHandle?.let {
+            item = it.get("mediaItem")
+            id = item?.mediaId
+            isLocal = item?.mediaId?.isLocal() == true
+            loadData()
+        }
         addListener(listener)
     }
 

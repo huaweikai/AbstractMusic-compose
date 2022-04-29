@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.compose.runtime.mutableStateOf
 import androidx.documentfile.provider.DocumentFile
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -18,6 +19,7 @@ import com.hua.abstractmusic.utils.isLocal
 import com.hua.abstractmusic.utils.toDate
 import com.hua.model.music.MediaData
 import com.hua.model.other.Constants
+import com.hua.model.other.Constants.PARCEL_ITEM_ID
 import com.hua.model.parcel.ParcelizeMediaItem
 import com.hua.model.sheet.SheetVO
 import com.hua.network.ApiResult
@@ -47,7 +49,12 @@ class SheetDetailViewModel @Inject constructor(
     private val netRepository: NetWorkRepository,
     private val repository: LocalRepository,
     private val userInfoData: UserInfoData,
+    savedStateHandle: SavedStateHandle?
 ) : BaseViewModel(mediaConnect) {
+
+    val sheetDetail = MutableStateFlow(SheetVO(0, 0, "", num = 0, author = ""))
+    val sheetDetailList = mutableStateOf<List<MediaData>>(emptyList())
+    val sheetChangeList = mutableStateOf<List<MediaData>>(emptyList())
 
     var isLocal: Boolean = true
 
@@ -65,12 +72,13 @@ class SheetDetailViewModel @Inject constructor(
                 author = field?.artist ?: ""
             )
         }
-
-    val sheetDetailList = mutableStateOf<List<MediaData>>(emptyList())
-    val sheetChangeList = mutableStateOf<List<MediaData>>(emptyList())
-    var mediaData: MediaData? = null
-
-    val sheetDetail = MutableStateFlow(SheetVO(0, 0, "", num = 0, author = ""))
+    init {
+        savedStateHandle?.let {
+            parcelItem = it.get(PARCEL_ITEM_ID)
+            loadData()
+            addListener(listener)
+        }
+    }
 
     private val listener = object : Player.Listener {
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
@@ -102,10 +110,6 @@ class SheetDetailViewModel @Inject constructor(
                 sheetDetail.value = it.toSheetVO()
             }
         }
-    }
-
-    init {
-        addListener(listener)
     }
 
     private fun refreshSheetLocalList() {

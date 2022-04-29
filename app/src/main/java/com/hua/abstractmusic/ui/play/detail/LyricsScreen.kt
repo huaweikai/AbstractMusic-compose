@@ -8,11 +8,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material.Card
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -201,11 +198,16 @@ private fun LyricsError(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "没有歌词")
-        Button(onClick = {
+        Button(
+            onClick = {
             scope.launch {
                 viewModel.getLyrics(viewModel.currentPlayItem.value)
             }
-        }) {
+        },
+            colors = ButtonDefaults.buttonColors(
+                contentColor = LocalContentColor.current
+            )
+        ) {
             Text(text = "点击重试")
         }
     }

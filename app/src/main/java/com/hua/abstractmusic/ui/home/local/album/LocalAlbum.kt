@@ -27,33 +27,22 @@ import com.hua.model.music.MediaData
  * @Date   : 2022/01/12
  * @Desc   : localalbum
  */
-@ExperimentalFoundationApi
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun LocalAlbum(
     viewModel: HomeViewModel,
     onClick:(MediaItem)->Unit
 ) {
-    AlbumLazyGrid(viewModel.localAlbumList.value, onClick = onClick)
-}
-
-@SuppressLint("UnsafeOptInUsageError")
-@Composable
-fun AlbumLazyGrid(
-    list: List<MediaData>,
-    bottomControllerHeight: Dp = LocalBottomControllerHeight.current,
-    onClick: (MediaItem) -> Unit,
-){
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         contentPadding = PaddingValues(
             start = 16.dp,
             end = 16.dp,
-            bottom = bottomControllerHeight,
+            bottom = LocalBottomControllerHeight.current,
             top = 16.dp
         ),
     ) {
-        items(list) { item ->
+        items(viewModel.localAlbumList.value) { item ->
             AlbumItem(item = item.mediaItem, onClick = onClick)
         }
     }

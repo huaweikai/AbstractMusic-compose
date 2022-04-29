@@ -38,18 +38,6 @@ fun SplashScreen(
 ) {
 
     val context = LocalContext.current
-
-//    LaunchedEffect(Unit) {
-//        val nextRoute =
-//            if (PermissionGet.checkReadPermission(context)) {
-//                Screen.HomeScreen.route
-//            } else Screen.HelloScreen.route
-//        delay(500L)
-//        val navOptions = NavOptions.Builder()
-//            .setPopUpTo(Screen.Splash.route, true)
-//            .build()
-//        appController.navigate(nextRoute, navOptions)
-//    }
     val nextRoute =
         if (PermissionGet.checkReadPermission(context)) {
             Screen.HomeScreen.route

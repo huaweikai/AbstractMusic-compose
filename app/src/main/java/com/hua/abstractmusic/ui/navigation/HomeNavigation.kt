@@ -27,11 +27,7 @@ import com.hua.abstractmusic.ui.route.Screen
  * @Date   : 2022/01/08
  * @Desc   : 主页的小navigation，用于跳转在线音乐，本地音乐和我的界面
  */
-
-@SuppressLint("UnsafeOptInUsageError")
 @OptIn(ExperimentalAnimationApi::class)
-@ExperimentalPagerApi
-@ExperimentalFoundationApi
 @Composable
 fun HomeNavigationNav(
     homeNavController:NavHostController,

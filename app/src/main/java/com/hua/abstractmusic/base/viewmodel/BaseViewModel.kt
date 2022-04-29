@@ -127,4 +127,9 @@ abstract class BaseViewModel(
         return index
     }
 
+    override fun onCleared() {
+        super.onCleared()
+        removeListener()
+    }
+
 }

@@ -224,10 +224,8 @@ fun NavGraphBuilder.router(
             }
         ),
     ) {
-        val item = it.getValue("mediaItem", defaultParcelizeMediaItem)
-        LocalAlbumDetail(
-            item
-        )
+//        val item = it.getValue("mediaItem", defaultParcelizeMediaItem)
+        LocalAlbumDetail()
     }
     composable(
         route = "${Screen.ArtistDetailScreen.route}?mediaItem={mediaItem}",
@@ -240,10 +238,8 @@ fun NavGraphBuilder.router(
             }
         ),
     ) {
-        val item = it.getValue("mediaItem", defaultParcelizeMediaItem)
-        LocalArtistDetail(
-            item = item
-        )
+//        val item = it.getValue("mediaItem", defaultParcelizeMediaItem)
+        LocalArtistDetail()
     }
 
     composable(
@@ -269,7 +265,7 @@ fun NavGraphBuilder.router(
         )
     ) {
         val item = it.getValue("mediaItem", defaultParcelizeMediaItem)
-        SheetDetail(parcelItem = item)
+        SheetDetail()
     }
 
     composable(Screen.NetSearchScreen.route) {

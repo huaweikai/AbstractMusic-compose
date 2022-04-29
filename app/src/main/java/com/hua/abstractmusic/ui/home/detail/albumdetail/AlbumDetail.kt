@@ -53,31 +53,13 @@ import com.hua.model.parcel.toGson
  */
 
 @OptIn(ExperimentalMaterial3Api::class)
-@ExperimentalFoundationApi
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun LocalAlbumDetail(
-    item: ParcelizeMediaItem,
     navHostController: NavHostController = LocalAppNavController.current,
     detailViewModel: AlbumDetailViewModel = hiltViewModel()
 ) {
-    val isLocal = item.mediaId.isLocal()
-    val bitmap = remember {
-        mutableStateOf(Bitmap.createBitmap(60, 60, Bitmap.Config.ARGB_8888))
-    }
-    val composeUtils = LocalComposeUtils.current
-    LaunchedEffect(Unit) {
-        bitmap.value = composeUtils.coilToBitmap(item.artUri).blur(50)
-        detailViewModel.id = item.mediaId
-        detailViewModel.isLocal = isLocal
-        detailViewModel.loadData()
-    }
-
-    DisposableEffect(Unit) {
-        this.onDispose {
-            detailViewModel.removeListener()
-        }
-    }
+    val item = detailViewModel.item ?:return
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             Modifier.fillMaxSize(),
@@ -89,7 +71,7 @@ fun LocalAlbumDetail(
                         }
                     },
                     title = {
-                        Text(text = "${item.title}")
+                        Text(text = item.title)
                     },
                     modifier = Modifier.statusBarsPadding(),
                     colors = TopAppBarDefaults.smallTopAppBarColors(
@@ -98,7 +80,7 @@ fun LocalAlbumDetail(
                 )
             }
         ) {
-            if (isLocal) {
+            if (detailViewModel.isLocal) {
                 AlbumLocalDetail(item = item, detailViewModel = detailViewModel)
             } else {
                 AlbumNetDetail(item = item, detailViewModel = detailViewModel,navHostController)
@@ -109,7 +91,7 @@ fun LocalAlbumDetail(
                 .fillMaxSize(),
         ) {
             AsyncImage(
-                model = bitmap.value,
+                model = item.artUri,
                 contentDescription = "",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -308,7 +290,6 @@ fun PlayIcon(
     }
 }
 
-@SuppressLint("UnsafeOptInUsageError")
 @Composable
 private fun AlbumDetailTail(
     item: ParcelizeMediaItem

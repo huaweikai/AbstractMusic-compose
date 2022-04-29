@@ -36,9 +36,7 @@ import kotlinx.coroutines.launch
  * @Desc   : 本地音乐screen
  */
 
-@OptIn(ExperimentalMaterial3Api::class)
-@ExperimentalFoundationApi
-@ExperimentalPagerApi
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPagerApi::class)
 @Composable
 fun LocalScreen(
     homeNavController: NavHostController = LocalAppNavController.current,
@@ -49,21 +47,22 @@ fun LocalScreen(
     val coroutineScope = rememberCoroutineScope()
     Scaffold(
         topBar = {
-                SmallTopAppBar(
-                    modifier = Modifier
-                        .statusBarsPadding(),
-                    title = { Text("本地音乐") },
-                    actions = {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = "",
-                            modifier = Modifier
-                                .padding(end = 16.dp)
-                                .clickable {
-                                    localViewModel.refresh(true)
-                                })
-                    }
-                )
+            SmallTopAppBar(
+                modifier = Modifier
+                    .statusBarsPadding(),
+                title = { Text("本地音乐") },
+                actions = {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "",
+                        modifier = Modifier
+                            .padding(end = 16.dp)
+                            .clickable {
+                                localViewModel.refresh(true)
+                            }
+                    )
+                }
+            )
         },
     ) {
         Column(
@@ -73,7 +72,7 @@ fun LocalScreen(
                 selectedTabIndex = pagerState.currentPage,
                 indicator = {
                     TabRowDefaults.Indicator(
-                        Modifier.indicatorOffset3(pagerState,it,20.dp),
+                        Modifier.indicatorOffset3(pagerState, it, 20.dp),
                     )
                 },
                 modifier = Modifier.height(50.dp)
@@ -85,9 +84,7 @@ fun LocalScreen(
                             coroutineScope.launch { pagerState.animateScrollToPage(index) }
                         },
                     ) {
-                        Text(
-                            text = title,
-                        )
+                        Text(text = title)
                     }
                 }
             }
@@ -100,19 +97,15 @@ fun LocalScreen(
             ) { page ->
                 when (page) {
                     0 -> {
-                        LocalMusic(modifier = Modifier.fillMaxSize(),localViewModel)
+                        LocalMusic(modifier = Modifier.fillMaxSize(), localViewModel)
                     }
                     1 -> {
-//                        LocalMusic(modifier = Modifier.fillMaxSize(),localViewModel)
-                        LocalAlbum(localViewModel){ mediaItem ->
-//                            homeNavController.navigate("${Screen.NetSearchScreen.route}")
+                        LocalAlbum(localViewModel) { mediaItem ->
                             homeNavController.navigate("${Screen.AlbumDetailScreen.route}?mediaItem=${mediaItem.toNavType()}")
                         }
                     }
                     2 -> {
-//                        LocalMusic(modifier = Modifier.fillMaxSize(),localViewModel)
-                        LocalArtist (localViewModel){ mediaItem ->
-//                            homeNavController.navigate("${Screen.NetSearchScreen.route}")
+                        LocalArtist(localViewModel) { mediaItem ->
                             homeNavController.navigate("${Screen.ArtistDetailScreen.route}?mediaItem=${mediaItem.toNavType()}")
                         }
                     }

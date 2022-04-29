@@ -57,10 +57,6 @@ fun Controller(
     playScreenClick: () -> Unit,
     viewModel: PlayingViewModel = LocalPlayingViewModel.current
 ) {
-
-//    val isTouch = remember {
-//        mutableStateOf(false)
-//    }
     val pagerState = rememberPagerState(viewModel.getLastMediaIndex())
 
     LaunchedEffect(viewModel.currentPlayItem.value) {
@@ -72,7 +68,13 @@ fun Controller(
     LaunchedEffect(pagerState.currentPage) {
         viewModel.skipTo(pagerState.currentPage, true)
     }
-
+    val playState = viewModel.playerState.collectAsState()
+    val stateIcon =
+        if (playState.value) {
+            R.drawable.ic_controller_pause
+        } else {
+            R.drawable.ic_controller_play
+        }
     ConstraintLayout(
         modifier = Modifier
             .fillMaxWidth()
@@ -87,7 +89,6 @@ fun Controller(
             count = viewModel.currentPlayList.value.size,
             modifier = Modifier
                 .layoutId("pager"),
-//                .isTouch(isTouch),
             verticalAlignment = CenterVertically
         ) { page ->
             val item = viewModel.currentPlayList.value[page].mediaItem.mediaMetadata
@@ -123,30 +124,24 @@ fun Controller(
             modifier = Modifier.layoutId("controller"),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val playState = viewModel.playerState.collectAsState()
-            val stateIcon =
-                if (playState.value) {
-                    R.drawable.ic_controller_pause
-                } else {
-                    R.drawable.ic_controller_play
-                }
-            val list = listOf(
-                IconBean(stateIcon, "播放", size = 32.dp, onClick = {
+            ControllerItem(
+                resId = stateIcon,
+                desc = "播放",
+                size = 32.dp,
+                width = 8.dp,
+                onClick = {
                     viewModel.playOrPause()
-                }),
-                IconBean(R.drawable.ic_controller_list, "播放列表", size = 20.dp, onClick = {
-                    playListClick()
-                })
+                }
             )
-            list.forEach {
-                ControllerItem(
-                    resId = it.resId,
-                    desc = it.desc,
-                    size = it.size,
-                    width = 8.dp,
-                    onClick = it.onClick
-                )
-            }
+            ControllerItem(
+                resId = R.drawable.ic_controller_list,
+                desc = "播放列表",
+                size = 20.dp,
+                width = 8.dp,
+                onClick = {
+                    playListClick()
+                }
+            )
         }
     }
 }
@@ -172,82 +167,3 @@ private fun controllerConstrains(margin: Dp): ConstraintSet {
         }
     }
 }
-
-
-@Composable
-fun HomeNavigation(
-    modifier: Modifier = Modifier,
-    navController: NavHostController
-) {
-    val back = navController.currentBackStackEntryAsState()
-    val bars = listOf(
-        BottomBarBean("网络音乐", R.drawable.ic_line, Screen.NetScreen.route),
-        BottomBarBean("本地音乐", R.drawable.ic_music_icon, Screen.LocalScreen.route),
-        BottomBarBean("我的", R.drawable.ic_person_icon, Screen.MineScreen.route)
-    )
-    BottomNavigation(
-        modifier = modifier,
-        elevation = 0.dp,
-        backgroundColor = MaterialTheme.colorScheme.background
-    ) {
-        bars.forEach { item ->
-            val selected = item.route == back.value?.destination?.route
-            val color =
-                if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
-            BottomNavigationItem(
-                selected = selected,
-                onClick = {
-                    navController.navigate(item.route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                icon = {
-                    Icon(
-                        painter = painterResource(id = item.resId),
-                        contentDescription = item.name,
-                        tint = color
-                    )
-                },
-                label = {
-                    Text(
-                        text = item.name,
-                        textAlign = TextAlign.Center,
-                        fontSize = 13.sp,
-                        color = color
-                    )
-                },
-                alwaysShowLabel = false,
-                selectedContentColor = MaterialTheme.colorScheme.primary
-            )
-        }
-    }
-
-}
-
-@ExperimentalPagerApi
-private fun Modifier.isTouch(
-    isTouch: MutableState<Boolean> = mutableStateOf(false)
-) =
-    this.pointerInput(Unit) {
-        awaitPointerEventScope {
-            while (true) {
-                val event = awaitPointerEvent(PointerEventPass.Initial)
-                val dragEvent = event.changes.firstOrNull()
-                when {
-                    dragEvent!!.positionChangeConsumed() -> {
-                        return@awaitPointerEventScope
-                    }
-                    dragEvent.changedToDownIgnoreConsumed() -> {
-                        isTouch.value = true
-                    }
-                    dragEvent.changedToUpIgnoreConsumed() -> {
-
-                    }
-                }
-            }
-        }
-    }

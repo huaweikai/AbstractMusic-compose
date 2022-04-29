@@ -64,11 +64,6 @@ class PopItemViewModel @Inject constructor(
                 netRepository.selectArtistByMusicId(item)
             }
             moreArtistList.value = result.get { listOf(NULL_MEDIA_ITEM) }
-//            if (result is ApiResult.Success) {
-//                moreArtistList.value = result.data
-//            } else {
-//                moreArtistList.value = listOf(NULL_MEDIA_ITEM)
-//            }
         }
 
     }
@@ -124,11 +119,6 @@ class PopItemViewModel @Inject constructor(
                 netRepository.selectAlbumByMusicId(item)
             }
             moreAlbum.value = result.get { NULL_MEDIA_ITEM }
-//            if(result is ApiResult.Success){
-//                moreAlbum.value = result.data
-//            }else{
-//                moreAlbum.value = NULL_MEDIA_ITEM
-//            }
         }
     }
 

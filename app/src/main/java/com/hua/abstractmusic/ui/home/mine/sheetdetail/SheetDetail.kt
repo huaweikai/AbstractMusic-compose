@@ -61,16 +61,8 @@ import kotlinx.coroutines.launch
 @SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun SheetDetail(
-    parcelItem: ParcelizeMediaItem,
     sheetDetailViewModel: SheetDetailViewModel = hiltViewModel(),
 ) {
-    DisposableEffect(Unit) {
-        sheetDetailViewModel.parcelItem = parcelItem
-        sheetDetailViewModel.loadData()
-        this.onDispose {
-            sheetDetailViewModel.removeListener()
-        }
-    }
     val popState = remember {
         mutableStateOf(false)
     }
