@@ -72,17 +72,16 @@ class SheetDetailViewModel @Inject constructor(
                 author = field?.artist ?: ""
             )
         }
+    private val listener = object : Player.Listener {
+        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            updateItem(mediaItem)
+        }
+    }
     init {
         savedStateHandle?.let {
             parcelItem = it.get(PARCEL_ITEM_ID)
             loadData()
             addListener(listener)
-        }
-    }
-
-    private val listener = object : Player.Listener {
-        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-            updateItem(mediaItem)
         }
     }
 
