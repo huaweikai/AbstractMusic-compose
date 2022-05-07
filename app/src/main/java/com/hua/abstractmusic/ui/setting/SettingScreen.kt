@@ -54,6 +54,9 @@ fun SettingScreen() {
         composable("setting_theme") {
             ThemeScreen()
         }
+        composable("setting_user"){
+            UserChangeScreen(settingNavController = settNavController)
+        }
     }
 }
 
@@ -82,6 +85,13 @@ fun SettingMain(
         }
     ) {
         Column(Modifier.padding(it)) {
+            val loginState = settingViewModel.userInfo.collectAsState().value.isLogin
+            if(loginState){
+                SettingItem(title = "用户信息") {
+                    settingNavController.navigate("setting_user")
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
             SettingSwitchItem(
                 title = "是否开启跟随壁纸主题色",
                 switchState = themeViewModel.monetColor.value == null,
@@ -118,7 +128,6 @@ fun SettingMain(
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            val loginState = settingViewModel.userInfo.collectAsState().value.isLogin
             if (loginState) {
                 Button(
                     onClick = {

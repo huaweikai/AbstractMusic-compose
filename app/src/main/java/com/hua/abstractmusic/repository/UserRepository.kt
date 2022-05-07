@@ -7,6 +7,7 @@ import com.hua.abstractmusic.utils.UpLoadFile
 import com.hua.model.user.UserPO
 import com.hua.model.user.UserVO
 import com.hua.network.ApiResult
+import com.hua.network.get
 import com.hua.service.room.dao.MusicDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -60,6 +61,9 @@ class UserRepository(
         return result
     }
 
+    suspend fun selectUser():ApiResult<UserVO>{
+        return userService.getUser(userInfoData.userInfo.value.userToken)
+    }
 
     private suspend fun getUser(token: String, isLogin: Boolean = false) {
         flow {
@@ -115,10 +119,27 @@ class UserRepository(
 
     suspend fun updateUser(url: String) {
         val user = userInfoData.userInfo.value.userBean
-        val netUser =
+        val userVO =
             UserVO(user?.id, user?.userName!!, user.email, user.password, url, user.createTime)
+        updateUser(userVO)
+    }
+
+    suspend fun updateUser(userPO: UserPO){
+        updateUser(
+            UserVO(
+                userPO.id,
+                userPO.userName,
+                userPO.email,
+                userPO.password,
+                userPO.head,
+                userPO.createTime
+            )
+        )
+    }
+
+    suspend fun updateUser(userVO: UserVO){
         val token = userInfoData.userInfo.value.userToken
-        val updateResult = userService.setUser(token, netUser)
+        val updateResult = userService.setUser(token, userVO)
         if (updateResult is ApiResult.Success) {
             getUser(token = token)
         }
