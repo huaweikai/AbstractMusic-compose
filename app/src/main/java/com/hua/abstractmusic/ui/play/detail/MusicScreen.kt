@@ -257,34 +257,34 @@ private fun MusicSlider(
         isFirst.value = false
     }
 
-    LaunchedEffect(
-        playState.value
-    ) {
-        if (playState.value) {
-            viewModel.startUpdatePosition()
-        } else {
-            viewModel.cancelUpdatePosition()
-        }
-    }
+//    LaunchedEffect(
+//        playState.value
+//    ) {
+//        if (playState.value) {
+//            viewModel.startUpdatePosition()
+//        } else {
+//            viewModel.cancelUpdatePosition()
+//        }
+//    }
 
-    val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
+//    val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
 
-    DisposableEffect(Unit) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                if (playState.value) {
-                    viewModel.startUpdatePosition()
-                }
-            } else if (event == Lifecycle.Event.ON_PAUSE) {
-                viewModel.cancelUpdatePosition()
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        this.onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
+//    DisposableEffect(Unit) {
+//        val observer = LifecycleEventObserver { _, event ->
+//            if (event == Lifecycle.Event.ON_RESUME) {
+//                if (playState.value) {
+//                    viewModel.startUpdatePosition()
+//                }
+//            } else if (event == Lifecycle.Event.ON_PAUSE) {
+//                viewModel.cancelUpdatePosition()
+//            }
+//        }
+//        lifecycleOwner.lifecycle.addObserver(observer)
+//
+//        this.onDispose {
+//            lifecycleOwner.lifecycle.removeObserver(observer)
+//        }
+//    }
 }
 
 @Composable

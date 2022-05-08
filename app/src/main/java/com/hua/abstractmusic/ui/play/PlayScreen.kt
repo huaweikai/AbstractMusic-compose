@@ -15,7 +15,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
@@ -154,8 +157,13 @@ private fun PlayScreenTab(
 @Composable
 private fun PlayScreenContent(
     viewPageState: PagerState,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    viewModel: PlayingViewModel = LocalPlayingViewModel.current
 ) {
+    val playerState = viewModel.playerState.collectAsState()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+
     CompositionLocalProvider(
         LocalContentColor provides LocalMusicScreenFirstColor.current,
         androidx.compose.material.LocalContentColor provides LocalMusicScreenFirstColor.current
@@ -179,6 +187,32 @@ private fun PlayScreenContent(
                     LyricsScreen()
                 }
             }
+        }
+    }
+    DisposableEffect(Unit){
+        val observer = LifecycleEventObserver{_,event->
+            if(event == Lifecycle.Event.ON_RESUME){
+                if (playerState.value) {
+                    viewModel.startUpdatePosition()
+                    viewModel.startUpdateLyrics()
+                }
+            }else if(event == Lifecycle.Event.ON_PAUSE){
+                viewModel.cancelUpdateLyrics()
+                viewModel.cancelUpdatePosition()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        this.onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+    LaunchedEffect(playerState.value){
+        if(playerState.value){
+            viewModel.startUpdateLyrics()
+            viewModel.startUpdatePosition()
+        }else{
+            viewModel.cancelUpdateLyrics()
+            viewModel.cancelUpdatePosition()
         }
     }
 }

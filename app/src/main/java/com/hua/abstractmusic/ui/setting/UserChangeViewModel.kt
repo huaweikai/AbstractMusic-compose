@@ -2,6 +2,7 @@ package com.hua.abstractmusic.ui.setting
 
 import android.content.ContentResolver
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.documentfile.provider.DocumentFile
@@ -65,7 +66,6 @@ class UserChangeViewModel @Inject constructor(
             }
             is UserChangeAction.SaveUser -> {
                 viewModelScope.launch {
-                    userRepository.updateUser(_userInfo.value)
                     if (_userInfo.value.head != userInfoData.userInfo.value.userBean?.head && _userInfo.value.head != null) {
                         putHeadPicture(_userInfo.value.head!!, userChangeAction.contentResolver)
                     }
@@ -85,13 +85,15 @@ class UserChangeViewModel @Inject constructor(
             val fileName = "${Constant.BUCKET_HEAD_IMG}/${userInfo.value.id}-head-${
                 System.currentTimeMillis().toDate()
             }.png"
-            userRepository.upLoadFile.putFile(fileName, byte, file, onSuccess = {
-                userRepository.updateUser(it)
-            }, onError = {
-
-            }, onCompletion = {
-                contentResolver.delete(uri, null, null)
-            })
+            userRepository.upLoadFile.putFile(fileName, byte, file,
+                onSuccess = {
+                    userRepository.updateUser(_userInfo.value.copy(head = it))
+                }, onError = {
+                    Toast.makeText(mediaConnect.context, it, Toast.LENGTH_SHORT).show()
+                }, onCompletion = {
+                    contentResolver.delete(uri, null, null)
+                }
+            )
         }
     }
 

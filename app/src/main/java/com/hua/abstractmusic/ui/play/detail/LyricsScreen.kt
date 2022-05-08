@@ -111,40 +111,34 @@ private fun LyricsSuccess(
         mutableStateOf(26)
     }
     val scope = rememberCoroutineScope()
+
     val height = (configuration.screenHeightDp - current.value) / 2
+
     val isTouch = remember { mutableStateOf(false) }
     val playerState = viewModel.playerState.collectAsState()
 
-    val lifecycleOwner = LocalLifecycleOwner.current
-
-    DisposableEffect(Unit){
-        val observer = LifecycleEventObserver{_,event->
-            if(event == Lifecycle.Event.ON_RESUME){
-                viewModel.startUpdateLyrics()
-            }else if(event == Lifecycle.Event.ON_PAUSE){
-                viewModel.cancelUpdateLyrics()
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        this.onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
-    LaunchedEffect(playerState.value){
-        if(playerState.value){
-            viewModel.startUpdateLyrics()
-        }else{
-            viewModel.cancelUpdateLyrics()
-        }
-    }
-    LaunchedEffect(viewModel.lyricList.value,isTouch.value){
-        if(viewModel.lyricList.value.isNotEmpty() &&
-            viewModel.lyricsCanScroll.value &&
-            !isTouch.value && playerState.value
-        ){
-            lyricsState.animateScrollToItem(viewModel.getStartIndex(viewModel.getMusicDuration()),-height)
-        }
-    }
+//    val lifecycleOwner = LocalLifecycleOwner.current
+//
+//    DisposableEffect(Unit){
+//        val observer = LifecycleEventObserver{_,event->
+//            if(event == Lifecycle.Event.ON_RESUME){
+//                viewModel.startUpdateLyrics()
+//            }else if(event == Lifecycle.Event.ON_PAUSE){
+//                viewModel.cancelUpdateLyrics()
+//            }
+//        }
+//        lifecycleOwner.lifecycle.addObserver(observer)
+//        this.onDispose {
+//            lifecycleOwner.lifecycle.removeObserver(observer)
+//        }
+//    }
+//    LaunchedEffect(playerState.value){
+//        if(playerState.value){
+//            viewModel.startUpdateLyrics()
+//        }else{
+//            viewModel.cancelUpdateLyrics()
+//        }
+//    }
     LazyColumn(
         Modifier
             .fillMaxWidth()
@@ -173,6 +167,14 @@ private fun LyricsSuccess(
             }
         }
         blackItem()
+    }
+    LaunchedEffect(viewModel.lyricList.value,isTouch.value){
+        if(viewModel.lyricList.value.isNotEmpty() &&
+            viewModel.lyricsCanScroll.value &&
+            !isTouch.value && playerState.value
+        ){
+            lyricsState.animateScrollToItem(viewModel.getStartIndex(viewModel.getMusicDuration()),-height)
+        }
     }
 }
 
