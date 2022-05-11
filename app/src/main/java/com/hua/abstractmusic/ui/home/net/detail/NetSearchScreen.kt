@@ -9,6 +9,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -57,17 +59,7 @@ fun NetSearchScreen(
     val searchText = searchViewModel.searchText.value
     val focus = LocalFocusManager.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(Unit) {
-        val observer = LifecycleEventObserver { source, event ->
-            if (event == Lifecycle.Event.ON_PAUSE) {
-                focus.clearFocus()
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        this.onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
+    LifecycleFocusClearUtils()
     Scaffold(
         topBar = {
             SmallTopAppBar(
@@ -95,6 +87,15 @@ fun NetSearchScreen(
                         )
                     )
                 },
+//                actions = {
+//                    Icon(
+//                        imageVector = Icons.Default.Search,
+//                        contentDescription = "",
+//                        modifier = Modifier.clickable {
+//                            searchViewModel.search()
+//                        }
+//                    )
+//                },
                 navigationIcon = {
                     NavigationBack {
                         navController.navigateUp()
@@ -182,7 +183,7 @@ fun SearchSuccess(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(32.dp)
+                .height(52.dp)
         ) {
             tabs.forEachIndexed { index, s ->
                 Tab(selected = index == pagerState.currentPage, onClick = {
@@ -230,7 +231,7 @@ private fun SearchItem(
         }
         is LCE.Success -> {
             if (data?.get { emptyList() }?.isEmpty() == true) {
-                SearchEmpty {
+                Error {
                     searchViewModel.search()
                 }
             } else {

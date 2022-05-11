@@ -6,8 +6,7 @@ import com.hua.abstractmusic.preference.UserInfoData
 import com.hua.abstractmusic.utils.UpLoadFile
 import com.hua.model.user.UserPO
 import com.hua.model.user.UserVO
-import com.hua.network.ApiResult
-import com.hua.network.get
+import com.hua.network.*
 import com.hua.service.room.dao.MusicDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -99,7 +98,6 @@ class UserRepository(
             userInfoData.logout()
         }
         return result
-
     }
 
     suspend fun getEmailCodeWithLogin(email: String): ApiResult<String> {
@@ -124,8 +122,8 @@ class UserRepository(
         updateUser(userVO)
     }
 
-    suspend fun updateUser(userPO: UserPO){
-        updateUser(
+    suspend fun updateUser(userPO: UserPO):ApiResult<Unit>{
+       return updateUser(
             UserVO(
                 userPO.id,
                 userPO.userName,
@@ -137,15 +135,30 @@ class UserRepository(
         )
     }
 
-    suspend fun updateUser(userVO: UserVO){
+    suspend fun updateUser(userVO: UserVO):ApiResult<Unit>{
         val token = userInfoData.userInfo.value.userToken
         val updateResult = userService.setUser(token, userVO)
-        if (updateResult is ApiResult.Success) {
-            getUser(token = token)
+        return updateResult.also {
+            if (it is ApiResult.Success) {
+                getUser(token = token)
+            }
         }
     }
 
     suspend fun removeLocalSheet(sheetId: String) {
         dao.deleteSheet(sheetId)
+    }
+
+    suspend fun deleteUser(passWord: String):ApiResult<Unit>{
+        val token = userInfoData.userInfo.value.userToken
+        val user = userInfoData.userInfo.value.userBean
+            ?: return ApiResult.Failure(ApiError.userIsNulError)
+        if(user.password != passWord) return ApiResult.Failure(Error("密码匹配错误"))
+        return userService.deleteUser(token).also {
+            it.onSuccess {
+                userDao.deleteUser()
+                userInfoData.logout()
+            }
+        }
     }
 }

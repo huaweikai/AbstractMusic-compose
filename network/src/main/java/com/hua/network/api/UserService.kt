@@ -64,4 +64,9 @@ interface UserService {
         @Query("token")token:String,
         @Body netUser: UserVO
     ):ApiResult<Unit>
+
+    @GET("/user/delete")
+    suspend fun deleteUser(
+        @Query("token")token:String
+    ):ApiResult<Unit>
 }

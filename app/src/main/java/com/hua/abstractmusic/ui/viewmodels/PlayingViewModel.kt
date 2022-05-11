@@ -2,6 +2,7 @@ package com.hua.abstractmusic.ui.viewmodels
 
 import android.annotation.SuppressLint
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
@@ -140,7 +141,7 @@ class PlayingViewModel @Inject constructor(
         }
     }
 
-    fun setController() {
+    private fun setController() {
         addListener(listener)
         addBrowserListener(browserListener)
         val browser = this.browser ?: return
@@ -201,6 +202,7 @@ class PlayingViewModel @Inject constructor(
             }
         }
         transformColor(item)
+        maxValue.value = browser.duration.toFloat()
         updateCurrentPlayList()
     }
 

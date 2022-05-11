@@ -132,7 +132,7 @@ fun SettingMain(
                 Button(
                     onClick = {
                         settingViewModel.logoutUser()
-                        appNavController.navigateUp()
+//                        appNavController.navigateUp()
                     },
                     modifier = Modifier
                         .padding(horizontal = 16.dp)

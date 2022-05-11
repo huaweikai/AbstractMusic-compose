@@ -12,14 +12,21 @@ import com.hua.abstractmusic.base.viewmodel.BaseViewModel
 import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.preference.UserInfoData
 import com.hua.abstractmusic.repository.UserRepository
+import com.hua.abstractmusic.ui.utils.LCE
 import com.hua.abstractmusic.utils.toDate
 import com.hua.model.user.UserPO
 import com.hua.network.ApiResult
+import com.hua.network.get
+import com.hua.network.onFailure
+import com.hua.network.onSuccess
 import com.hua.service.MediaConnect
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.InputStream
 import javax.inject.Inject
 
 /**
@@ -39,9 +46,14 @@ class UserChangeViewModel @Inject constructor(
     private val _userInfo = mutableStateOf(userInfoData.userInfo.value.userBean!!)
     val userInfo: State<UserPO> get() = _userInfo
 
+    private val _userPassWordCheck = mutableStateOf("")
+    val userPassWordCheck :State<String> get() = _userPassWordCheck
+
     init {
         checkUser()
     }
+    private val _userUpdateState = MutableStateFlow<LCE>(LCE.Success)
+    val userUpdateState :StateFlow<LCE> get()= _userUpdateState
 
     private fun checkUser() {
         viewModelScope.launch {
@@ -58,25 +70,60 @@ class UserChangeViewModel @Inject constructor(
                 _userInfo.value = _userInfo.value.copy(
                     userName = userChangeAction.data
                 )
+                if(_userUpdateState.value == LCE.Error){
+                    _userUpdateState.value = LCE.Success
+                }
             }
             is UserChangeAction.UserHead -> {
                 _userInfo.value = _userInfo.value.copy(
                     head = userChangeAction.data
                 )
+                if(_userUpdateState.value == LCE.Error){
+                    _userUpdateState.value = LCE.Success
+                }
             }
             is UserChangeAction.SaveUser -> {
+                _userUpdateState.value = LCE.Loading
                 viewModelScope.launch {
                     if (_userInfo.value.head != userInfoData.userInfo.value.userBean?.head && _userInfo.value.head != null) {
-                        putHeadPicture(_userInfo.value.head!!, userChangeAction.contentResolver)
+                        putHeadPicture(
+                            _userInfo.value.head!!,
+                            userChangeAction.contentResolver,
+                            userChangeAction.success,
+                            userChangeAction.error
+                        )
+                    } else {
+                        userRepository.updateUser(_userInfo.value).onSuccess {
+                            userChangeAction.success()
+                            _userUpdateState.value = LCE.Success
+                        }.onFailure {
+                            userChangeAction.error(it.errorMsg ?:"")
+                            _userUpdateState.value = LCE.Error
+                        }
                     }
                 }
+            }
+            is UserChangeAction.UserPassWord->{
+                _userPassWordCheck.value = userChangeAction.data
+            }
+            is UserChangeAction.DeleteUser->{
+                viewModelScope.launch {
+                    userRepository.deleteUser(_userPassWordCheck.value).onSuccess {
+                        userChangeAction.success()
+                    }.onFailure {
+                        userChangeAction.error(it.errorMsg ?:"")
+                    }
+                }
+
             }
         }
     }
 
     private fun putHeadPicture(
         url: String,
-        contentResolver: ContentResolver
+        contentResolver: ContentResolver,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
     ) {
         val uri = Uri.parse(url)
         val byte = contentResolver.openInputStream(uri)
@@ -88,19 +135,34 @@ class UserChangeViewModel @Inject constructor(
             userRepository.upLoadFile.putFile(fileName, byte, file,
                 onSuccess = {
                     userRepository.updateUser(_userInfo.value.copy(head = it))
+                    withContext(Dispatchers.Main){
+                        onSuccess()
+                        contentResolver.delete(uri, null, null)
+                    }
+                    _userUpdateState.tryEmit(LCE.Success)
                 }, onError = {
-                    Toast.makeText(mediaConnect.context, it, Toast.LENGTH_SHORT).show()
-                }, onCompletion = {
-                    contentResolver.delete(uri, null, null)
-                }
+                    withContext(Dispatchers.Main){
+                        onError(it)
+                    }
+                    _userUpdateState.tryEmit(LCE.Error)
+                }, onCompletion = {}
             )
         }
     }
 
 }
 
-sealed class UserChangeAction() {
+sealed class UserChangeAction{
     data class UserName(val data: String) : UserChangeAction()
     data class UserHead(val data: String) : UserChangeAction()
-    data class SaveUser(val contentResolver: ContentResolver) : UserChangeAction()
+    data class SaveUser(
+        val contentResolver: ContentResolver,
+        val success: () -> Unit,
+        val error: (String) -> Unit
+    ) : UserChangeAction()
+    data class UserPassWord(val data:String):UserChangeAction()
+    data class DeleteUser(
+        val success: () -> Unit,
+        val error: (String) -> Unit
+    ):UserChangeAction()
 }
