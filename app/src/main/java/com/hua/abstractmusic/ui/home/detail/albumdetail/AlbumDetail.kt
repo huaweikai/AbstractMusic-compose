@@ -79,11 +79,13 @@ fun LocalAlbumDetail(
                     )
                 )
             }
-        ) {
-            if (detailViewModel.isLocal) {
-                AlbumLocalDetail(item = item, detailViewModel = detailViewModel)
-            } else {
-                AlbumNetDetail(item = item, detailViewModel = detailViewModel,navHostController)
+        ){
+            Box(modifier = Modifier.fillMaxSize().padding(it)) {
+                if (detailViewModel.isLocal) {
+                    AlbumLocalDetail(item = item, detailViewModel = detailViewModel)
+                } else {
+                    AlbumNetDetail(item = item, detailViewModel = detailViewModel,navHostController)
+                }
             }
         }
         Box(

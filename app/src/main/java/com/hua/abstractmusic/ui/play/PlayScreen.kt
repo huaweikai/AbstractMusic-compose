@@ -101,7 +101,8 @@ fun PlayScreen(
         ) {
             Box(
                 Modifier
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .padding(it),
             ) {
                 PlayScreenContent(viewPageState, snackBarHostState)
                 PlayScreenTab(viewPageState)

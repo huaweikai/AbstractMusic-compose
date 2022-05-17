@@ -46,7 +46,6 @@ import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.*
 import com.hua.abstractmusic.utils.getCacheDir
 import com.hua.abstractmusic.utils.isLocal
-import com.hua.model.parcel.ParcelizeMediaItem
 import com.hua.model.parcel.toNavType
 import com.hua.network.onFailure
 import kotlinx.coroutines.launch
@@ -131,7 +130,16 @@ fun NavSheetDetail(
             )
         },
         snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState, modifier = Modifier.padding(bottom = 48.dp)) {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(
+                    PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = LocalBottomControllerHeight.current.coerceAtLeast(80.dp)
+                    )
+                )
+            ) {
                 Snackbar {
                     Text(text = it.visuals.message)
                 }
@@ -189,202 +197,7 @@ fun NavSheetDetail(
 
 }
 
-@SuppressLint("UnsafeOptInUsageError")
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun SheetChangeScreen(
-    sheetNavHostController: NavHostController,
-    sheetDetailViewModel: SheetDetailViewModel
-) {
-    LifecycleFocusClearUtils()
-    val context = LocalContext.current
-    val cropPicture = rememberLauncherForActivityResult(UCropActivityResultContract()) {
-        if (it != null) {
-            sheetDetailViewModel.uploadSheetDesc(
-                sheetDetailViewModel.sheetDetail.value.copy(
-                    artUri = it.toString()
-                )
-            )
-        } else {
-            Toast.makeText(context, "连接为空", Toast.LENGTH_SHORT).show()
-        }
-    }
 
-    val selectPicture = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
-        it?.let {
-            val outputUri = getCacheDir(context, it)
-            cropPicture.launch(Pair(it, outputUri!!))
-        }
-    }
-    val item = sheetDetailViewModel.sheetDetail.collectAsState().value
-    Scaffold(
-        topBar = {
-            SmallTopAppBar(
-                title = { Text(text = "修改歌单", modifier = Modifier.padding(start = 16.dp)) },
-                navigationIcon = {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "",
-                        modifier = Modifier
-                            .clickable {
-                                sheetNavHostController.navigateUp()
-                            }
-                            .padding(start = 8.dp)
-                            .size(24.dp)
-                    )
-                },
-                actions = {
-                    val state = remember { mutableStateOf(false) }
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .padding(end = 8.dp)
-                    ) {
-                        if (state.value) {
-                            CircularProgressIndicator()
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.Send,
-                                contentDescription = "",
-                                modifier = Modifier
-                                    .clickable {
-                                        state.value = true
-                                        sheetDetailViewModel.uploadSheetDesc {
-                                            state.value = false
-                                            sheetNavHostController.navigateUp()
-                                        }
-                                    })
-                        }
-                    }
-                },
-                modifier = Modifier.statusBarsPadding()
-            )
-        }
-    ) {
-        val moreHeight = remember {
-            mutableStateOf(0.dp)
-        }
-        Column(
-            Modifier
-                .fillMaxSize()
-                .padding(it)
-                .padding(horizontal = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Column(
-                Modifier
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                ArtImage(
-                    modifier = Modifier
-                        .size(150.dp)
-                        .clickable {
-                            selectPicture.launch("image/*")
-                        },
-                    uri = item.artUri,
-                    desc = "",
-                    transformation = RoundedCornersTransformation(20f)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                BasicTextField(
-                    value = item.title,
-                    onValueChange = { sheetDetailViewModel.uploadSheetDesc(item.copy(title = it)) },
-                    maxLines = 1,
-                    singleLine = true,
-                    textStyle = TextStyle(
-                        fontSize = 22.sp, lineHeight = 26.sp, textAlign = TextAlign.Center
-                    )
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                BasicTextField(
-                    value = item.sheetDesc ?: "",
-                    onValueChange = {
-                        sheetDetailViewModel.uploadSheetDesc(item.copy(sheetDesc = it))
-                    },
-                    maxLines = 2,
-                    textStyle = TextStyle(
-                        fontSize = 18.sp, lineHeight = 22.sp, textAlign = TextAlign.Center
-                    )
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-            Box(modifier = Modifier.fillMaxSize()) {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = moreHeight.value + LocalBottomControllerHeight.current)
-                ) {
-                    itemsIndexed(sheetDetailViewModel.sheetChangeList.value) { index, item ->
-                        val data = item.mediaItem.mediaMetadata
-                        Row(
-                            Modifier
-                                .fillMaxWidth()
-                                .height(70.dp)
-                                .background(
-                                    if (item.isPlaying) MaterialTheme.colorScheme.surfaceVariant
-                                    else MaterialTheme.colorScheme.surface
-                                )
-                                .clickable {
-                                    sheetDetailViewModel.updateSelect(index)
-                                },
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            CoilImage(
-                                url = data.artworkUri,
-                                modifier = Modifier
-                                    .size(50.dp)
-                                    .clip(RoundedCornerShape(8.dp)),
-                            )
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column(
-                                verticalArrangement = Arrangement.Center,
-                                modifier = Modifier.fillMaxHeight()
-                            ) {
-                                TitleAndArtist(
-                                    title = "${data.title}",
-                                    subTitle = "${data.artist}"
-                                )
-                            }
-                        }
-                    }
-                }
-                val density = LocalDensity.current
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = sheetDetailViewModel.sheetChangeList.value.find { it.isPlaying } != null,
-                    modifier = Modifier
-                        .onSizeChanged {
-                            moreHeight.value = with(density) {
-                                it.height.toDp()
-                            }
-                        }
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter)
-                        .padding(
-                            bottom = LocalBottomControllerHeight.current - 8.dp
-                        )
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                sheetDetailViewModel.removeNetSheetList()
-                            }
-                            .height(38.dp)
-                            .background(
-                                MaterialTheme.colorScheme.surface,
-                                shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
-                            ),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(text = "移除歌单")
-                    }
-                }
-            }
-        }
-    }
-}
 
 
 @Composable
@@ -416,12 +229,12 @@ fun NetSheetDetail(
             Spacer(modifier = Modifier.height(8.dp))
             when (state.value) {
                 is LCE.Error -> {
-                        Error {
-                            sheetDetailViewModel.loadData()
-                        }
+                    Error {
+                        sheetDetailViewModel.loadData()
+                    }
                 }
                 is LCE.Loading -> {
-                        Loading()
+                    Loading()
                 }
                 is LCE.Success -> {}
             }
@@ -478,7 +291,7 @@ fun SheetImgAndDesc(
     navController: NavHostController
 ) {
     val item = viewModel.sheetDetail.collectAsState().value
-    val subTitle = if(item.sheetDesc.isNullOrBlank()) "暂无介绍" else item.sheetDesc
+    val subTitle = if (item.sheetDesc.isNullOrBlank()) "暂无介绍" else item.sheetDesc
     Column(
         Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -517,10 +330,9 @@ fun MediaPopWindow(
     val artistPop = remember { mutableStateOf(false) }
     val sheetPop = remember { mutableStateOf(false) }
     val snack = sheetDetailViewModel.snackBarTitle.collectAsState(initial = "")
-    LaunchedEffect(snack.value){
-        if(snack.value.isNotBlank()){
+    LaunchedEffect(snack.value) {
+        if (snack.value.isNotBlank()) {
             snackbarHostState.showSnackbar(snack.value)
-            sheetPop.value = false
         }
     }
     val scope = rememberCoroutineScope()
@@ -567,7 +379,7 @@ fun MediaPopWindow(
                 }
                 PopItem(desc = "添加到歌单") {
                     scope.launch {
-                        sheetDetailViewModel.refreshSheetLocalList(item.mediaId.isLocal())
+                        sheetDetailViewModel.refreshSheetList(item.mediaId.isLocal())
                         state.value = false
                         sheetPop.value = true
                     }
@@ -603,10 +415,11 @@ fun MediaPopWindow(
         Spacer(modifier = Modifier.height(16.dp))
     }, popItems = sheetDetailViewModel.sheetList.value.map {
         PopItems("${it.mediaMetadata.title}") {
-                sheetDetailViewModel.insertMusicToSheet(
-                    mediaItem = item,
-                    sheetItem = it
-                )
+            sheetPop.value = false
+            sheetDetailViewModel.insertMusicToSheet(
+                mediaItem = item,
+                sheetItem = it
+            )
         }
     })
 

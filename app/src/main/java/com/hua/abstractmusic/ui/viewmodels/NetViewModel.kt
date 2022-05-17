@@ -19,7 +19,10 @@ import com.hua.model.other.Constants.NETWORK_BANNER_ID
 import com.hua.model.other.Constants.NETWORK_MUSIC_ID
 import com.hua.model.other.Constants.NETWORK_RECOMMEND_ID
 import com.hua.network.ApiResult
+import com.hua.network.onFailure
+import com.hua.network.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

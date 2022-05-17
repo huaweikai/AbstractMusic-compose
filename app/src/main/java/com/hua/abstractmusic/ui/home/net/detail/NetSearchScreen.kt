@@ -59,7 +59,19 @@ fun NetSearchScreen(
     val searchText = searchViewModel.searchText.value
     val focus = LocalFocusManager.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    LifecycleFocusClearUtils()
+    DisposableEffect(Unit) {
+        val observer = LifecycleEventObserver { source, event ->
+            if (event == Lifecycle.Event.ON_PAUSE) {
+                focus.clearFocus()
+            }else if (event == Lifecycle.Event.ON_DESTROY){
+                searchViewModel.clear()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        this.onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
     Scaffold(
         topBar = {
             SmallTopAppBar(
@@ -153,10 +165,11 @@ fun NetSearchScreen(
             }
         }
     }
-    BackHandler(true) {
-        navController.navigateUp()
-        searchViewModel.clear()
-    }
+//    BackHandler(true) {
+//        navController.navigateUp()
+//        searchViewModel.clear()
+//    }
+
 }
 
 private val tabs = listOf(

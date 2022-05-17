@@ -3,7 +3,7 @@ package com.hua.abstractmusic.repository
 import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.media3.common.MediaItem
-import com.hua.abstractmusic.base.repository.BaseRepository
+import com.hua.abstractmusic.base.repository.MusicRepository
 import com.hua.abstractmusic.preference.UserInfoData
 import com.hua.abstractmusic.ui.home.net.detail.SearchObject
 import com.hua.abstractmusic.utils.toMediaItem
@@ -12,8 +12,6 @@ import com.hua.network.api.MusicAPI
 import com.hua.network.api.SearchApi
 import com.hua.model.other.Constants.NETWORK_ALBUM_ID
 import com.hua.model.other.Constants.NETWORK_ARTIST_ID
-import com.hua.model.other.Constants.NETWORK_MUSIC_ID
-import com.hua.model.other.Constants.NET_SHEET_ID
 import com.hua.model.other.Constants.ROOT_SCHEME
 import com.hua.model.other.Constants.TYPE_NETWORK_ALBUM
 import com.hua.model.other.Constants.TYPE_NETWORK_ARTIST
@@ -35,7 +33,7 @@ class NetWorkRepository(
     private val searchApi:SearchApi,
     private val itemTree: MediaItemTree,
     private val userInfoData: UserInfoData
-) :BaseRepository{
+) :MusicRepository{
     override suspend fun selectTypeList(parentId: Uri): ApiResult<List<MediaItem>> {
         val result = when(parentId.authority) {
             TYPE_NETWORK_ALBUM -> {

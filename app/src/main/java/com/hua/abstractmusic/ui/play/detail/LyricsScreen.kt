@@ -25,11 +25,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import coil.transform.RoundedCornersTransformation
+import com.hua.abstractmusic.ui.LocalMusicScreenFirstColor
+import com.hua.abstractmusic.ui.LocalMusicScreenSecondColor
 import com.hua.abstractmusic.ui.LocalPlayingViewModel
-import com.hua.abstractmusic.ui.utils.ArtImage
-import com.hua.abstractmusic.ui.utils.LCE
-import com.hua.abstractmusic.ui.utils.TitleAndArtist
-import com.hua.abstractmusic.ui.utils.translucent
+import com.hua.abstractmusic.ui.utils.*
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 import com.hua.abstractmusic.utils.textDp
 import com.hua.model.lyrics.LyricsDTO
@@ -50,7 +49,7 @@ import kotlinx.coroutines.launch
 fun LyricsScreen(
     viewModel: PlayingViewModel = LocalPlayingViewModel.current,
 ) {
-
+    val scope = rememberCoroutineScope()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -91,7 +90,9 @@ fun LyricsScreen(
                 LyricsLoading()
             }
             is LCE.Error -> {
-                LyricsError()
+               Error {
+                   scope.launch { viewModel.getLyrics(viewModel.currentPlayItem.value) }
+               }
             }
             is LCE.Success -> {
                 LyricsSuccess()
@@ -189,31 +190,34 @@ private fun LyricsLoading() {
     }
 }
 
-@Composable
-private fun LyricsError(
-    viewModel: PlayingViewModel = LocalPlayingViewModel.current
-) {
-    val scope = rememberCoroutineScope()
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "没有歌词")
-        Button(
-            onClick = {
-            scope.launch {
-                viewModel.getLyrics(viewModel.currentPlayItem.value)
-            }
-        },
-            colors = ButtonDefaults.buttonColors(
-                contentColor = LocalContentColor.current
-            )
-        ) {
-            Text(text = "点击重试")
-        }
-    }
-}
+//@Composable
+//private fun LyricsError(
+//    viewModel: PlayingViewModel = LocalPlayingViewModel.current
+//) {
+//    com.hua.abstractmusic.ui.utils.Error {
+//
+//    }
+//    val scope = rememberCoroutineScope()
+//    Column(
+//        modifier = Modifier.fillMaxSize(),
+//        verticalArrangement = Arrangement.Center,
+//        horizontalAlignment = Alignment.CenterHorizontally
+//    ) {
+//        Text(text = "没有歌词")
+//        Button(
+//            onClick = {
+//            scope.launch {
+//                viewModel.getLyrics(viewModel.currentPlayItem.value)
+//            }
+//        },
+//            colors = ButtonDefaults.buttonColors(
+//                contentColor = MaterialTheme.colorScheme.onBackground
+//            )
+//        ) {
+//            Text(text = "点击重试")
+//        }
+//    }
+//}
 
 
 @OptIn(ExperimentalFoundationApi::class)

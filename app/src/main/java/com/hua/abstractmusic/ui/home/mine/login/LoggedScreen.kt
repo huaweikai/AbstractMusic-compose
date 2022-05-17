@@ -217,10 +217,10 @@ fun UserInfo(
         CoilImage(
             url = data.head,
             modifier = Modifier
-                .size(avatarSize)
-                .clickable {
-                    selectPicture.launch("image/*")
-                },
+                .size(avatarSize),
+//                .clickable {
+//                    selectPicture.launch("image/*")
+//                },
             shape = CircleShape
         )
     }

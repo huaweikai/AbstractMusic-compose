@@ -3,7 +3,9 @@ import Version.compose_md3_version
 import Version.compose_version
 import Version.hilt_compose_version
 import Version.hilt_version
+import Version.hilt_viewModel
 import Version.lifecycle_version
+import Version.material
 import Version.media2_version
 import Version.media3_version
 import Version.mmkv_version
@@ -17,13 +19,11 @@ import Version.room_version
  */
 
 object Google {
-    const val material = "com.google.android.material:material:1.5.0"
-
+    const val material = "com.google.android.material:material:${Version.material}"
     const val hilt_android = "com.google.dagger:hilt-android:$hilt_version"
     const val hilt_compiler = "com.google.dagger:hilt-compiler:$hilt_version"
-    const val hilt_viewModel = "androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03"
-
-    const val gson = "com.google.code.gson:gson:2.8.5"
+    const val hilt_viewModel = "androidx.hilt:hilt-lifecycle-viewmodel:${Version.hilt_viewModel}"
+    const val gson = "com.google.code.gson:gson:${Version.gson}"
 
 //        const val exoplayer_core = "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
 //        const val exoplayer_ui = "com.google.android.exoplayer:exoplayer-ui:${exoplayer_version}"

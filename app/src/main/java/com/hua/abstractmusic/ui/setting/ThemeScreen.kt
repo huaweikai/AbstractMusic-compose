@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import com.google.accompanist.insets.statusBarsHeight
 import com.hua.abstractmusic.ui.*
 import com.hua.abstractmusic.ui.home.MainPageItem
@@ -44,15 +45,21 @@ import kotlin.math.roundToInt
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ThemeScreen() {
+fun ThemeScreen(
+    settingNavController:NavHostController
+) {
     val themeViewModel = hiltViewModel<ThemeViewModel>()
+    val globalThemeViewModel = LocalThemeViewModel.current
     val primary by themeViewModel.monetColor
     Scaffold {
-        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(Modifier.fillMaxWidth().padding(it), horizontalAlignment = Alignment.CenterHorizontally) {
             Spacer(modifier = Modifier
                 .statusBarsPadding()
                 .padding(top = 16.dp))
-            ColorPicker(themeViewModel, MaterialTheme.colorScheme.primary)
+            ColorPicker(themeViewModel, MaterialTheme.colorScheme.primary, cancelCustom = {
+                globalThemeViewModel.closeCustomThemeColor()
+                settingNavController.navigateUp()
+            })
             ThemePreview(
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
@@ -122,7 +129,11 @@ fun ThemePreview(modifier: Modifier = Modifier, color: dev.kdrag0n.monet.theme.C
 }
 
 @Composable
-fun ColorPicker(themeViewModel: ThemeViewModel, themeColor: Color) {
+fun ColorPicker(
+    themeViewModel: ThemeViewModel,
+    themeColor: Color,
+    cancelCustom:()->Unit
+) {
     val globalThemeViewModel = LocalThemeViewModel.current
     var red by remember {
         mutableStateOf((255 * themeColor.red).roundToInt())
@@ -188,9 +199,7 @@ fun ColorPicker(themeViewModel: ThemeViewModel, themeColor: Color) {
         }) {
             Text(text = "确认")
         }
-        TextButton(onClick = {
-            globalThemeViewModel.closeCustomThemeColor()
-        }) {
+        TextButton(onClick = cancelCustom) {
             Text(text = "取消自定义主题色")
         }
     }

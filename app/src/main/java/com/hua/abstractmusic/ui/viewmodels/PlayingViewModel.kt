@@ -80,6 +80,9 @@ class PlayingViewModel @Inject constructor(
 
     private var screenIsDark = false
 
+    private val _hasNextOrPrev = mutableStateOf(hasNextOrPrev())
+    val hasNextOrPrev :State<Pair<Boolean,Boolean>> get() = _hasNextOrPrev
+
     init {
         viewModelScope.launch {
             mediaConnect.isConnected.collectLatest {
@@ -150,6 +153,7 @@ class PlayingViewModel @Inject constructor(
         updateItem(browser.currentMediaItem)
         shuffleUI.value = browser.shuffleModeEnabled
         repeatModeUI.value = browser.repeatMode
+        _hasNextOrPrev.value = hasNextOrPrev()
     }
 
     private var positionJob: Job? = null
@@ -202,6 +206,7 @@ class PlayingViewModel @Inject constructor(
             }
         }
         transformColor(item)
+        _hasNextOrPrev.value = hasNextOrPrev()
         maxValue.value = browser.duration.toFloat()
         updateCurrentPlayList()
     }
@@ -364,5 +369,12 @@ class PlayingViewModel @Inject constructor(
             )
             itemColor.value = Pair(Color(result.first), Color(result.second))
         }
+    }
+
+    private fun hasNextOrPrev():Pair<Boolean,Boolean>{
+        val browser = mediaConnect.browser ?: return Pair(true,true)
+        return Pair(
+            browser.hasNextMediaItem(),browser.hasPreviousMediaItem()
+        )
     }
 }

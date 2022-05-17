@@ -77,6 +77,7 @@ class SheetDetailViewModel @Inject constructor(
             updateItem(mediaItem)
         }
     }
+
     init {
         savedStateHandle?.let {
             parcelItem = it.get(PARCEL_ITEM_ID)
@@ -121,7 +122,7 @@ class SheetDetailViewModel @Inject constructor(
         playListMap[parcelItem!!.mediaId] = sheetDetailList
     }
 
-   private fun netfreshSheetList() {
+    private fun netfreshSheetList() {
         parcelItem ?: return
         viewModelScope.launch {
             _screenState.value = LCE.Loading
@@ -262,9 +263,9 @@ class SheetDetailViewModel @Inject constructor(
 
     fun selectArtistByMusicId(item: MediaItem) {
         viewModelScope.launch {
-            val result = if(item.mediaId.isLocal()){
+            val result = if (item.mediaId.isLocal()) {
                 repository.selectArtistByMusicId(item)
-            }else{
+            } else {
                 netRepository.selectArtistByMusicId(item)
             }
             moreArtistList.value = result.get { emptyList() }
@@ -279,9 +280,9 @@ class SheetDetailViewModel @Inject constructor(
 
     fun selectAlbumByMusicId(item: MediaItem) {
         viewModelScope.launch {
-            val result = if(item.mediaId.isLocal()){
+            val result = if (item.mediaId.isLocal()) {
                 repository.selectAlbumByMusicId(item)
-            }else{
+            } else {
                 netRepository.selectAlbumByMusicId(item)
             }
             moreAlbum.value = result.get { Constant.NULL_MEDIA_ITEM }
@@ -298,16 +299,15 @@ class SheetDetailViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             val sheetId = Uri.parse(sheetItem.mediaId).lastPathSegment
-            val result = if(sheetItem.mediaId.isLocal()){
-                repository.insertMusicToSheet(sheetId!!,mediaItem)
-            }else{
-                netRepository.insertMusicToSheet(sheetId!!,mediaItem)
+            val result = if (sheetItem.mediaId.isLocal()) {
+                repository.insertMusicToSheet(sheetId!!, mediaItem)
+            } else {
+                netRepository.insertMusicToSheet(sheetId!!, mediaItem)
             }
             result.onSuccess {
-                showSnackBar("加入歌单成功")
-            }
-            result.onFailure {
-                showSnackBar(it.errorMsg ?:"")
+                showSnackBar("${mediaItem.mediaMetadata.title} 加入歌单 ${sheetItem.mediaMetadata.title} 成功")
+            }.onFailure {
+                showSnackBar(it.errorMsg ?: "")
             }
         }
 
@@ -317,10 +317,9 @@ class SheetDetailViewModel @Inject constructor(
 
     val sheetList = mutableStateOf(emptyList<MediaItem>())
 
-    fun refreshSheetLocalList(isLocal: Boolean) {
-        sheetList.value = mediaConnect.itemTree.getCacheItems(
-            if (isLocal) Constants.LOCAL_SHEET_ID else "${Constants.ROOT_SCHEME}${user.userToken}"
-        )
+    suspend fun refreshSheetList(isLocal: Boolean) {
+        sheetList.value = if (isLocal) repository.selectUserSheet()
+            .get { emptyList() } else netRepository.selectUserSheet().get { emptyList() }
     }
 
     fun deleteSheet() {
@@ -328,7 +327,7 @@ class SheetDetailViewModel @Inject constructor(
             val id = Uri.parse(parcelItem?.mediaId).lastPathSegment
             if (parcelItem?.mediaId?.isLocal() == true) {
                 repository.deleteSheet(id!!)
-            }else{
+            } else {
                 netRepository.deleteSheet(id!!)
             }
             refresh()
@@ -348,7 +347,7 @@ class SheetDetailViewModel @Inject constructor(
         )
     }
 
-    private fun showSnackBar(message:String){
+    private fun showSnackBar(message: String) {
         viewModelScope.launch {
             snackBarTitle.emit(message)
         }
@@ -361,7 +360,7 @@ private fun MediaItem.toSheetVO() = SheetVO(
     userId = this.mediaMetadata.extras?.getInt("userId") ?: -1,
     title = this.mediaMetadata.title.toString(),
     artUri = this.mediaMetadata.artworkUri.toString(),
-    sheetDesc = "${this.mediaMetadata.subtitle?:""}",
+    sheetDesc = "${this.mediaMetadata.subtitle ?: ""}",
     num = 0,
     author = this.mediaMetadata.artist.toString()
 )

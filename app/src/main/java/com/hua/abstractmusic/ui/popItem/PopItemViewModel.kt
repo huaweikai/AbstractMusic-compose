@@ -100,10 +100,9 @@ class PopItemViewModel @Inject constructor(
                 netRepository.insertMusicToSheet(sheetId!!, mediaItem)
             }
             result.onSuccess {
-                showSnackBar("加入歌单成功")
-            }
-            result.onFailure {
-                showSnackBar((result as ApiResult.Failure).error.errorMsg ?: "")
+                showSnackBar("${mediaItem.mediaMetadata.title} 加入歌单 ${sheetItem.mediaMetadata.title} 成功")
+            }.onFailure {
+                showSnackBar(it.errorMsg ?: "")
             }
         }
     }

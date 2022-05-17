@@ -52,7 +52,7 @@ fun SettingScreen() {
             SettingMain(settNavController)
         }
         composable("setting_theme") {
-            ThemeScreen()
+            ThemeScreen(settNavController)
         }
         composable("setting_user"){
             UserChangeScreen(settingNavController = settNavController)

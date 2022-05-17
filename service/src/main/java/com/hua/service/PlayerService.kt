@@ -65,14 +65,18 @@ class PlayerService : MediaLibraryService() {
 
 
     private fun initSessionAndPlayer() {
-        val sessionActivityPendingIntent:PendingIntent = PendingIntent.getActivity(this,0,Intent("com.hua.abstractmusic.NOTIFICATION_START"),PendingIntent.FLAG_IMMUTABLE)
+        val sessionActivityPendingIntent = PendingIntent
+            .getActivity(this,0,
+                Intent("com.hua.abstractmusic.NOTIFICATION_START"),PendingIntent.FLAG_IMMUTABLE)
         val sessionPendingIntent =
             packageManager?.getLaunchIntentForPackage(packageName)?.let { intent ->
                 PendingIntent.getActivity(
                     this, 0, intent, PendingIntent.FLAG_IMMUTABLE
                 )
             }
-
+//        val sessionActivityPendingIntent:PendingIntent = PendingIntent.getActivity(this,0,Intent(
+//            "com.hua.abstractmusic.NOTIFICATION_START"
+//        ),PendingIntent.FLAG_IMMUTABLE)
         mediaLibrarySession = MediaLibrarySession.Builder(
             this,
             exoplayer.apply { addListener(PlayerListener()) },

@@ -3,7 +3,7 @@ package com.hua.abstractmusic.repository
 import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.media3.common.MediaItem
-import com.hua.abstractmusic.base.repository.BaseRepository
+import com.hua.abstractmusic.base.repository.MusicRepository
 import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.utils.toMediaItem
 import com.hua.model.sheet.SheetMusicPO
@@ -16,10 +16,7 @@ import com.hua.network.Error
 import com.hua.service.MediaConnect
 import com.hua.model.other.Constants
 import com.hua.service.room.dao.MusicDao
-import com.hua.service.usecase.events.MusicInsertError
 import com.hua.taglib.TaglibLibrary
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 /**
  * @author : huaweikai
@@ -31,7 +28,7 @@ class LocalRepository(
     private val mediaConnect: MediaConnect,
     private val taglibLibrary: TaglibLibrary,
     private val dao: MusicDao
-) : BaseRepository {
+) : MusicRepository {
     override suspend fun selectTypeList(parentId: Uri): ApiResult<List<MediaItem>> {
         val cache = mediaConnect.itemTree.getCacheItems("$parentId")
         return ApiResult.Success(

@@ -119,11 +119,11 @@ fun PopupWindow(
         Spacer(modifier = Modifier.height(16.dp))
     }, popItems = viewModel.sheetList.value.map {
         PopItems("${it.mediaMetadata.title}") {
+            sheetPop.value = false
             viewModel.insertMusicToSheet(
                 mediaItem = item,
                 sheetItem = it
             )
-            sheetPop.value = false
         }
     })
 
