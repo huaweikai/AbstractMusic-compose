@@ -9,9 +9,9 @@ object Version {
     const val targetSdkVersion = 31
 
     const val kotlin_version = "1.6.21"
-    const val compose_version = "1.2.0-beta01"
+    const val compose_version = "1.2.0-beta02"
     const val activity_compose_version = "1.4.0"
-    const val compose_md3_version = "1.0.0-alpha11"
+    const val compose_md3_version = "1.0.0-alpha12"
     const val navigation_version = "2.4.0-rc01"
     const val compose_accompanist = "0.24.8-beta"
     const val retrofit_version = "2.9.0"

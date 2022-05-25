@@ -30,7 +30,8 @@ fun Activity.rememberWindowSizeClass(): WindowSize {
 
     // Convert the window size to [Dp]
     val windowDpSize = with(LocalDensity.current) {
-        windowSize.toDpSize()
+        DpSize(windowSize.width.toDp(),windowSize.height.toDp())
+//        windowSize.toDpSize()
     }
 
     // Calculate the window size class

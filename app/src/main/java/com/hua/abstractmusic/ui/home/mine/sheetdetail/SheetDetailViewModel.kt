@@ -2,7 +2,9 @@ package com.hua.abstractmusic.ui.home.mine.sheetdetail
 
 import android.annotation.SuppressLint
 import android.net.Uri
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.focus.FocusState
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -32,7 +34,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -147,17 +151,27 @@ class SheetDetailViewModel @Inject constructor(
         }
     }
 
-    fun uploadSheetDesc(
-        onBack: () -> Unit
+    private val _uploadState = mutableStateOf<LCE>(LCE.Success)
+    val uploadSate: State<LCE> get() = _uploadState
+
+    private fun uploadSheetDesc(
+        onSuccess: () -> Unit
     ) {
         parcelItem ?: return
-        viewModelScope.launch {
-            val sheetDesc = sheetDetail.value
-            if (parcelItem!!.mediaId.isLocal()) {
-                repository.updateSheet(sheetDesc)
-                onBack()
-            } else {
-                putImgUpdateNetSheet(sheetDesc, onBack)
+        _uploadState.value = LCE.Loading
+        val sheetDesc = sheetDetail.value
+        if (sheetDesc.title.isBlank()) {
+            _uploadState.value = LCE.Error
+            showSnackBar("歌单标题不能为空")
+        } else {
+            viewModelScope.launch {
+                if (parcelItem!!.mediaId.isLocal()) {
+                    repository.updateSheet(sheetDesc)
+                    _uploadState.value = LCE.Success
+                    onSuccess()
+                } else {
+                    putImgUpdateNetSheet(sheetDesc, onSuccess)
+                }
             }
         }
     }
@@ -173,18 +187,46 @@ class SheetDetailViewModel @Inject constructor(
         sheetChangeList.value = list
     }
 
-    fun uploadSheetDesc(sheet: SheetVO) {
-        sheetDetail.value = sheet
+    fun sheetChangeAction(sheetChangeAction: SheetChangeAction) {
+        when (sheetChangeAction) {
+            is SheetChangeAction.SheetArtUriChange -> {
+                sheetDetail.value = sheetDetail.value.copy(artUri = sheetChangeAction.url)
+            }
+            is SheetChangeAction.TitleChange -> {
+                sheetDetail.value = sheetDetail.value.copy(title = sheetChangeAction.value)
+            }
+            is SheetChangeAction.SubTitleChange -> {
+                sheetDetail.value = sheetDetail.value.copy(sheetDesc = sheetChangeAction.value)
+            }
+            is SheetChangeAction.SaveSheet -> {
+                uploadSheetDesc {
+                    viewModelScope.launch(Dispatchers.Main) {
+                        sheetChangeAction.success()
+                        _uploadState.value = LCE.Success
+                    }
+                }
+            }
+            else -> {}
+        }
+        if(_uploadState.value == LCE.Error) _uploadState.value = LCE.Success
     }
+
+//    fun uploadSheetDesc(sheet: SheetVO) {
+//        sheetDetail.value = sheet
+//    }
+
 
     private fun putImgUpdateNetSheet(
         sheet: SheetVO,
-        onBack: () -> Unit
+        onSuccess: () -> Unit
     ) {
         if (sheet.artUri == parcelItem?.artUri) {
-            viewModelScope.launch {
-                netRepository.updateSheet(sheet)
-                onBack()
+            viewModelScope.launch(Dispatchers.Main) {
+                netRepository.updateSheet(sheet).onSuccess {
+                    onSuccess()
+                }.onFailure {
+                    showSnackBar(it.errorMsg ?: "")
+                }
             }
         } else {
             val uri = Uri.parse(sheet.artUri)
@@ -202,14 +244,20 @@ class SheetDetailViewModel @Inject constructor(
                     onSuccess = {
                         val path =
                             "https://abstractmusic.obs.cn-north-4.myhuaweicloud.com/$fileName"
-                        netRepository.updateSheet(sheet.copy(artUri = path))
+                        netRepository.updateSheet(sheet.copy(artUri = path)).onSuccess {
+                            onSuccess()
+                        }.onFailure {
+                            _uploadState.value = LCE.Error
+                            showSnackBar(it.errorMsg ?: "")
+                        }
                     },
                     onError = {
-                        netRepository.updateSheet(sheet.copy(artUri = parcelItem?.artUri))
+                        sheetDetail.value = sheet.copy(artUri = parcelItem?.artUri)
+                        _uploadState.value = LCE.Error
+                        showSnackBar("上传歌单图失败")
                     },
                     onCompletion = {
                         mediaConnect.context.contentResolver.delete(uri, null, null)
-                        onBack()
                     }
                 )
             }
@@ -347,11 +395,21 @@ class SheetDetailViewModel @Inject constructor(
         )
     }
 
-    private fun showSnackBar(message: String) {
+    fun showSnackBar(message: String) {
         viewModelScope.launch {
             snackBarTitle.emit(message)
         }
     }
+}
+
+
+sealed class SheetChangeAction {
+    data class TitleChange(val value: String) : SheetChangeAction()
+    data class TitleFocusChange(val focusState: FocusState) : SheetChangeAction()
+    data class SubTitleChange(val value: String) : SheetChangeAction()
+    data class SubTitleFocusChange(val focusState: FocusState) : SheetChangeAction()
+    data class SheetArtUriChange(val url: String) : SheetChangeAction()
+    data class SaveSheet(val success: () -> Unit) : SheetChangeAction()
 }
 
 @SuppressLint("UnsafeOptInUsageError")

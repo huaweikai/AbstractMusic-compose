@@ -226,7 +226,7 @@ private fun DeleteUserCheck(
                 }
             },
             title = {
-                Row(Modifier.fillMaxWidth()) {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Rounded.Warning,
                         contentDescription = "警告",

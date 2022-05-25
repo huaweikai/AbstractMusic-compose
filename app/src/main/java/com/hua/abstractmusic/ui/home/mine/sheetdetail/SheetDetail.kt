@@ -2,6 +2,7 @@ package com.hua.abstractmusic.ui.home.mine.sheetdetail
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import android.util.Base64
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,9 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -37,6 +41,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.transform.RoundedCornersTransformation
+import com.google.gson.Gson
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
@@ -46,9 +51,12 @@ import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.*
 import com.hua.abstractmusic.utils.getCacheDir
 import com.hua.abstractmusic.utils.isLocal
+import com.hua.model.parcel.toGson
 import com.hua.model.parcel.toNavType
 import com.hua.network.onFailure
+import com.hua.network.utils.toJsonString
 import kotlinx.coroutines.launch
+import java.util.*
 
 
 /**
@@ -114,7 +122,7 @@ fun NavSheetDetail(
                     }
                 },
                 actions = {
-                    if (sheetDetailViewModel.hasPermission()) {
+//                    if (sheetDetailViewModel.hasPermission()) {
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = "",
@@ -124,7 +132,7 @@ fun NavSheetDetail(
                                     popState.value = true
                                 }
                         )
-                    }
+//                    }
                 },
                 modifier = Modifier.statusBarsPadding()
             )
@@ -174,25 +182,47 @@ fun NavSheetDetail(
                         modifier = Modifier
                             .statusBarsPadding()
                             .background(
-                                MaterialTheme.colorScheme.inversePrimary,
+                                MaterialTheme.colorScheme.secondaryContainer,
                                 shape = RoundedCornerShape(8.dp)
                             )
                     ) {
-                        MorePopItem(icon = Icons.Default.Edit, title = "修改歌单") {
-                            sheetNavHostController.navigate("change")
+                        if(sheetDetailViewModel.hasPermission()){
+                            MorePopItem(icon = Icons.Default.Edit, title = "修改歌单") {
+                                sheetNavHostController.navigate("change")
+                            }
+                            MorePopItem(icon = Icons.Default.Delete, title = "删除歌单") {
+                                sheetDetailViewModel.deleteSheet()
+                                appNavHostController.navigateUp()
+                            }
                         }
-                        MorePopItem(icon = Icons.Default.Delete, title = "删除歌单") {
-                            sheetDetailViewModel.deleteSheet()
-                            appNavHostController.navigateUp()
-                        }
+                        val clipboardManager = LocalClipboardManager.current
+//                        if(!sheetDetailViewModel.isLocal){
+                            MorePopItem(icon = Icons.Rounded.Share, title = "分享歌单") {
+                                sheetDetailViewModel.parcelItem?.let {
+                                    val share = it.toGson()
+                                    clipboardManager.setText(AnnotatedString(
+//                                        it.toGson()
+                                    Base64.encodeToString(share.toByteArray(),Base64.DEFAULT)
+                                    ))
+
+                                    popState.value = false
+                                    sheetDetailViewModel.showSnackBar("已复制到粘贴板")
+                                }
+                            }
+//                        }
                     }
                 }
             }
         }
         MediaPopWindow(
-            sheetDetailViewModel = sheetDetailViewModel,
-            snackbarHostState = snackbarHostState
+            sheetDetailViewModel = sheetDetailViewModel
         )
+    }
+    val snack = sheetDetailViewModel.snackBarTitle.collectAsState(initial = "")
+    LaunchedEffect(snack.value) {
+        if (snack.value.isNotBlank()) {
+            snackbarHostState.showSnackbar(snack.value)
+        }
     }
 
 }
@@ -321,7 +351,6 @@ fun SheetImgAndDesc(
 @Composable
 fun MediaPopWindow(
     sheetDetailViewModel: SheetDetailViewModel,
-    snackbarHostState: SnackbarHostState,
     state: MutableState<Boolean> = LocalPopWindow.current,
     item: MediaItem = LocalPopWindowItem.current.value,
     config: Configuration = LocalConfiguration.current,
@@ -329,12 +358,6 @@ fun MediaPopWindow(
 ) {
     val artistPop = remember { mutableStateOf(false) }
     val sheetPop = remember { mutableStateOf(false) }
-    val snack = sheetDetailViewModel.snackBarTitle.collectAsState(initial = "")
-    LaunchedEffect(snack.value) {
-        if (snack.value.isNotBlank()) {
-            snackbarHostState.showSnackbar(snack.value)
-        }
-    }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     if (state.value) {

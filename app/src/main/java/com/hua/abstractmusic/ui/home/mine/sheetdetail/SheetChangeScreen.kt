@@ -15,11 +15,10 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.rounded.Send
+import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,10 +51,8 @@ fun SheetChangeScreen(
     val context = LocalContext.current
     val cropPicture = rememberLauncherForActivityResult(UCropActivityResultContract()) {
         if (it != null) {
-            sheetDetailViewModel.uploadSheetDesc(
-                sheetDetailViewModel.sheetDetail.value.copy(
-                    artUri = it.toString()
-                )
+            sheetDetailViewModel.sheetChangeAction(
+                SheetChangeAction.SheetArtUriChange(it.toString())
             )
         } else {
             Toast.makeText(context, "连接为空", Toast.LENGTH_SHORT).show()
@@ -69,6 +66,8 @@ fun SheetChangeScreen(
         }
     }
     val item = sheetDetailViewModel.sheetDetail.collectAsState().value
+    val snackbarHostState = remember { SnackbarHostState() }
+
     Scaffold(
         topBar = {
             SmallTopAppBar(
@@ -86,31 +85,47 @@ fun SheetChangeScreen(
                     )
                 },
                 actions = {
-                    val state = remember { mutableStateOf(false) }
                     Box(
                         modifier = Modifier
                             .size(32.dp)
                             .padding(end = 8.dp)
                     ) {
-                        if (state.value) {
+                        val uploadState = sheetDetailViewModel.uploadSate.value
+                        if (uploadState == LCE.Loading) {
                             CircularProgressIndicator()
                         } else {
                             Icon(
-                                imageVector = Icons.Default.Send,
+                                imageVector = if (uploadState == LCE.Success) Icons.Rounded.Send else Icons.Rounded.Warning,
                                 contentDescription = "",
                                 modifier = Modifier
                                     .clickable {
-                                        state.value = true
-                                        sheetDetailViewModel.uploadSheetDesc {
-                                            state.value = false
+                                        sheetDetailViewModel.sheetChangeAction(SheetChangeAction.SaveSheet {
                                             sheetNavHostController.navigateUp()
                                         }
-                                    })
+                                        )
+                                    }
+                            )
                         }
                     }
                 },
                 modifier = Modifier.statusBarsPadding()
             )
+        },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(
+                    PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = LocalBottomControllerHeight.current.coerceAtLeast(80.dp)
+                    )
+                )
+            ) {
+                Snackbar {
+                    Text(text = it.visuals.message)
+                }
+            }
         }
     ) {
         val moreHeight = remember {
@@ -128,37 +143,59 @@ fun SheetChangeScreen(
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                ArtImage(
+                CoilImage(
                     modifier = Modifier
                         .size(150.dp)
+                        .clip(RoundedCornerShape(16.dp))
                         .clickable {
                             selectPicture.launch("image/*")
                         },
-                    uri = item.artUri,
-                    desc = "",
-                    transformation = RoundedCornersTransformation(20f)
+                    url = item.artUri,
+                    contentDescription = "",
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                BasicTextField(
-                    value = item.title,
-                    onValueChange = { sheetDetailViewModel.uploadSheetDesc(item.copy(title = it)) },
-                    maxLines = 1,
-                    singleLine = true,
+                TransparentHintTextField(
+                    text = item.title,
+                    hint = "暂无标题",
+                    isHintVisible = item.title.isBlank(),
+                    onValueChange = {
+                        sheetDetailViewModel.sheetChangeAction(SheetChangeAction.TitleChange(it))
+                    },
                     textStyle = TextStyle(
                         fontSize = 22.sp, lineHeight = 26.sp, textAlign = TextAlign.Center
-                    )
+                    ),
                 )
+//                BasicTextField(
+//                    value = item.title,
+//                    onValueChange = { sheetDetailViewModel.uploadSheetDesc(item.copy(title = it)) },
+//                    maxLines = 1,
+//                    singleLine = true,
+//                    textStyle = TextStyle(
+//                        fontSize = 22.sp, lineHeight = 26.sp, textAlign = TextAlign.Center
+//                    )
+//                )
                 Spacer(modifier = Modifier.height(8.dp))
-                BasicTextField(
-                    value = item.sheetDesc ?: "",
+                TransparentHintTextField(
+                    text = item.sheetDesc ?: "",
+                    hint = "暂无介绍",
+                    isHintVisible = item.sheetDesc.isNullOrBlank(),
                     onValueChange = {
-                        sheetDetailViewModel.uploadSheetDesc(item.copy(sheetDesc = it))
+                        sheetDetailViewModel.sheetChangeAction(SheetChangeAction.SubTitleChange(it))
                     },
-                    maxLines = 2,
                     textStyle = TextStyle(
                         fontSize = 18.sp, lineHeight = 22.sp, textAlign = TextAlign.Center
-                    )
+                    ),
                 )
+//                BasicTextField(
+//                    value = item.sheetDesc ?: "",
+//                    onValueChange = {
+//                        sheetDetailViewModel.uploadSheetDesc(item.copy(sheetDesc = it))
+//                    },
+//                    maxLines = 2,
+//                    textStyle = TextStyle(
+//                        fontSize = 18.sp, lineHeight = 22.sp, textAlign = TextAlign.Center
+//                    )
+//                )
                 Spacer(modifier = Modifier.height(16.dp))
             }
             Box(modifier = Modifier.fillMaxSize()) {
@@ -167,7 +204,9 @@ fun SheetChangeScreen(
                         .fillMaxSize(),
                     contentPadding = PaddingValues(bottom = moreHeight.value + LocalBottomControllerHeight.current)
                 ) {
-                    itemsIndexed(sheetDetailViewModel.sheetChangeList.value, key = {_,item-> item.mediaId}) { index, item ->
+                    itemsIndexed(
+                        sheetDetailViewModel.sheetChangeList.value,
+                        key = { _, item -> item.mediaId }) { index, item ->
                         val data = item.mediaItem.mediaMetadata
                         Row(
                             Modifier
@@ -234,6 +273,12 @@ fun SheetChangeScreen(
                     }
                 }
             }
+        }
+    }
+    val snack = sheetDetailViewModel.snackBarTitle.collectAsState(initial = "")
+    LaunchedEffect(snack.value) {
+        if (snack.value.isNotBlank()) {
+            snackbarHostState.showSnackbar(snack.value)
         }
     }
 }

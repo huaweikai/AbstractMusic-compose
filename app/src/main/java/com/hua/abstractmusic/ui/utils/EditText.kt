@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.onFocusChanged
@@ -30,6 +31,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextAlign
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.utils.isEmail
 import com.hua.abstractmusic.utils.isUser
@@ -195,9 +197,10 @@ fun TransparentHintTextField(
     onValueChange: (String) -> Unit,
     textStyle: TextStyle = TextStyle(),
     singleLine: Boolean = false,
+    maxLines:Int = 1,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    onFocusChange: (FocusState) -> Unit
+    onFocusChange: (FocusState) -> Unit = {}
 ) {
     Box(
         modifier = modifier
@@ -212,11 +215,26 @@ fun TransparentHintTextField(
                 .onFocusChanged {
                     onFocusChange(it)
                 },
+            maxLines = maxLines,
             keyboardActions = keyboardActions,
-            keyboardOptions = keyboardOptions
+            keyboardOptions = keyboardOptions,
         )
+        val align = when(textStyle.textAlign){
+            TextAlign.Center->{
+                Alignment.Center
+            }
+            TextAlign.Left->{
+                Alignment.CenterStart
+            }
+            TextAlign.Right->{
+                Alignment.CenterEnd
+            }
+            else->{
+                Alignment.CenterStart
+            }
+        }
         if (isHintVisible) {
-            Text(text = hint, style = textStyle, color = Color.DarkGray.copy(0.6f))
+            Text(text = hint, modifier = Modifier.align(align),style = textStyle, color = Color.DarkGray.copy(0.6f))
         }
     }
 }

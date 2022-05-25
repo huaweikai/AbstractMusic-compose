@@ -1,7 +1,13 @@
 package com.hua.abstractmusic.ui.navigation
 
 import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.res.Configuration
+import android.util.Base64
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -9,6 +15,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,25 +27,29 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.*
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.ContextCompat.getSystemService
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.navigation.*
+import androidx.navigation.compose.*
 import com.google.accompanist.navigation.material.BottomSheetNavigator
+import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
 import com.google.accompanist.navigation.material.ModalBottomSheetLayout
 import com.google.accompanist.navigation.material.bottomSheet
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
+import com.google.gson.Gson
 import com.hua.abstractmusic.R
 import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
@@ -58,11 +69,14 @@ import com.hua.abstractmusic.ui.play.PlayScreen
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.setting.SettingScreen
 import com.hua.abstractmusic.ui.splash.SplashScreen
+import com.hua.abstractmusic.ui.utils.CoilImage
 import com.hua.abstractmusic.ui.utils.PopupWindow
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 import com.hua.abstractmusic.ui.viewmodels.ThemeViewModel
-import com.hua.model.parcel.NavTypeMediaItem
-import com.hua.model.parcel.defaultParcelizeMediaItem
+import com.hua.abstractmusic.utils.toMediaItem
+import com.hua.model.parcel.*
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -185,14 +199,45 @@ fun AppNavigation(
 //            playingViewModel.setController()
 //        }
 //    }
-}
 
+    val clipboardManager = LocalClipboardManager.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val scope = rememberCoroutineScope()
+    DisposableEffect(Unit) {
+        val lifecycleObserver = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                scope.launch {
+                    delay(800L)
+                    clipboardManager.getText()?.let {
+                        if(it.text.isNotBlank()){
+                            val result = kotlin.runCatching {
+                                val share = String(Base64.decode(it.text,Base64.DEFAULT))
+                                Gson().fromJson(share, ParcelizeMediaItem::class.java)
+                                share
+                            }
+                            if (result.isSuccess && controller.currentDestination?.route !in controllerDone) {
+                                controller.navigate(
+                                    "${Screen.ShareSheetDialog.route}?item=${result.getOrNull()}"
+                                )
+                                clipboardManager.setText(AnnotatedString(""))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
+        this.onDispose {
+            lifecycleOwner.lifecycle.removeObserver(lifecycleObserver)
+        }
+    }
+}
 
 @OptIn(
     ExperimentalFoundationApi::class,
     ExperimentalPagerApi::class,
     ExperimentalMaterialApi::class,
-    com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi::class
+    ExperimentalMaterialNavigationApi::class, ExperimentalMaterial3Api::class
 )
 fun NavGraphBuilder.router(
     sheetPlayState: ModalBottomSheetState,
@@ -206,7 +251,6 @@ fun NavGraphBuilder.router(
         HelloScreen()
     }
     composable(route = Screen.HomeScreen.route) {
-
         HomeScreen(
             onSizeChange = {
                 bottomNavigationHeight.value = it
@@ -264,7 +308,6 @@ fun NavGraphBuilder.router(
             }
         )
     ) {
-        val item = it.getValue("mediaItem", defaultParcelizeMediaItem)
         SheetDetail()
     }
 
@@ -326,6 +369,53 @@ fun NavGraphBuilder.router(
         BackHandler(true) {
             scope.launch {
                 sheetPlayState.hide()
+            }
+        }
+    }
+    dialog(route = "${Screen.ShareSheetDialog.route}?item={item}", arguments = listOf(
+        navArgument("item") {
+            type = NavTypeMediaItem()
+        }
+    )) {
+        val configuration = LocalConfiguration.current
+        val item = it.getValue("item", defaultParcelizeMediaItem)
+        val clipboardManager = LocalClipboardManager.current
+        val appNavController = LocalAppNavController.current
+        Card(
+            modifier = Modifier
+                .width(configuration.screenWidthDp.dp * 0.8f)
+                .height(
+                    configuration.screenHeightDp.dp * 0.4f
+                ),
+            shape = RoundedCornerShape(32.dp)
+        ) {
+            Text(text = "发现了分享的歌单~", fontSize = 22.sp,modifier = Modifier.padding(top = 16.dp, start = 16.dp))
+            Column(
+                Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CoilImage(
+                    url = item.artUri,
+                    modifier = Modifier
+                        .size(configuration.screenHeightDp.dp * 0.2f)
+                        .clip(
+                            RoundedCornerShape(16.dp)
+                        )
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = item.title, fontSize = 22.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(onClick = {
+                    appNavController.navigate(
+                        "${Screen.SheetDetailScreen.route}?mediaItem=${
+                            Gson().toJson(item)
+                        }"
+                    )
+                    clipboardManager.setText(AnnotatedString(""))
+                }) {
+                    Text(text = "立即查看")
+                }
             }
         }
     }

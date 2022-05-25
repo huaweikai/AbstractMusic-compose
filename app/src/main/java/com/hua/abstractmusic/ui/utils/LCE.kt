@@ -2,10 +2,7 @@ package com.hua.abstractmusic.ui.utils
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
@@ -56,6 +53,7 @@ fun Error(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(painter = painterResource(id = R.drawable.ic_network_error),modifier = Modifier.size(48.dp), contentDescription = "")
+        Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = { onclick() }) {
             Text(text = "点击重试")
         }

@@ -31,4 +31,6 @@ sealed class Screen(val route: String) {
     object PlayListScreen : Screen("playlist_screen")
 
     object OtherDetail:Screen("other_screen")
+
+    object ShareSheetDialog :Screen("share_sheet_dialog")
 }
