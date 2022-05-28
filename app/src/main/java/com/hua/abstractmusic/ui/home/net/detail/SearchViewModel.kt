@@ -76,14 +76,14 @@ class SearchViewModel @Inject constructor(
         searchMaps[SearchObject.Sheet(search)] = searchSheet
         viewModelScope.launch {
             searchMaps.keys.forEach {
+                val c = userDao.selectHistoryList().find { it.history == search }
+                if(c != null){
+                    userDao.deleteHistory(c.id)
+                }
+                userDao.insertHistory(HistoryPO(history = search))
                 searchMaps[it]!!.value = netRepository.search(it)
             }
             searchState.value = if (searchMusic.value is ApiResult.Success) LCE.Success else LCE.Error
-            val c = userDao.selectHistoryList().find { it.history == search }
-            if(c != null){
-                userDao.deleteHistory(c.id)
-            }
-            userDao.insertHistory(HistoryPO(history = search))
         }
     }
     fun clear(){

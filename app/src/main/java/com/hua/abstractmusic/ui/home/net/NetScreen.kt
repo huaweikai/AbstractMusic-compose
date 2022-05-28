@@ -1,6 +1,7 @@
 package com.hua.abstractmusic.ui.home.net
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -94,10 +95,10 @@ fun NetScreen(
         ) {
             when (state.value) {
                 LCE.Loading -> {
-                    if (netViewModel.bannerList.value.isEmpty()) {
-                        Loading()
-                    } else {
+                    if (netViewModel.isLoadData) {
                         SuccessContent(netViewModel = netViewModel)
+                    } else {
+                        Loading()
                     }
                 }
                 LCE.Error -> {

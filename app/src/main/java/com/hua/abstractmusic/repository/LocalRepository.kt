@@ -114,7 +114,7 @@ class LocalRepository(
                 musicId = "${Uri.parse(mediaItem.mediaId).lastPathSegment}",
                 title = "$title",
                 displayTitle = "$displayTitle",
-                displaySubtitle = "$displayTitle",
+                displaySubtitle = "$subtitle",
                 album = "$albumTitle",
                 artist = "$artist",
                 trackerNumber = trackNumber,

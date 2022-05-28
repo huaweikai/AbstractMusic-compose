@@ -2,6 +2,7 @@ package com.hua.abstractmusic.ui.viewmodels
 
 import android.annotation.SuppressLint
 import android.net.Uri
+import android.util.Log
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -59,6 +60,8 @@ class NetViewModel @Inject constructor(
     private val _playList = mutableStateOf<List<MediaData>>(emptyList())
     val playList: State<List<MediaData>> get() = _playList
 
+    var isLoadData = false
+
     val snackBarState = SnackbarHostState()
 
     init {
@@ -99,6 +102,8 @@ class NetViewModel @Inject constructor(
                     isPlaying = it.mediaId == browser?.currentMediaItem?.mediaId
                 )
             }
+            isLoadData = _bannerList.value.isNotEmpty()
+            delay(1000L)
             if (loadError) {
                 _screenState.value = LCE.Error
             } else {

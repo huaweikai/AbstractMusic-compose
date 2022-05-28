@@ -4,6 +4,7 @@ plugins {
     id "kotlinx-serialization"
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
+    id "kotlin-parcelize"
 //    id 'com.google.devtools.ksp' version '1.6.10-1.0.4'
 }
 
@@ -133,6 +134,7 @@ dependencies {
     implementation project(":blur")
     implementation project(":network")
     implementation project(":service")
+    implementation project(":material")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.8.1'
 

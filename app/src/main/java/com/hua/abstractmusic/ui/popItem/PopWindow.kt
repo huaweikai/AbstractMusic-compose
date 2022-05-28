@@ -1,4 +1,4 @@
-package com.hua.abstractmusic.ui.utils
+package com.hua.abstractmusic.ui.popItem
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
@@ -24,10 +24,12 @@ import coil.transform.RoundedCornersTransformation
 import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalPopWindow
 import com.hua.abstractmusic.ui.LocalPopWindowItem
-import com.hua.abstractmusic.ui.popItem.PopItemViewModel
-import com.hua.abstractmusic.ui.popItem.SnackData
 import com.hua.abstractmusic.ui.route.Screen
+import com.hua.abstractmusic.ui.utils.ArtImage
+import com.hua.abstractmusic.ui.utils.TitleAndArtist
 import com.hua.abstractmusic.utils.isLocal
+import com.hua.abstractmusic.utils.toMediaItem
+import com.hua.model.parcel.ParcelizeMediaItem
 import com.hua.model.parcel.toNavType
 import kotlinx.coroutines.launch
 

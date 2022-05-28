@@ -1,21 +1,11 @@
 package com.hua.abstractmusic.ui.navigation
 
 import android.annotation.SuppressLint
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.content.res.Configuration
 import android.util.Base64
-import android.util.Log
-import android.widget.Toast
+import android.widget.PopupWindow
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,17 +17,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.*
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.*
@@ -50,7 +34,6 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
 import com.google.gson.Gson
-import com.hua.abstractmusic.R
 import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.preference.getValue
@@ -58,24 +41,24 @@ import com.hua.abstractmusic.ui.*
 import com.hua.abstractmusic.ui.hello.HelloScreen
 import com.hua.abstractmusic.ui.home.Controller
 import com.hua.abstractmusic.ui.home.HomeScreen
+import com.hua.abstractmusic.ui.home.detail.DescDetailBottomSheet
 import com.hua.abstractmusic.ui.home.detail.albumdetail.LocalAlbumDetail
 import com.hua.abstractmusic.ui.home.detail.artistdetail.LocalArtistDetail
 import com.hua.abstractmusic.ui.home.mine.register.LoginScreen
 import com.hua.abstractmusic.ui.home.mine.register.RegisterScreen
-import com.hua.abstractmusic.ui.home.mine.sheetdetail.SheetDetail
+import com.hua.abstractmusic.ui.sheet.SheetDetail
 import com.hua.abstractmusic.ui.home.net.detail.NetSearchScreen
 import com.hua.abstractmusic.ui.play.PlayListScreen
 import com.hua.abstractmusic.ui.play.PlayScreen
+import com.hua.abstractmusic.ui.popItem.PopupWindow
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.setting.SettingScreen
+import com.hua.abstractmusic.ui.sheet.ShareSheetDialog
 import com.hua.abstractmusic.ui.splash.SplashScreen
-import com.hua.abstractmusic.ui.utils.CoilImage
-import com.hua.abstractmusic.ui.utils.PopupWindow
+import com.hua.abstractmusic.ui.route.Dialog
 import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 import com.hua.abstractmusic.ui.viewmodels.ThemeViewModel
-import com.hua.abstractmusic.utils.toMediaItem
 import com.hua.model.parcel.*
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -169,7 +152,7 @@ fun AppNavigation(
                         navController = LocalAppNavController.current,
                         startDestination = Screen.Splash.route
                     ) {
-                        router(sheetState, bottomNavigationHeight, viewPageState)
+                        router(sheetState, bottomNavigationHeight, viewPageState, snackBarHostState)
                     }
                 }
                 MusicController(
@@ -208,16 +191,17 @@ fun AppNavigation(
             if (event == Lifecycle.Event.ON_RESUME) {
                 scope.launch {
                     delay(800L)
-                    clipboardManager.getText()?.let {
-                        if(it.text.isNotBlank()){
+                    clipboardManager.getText()?.let { clipText ->
+                        if (clipText.text.isNotBlank()) {
                             val result = kotlin.runCatching {
-                                val share = String(Base64.decode(it.text,Base64.DEFAULT))
+                                val share = String(Base64.decode(clipText.text, Base64.DEFAULT))
                                 Gson().fromJson(share, ParcelizeMediaItem::class.java)
+                                    ?: throw Throwable()
                                 share
                             }
                             if (result.isSuccess && controller.currentDestination?.route !in controllerDone) {
                                 controller.navigate(
-                                    "${Screen.ShareSheetDialog.route}?item=${result.getOrNull()}"
+                                    "${Dialog.ShareSheetDialog.route}?item=${result.getOrNull()}"
                                 )
                                 clipboardManager.setText(AnnotatedString(""))
                             }
@@ -242,7 +226,8 @@ fun AppNavigation(
 fun NavGraphBuilder.router(
     sheetPlayState: ModalBottomSheetState,
     bottomNavigationHeight: MutableState<Dp>,
-    viewPageState: PagerState
+    viewPageState: PagerState,
+    snackbarHostState: SnackbarHostState
 ) {
     composable(route = Screen.Splash.route) {
         SplashScreen()
@@ -268,7 +253,6 @@ fun NavGraphBuilder.router(
             }
         ),
     ) {
-//        val item = it.getValue("mediaItem", defaultParcelizeMediaItem)
         LocalAlbumDetail()
     }
     composable(
@@ -282,7 +266,6 @@ fun NavGraphBuilder.router(
             }
         ),
     ) {
-//        val item = it.getValue("mediaItem", defaultParcelizeMediaItem)
         LocalArtistDetail()
     }
 
@@ -344,85 +327,36 @@ fun NavGraphBuilder.router(
             type = NavTypeMediaItem()
         }
     )) {
-        val item = it.getValue("item", defaultParcelizeMediaItem)
         val scope = rememberCoroutineScope()
-        Column(
-            modifier = Modifier.height(IntrinsicSize.Min),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_level_button),
-                modifier = Modifier.padding(16.dp),
-                contentDescription = ""
-            )
-            Text(text = item.title, fontSize = 24.sp)
-            Spacer(modifier = Modifier.height(16.dp))
-            Column(Modifier.fillMaxWidth()) {
-                Text(
-                    text = item.desc ?: "暂无介绍",
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 32.dp),
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
-                )
-            }
-        }
+        DescDetailBottomSheet(it.getValue("item", defaultParcelizeMediaItem))
         BackHandler(true) {
             scope.launch {
                 sheetPlayState.hide()
             }
         }
     }
-    dialog(route = "${Screen.ShareSheetDialog.route}?item={item}", arguments = listOf(
+    dialog(route = "${Dialog.ShareSheetDialog.route}?item={item}", arguments = listOf(
         navArgument("item") {
             type = NavTypeMediaItem()
         }
     )) {
-        val configuration = LocalConfiguration.current
-        val item = it.getValue("item", defaultParcelizeMediaItem)
-        val clipboardManager = LocalClipboardManager.current
-        val appNavController = LocalAppNavController.current
-        Card(
-            modifier = Modifier
-                .width(configuration.screenWidthDp.dp * 0.8f)
-                .height(
-                    configuration.screenHeightDp.dp * 0.4f
-                ),
-            shape = RoundedCornerShape(32.dp)
-        ) {
-            Text(text = "发现了分享的歌单~", fontSize = 22.sp,modifier = Modifier.padding(top = 16.dp, start = 16.dp))
-            Column(
-                Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                CoilImage(
-                    url = item.artUri,
-                    modifier = Modifier
-                        .size(configuration.screenHeightDp.dp * 0.2f)
-                        .clip(
-                            RoundedCornerShape(16.dp)
-                        )
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = item.title, fontSize = 22.sp)
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(onClick = {
-                    appNavController.navigate(
-                        "${Screen.SheetDetailScreen.route}?mediaItem=${
-                            Gson().toJson(item)
-                        }"
-                    )
-                    clipboardManager.setText(AnnotatedString(""))
-                }) {
-                    Text(text = "立即查看")
-                }
-            }
-        }
+        ShareSheetDialog(item = it.getValue("item", defaultParcelizeMediaItem))
+
     }
+//    dialog("${Dialog.MediaMoreDialog.route}?item={item}", arguments = listOf(
+//        navArgument("item") {
+//            type = NavTypeMediaItem()
+//        }
+//    )) {
+//        PopupWindow(
+//            parcelizeItem = it.getValue("item", defaultParcelizeMediaItem),
+//            snackBarHostState = snackbarHostState
+//        )
+//    }
 }
 
 @SuppressLint("UnsafeOptInUsageError")
-@OptIn(ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun MusicController(
     controller: NavHostController,

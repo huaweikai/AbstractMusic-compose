@@ -123,7 +123,7 @@ private fun ColorScheme.getMonetNeutralColor(
     return Color(monetColor)
 }
 
-private fun ColorScheme.getMonetAccentColor(
+fun ColorScheme.getMonetAccentColor(
     @IntRange(from = 1, to = 3) type: Int,
     @IntRange(from = 50, to = 900) shade: Int
 ): Color {

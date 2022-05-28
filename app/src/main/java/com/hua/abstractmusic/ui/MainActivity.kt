@@ -1,7 +1,10 @@
 package com.hua.abstractmusic.ui
 
 
+import android.content.Intent
 import android.os.Bundle
+import android.os.Parcel
+import android.os.Parcelable
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -21,6 +24,7 @@ import com.hua.abstractmusic.ui.viewmodels.PlayingViewModel
 import com.hua.abstractmusic.ui.viewmodels.ThemeViewModel
 import com.hua.abstractmusic.ui.viewmodels.UserViewModel
 import com.hua.abstractmusic.utils.ComposeUtils
+import com.hua.model.parcel.ParcelizeMediaItem
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

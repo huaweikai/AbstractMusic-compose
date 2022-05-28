@@ -1,18 +1,15 @@
-package com.hua.abstractmusic.ui.home.mine.sheetdetail
+package com.hua.abstractmusic.ui.sheet
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.util.Base64
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.rounded.Share
@@ -22,14 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -41,22 +34,21 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.transform.RoundedCornersTransformation
-import com.google.gson.Gson
 import com.hua.abstractmusic.other.Constant.NULL_MEDIA_ITEM
 import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalBottomControllerHeight
 import com.hua.abstractmusic.ui.LocalPopWindow
 import com.hua.abstractmusic.ui.LocalPopWindowItem
+import com.hua.abstractmusic.ui.popItem.PopItem
+import com.hua.abstractmusic.ui.popItem.PopItemLayout
+import com.hua.abstractmusic.ui.popItem.PopItems
 import com.hua.abstractmusic.ui.route.Screen
 import com.hua.abstractmusic.ui.utils.*
-import com.hua.abstractmusic.utils.getCacheDir
 import com.hua.abstractmusic.utils.isLocal
 import com.hua.model.parcel.toGson
 import com.hua.model.parcel.toNavType
 import com.hua.network.onFailure
-import com.hua.network.utils.toJsonString
 import kotlinx.coroutines.launch
-import java.util.*
 
 
 /**

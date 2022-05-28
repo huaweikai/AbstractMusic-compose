@@ -32,5 +32,12 @@ sealed class Screen(val route: String) {
 
     object OtherDetail:Screen("other_screen")
 
-    object ShareSheetDialog :Screen("share_sheet_dialog")
+
+}
+
+
+sealed class Dialog(val route:String){
+    object ShareSheetDialog :Dialog("share_sheet_dialog")
+    object MediaMoreDialog :Dialog("media_more_dialog")
+    object SheetAddDialog :Dialog("sheet_add_dialog")
 }

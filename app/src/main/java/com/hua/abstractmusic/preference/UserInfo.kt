@@ -71,22 +71,24 @@ class UserInfoData @Inject constructor(
     fun loginUser(userToken: String) {
         serviceScope.launch {
             preferenceManager.userToken = userToken
-            _userInfo.value = _userInfo.value.copy(
-                isLogin = preferenceManager.userToken.isNotBlank(),
-                userToken = preferenceManager.userToken,
-                userBean = userDao.getUserInfo()
-            )
+            refreshUser()
+//            _userInfo.value = _userInfo.value.copy(
+//                isLogin = preferenceManager.userToken.isNotBlank(),
+//                userToken = preferenceManager.userToken,
+//                userBean = userDao.getUserInfo()
+//            )
         }
 
     }
 
     fun logout() {
         preferenceManager.userToken = ""
-        _userInfo.value = _userInfo.value.copy(
-            isLogin = false,
-            userToken = "",
-            userBean = null
-        )
+        refreshUser()
+//        _userInfo.value = _userInfo.value.copy(
+//            isLogin = false,
+//            userToken = "",
+//            userBean = null
+//        )
     }
 }
 

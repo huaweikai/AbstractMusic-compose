@@ -1,4 +1,4 @@
-package com.hua.abstractmusic.ui.home.mine.sheetdetail
+package com.hua.abstractmusic.ui.sheet
 
 import android.annotation.SuppressLint
 import android.net.Uri
@@ -16,11 +16,9 @@ import com.hua.abstractmusic.other.Constant
 import com.hua.abstractmusic.preference.UserInfoData
 import com.hua.abstractmusic.repository.*
 import com.hua.abstractmusic.ui.utils.LCE
-import com.hua.service.usecase.events.MusicInsertError
 import com.hua.abstractmusic.utils.isLocal
 import com.hua.abstractmusic.utils.toDate
 import com.hua.model.music.MediaData
-import com.hua.model.other.Constants
 import com.hua.model.other.Constants.PARCEL_ITEM_ID
 import com.hua.model.parcel.ParcelizeMediaItem
 import com.hua.model.sheet.SheetVO
@@ -29,14 +27,11 @@ import com.hua.network.get
 import com.hua.network.onFailure
 import com.hua.network.onSuccess
 import com.hua.service.MediaConnect
-import com.hua.service.usecase.UseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -390,7 +385,8 @@ class SheetDetailViewModel @Inject constructor(
                 title = sheet.title,
                 artist = sheet.author,
                 artUri = sheet.artUri ?: "",
-                desc = sheet.sheetDesc
+                desc = sheet.sheetDesc,
+                album = ""
             )
         )
     }

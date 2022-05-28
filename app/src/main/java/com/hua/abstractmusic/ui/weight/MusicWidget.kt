@@ -144,10 +144,7 @@ class MusicWidgetReceiver : GlanceAppWidgetReceiver() {
         title = "暂未播放",
         artist = "",
         artUri = "",
-        null,
-        null,
-        null,
-        null
+        album = ""
     )
     override val glanceAppWidget: GlanceAppWidget
         get() = MusicWidget(nullItem, null, false)

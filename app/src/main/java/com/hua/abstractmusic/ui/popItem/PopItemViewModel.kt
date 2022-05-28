@@ -2,7 +2,9 @@ package com.hua.abstractmusic.ui.popItem
 
 import android.annotation.SuppressLint
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
@@ -12,15 +14,19 @@ import com.hua.abstractmusic.preference.UserInfoData
 import com.hua.abstractmusic.repository.LocalRepository
 import com.hua.abstractmusic.repository.NetWorkRepository
 import com.hua.abstractmusic.utils.isLocal
+import com.hua.abstractmusic.utils.toMediaItem
 import com.hua.model.other.Constants.LOCAL_SHEET_ID
+import com.hua.model.parcel.ParcelizeMediaItem
 import com.hua.network.ApiResult
 import com.hua.network.get
 import com.hua.network.onFailure
 import com.hua.network.onSuccess
 import com.hua.service.MediaConnect
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**

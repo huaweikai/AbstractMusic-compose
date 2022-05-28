@@ -115,6 +115,7 @@ fun ParcelizeMediaItem.toMediaItem() = MediaItem.Builder()
         MediaMetadata.Builder()
             .setTitle(title)
             .setArtist(artist)
+            .setAlbumTitle(album)
             .setArtworkUri(
                 if (artUri.isNotBlank()) Uri.parse(artUri) else null
             )

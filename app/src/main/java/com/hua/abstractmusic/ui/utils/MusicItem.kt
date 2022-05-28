@@ -23,15 +23,19 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.media3.common.MediaItem
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import coil.transform.RoundedCornersTransformation
 import coil.transform.Transformation
 import com.airbnb.lottie.compose.*
 import com.hua.abstractmusic.R
+import com.hua.abstractmusic.ui.LocalAppNavController
 import com.hua.abstractmusic.ui.LocalPopWindow
 import com.hua.abstractmusic.ui.LocalPopWindowItem
+import com.hua.abstractmusic.ui.route.Dialog
 import com.hua.model.music.MediaData
+import com.hua.model.parcel.toNavType
 
 
 /**

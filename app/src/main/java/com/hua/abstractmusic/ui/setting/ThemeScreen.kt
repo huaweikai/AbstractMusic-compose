@@ -2,6 +2,7 @@ package com.hua.abstractmusic.ui.setting
 
 import android.os.Build
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,21 +17,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.pointer.consumeAllChanges
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.media3.extractor.CeaUtil.consume
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.google.accompanist.insets.statusBarsHeight
 import com.hua.abstractmusic.ui.*
 import com.hua.abstractmusic.ui.home.MainPageItem
 import com.hua.abstractmusic.ui.home.pages
-import com.hua.abstractmusic.ui.theme.AbstractMusicTheme
-import com.hua.abstractmusic.ui.theme.Shapes
-import com.hua.abstractmusic.ui.theme.Typography
-import com.hua.abstractmusic.ui.theme.defaultColor
+import com.hua.abstractmusic.ui.theme.*
 import com.hua.abstractmusic.ui.utils.Monet
 import com.hua.abstractmusic.ui.viewmodels.ThemeViewModel
 import com.kieronquinn.monetcompat.core.MonetCompat
@@ -46,16 +49,22 @@ import kotlin.math.roundToInt
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ThemeScreen(
-    settingNavController:NavHostController
+    settingNavController: NavHostController
 ) {
     val themeViewModel = hiltViewModel<ThemeViewModel>()
     val globalThemeViewModel = LocalThemeViewModel.current
     val primary by themeViewModel.monetColor
     Scaffold {
-        Column(Modifier.fillMaxWidth().padding(it), horizontalAlignment = Alignment.CenterHorizontally) {
-            Spacer(modifier = Modifier
-                .statusBarsPadding()
-                .padding(top = 16.dp))
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(it), horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .padding(top = 16.dp)
+            )
             ColorPicker(themeViewModel, MaterialTheme.colorScheme.primary, cancelCustom = {
                 globalThemeViewModel.closeCustomThemeColor()
                 settingNavController.navigateUp()
@@ -75,6 +84,12 @@ fun ThemeScreen(
 @Composable
 fun ThemePreview(modifier: Modifier = Modifier, color: dev.kdrag0n.monet.theme.ColorScheme?) {
     PreviewTheme(color) {
+        var offsetX by remember {
+            mutableStateOf(0f)
+        }
+        var offsetY by remember {
+            mutableStateOf(0f)
+        }
         Scaffold(
             modifier,
             topBar = {
@@ -84,6 +99,17 @@ fun ThemePreview(modifier: Modifier = Modifier, color: dev.kdrag0n.monet.theme.C
             },
             floatingActionButton = {
                 FloatingActionButton(
+                    modifier = Modifier
+                        .offset {
+                            IntOffset(offsetX.roundToInt(), offsetY.roundToInt())
+                        }
+                        .pointerInput(Unit) {
+                            detectDragGestures { change, dragAmount ->
+                                change.consumeAllChanges()
+                                offsetX += dragAmount.x
+                                offsetY += dragAmount.y
+                            }
+                        },
                     onClick = { }) {
                     Icon(imageVector = Icons.Default.Add, contentDescription = null)
                 }
@@ -132,7 +158,7 @@ fun ThemePreview(modifier: Modifier = Modifier, color: dev.kdrag0n.monet.theme.C
 fun ColorPicker(
     themeViewModel: ThemeViewModel,
     themeColor: Color,
-    cancelCustom:()->Unit
+    cancelCustom: () -> Unit
 ) {
     val globalThemeViewModel = LocalThemeViewModel.current
     var red by remember {
@@ -224,7 +250,7 @@ private fun ColorItem(color: Color, name: String) {
         ) {
             Text(
                 text = "#${
-                    color.value.toString(16).subSequence(0, 7)
+                    color.value.toString(16).subSequence(0, 8)
                 }".uppercase(Locale.getDefault()),
                 color = contentColorFor(backgroundColor = color)
             )
@@ -271,10 +297,10 @@ fun PreviewTheme(
     content: @Composable () -> Unit
 ) {
     val colors = when {
-        customColor != null && darkTheme -> customColor.darkMonetCompatScheme()
-        customColor != null && !darkTheme -> customColor.lightMonetCompatScheme()
-        darkTheme -> Monet.getMonetColor(defaultColor.toArgb()).darkMonetCompatScheme()
-        else -> Monet.getMonetColor(defaultColor.toArgb()).lightMonetCompatScheme()
+        customColor != null && darkTheme -> customColor.toDarkMaterialColors()
+        customColor != null && !darkTheme -> customColor.toLightMaterialColors()
+        darkTheme -> Monet.getMonetColor(defaultColor.toArgb()).toDarkMaterialColors()
+        else -> Monet.getMonetColor(defaultColor.toArgb()).toLightMaterialColors()
     }
     MaterialTheme(
         colorScheme = colors.animateColor(),
