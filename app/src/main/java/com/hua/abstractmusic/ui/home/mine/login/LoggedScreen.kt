@@ -78,12 +78,8 @@ fun LoggedScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(
-                        PaddingValues(
-                            bottom = controllerHeight.coerceAtLeast(16.dp)
-                        )
-                    )
-                    .padding(it)
+                    .padding(it),
+                contentPadding = PaddingValues(bottom = controllerHeight.coerceAtLeast(16.dp))
             ) {
                 item {
                     LoginSetting(

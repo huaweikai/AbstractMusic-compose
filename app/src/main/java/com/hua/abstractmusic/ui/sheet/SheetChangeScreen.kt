@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
@@ -130,8 +133,7 @@ fun SheetChangeScreen(
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(it)
-                .padding(horizontal = 8.dp),
+                .padding(it),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Column(
@@ -192,7 +194,7 @@ fun SheetChangeScreen(
 //                        fontSize = 18.sp, lineHeight = 22.sp, textAlign = TextAlign.Center
 //                    )
 //                )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
             }
             Box(modifier = Modifier.fillMaxSize()) {
                 LazyColumn(
@@ -208,10 +210,13 @@ fun SheetChangeScreen(
                             Modifier
                                 .fillMaxWidth()
                                 .height(70.dp)
+                                .padding(horizontal = 8.dp, vertical = 2.dp)
                                 .background(
                                     if (item.isPlaying) MaterialTheme.colorScheme.surfaceVariant
-                                    else MaterialTheme.colorScheme.surface
+                                    else MaterialTheme.colorScheme.surface,
+                                    RoundedCornerShape(8.dp)
                                 )
+                                .padding(horizontal = 8.dp)
                                 .clickable {
                                     sheetDetailViewModel.updateSelect(index)
                                 },
@@ -245,28 +250,36 @@ fun SheetChangeScreen(
                                 it.height.toDp()
                             }
                         }
-                        .fillMaxWidth()
+                        .width(LocalConfiguration.current.screenWidthDp.dp * 0.6f)
                         .align(Alignment.BottomCenter)
                         .padding(
-                            bottom = LocalBottomControllerHeight.current - 8.dp
-                        )
+                            bottom = LocalBottomControllerHeight.current.coerceAtLeast(8.dp)
+                        ),
+                    enter = slideInVertically { it },
+                    exit = slideOutVertically { it }
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                sheetDetailViewModel.removeNetSheetList()
-                            }
-                            .height(38.dp)
-                            .background(
-                                MaterialTheme.colorScheme.surface,
-                                shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
-                            ),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                    Button(
+                        modifier = Modifier.height(38.dp),
+                        onClick = {sheetDetailViewModel.removeNetSheetList()}
                     ) {
                         Text(text = "移除歌单")
                     }
+//                    Column(
+//                        modifier = Modifier
+//
+//                            .clickable {
+//                                sheetDetailViewModel.removeNetSheetList()
+//                            }
+//                            .height(38.dp)
+//                            .background(
+//                                MaterialTheme.colorScheme.surface,
+//                                shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
+//                            ),
+//                        horizontalAlignment = Alignment.CenterHorizontally,
+//                        verticalArrangement = Arrangement.Center
+//                    ) {
+//                        Text(text = "移除歌单")
+//                    }
                 }
             }
         }
