@@ -9,6 +9,7 @@ import Version.material
 import Version.media2_version
 import Version.media3_version
 import Version.mmkv_version
+import Version.navigation_version
 import Version.retrofit_version
 import Version.room_version
 
@@ -34,27 +35,27 @@ object Google {
 
 object Compose {
     const val compose_ui = "androidx.compose.ui:ui:${compose_version}"
-    const val compose_material = "androidx.compose.material:material:1.2.0-alpha01"
+    const val compose_material = "androidx.compose.material:material:$compose_version"
     const val compose_ui_tool_preview = "androidx.compose.ui:ui-tooling-preview:$compose_version"
     const val compose_activity =
         "androidx.activity:activity-compose:${Version.activity_compose_version}"
     const val compose_material_md3 = "androidx.compose.material3:material3:$compose_md3_version"
     const val compose_ui_util = "androidx.compose.ui:ui-util:$compose_version"
-    const val compose_navigation = "androidx.navigation:navigation-compose:2.4.0"
+    const val compose_navigation = "androidx.navigation:navigation-compose:$navigation_version"
 
     const val compose_hilt_navigation =
         "androidx.hilt:hilt-navigation-compose:$hilt_compose_version"
 
     const val compose_systemuiController =
         "com.google.accompanist:accompanist-systemuicontroller:${Version.compose_accompanist}"
-    const val compose_pager = "com.google.accompanist:accompanist-pager:0.20.3"
-    const val compose_pager_indicator = "com.google.accompanist:accompanist-pager-indicators:0.20.3"
+    const val compose_pager = "com.google.accompanist:accompanist-pager:${Version.compose_accompanist}"
+    const val compose_pager_indicator = "com.google.accompanist:accompanist-pager-indicators:${Version.compose_accompanist}"
     const val compose_insets =
         "com.google.accompanist:accompanist-insets:${Version.compose_accompanist}"
     const val compose_flow_layout = "com.google.accompanist:accompanist-flowlayout:${Version.compose_accompanist}"
     const val compose_swipeRefresh =
         "com.google.accompanist:accompanist-swiperefresh:${Version.compose_accompanist}"
-    const val compose_constraintlayout = "androidx.constraintlayout:constraintlayout-compose:1.0.0"
+    const val compose_constraintlayout = "androidx.constraintlayout:constraintlayout-compose:1.0.1"
 
     //navigation-material
     const val compose_navigation_material =
@@ -69,7 +70,7 @@ object Compose {
     const val compose_scroll_bar = "me.onebone:toolbar-compose:2.3.2"
 
     const val lifecycle_viewModel_compose =
-        "androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha07"
+        "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version"
 
     const val compose_glance = "androidx.glance:glance-appwidget:1.0.0-alpha03"
 
@@ -113,8 +114,8 @@ object Test {
 
 object AndroidX {
     const val core = "androidx.core:core-ktx:1.7.0"
-    const val appcompat = "androidx.appcompat:appcompat:1.4.0"
-    const val activity = "androidx.activity:activity-ktx:1.4.0"
+    const val appcompat = "androidx.appcompat:appcompat:1.4.1"
+//    const val activity = "androidx.activity:activity-ktx:1.4.0"
     const val activity_ktx = "androidx.activity:activity:1.4.0"
 
     const val media2_session = "androidx.media2:media2-session:$media2_version"

@@ -12,14 +12,14 @@ object Version {
     const val compose_version = "1.2.0-beta02"
     const val activity_compose_version = "1.4.0"
     const val compose_md3_version = "1.0.0-alpha12"
-    const val navigation_version = "2.4.0-rc01"
-    const val compose_accompanist = "0.24.8-beta"
+    const val navigation_version = "2.4.2"
+    const val compose_accompanist = "0.24.9-beta"
     const val retrofit_version = "2.9.0"
-    const val coil_version = "2.0.0-rc03"
+    const val coil_version = "2.1.0"
     const val mmkv_version = "1.2.12"
 
-    const val hilt_compose_version = "1.0.0-alpha03"
-    const val lifecycle_version = "2.4.0"
+    const val hilt_compose_version = "1.0.0"
+    const val lifecycle_version = "2.5.0-rc01"
     const val paging_version = "3.1.0"
     const val media3_version = "1.0.0-alpha01"
     const val media2_version = "1.2.1"
@@ -30,7 +30,7 @@ object Version {
     const val android_gradle_version = "7.0.4"
 
     const val gson = "2.8.5"
-    const val material = "1.5.0"
+    const val material = "1.6.0"
     const val hilt_version = "2.40.5"
     const val hilt_viewModel = "1.0.0-alpha03"
 

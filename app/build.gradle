@@ -76,7 +76,7 @@ dependencies {
 
     implementation AndroidX.core
     implementation AndroidX.appcompat
-    implementation AndroidX.activity
+//    implementation AndroidX.activity
     implementation AndroidX.activity_ktx
 
     implementation AndroidX.room_runtime

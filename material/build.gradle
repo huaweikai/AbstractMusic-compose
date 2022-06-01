@@ -31,9 +31,9 @@ android {
 
 dependencies {
 
-    implementation 'androidx.core:core-ktx:1.7.0'
-    implementation 'com.google.android.material:material:1.5.0-alpha01'
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0-alpha02'
-    implementation 'androidx.palette:palette-ktx:1.0.0'
+    implementation AndroidX.core
+    implementation Google.material
+    implementation AndroidX.lifecycle_runtime_ktx
+    implementation AndroidX.palette
 
 }

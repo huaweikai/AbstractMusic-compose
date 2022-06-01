@@ -188,7 +188,7 @@ fun NavSheetDetail(
                             }
                         }
                         val clipboardManager = LocalClipboardManager.current
-//                        if(!sheetDetailViewModel.isLocal){
+                        if(!sheetDetailViewModel.isLocal){
                             MorePopItem(icon = Icons.Rounded.Share, title = "分享歌单") {
                                 sheetDetailViewModel.parcelItem?.let {
                                     val share = it.toGson()
@@ -201,7 +201,7 @@ fun NavSheetDetail(
                                     sheetDetailViewModel.showSnackBar("已复制到粘贴板")
                                 }
                             }
-//                        }
+                        }
                     }
                 }
             }

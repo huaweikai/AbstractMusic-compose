@@ -262,7 +262,13 @@ class MediaStoreScanner(
                 val albumNum = it.getLong(albumNumColumn)
                 val id = parentId.buildUpon().appendPath(artistId.toString()).toString()
                 val data = scanArtistMusic(context, Uri.parse(id))
-                val albumArtUri = data[0].mediaMetadata.artworkUri
+                val albumArtUri:Uri?
+                if(data.isNotEmpty()){
+                    albumArtUri = data[0].mediaMetadata.artworkUri
+                }else{
+                    continue
+                }
+
                 val trackNum = data.size
                 val metadata = MediaMetadata.Builder()
                     .setTitle(artistName)

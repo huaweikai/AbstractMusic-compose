@@ -17,6 +17,7 @@ import coil.transform.RoundedCornersTransformation
 import com.google.accompanist.pager.*
 import com.hua.abstractmusic.R
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 
 
@@ -54,7 +55,7 @@ private fun <T> Banner(
     time: Long,
     onClick: (Int) -> Unit
 ) {
-    val count = 1e6.toInt()
+    val count = Int.MAX_VALUE
     val startIndex = count / 2
     val state = rememberPagerState(startIndex)
     val pageCount = items.size
@@ -62,11 +63,14 @@ private fun <T> Banner(
     val isTouch = remember {
         mutableStateOf(false)
     }
+    val animateScope = rememberCoroutineScope()
     if (repeat) {
         LaunchedEffect(state.currentPage, isTouch.value) {
             delay(time)
             if (!isTouch.value) {
-                state.animateScrollToPage((state.currentPage + 1) % state.pageCount)
+                animateScope.launch {
+                    state.animateScrollToPage(state.currentPage + 1)
+                }
             }
         }
     }

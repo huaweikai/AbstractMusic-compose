@@ -373,7 +373,7 @@ class SheetDetailViewModel @Inject constructor(
             } else {
                 netRepository.deleteSheet(id!!)
             }
-            refresh()
+//            refresh()
         }
     }
 
