@@ -253,17 +253,17 @@ class PlayingViewModel @Inject constructor(
         item ?: return
         _lyricsLoadState.value = LCE.Loading
         withContext(Dispatchers.IO) {
-            val lyrics = if (item.mediaId.isLocal()) {
-                repository.selectLyrics(item.mediaMetadata.mediaUri)
-            } else {
-                netRepository.selectLyrics(Uri.parse(item.mediaId))
-            }
-            if (lyrics.isBlank()) {
+//            val lyrics = if (item.mediaId.isLocal()) {
+//                repository.selectLyrics(item.mediaMetadata.)
+//            } else {
+//                netRepository.selectLyrics(Uri.parse(item.mediaId))
+//            }
+            if ("".isBlank()) {
                 _lyricsList.value = emptyList()
                 _lyricsLoadState.value = LCE.Error
                 lyricsCanScroll.value = false
             } else {
-                stringToLyrics(lyrics)
+                stringToLyrics("")
                 _lyricsLoadState.value = LCE.Success
             }
         }

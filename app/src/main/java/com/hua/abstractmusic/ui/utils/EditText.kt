@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -42,6 +43,7 @@ import com.hua.abstractmusic.utils.isUser
  * @Date   : 2022/01/26
  * @Desc   :
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditText(
     value: String,

@@ -284,5 +284,7 @@ fun androidx.compose.material3.ColorScheme.animateColor() = androidx.compose.mat
     errorContainer = animateColorAsState(targetValue = this.errorContainer, tween(600)).value,
     onErrorContainer = animateColorAsState(targetValue = this.onErrorContainer, tween(600)).value,
     outline = animateColorAsState(targetValue = this.outline, tween(600)).value,
-    surfaceTint = animateColorAsState(targetValue = this.surfaceTint, tween(600)).value
+    surfaceTint = animateColorAsState(targetValue = this.surfaceTint, tween(600)).value,
+    outlineVariant = animateColorAsState(targetValue = this.outlineVariant, tween(600)).value,
+    scrim = animateColorAsState(targetValue = this.scrim, tween(600)).value
 )

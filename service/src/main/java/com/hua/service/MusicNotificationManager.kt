@@ -10,7 +10,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.MediaSession
-import androidx.media3.session.PlayerNotificationManager
+import androidx.media3.ui.PlayerNotificationManager
 import coil.ImageLoader
 import coil.request.ImageRequest
 

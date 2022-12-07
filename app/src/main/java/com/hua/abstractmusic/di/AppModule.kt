@@ -11,11 +11,6 @@ import com.hua.abstractmusic.preference.UserInfoData
 import com.hua.abstractmusic.repository.LocalRepository
 import com.hua.abstractmusic.repository.NetWorkRepository
 import com.hua.abstractmusic.repository.UserRepository
-import com.hua.service.usecase.currentlist.ClearCurrentListCase
-import com.hua.service.usecase.currentlist.InsertMusicToCurrentItemCase
-import com.hua.service.usecase.sheet.InsertSheetCase
-import com.hua.abstractmusic.utils.ComposeUtils
-import com.hua.abstractmusic.utils.KEY
 import com.hua.abstractmusic.utils.UpLoadFile
 import com.hua.blur.BlurLibrary
 import com.hua.network.api.MusicAPI
@@ -72,8 +67,8 @@ object AppModule {
     @Provides
     @Singleton
     fun provideObsClient() = ObsClient(
-        KEY.AccessKeyId,
-        KEY.SecretAccessKey,
+       " KEY.AccessKeyId",
+        "KEY.SecretAccessKey",
         "obs.cn-north-4.myhuaweicloud.com"
     )
 

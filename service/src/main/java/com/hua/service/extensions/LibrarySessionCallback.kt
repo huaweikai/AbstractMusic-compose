@@ -15,7 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 class LibrarySessionCallback(
     private val itemTree: MediaItemTree,
     private val scope: CoroutineScope
-) : MediaLibraryService.MediaLibrarySession.MediaLibrarySessionCallback {
+) : MediaLibraryService.MediaLibrarySession.Callback {
     override fun onGetLibraryRoot(
         session: MediaLibraryService.MediaLibrarySession,
         browser: MediaSession.ControllerInfo,

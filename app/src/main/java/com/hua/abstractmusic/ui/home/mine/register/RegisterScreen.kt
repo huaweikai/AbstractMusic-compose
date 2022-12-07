@@ -33,6 +33,7 @@ import kotlinx.coroutines.launch
  * @Date   : 2022/01/25
  * @Desc   :
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
     viewModel: RegisterViewModel = hiltViewModel(),

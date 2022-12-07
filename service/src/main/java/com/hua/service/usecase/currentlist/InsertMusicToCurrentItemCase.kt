@@ -36,7 +36,8 @@ class InsertMusicToCurrentItemCase(
                     item.albumTitle.toString(),
                     item.artist.toString(),
                     item.trackNumber?.toLong() ?: 0L,
-                    item.mediaUri.toString(),
+//                    item.mediaUri.toString(),
+                    "",
                     item.artworkUri.toString()
                 )
                 dao.insertCurrentPlayItem(currentPlayItem)

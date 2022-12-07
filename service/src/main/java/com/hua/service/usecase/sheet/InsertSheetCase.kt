@@ -47,7 +47,8 @@ class InsertSheetCase(
                 album = "$albumTitle",
                 artist = "$artist",
                 trackerNumber = trackNumber,
-                mediaUri = "$mediaUri",
+                mediaUri = "",
+//                mediaUri = "$mediaUri",
                 albumUri = "$artworkUri",
                 artistId = extras?.getLong("artistId") ?:0L,
                 albumId = extras?.getLong("albumId") ?: 0L

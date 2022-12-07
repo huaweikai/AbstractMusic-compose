@@ -10,6 +10,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaBrowser
 import androidx.media3.session.MediaLibraryService
+import androidx.media3.session.MediaNotification
 import androidx.media3.session.MediaSession
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
@@ -82,17 +83,16 @@ class PlayerService : MediaLibraryService() {
             exoplayer.apply { addListener(PlayerListener()) },
             LibrarySessionCallback(itemTree, serviceScope)
         )
-            .setMediaItemFiller(CustomMediaItemFiller())
             .setSessionActivity(sessionPendingIntent ?: sessionActivityPendingIntent)
             .build()
 
 
 //        生成自定义的通知管理
-        notificationManager = MusicNotificationManager(
-            this,
-            mediaLibrarySession,
-            PlayerNotificationListener(this)
-        )
+//        notificationManager = MusicNotificationManager(
+//            this,
+//            mediaLibrarySession,
+//            PlayerNotificationListener(this)
+//        )
 
         connectBrowser()
     }
@@ -128,25 +128,6 @@ class PlayerService : MediaLibraryService() {
         serviceScope.cancel()
     }
 
-
-    inner class CustomMediaItemFiller : MediaSession.MediaItemFiller {
-        override fun fillInLocalConfiguration(
-            session: MediaSession,
-            controller: MediaSession.ControllerInfo,
-            mediaItem: MediaItem
-        ): MediaItem {
-            return MediaItem.Builder()
-                .setMediaMetadata(mediaItem.mediaMetadata)
-                .setUri(mediaItem.mediaMetadata.mediaUri)
-                .setMediaId(mediaItem.mediaId)
-                .build()
-        }
-    }
-
-    override fun onUpdateNotification(session: MediaSession): MediaNotification? {
-        return null
-    }
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intent?.let {
             when (intent.action) {
@@ -163,10 +144,10 @@ class PlayerService : MediaLibraryService() {
             when (playbackState) {
                 Player.STATE_BUFFERING,
                 Player.STATE_READY -> {
-                    notificationManager.showNotification(exoplayer)
+//                    notificationManager.showNotification(exoplayer)
                 }
                 else -> {
-                    notificationManager.hideNotification()
+//                    notificationManager.hideNotification()
                     preferenceManager.mediaPosition = 0L
                 }
             }

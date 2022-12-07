@@ -68,7 +68,6 @@ fun MusicVO.toMediaItem(parentId: Uri): MediaItem {
                 .setSubtitle(this@toMediaItem.artist)
                 .setArtist(this@toMediaItem.artist)
                 .setArtworkUri(Uri.parse(this@toMediaItem.imgUrl))
-                .setMediaUri(this.musicUrl.toUri())
                 .setExtras(
                     Bundle().apply {
                         putLong("albumId", albumId.toLong())

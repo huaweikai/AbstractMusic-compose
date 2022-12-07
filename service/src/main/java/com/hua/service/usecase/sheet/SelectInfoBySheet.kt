@@ -36,7 +36,7 @@ class SelectInfoBySheet(
                         putLong("albumId",it.albumId)
                     }
                 )
-                .setMediaUri(Uri.parse(it.mediaUri))
+//                .setMediaUri(Uri.parse(it.mediaUri))
                 .build()
             mediaItems.add(
                 MediaItem.Builder()

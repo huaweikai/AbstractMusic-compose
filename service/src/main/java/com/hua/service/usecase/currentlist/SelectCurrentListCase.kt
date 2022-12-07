@@ -28,7 +28,7 @@ class SelectCurrentListCase(
                     .setAlbumTitle(item.album)
                     .setTrackNumber(item.trackerNumber.toInt())
                     .setArtworkUri(Uri.parse(item.albumUri))
-                    .setMediaUri(Uri.parse(item.mediaUri))
+//                    .setMediaUri(Uri.parse(item.mediaUri))
                     .setIsPlayable(true)
                     .setFolderType(MediaMetadata.FOLDER_TYPE_NONE)
                     .build()

@@ -44,10 +44,8 @@ class MainActivity : MonetActivity() {
         ExperimentalPagerApi::class,
         ExperimentalFoundationApi::class
     )
-
     override fun onCreate(savedInstanceState: Bundle?) {
         //不会在系统视图下面绘制
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
         lifecycleScope.launchWhenCreated {
             monet.awaitMonetReady()
@@ -57,21 +55,7 @@ class MainActivity : MonetActivity() {
                     darkIcons = MaterialTheme.colors.isLight
                 )
                 val windowSize = rememberWindowSizeClass()
-                CompositionLocalProvider(
-                    LocalPlayingViewModel provides playingViewModel,
-                    LocalThemeViewModel provides themeViewModel,
-                    LocalScreenSize provides windowSize,
-                    LocalHomeViewModel provides homeViewModel,
-                    LocalComposeUtils provides composeUtils,
-                    LocalUserViewModel provides userViewModel,
-                ) {
-                    AbstractMusicTheme(
-                        monet,
-                        themeViewModel.monetColor.value
-                    ) {
-                        AppNavigation()
-                    }
-                }
+                AppNavigation()
             }
         }
     }
